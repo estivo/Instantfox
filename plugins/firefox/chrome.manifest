@@ -1,0 +1,15 @@
+content   instantfox chrome/content/
+overlay   chrome://browser/content/browser.xul chrome://instantfox/content/instantfox.xul
+
+locale    instantfox de chrome/locale/de/
+locale    instantfox de-DE chrome/locale/de/
+locale    instantfox de-AT chrome/locale/de-AT/
+locale    instantfox de-CH chrome/locale/de-CH/
+locale    instantfox en-CA chrome/locale/en-CA/
+locale    instantfox en-GB chrome/locale/en-GB/
+locale    instantfox en-US chrome/locale/en-US/
+locale    instantfox es-ES chrome/locale/es-ES/
+locale    instantfox fr chrome/locale/fr/
+locale    instantfox fr-FR chrome/locale/fr/
+locale    instantfox it chrome/locale/it/
+locale    instantfox it-IT chrome/locale/it/

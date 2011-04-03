@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+
+  <Description about="urn:mozilla:install-manifest">
+    <em:id>searchy@searchy</em:id>
+    <em:version>1.0.4</em:version>
+    <em:type>2</em:type>
+   
+    <!-- Target Application this extension can install into, 
+         with minimum and maximum supported versions. --> 
+    <em:targetApplication>
+      <Description>
+        <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+        <em:minVersion>1.5</em:minVersion>
+        <em:maxVersion>4.0.*</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+   
+    <!-- Front End MetaData -->
+    <em:name>InstantFox</em:name>
+    <em:description>Search via your addressbar with shortcuts at your fingertips. Use g for Google, m for Maps, e for eBay, y for Youtube, w for Wikipedia, c for Calculator, f for Weather Forecast and many more.</em:description>
+    <em:creator>instantfox.net</em:creator>
+    <em:iconURL>chrome://instantfox/content/skin/logo.png</em:iconURL>
+    <em:homepageURL>http://www.instantfox.net/</em:homepageURL>
+  </Description>      
+</RDF>
