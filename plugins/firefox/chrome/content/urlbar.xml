@@ -1,0 +1,333 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<bindings xmlns="http://www.mozilla.org/xbl"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+          xmlns:xbl="http://www.mozilla.org/xbl">
+
+  <binding id="urlbar" extends="chrome://browser/content/urlbarBindings.xml#urlbar">
+    <content sizetopopup="pref">
+      <xul:hbox class="autocomplete-textbox-container urlbar-textbox-container" flex="1">
+        <xul:stack flex="1">
+          <children includes="progressmeter"/>
+          <xul:hbox class="autocomplete-textbox-container-fission">
+        <xul:hbox class="textbox-icon-box"
+                  onmouseover="gURLBar._iconWasHovered = true;">
+          <children includes="image|deck|stack|box">
+            <xul:image class="autocomplete-icon" allowevents="true"/>
+          </children>
+        </xul:hbox>
+
+        <xul:stack flex="1" anonid="textbox-input-box" class="textbox-input-box urlbar-input-box">
+		  <xul:hbox>
+			  <xul:label anonid="instantFoxSpacer" class="instantfox-spacer"/>		
+			  <xul:label anonid="instantFoxShaddow"
+						flex="1"
+						onmousedown="gURLBar.focus();"
+						ondragover="nsDragAndDrop.dragOver(event, gURLBar);"
+						ondragdrop="nsDragAndDrop.drop(event, gURLBar);"
+						ondragexit="nsDragAndDrop.dragExit(event, gURLBar);"
+						class="instantfox-shaddow" />
+		  </xul:hbox>		
+		  <xul:hbox anonid="textbox-input-box-inner" xbl:inherits="tooltiptext=inputtooltiptext"
+                    flex="1" align="center">
+            <children/>
+            <html:input anonid="input" class="autocomplete-textbox urlbar-input textbox-input uri-element-right-align"
+                        flex="1" allowevents="true"
+                        xbl:inherits="tooltiptext=inputtooltiptext,onfocus,onblur,value,type,maxlength,disabled,size,readonly,placeholder,userAction"/>
+		  </xul:hbox>
+        </xul:stack>
+
+        <children includes="hbox"/>
+          </xul:hbox>
+        </xul:stack>
+      </xul:hbox>
+
+      <xul:dropmarker anonid="historydropmarker"
+                      class="autocomplete-history-dropmarker urlbar-history-dropmarker"
+                      allowevents="true"
+                      xbl:inherits="open,enablehistory,parentfocused=focused"/>
+
+      <children includes="toolbarbutton"/>
+
+      <xul:popupset anonid="popupset" class="autocomplete-result-popupset"/>
+    </content>
+
+    <implementation implements="nsIDOMEventListener, nsIObserver">
+      <constructor><![CDATA[
+        /*
+		try {
+          this.overflowEllipsis.value =
+            Components.classes["@mozilla.org/preferences-service;1"]
+                      .getService(Components.interfaces.nsIPrefBranch)
+                      .getComplexValue("intl.ellipsis",
+                                       Components.interfaces.nsIPrefLocalizedString)
+                      .data;
+        } catch (ex) {
+          this.overflowEllipsis.value = "\u2026";
+        }
+
+        let (self = this) {
+          this.inputBoxInner.focus = function () {
+            self.inputField.focus();
+          };
+        }
+		*/
+        this.plain = true;
+      ]]></constructor>
+      <field name="mouseOnTopLinkifies">
+        this._prefs.getBoolPref("mouseOnTopLinkifies")
+      </field>
+      <field name="mouseOnBottomLinkifies">
+        this._prefs.getBoolPref("mouseOnBottomLinkifies")
+      </field>
+      <field name="uri"/>
+      <field name="_focused"/>
+      <field name="_mouseover"/>
+      <field name="_iconWasHovered"/>
+      <field name="_tooltipTimer"/>
+	  
+      <field name="inputBox">
+        document.getAnonymousElementByAttribute(this, "anonid", "textbox-input-box");
+      </field>
+      <field name="inputBoxInner">
+        document.getAnonymousElementByAttribute(this, "anonid", "textbox-input-box-inner");
+      </field>
+	  
+	  <field name="instantFoxShaddowNode">
+        document.getAnonymousElementByAttribute(this, "anonid", "instantFoxShaddow");
+      </field>  
+	  <field name="instantFoxSpacerNode">
+        document.getAnonymousElementByAttribute(this, "anonid", "instantFoxSpacer");
+      </field>  
+	  	  	  
+      <field name="urlTooltip">
+        document.getElementById("urlTooltip");
+      </field>
+      <field name="urlTooltipLabel">
+        this.urlTooltip.getElementsByTagName("label")[0];
+      </field>
+      <field name="_tldService" readonly="true"><![CDATA[
+        Components.classes["@mozilla.org/network/effective-tld-service;1"]
+                  .getService(Components.interfaces.nsIEffectiveTLDService);
+      ]]></field>
+      <field name="_ioService" readonly="true">
+        Components.classes["@mozilla.org/network/io-service;1"]
+                  .getService(Components.interfaces.nsIIOService);
+      </field>
+
+      <field name="_plain">true</field>
+      <property name="plain" onget="return this._plain">
+        <setter><![CDATA[
+          this._plain = val;
+		  this._hideURLTooltip();
+          return val;
+        ]]></setter>
+      </property>
+
+      <property name="contentIsCropped" />
+
+      <property name="value">
+        <getter><![CDATA[
+          if (typeof this.onBeforeValueGet == "function") {
+            var result = this.onBeforeValueGet();
+            if (result)
+              return result.value;
+          }
+          return (this.hasAttribute('isempty') || this.hasAttribute('empty')) ? '' : this.inputField.value;
+        ]]></getter>
+        <setter><![CDATA[
+          this.mIgnoreInput = true;
+
+          if (typeof this.onBeforeValueSet == "function")
+            val = this.onBeforeValueSet(val);
+
+          if (val) {
+            // clear the emptyText _before_ setting a new non-empty value
+            if (this._clearEmptyText)
+              this._clearEmptyText();
+            this.inputField.value = val;
+          } else {
+            // display the emptyText _after_ setting a value that's an empty string
+            this.inputField.value = val;
+            if (this._updateVisibleText)
+              this._updateVisibleText();
+          }
+          this.mIgnoreInput = false;
+          if (this._focused)
+            this.plain = true;
+          else if (!this._mouseover || !this.plain)
+            this.prettyView();
+          var event = document.createEvent("Events");
+          event.initEvent("ValueChange", true, true);
+          this.inputField.dispatchEvent(event);
+          return val;
+        ]]></setter>
+      </property>
+	  
+	  <method name="InsertShaddowLink">
+        <parameter name="aURL"/>
+        <body><![CDATA[
+			//if(aURL){
+			this.instantFoxShaddowNode.value = aURL;
+			//}
+        ]]></body>
+      </method> 
+	  <method name="InsertSpacerLink">
+        <parameter name="aURL"/>
+        <body><![CDATA[
+			if(aURL){
+				this.instantFoxSpacerNode.value = aURL;
+			}
+        ]]></body>
+      </method> 
+	        
+      <method name="_prettyView">
+        <body><![CDATA[
+          this._plain = false;
+        ]]></body>
+      </method>
+
+      <method name="prettyView">
+        <body><![CDATA[
+          if (this.uri) {
+            this._prettyView();
+            this.plain = false;
+          } else {
+            this.plain = true;
+          }
+        ]]></body>
+      </method>
+
+      <method name="_initURLTooltip">
+        <parameter name="callback"/>
+        <parameter name="object"/>
+        <parameter name="crop"/>
+        <body><![CDATA[
+          if (this._tooltipTimer)
+            clearTimeout(this._tooltipTimer);
+          this._tooltipTimer = setTimeout (function (self) {
+            self._tooltipTimer = 0;
+            var tooltipText = callback.apply(object);
+            if (tooltipText) {
+              self.urlTooltipLabel.value = tooltipText;
+              self.urlTooltipLabel.crop = crop || "center";
+              var bO = self.boxObject;
+              self.urlTooltip.maxWidth = bO.width;
+              self.urlTooltip.showPopup(self, bO.screenX, bO.screenY + bO.height, "tooltip");
+            }
+          }, 400, this);
+        ]]></body>
+      </method>
+
+      <method name="handleEvent">
+        <parameter name="aEvent"/>
+        <body><![CDATA[
+          switch (aEvent.type) {
+            case "mousedown":
+              if (this.doubleClickSelectsAll &&
+                  aEvent.button == 0 && aEvent.detail == 2) {
+                this.editor.selectAll();
+                aEvent.preventDefault();
+              }
+              break;
+            case "keydown":
+              if (this.plain && this._mouseover && !this._focused) {
+                switch (aEvent.keyCode) {
+                  case KeyEvent.DOM_VK_SHIFT:
+                  case KeyEvent.DOM_VK_CONTROL:
+                  case KeyEvent.DOM_VK_META:
+                  case KeyEvent.DOM_VK_ALT:
+                    this.prettyView();
+                    this.setAttribute("linkify", "true");
+                }
+              }
+          }
+        ]]></body>
+      </method>
+
+      <method name="observe">
+        <parameter name="subject"/>
+        <parameter name="topic"/>
+        <parameter name="data"/>
+        <body><![CDATA[
+          if (topic == "nsPref:changed") {
+            switch(data) {
+              case "clickSelectsAll":
+              case "doubleClickSelectsAll":
+              case "mouseOnBottomLinkifies":
+              case "mouseOnTopLinkifies":
+                this[data] = this._prefs.getBoolPref(data);
+                break;
+            }
+          }
+        ]]></body>
+      </method>
+    </implementation>
+
+    <handlers>
+      <handler event="mousemove"><![CDATA[
+        if (this.plain && !this._focused && this.contentIsCropped)
+          this._initURLTooltip(function () {
+            return this.plain ? this.value : null;
+          }, this, "start");
+      ]]></handler>
+
+      <handler event="mouseover"><![CDATA[
+        if (this._mouseover)
+          return;
+        if (!this.plain) {
+          var bO = this.inputBox.boxObject;
+          if (event.screenX < bO.screenX || event.screenX > bO.screenX + bO.width)
+            return;
+        }
+        this._mouseover = true;
+        var bO = this.boxObject;
+        if (this._iconWasHovered || event.shiftKey || event.ctrlKey || event.metaKey || event.altKey ||
+            this.mouseOnTopLinkifies && event.screenY < bO.screenY + bO.height / 4 ||
+            this.mouseOnBottomLinkifies && event.screenY >= bO.screenY + bO.height / 4)
+          this.setAttribute("linkify", "true");
+        else
+          setTimeout (function (self) {
+            if (self._mouseover && self.getAttribute("linkify") != "true") {
+              self.plain = true;
+              document.addEventListener("keydown", self, false);
+            }
+          }, 120, this);
+      ]]></handler>
+
+      <handler event="mouseout"><![CDATA[
+        for (var node = event.relatedTarget; node; node = node.parentNode)
+          if (node == this)
+            return;
+        this.removeAttribute("linkify");
+        this._mouseover = false;
+        this._iconWasHovered = false;
+        if (!this._focused && this.plain) {
+          this.prettyView();
+          document.removeEventListener("keydown", this, false);
+        } else
+          this._hideURLTooltip();
+      ]]></handler>
+
+      <handler event="focus" phase="capturing"><![CDATA[
+        if (!this._focused && event.originalTarget == this.inputField) {
+          this._focused = true;
+          if (!this.plain)
+            this.plain = true;
+        }
+      ]]></handler>
+
+      <handler event="blur" phase="capturing"><![CDATA[
+        if (this._focused && !this._dontBlur && event.originalTarget == this.inputField) {
+          this._focused = false;
+          if (!this._mouseover)
+            this.prettyView();
+        }
+      ]]></handler>
+    </handlers>
+
+  </binding>
+
+
+</bindings>
