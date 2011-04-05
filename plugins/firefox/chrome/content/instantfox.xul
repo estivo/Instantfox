@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <!-- @TODO: Add Autocomplete Feature -->
-<?xml-stylesheet href="chrome://instantfox/skin/autocomplete.css" type="text/css"?>
+<?xml-stylesheet href="chrome://instantfox/content/skin/autocomplete.css" type="text/css"?>
 
 <overlay id="instantfox-browser-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-  <script type="text/javascript" src="chrome://instantfox/content/javascripts/jquery.js"></script>
+  <!--<script type="text/javascript" src="chrome://instantfox/content/javascripts/jquery.js"></script>-->
   <!-- Load InstantFox Core -->
   <script type="text/javascript" src="chrome://instantfox/content/javascripts/app.js"></script>
   <!-- Load General Plugins -->

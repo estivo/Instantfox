@@ -1,4 +1,4 @@
-(function() {
+//(function() {
   // @TODO: Handle Shortcuts in Config
   InstantFox.Shortcuts = { 
     ga:   'googleApi',
@@ -57,4 +57,4 @@
     }
   });
   
-})();
+//})();
