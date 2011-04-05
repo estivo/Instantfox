@@ -1,0 +1,12 @@
+richlistitem[type ~= 'InstantFoxSuggest'] {
+	-moz-appearance: none;
+	border: none !important;
+	padding:2px;
+	min-height: 25px !important;
+	max-height: 22px !important;
+	overflow-y: hidden !important;
+}
+
+richlistitem[type ~= 'InstantFoxSuggest'][selected='true'] > hbox {
+	background-color: transparent;
+}

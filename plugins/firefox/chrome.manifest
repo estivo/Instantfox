@@ -1,5 +1,8 @@
 content   instantfox chrome/content/
+
+style chrome://browser/content/browser.xul chrome://instantfox/content/skin/urlbar.css
 overlay   chrome://browser/content/browser.xul chrome://instantfox/content/instantfox.xul
+
 
 locale    instantfox de chrome/locale/de/
 locale    instantfox de-DE chrome/locale/de/
