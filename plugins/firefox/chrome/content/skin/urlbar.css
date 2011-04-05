@@ -1,0 +1,21 @@
+@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+@namespace html url("http://www.w3.org/1999/xhtml");
+
+#urlbar {
+  -moz-binding: url(chrome://instantfox/content/urlbar.xml#urlbar) !important;
+}
+
+.instantfox-shaddow{
+	position:relative;
+	left:0;
+	-moz-margin-start: -2px;
+	/*margin-left:1px; */
+	color: graytext;
+}
+.instantfox-spacer{
+	position:relative;
+	left:0;
+	-moz-margin-start: 0px;
+	/*margin-right:1px; */
+	visibility:hidden;
+}
