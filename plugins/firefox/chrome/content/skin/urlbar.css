@@ -6,16 +6,17 @@
 }
 
 .instantfox-shaddow{
-	position:relative;
-	left:0;
-	-moz-margin-start: -2px;
-	/*margin-left:1px; */
-	color: graytext;
+	 position:relative;
+	 -moz-margin-start:  0px !important;
+	 -moz-padding-start: 0px !important;
+	 margin: 0px;
+	 color: graytext;
 }
 .instantfox-spacer{
-	position:relative;
-	left:0;
-	-moz-margin-start: 0px;
-	/*margin-right:1px; */
-	visibility:hidden;
+	 position:relative;
+	 clear:both !important;
+	 -moz-margin-start: 0px !important;
+	 -moz-padding-start: 0px !important;
+	 margin:1px 0 0 0;
+	 visibility:hidden;
 }
