@@ -1,3 +1,6 @@
+@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+@namespace html url("http://www.w3.org/1999/xhtml");
+
 richlistitem[type ~= 'InstantFoxSuggest'] {
 	-moz-appearance: none;
 	border: none !important;
@@ -7,6 +10,60 @@ richlistitem[type ~= 'InstantFoxSuggest'] {
 	overflow-y: hidden !important;
 }
 
-richlistitem[type ~= 'InstantFoxSuggest'][selected='true'] > hbox {
+.autocomplete-richlistitem[type ~= 'InstantFoxSuggest'] spacer,
+.autocomplete-richlistitem[type ~= 'InstantFoxSuggest'] label{
+	display:none;
+}
+
+.autocomplete-richlistitem[type ~= 'InstantFoxSuggest']{
+	border:none!important;
+}
+.autocomplete-richlistitem[type ~= 'InstantFoxSuggest'] .ac-url{
+	display:none;
+}
+/*
+.ac-emphasize-text,
+.ac-emphasize-alt{
+	text-decoration:none !important;
+	font-weight:normal !important;
+	color:#F00 !important;
+}
+*/
+.autocomplete-richlistitem[type ~= 'InstantFoxSuggest'] html|span.ac-emphasize-text {
+	text-decoration:none !important;
+	font-weight:normal !important;
+}
+
+.autocomplete-richlistitem[type ~= 'InstantFoxSuggest'] html|span.ac-emphasize-alt {
+	text-decoration:none !important;
+} 
+
+.autocomplete-richlistitem[type ~= 'InstantFoxSuggest'] html|span.ac-emphasize-text:first-child {
+	text-decoration:none !important;
+	font-weight:bold !important;
+	/*color:green;*/
+}
+
+.autocomplete-richlistitem[type ~= 'InstantFoxSuggest'] html|span.ac-emphasize-alt:first-child {
+	text-decoration:none !important;
+	/*color:green;*/
+
+} 
+
+
+.autocomplete-richlistitem[type ~= 'InstantFoxSuggest'] .ac-url description[selected="true"]{
 	background-color: transparent;
 }
+
+
+/*
+	not needed :
+	
+	.autocomplete-richlistitem[type ~= 'InstantFoxSuggest'] .ac-title{
+	}
+	.autocomplete-richlistitem[type ~= 'InstantFoxSuggest'] .ac-title description{
+	}
+	
+	.autocomplete-richlistitem[type ~= 'InstantFoxSuggest'] .ac-url description{
+	}
+*/

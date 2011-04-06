@@ -19,7 +19,7 @@
 		xhttpreq:false
 		
 	}
-	
+	/*
    function debug(aMessage) {
 
 		try {
@@ -38,16 +38,17 @@
 						else if (aMessage != null) consoleService.logStringMessage(aMessage.toString());
 						else consoleService.logStringMessage("null");
 	}
-
+	*/
 	
 	function SearchAutoCompleteResult(result, search_result, maxNumResults){
 		if(InstantFox_Comp.processed_results){return;}
+				
 		this._result		= result;
 		this._search_result	= search_result;
 		this._maxNumResults	= maxNumResults;
 	};
 	
-	SearchAutoCompleteResult.prototype = {
+	SearchAutoCompleteResult.prototype = {	
 		get searchString(){
 			try{
 				return this._result.searchString;
@@ -175,6 +176,33 @@
 			}
 		},
 		
+		getLabelAt: function(index) {// Added FF4
+			/*
+			try{
+				return "tet";//this._search_result.value[index];
+			}
+			catch(e){
+				return "";
+			}
+			*/
+			try{
+				var numResults = Math.min(this._result.matchCount, this._maxNumResults);
+				if(index < numResults){
+					return this._result.getValueAt(index);
+				}
+				else{
+					//Hack because of duplicate array printing
+					if(this._search_result.last[index - numResults]){
+						InstantFox_Comp.processed_results = true;
+					}
+					return this._search_result.values[index - numResults];
+				}
+			}
+			catch(e){
+				return "";
+			}
+		},
+		
 		removeValueAt: function(index, removeFromDb){
 			try{
 				var numResults = Math.min(this._result.matchCount, this._maxNumResults);
@@ -190,6 +218,7 @@
 			catch(e){}
 			
 		},
+		
 		
 		QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIAutoCompleteResult]),
 	};
@@ -210,8 +239,8 @@
 			/*
 				api return('query':query, 'key':parsed.key, 'json':json, 'gotourl':gotourl); OR false!
 			*/
-			InstantFox_Comp.processed_results = false;
 			
+			InstantFox_Comp.processed_results = false;
 			if(api){
 				var num_history_results = 4;
 				var history_string		= InstantFox_Comp.Wnd.InstantFox.rand4comp();
@@ -235,9 +264,11 @@
 			this.historyAutoComplete.startSearch(history_string, searchParam, null, autoCompleteObserver);
 			
 			if(!api['json']){
+				/*
 				if(typeof result!='undefined'){
 					listener.onSearchResult(_search, new SearchAutoCompleteResult(result, internal_results, num_history_results));
 				}
+				*/
 				return true;
 			}
 
@@ -280,11 +311,12 @@
 								if(i==0){
 									if(InstantFox_Comp.Wnd.InstantFox.current_shaddow !=  result){
 										InstantFox_Comp.Wnd.InstantFox.current_shaddow = result;
-										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(result,api['query'])
+										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(result,api['query']);
+										InstantFox_Comp.Wnd.HH._goto4comp(gotourl.replace('%q', encodeURIComponent(result)));
 									}
 								}
 								
-								result_info.icon			= "";
+								result_info.icon			= null;
 								result_info.title			= result;
 								result_info.url				= gotourl.replace('%q', result);
 																						
@@ -317,13 +349,14 @@
 								if(i==0){
 									if(InstantFox_Comp.Wnd.InstantFox.current_shaddow !=  result){
 										InstantFox_Comp.Wnd.InstantFox.current_shaddow = result;
-										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(result,api['query'])
+										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(result,api['query']);
+										InstantFox_Comp.Wnd.HH._goto4comp(gotourl.replace('%q', encodeURIComponent(result)));
 									}
 								}
 								
-								result_info.icon			= "";
+								result_info.icon			= null;
 								result_info.title			= result;
-								result_info.url				= gotourl.replace('%q', result);
+								result_info.url				= gotourl.replace('%q', encodeURIComponent(result));
 																						
 								tmp_results.push(result_info);
 								
@@ -352,11 +385,12 @@
 								if(i==0){
 									if(InstantFox_Comp.Wnd.InstantFox.current_shaddow != result){
 										InstantFox_Comp.Wnd.InstantFox.current_shaddow = result;
-										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(result,api['query'])
+										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(result,api['query']);
+										InstantFox_Comp.Wnd.HH._goto4comp(gotourl.replace('%q', encodeURIComponent(result)));
 									}
 								}
 								
-								result_info.icon			= "";
+								result_info.icon			= null;
 								result_info.title			= result;
 								result_info.url				= gotourl.replace('%q', encodeURIComponent(result));
 																						
@@ -402,8 +436,14 @@
 	
 	
 	
+	if (XPCOMUtils.generateNSGetFactory)
+	    var NSGetFactory = XPCOMUtils.generateNSGetFactory([InstantFoxSearch]);
+	else
+	    var NSGetModule = XPCOMUtils.generateNSGetModule([InstantFoxSearch]);
 	
+	/*
 	function NSGetModule(compMgr, fileSpec){
 		return XPCOMUtils.generateModule([InstantFoxSearch]);
 	}
+	*/
 		

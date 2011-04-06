@@ -9,7 +9,65 @@
         };
 
   InFoxPrefs.QueryInterface(Components.interfaces.nsIPrefBranch2);
-  
+
+	/*
+	function print_r(x, max, sep, l) {
+	
+		l = l || 0;
+		max = max || 10;
+		sep = sep || ' ';
+	
+		if (l > max) {
+			return "[WARNING: Too much recursion]\n";
+		}
+	
+		var
+			i,
+			r = '',
+			t = typeof x,
+			tab = '';
+	
+		if (x === null) {
+			r += "(null)\n";
+		} else if (t == 'object') {
+	
+			l++;
+	
+			for (i = 0; i < l; i++) {
+				tab += sep;
+			}
+	
+			if (x && x.length) {
+				t = 'array';
+			}
+	
+			r += '(' + t + ") :\n";
+	
+			for (i in x) {
+				try {
+					r += tab + '[' + i + '] : ' + print_r(x[i], max, sep, (l + 1));
+				} catch(e) {
+					return "[ERROR: " + e + "]\n";
+				}
+			}
+	
+		} else {
+	
+			if (t == 'string') {
+				if (x == '') {
+					x = '(empty)';
+				}
+			}
+	
+			r += '(' + t + ') ' + x + "\n";
+	
+		}
+	
+		return r;
+	
+	};
+ 
+  */
   function debug(aMessage) {
 
 		try {
@@ -28,7 +86,7 @@
 						else if (aMessage != null) consoleService.logStringMessage(aMessage.toString());
 						else consoleService.logStringMessage("null");
   }
-    
+
   XULBrowserWindow.InsertShaddowLink = function (shaddow2dsp, query) {
 	
 	if (gURLBar) {
@@ -63,7 +121,8 @@
       hash: 'http://search.instantfox.net/#',
       host: 'search.instantfox.net',
       intn: 'chrome://instantfox/locale/index.html',
-	  actp: '' // current shortcut in use
+	  actp: '', // current shortcut in use
+	  seralw: false, // search always
     },
     
     _isOwnQuery: false,
@@ -92,19 +151,27 @@
         }
 
         // Don't spam the history!
-        if (HH._state.id != HH._oldState.id) {
-          content.document.location.replace(_location);
-        } else {
-          content.document.location.assign(_location);
-        }
+	    if(HH._url.seralw){
+		  if (HH._state.id != HH._oldState.id) {
+            content.document.location.replace(_location);
+          } else {
+            content.document.location.assign(_location);
+          }
+		}
       }, 200, event);
       
 	  
     },
+	
+	_goto4comp: function(url2go) {
+		if(!this._url.seralw){
+			content.document.location.assign(url2go);
+		}
+		return true;
+	},
     
     _init: function() {
       var _prefVersion = 'extensions.' + InstantFox._name + '.version';
-      debug(_prefVersion);
       if (InFoxPrefs.getCharPref(_prefVersion) != InstantFox._version) {
           // open Locale Index and Help Document
           content.document.location = HH._url.intn;
@@ -115,8 +182,8 @@
     
     _focusPermission: function(access) {
       var permission = (access ? 'allAccess' : 'noAccess');
-      //InFoxPrefs.setCharPref('capability.policy.default.HTMLInputElement.focus',   permission);
-      //InFoxPrefs.setCharPref('capability.policy.default.HTMLAnchorElement.focus',  permission);
+      InFoxPrefs.setCharPref('capability.policy.default.HTMLInputElement.focus',   permission);
+      InFoxPrefs.setCharPref('capability.policy.default.HTMLAnchorElement.focus',  permission);
     },
     
 	_showAutoCompletePopup: function(display) {
@@ -129,7 +196,7 @@
         if (HH._isOwnQuery) {
 		  HH._blankShaddow();
           gURLBar.value   = content.document.location;
-          HH._isOwnQuery  = false;
+		  HH._isOwnQuery  = false;
           HH._focusPermission(true);
         }
       }, false);
@@ -146,7 +213,7 @@
       
       onLocationChange: function(a, b, c) {
         // replace location in URLBar with InstantFox-Query (if InstantFox)
-        if (HH._isOwnQuery) {
+		if (HH._isOwnQuery) {
           gURLBar.value = HH._location;
           gURLBar.setSelectionRange(HH._cursorPosition || HH._location.length, HH._cursorPosition || HH._location.length);
         }
@@ -227,21 +294,31 @@
       if (HH._isQuery() && (event.keyCode ? event.keyCode : event.which) == 13) {
 		//InstantFox.Plugins[InstantfoxHH._url.actp]; // improve it later!
 		
+		var tmp = InstantFox.query(gURLBar.value,event);
+		//content.document.location.assign(tmp['loc']);
+        gURLBar.value = tmp['loc'];		
+		
+		if(content.document.location.href != tmp['loc']){
+          content.document.location.assign(tmp['loc']);
+		}
         event.preventDefault();
-
+		
 	    HH._blankShaddow();
         HH._isOwnQuery  = false;
         HH._focusPermission(true);
-		var tmp = InstantFox.query(gURLBar.value,event);
-		//content.document.location.assign(tmp['loc']);
-        gURLBar.value = tmp['loc'];
+		
+		gBrowser.selectedBrowser.focus();	
+		//gBrowser.selectedBrowser.focus();		
+		//gBrowser.mCurrentBrowser.focus();
+		//content.document.defaultView.focus();
+
       }
     };
     
     // Perform query if space was detected
     var _input = function(event) {
       HH._location = gURLBar.value;
-	  debug("input");
+
       if (HH._isQuery()) {
         HH._observeURLBar();
         HH._query(gURLBar.value, event);
@@ -265,6 +342,8 @@
         break;
         
       case 'unload':
+	  	gURLBar.removeEventListener('keydown', _keydown, true);
+		gURLBar.removeEventListener('input', _input, true);
         break;
     }
     
@@ -279,7 +358,37 @@
     }, true);
     HH._init();
   };
+  
   // change the loader don't think that it would be supported in every version if you do it that way!
   window.addEventListener('load', bindings, true);
-  
+  window.addEventListener('unload', bindings, true);
+
+  var observerService = Components.classes["@mozilla.org/observer-service;1"]
+                          .getService(Components.interfaces.nsIObserverService);
+
+  var uninstallObserver = {
+    observe: function observe(subject, topic, data) {
+	  if (topic == "em-action-requested") {
+		subject.QueryInterface(Components.interfaces.nsIUpdateItem);
+
+		if (subject.id == "activities@kaply.com") {
+		  alert(data);
+		  if (data == "item-uninstalled") {
+		  }
+		}
+	  }
+    }
+  }
+
+
+
+   observerService.addObserver(uninstallObserver, "em-action-requested", false);  
+ 
+ /*
+ 
+	InFoxPrefs.clearUserPref('browser.urlbar.autocomplete.enabled');
+    InFoxPrefs.clearUserPref('capability.policy.default.HTMLInputElement.focus');
+   	InFoxPrefs.clearUserPref('capability.policy.default.HTMLAnchorElement.focus');
+
+  */
 //})();
