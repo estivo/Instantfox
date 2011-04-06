@@ -102,13 +102,16 @@
 				}else{
 					tmpshaddow = '';
 				}
+				InstantFox.right_shaddow = tmpshaddow;
 				gURLBar.InsertShaddowLink(tmpshaddow);
 			}else{
 				// keyword is new
+				InstantFox.right_shaddow = '';
 				gURLBar.InsertShaddowLink('');
 				//gURLBar.InsertShaddowLink(url);
 			}
 		}else{
+			InstantFox.right_shaddow = '';
 			gURLBar.InsertSpacerLink('');
 			gURLBar.InsertShaddowLink('');
 		}
@@ -291,28 +294,41 @@
     
     // Prevent pressing enter from performing it's default behaviour
     var _keydown = function(event) {
-      if (HH._isQuery() && (event.keyCode ? event.keyCode : event.which) == 13) {
-		//InstantFox.Plugins[InstantfoxHH._url.actp]; // improve it later!
+	  debug(event.keyCode);
+	  debug(event.which);
+	  
+	  if(HH._isQuery()){
+        if ((event.keyCode ? event.keyCode : event.which) == 9) { // 9 == Tab
+          
+		  gURLBar.value += InstantFox.right_shaddow;
+		  InstantFox.right_shaddow = '';
+		  event.preventDefault();
+	    }
 		
-		var tmp = InstantFox.query(gURLBar.value,event);
-		//content.document.location.assign(tmp['loc']);
-        gURLBar.value = tmp['loc'];		
+	    if (HH._isQuery() && (event.keyCode ? event.keyCode : event.which) == 13) { // 13 == ENTER
+		  //InstantFox.Plugins[InstantfoxHH._url.actp]; // improve it later!
+		  
+		  var tmp = InstantFox.query(gURLBar.value,event);
+		  //content.document.location.assign(tmp['loc']);
+          gURLBar.value = tmp['loc'];		
+		  
+		  if(content.document.location.href != tmp['loc']){
+            content.document.location.assign(tmp['loc']);
+		  }
+          event.preventDefault();
 		
-		if(content.document.location.href != tmp['loc']){
-          content.document.location.assign(tmp['loc']);
-		}
-        event.preventDefault();
+	      HH._blankShaddow();
+          HH._isOwnQuery  = false;
+          HH._focusPermission(true);
 		
-	    HH._blankShaddow();
-        HH._isOwnQuery  = false;
-        HH._focusPermission(true);
-		
-		gBrowser.selectedBrowser.focus();	
-		//gBrowser.selectedBrowser.focus();		
-		//gBrowser.mCurrentBrowser.focus();
-		//content.document.defaultView.focus();
+		  gBrowser.selectedBrowser.focus();	
+		  //gBrowser.selectedBrowser.focus();		
+		  //gBrowser.mCurrentBrowser.focus();
+		 //content.document.defaultView.focus();
 
-      }
+        }
+	  }
+	  
     };
     
     // Perform query if space was detected

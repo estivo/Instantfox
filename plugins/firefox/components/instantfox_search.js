@@ -4,21 +4,25 @@
 		https://developer.mozilla.org/en/How_to_implement_custom_autocomplete_search_component
 		Firefox 4 handling
 	*/
-	
+	/*
 	const Cc	= Components.classes;
 	const Ci	= Components.interfaces;
 	const Cr	= Components.results;
-	const Cu	= Components.utils;
-	
-	Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+	*/
 	
 	var InstantFox_Comp = {
 		processed_results:false,
 		Wnd:'',
+		Cc:Components.classes,
+		Ci:Components.interfaces,
+	    Cr:Components.results,
+		Cu:Components.utils,		
 		
 		xhttpreq:false
 		
 	}
+	InstantFox_Comp.Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+
 	/*
    function debug(aMessage) {
 
@@ -61,25 +65,25 @@
 		get searchResult(){
 			try{
 				switch(this._result.searchResult){
-					case Ci.nsIAutoCompleteResult.RESULT_NOMATCH:
-						if(this._search_result.values == null)				return Ci.nsIAutoCompleteResult.RESULT_NOMATCH_ONGOING;
-						else if(this._search_result.values.length > 0)		return Ci.nsIAutoCompleteResult.RESULT_SUCCESS;
-						else if(this._search_result.values.length == 0)		return Ci.nsIAutoCompleteResult.RESULT_NOMATCH;
+					case InstantFox_Comp.Ci.nsIAutoCompleteResult.RESULT_NOMATCH:
+						if(this._search_result.values == null)				return InstantFox_Comp.Ci.nsIAutoCompleteResult.RESULT_NOMATCH_ONGOING;
+						else if(this._search_result.values.length > 0)		return InstantFox_Comp.Ci.nsIAutoCompleteResult.RESULT_SUCCESS;
+						else if(this._search_result.values.length == 0)		return InstantFox_Comp.Ci.nsIAutoCompleteResult.RESULT_NOMATCH;
 						break;
-					case Ci.nsIAutoCompleteResult.RESULT_SUCCESS:
-						if(this._search_result.values == null)				return Ci.nsIAutoCompleteResult.RESULT_SUCCESS_ONGOING;
-						else if(this._search_result.values.length > 0)		return Ci.nsIAutoCompleteResult.RESULT_SUCCESS;
-						else if(this._search_result.values.length == 0)		return Ci.nsIAutoCompleteResult.RESULT_SUCCESS;
+					case InstantFox_Comp.Ci.nsIAutoCompleteResult.RESULT_SUCCESS:
+						if(this._search_result.values == null)				return InstantFox_Comp.Ci.nsIAutoCompleteResult.RESULT_SUCCESS_ONGOING;
+						else if(this._search_result.values.length > 0)		return InstantFox_Comp.Ci.nsIAutoCompleteResult.RESULT_SUCCESS;
+						else if(this._search_result.values.length == 0)		return InstantFox_Comp.Ci.nsIAutoCompleteResult.RESULT_SUCCESS;
 						break;
-					case Ci.nsIAutoCompleteResult.RESULT_NOMATCH_ONGOING:
-						if(this._search_result.values == null)				return Ci.nsIAutoCompleteResult.RESULT_NOMATCH_ONGOING;
-						else if(this._search_result.values.length > 0)		return Ci.nsIAutoCompleteResult.RESULT_SUCCESS_ONGOING;
-						else if(this._search_result.values.length == 0)		return Ci.nsIAutoCompleteResult.RESULT_NOMATCH_ONGOING;
+					case InstantFox_Comp.Ci.nsIAutoCompleteResult.RESULT_NOMATCH_ONGOING:
+						if(this._search_result.values == null)				return InstantFox_Comp.Ci.nsIAutoCompleteResult.RESULT_NOMATCH_ONGOING;
+						else if(this._search_result.values.length > 0)		return InstantFox_Comp.Ci.nsIAutoCompleteResult.RESULT_SUCCESS_ONGOING;
+						else if(this._search_result.values.length == 0)		return InstantFox_Comp.Ci.nsIAutoCompleteResult.RESULT_NOMATCH_ONGOING;
 						break;
-					case Ci.nsIAutoCompleteResult.RESULT_SUCCESS_ONGOING:
-						if(this._search_result.values == null)				return Ci.nsIAutoCompleteResult.RESULT_SUCCESS_ONGOING;
-						else if(this._search_result.values.length > 0)		return Ci.nsIAutoCompleteResult.RESULT_SUCCESS_ONGOING;
-						else if(this._search_result.values.length == 0)		return Ci.nsIAutoCompleteResult.RESULT_SUCCESS_ONGOING;
+					case InstantFox_Comp.Ci.nsIAutoCompleteResult.RESULT_SUCCESS_ONGOING:
+						if(this._search_result.values == null)				return InstantFox_Comp.Ci.nsIAutoCompleteResult.RESULT_SUCCESS_ONGOING;
+						else if(this._search_result.values.length > 0)		return InstantFox_Comp.Ci.nsIAutoCompleteResult.RESULT_SUCCESS_ONGOING;
+						else if(this._search_result.values.length == 0)		return InstantFox_Comp.Ci.nsIAutoCompleteResult.RESULT_SUCCESS_ONGOING;
 						break;
 					default:
 						return this._result.searchResult;
@@ -228,6 +232,7 @@
 	InstantFoxSearch.prototype = 
 	{
 		classDescription: "Autocomplete 4 InstantFox",
+		historyAutoComplete: null,
 		classID:          Components.ID("c541b971-0729-4f5d-a5c4-1f4dadef365e"),
 		contractID:       "@mozilla.org/autocomplete/search;1?name=instantFoxAutoComplete",
 		QueryInterface:   XPCOMUtils.generateQI([Components.interfaces.nsIAutoCompleteSearch]),
@@ -426,7 +431,7 @@
 		},
 		
 		stopSearch: function(){
-			this.historyAutoComplete.stopSearch();
+			if(this.historyAutoComplete) this.historyAutoComplete.stopSearch();
 			if(this._req){
 			    //this._req.abort();
 			}
