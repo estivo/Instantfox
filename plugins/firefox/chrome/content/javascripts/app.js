@@ -32,7 +32,15 @@ InstantFox = new ExtClass;
 	
 	// used to handle shaddow "caching"
 	current_shaddow: '',
-    	
+	right_shaddow:   '',
+	/*
+		right_shaddow hint:
+		only grey letters e.g
+		g t: 
+			current_shaddow = test
+			right_shaddow = est
+    */
+	
 	query4comp: function(){
 	  // this query is executed by component
 	  
@@ -68,9 +76,11 @@ InstantFox = new ExtClass;
 		
 		// used to handle shaddow "caching"
 		this.next_kwd = parsed.query;
+		/*
 		if(this.next_kwd != this.current_kwd){
 			
 		}
+		*/
 		
 		// may add additional replaces!
 		return {'query': parsed.query, 'key':parsed.key, 'json':json, 'gotourl':gotourl};  
