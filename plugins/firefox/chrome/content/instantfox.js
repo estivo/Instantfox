@@ -3,7 +3,6 @@
         StringService = Components.classes["@mozilla.org/intl/stringbundle;1"].getService(Components.interfaces.nsIStringBundleService),
         LocaleService = Components.classes["@mozilla.org/intl/nslocaleservice;1"].getService(Components.interfaces.nsILocaleService),
         StringBundle  = StringService.createBundle("chrome://instantfox/locale/instantfox.properties", LocaleService.getApplicationLocale()),
-        StateStop     = Components.interfaces.nsIWebProgressListener.STATE_STOP,
         I18n          = function(param) {
           return StringBundle.GetStringFromName(param);
         };
@@ -66,8 +65,7 @@
 		return r;
 	
 	};
- 
-  */
+*/ 
   function debug(aMessage) {
 
 		try {
@@ -86,7 +84,6 @@
 						else if (aMessage != null) consoleService.logStringMessage(aMessage.toString());
 						else consoleService.logStringMessage("null");
   }
-
   XULBrowserWindow.InsertShaddowLink = function (shaddow2dsp, query) {
 	
 	if (gURLBar) {
@@ -125,7 +122,8 @@
       host: 'search.instantfox.net',
       intn: 'chrome://instantfox/locale/index.html',
 	  actp: '', // current shortcut in use
-	  seralw: false, // search always
+	  seralw: false, // search always on every key up!
+	  abort: '' // abort request because enter pressed
     },
     
     _isOwnQuery: false,
@@ -174,13 +172,15 @@
 	},
     
     _init: function() {
-      var _prefVersion = 'extensions.' + InstantFox._name + '.version';
+      /*
+	  var _prefVersion = 'extensions.' + InstantFox._name + '.version';
       if (InFoxPrefs.getCharPref(_prefVersion) != InstantFox._version) {
           // open Locale Index and Help Document
           content.document.location = HH._url.intn;
           // set new Version
           InFoxPrefs.setCharPref(_prefVersion, InstantFox._version);
        }
+	   */
     },
     
     _focusPermission: function(access) {
@@ -222,12 +222,18 @@
         }
       },
       
-      onStateChange: function(a, b, flag, d) {
-        if (flag && StateStop) {
+      onStateChange: function(aWebProgress, aRequest, aStatus, aMessage) {//function(a, b, flag, d) {
+		if (aStatus & Components.interfaces.nsIWebProgressListener.STATE_START){//if (flag && StateStop) {
+		  if (HH._isOwnQuery) {
+			gURLBar.value = HH._location;
+			gURLBar.setSelectionRange(HH._cursorPosition || HH._location.length, HH._cursorPosition || HH._location.length);
+		  }
+		}
+		if (aStatus & Components.interfaces.nsIWebProgressListener.STATE_STOP){//if (flag && StateStop) {
           // on load
           if (HH._isInstantFox() && HH._state.id && HH._state.id != HH._oldState.id) {
             // Got a query hash - perform it ONCE on page load!
-            InstantFox.query(content.document.location.hash.substr(1));
+			if(content.document.location.hash.substr(1)) InstantFox.query(content.document.location.hash.substr(1));
           }
         }
       },
@@ -273,7 +279,7 @@
 	  var query = gURLBar.value.substr((plugin.length+1),gURLBar.value.length); // plugin.length Shortkey + Space => length to cut off
 	  XULBrowserWindow.InsertShaddowLink(InstantFox.current_shaddow,query);
 	  
-	  return (gURLBar.value.replace(/^\s+|\s+$/g, '').search(' ') > -1);
+	  return true; //(gURLBar.value.replace(/^\s+|\s+$/g, '').search(' ') > -1);
     }
   };
   /*
@@ -294,29 +300,33 @@
     
     // Prevent pressing enter from performing it's default behaviour
     var _keydown = function(event) {
-	  debug(event.keyCode);
-	  debug(event.which);
-	  
+ 	  HH._url.abort=false;
 	  if(HH._isQuery()){
         if ((event.keyCode ? event.keyCode : event.which) == 9) { // 9 == Tab
-          
-		  gURLBar.value += InstantFox.right_shaddow;
-		  InstantFox.right_shaddow = '';
+          if(InstantFox.right_shaddow != ''){
+		    gURLBar.value += InstantFox.right_shaddow;
+		    InstantFox.right_shaddow = '';
+		  }
+		  HH._url.abort=true;
 		  event.preventDefault();
 	    }
 		
 	    if (HH._isQuery() && (event.keyCode ? event.keyCode : event.which) == 13) { // 13 == ENTER
+		  HH._url.abort=true;
 		  //InstantFox.Plugins[InstantfoxHH._url.actp]; // improve it later!
 		  
 		  var tmp = InstantFox.query(gURLBar.value,event);
 		  //content.document.location.assign(tmp['loc']);
-          gURLBar.value = tmp['loc'];		
+		  
+		  gURLBar.value = tmp['loc'];		
 		  
 		  if(content.document.location.href != tmp['loc']){
             content.document.location.assign(tmp['loc']);
 		  }
           event.preventDefault();
-		
+		  gURLBar.value = tmp['loc'];		
+
+		  
 	      HH._blankShaddow();
           HH._isOwnQuery  = false;
           HH._focusPermission(true);
@@ -333,8 +343,8 @@
     
     // Perform query if space was detected
     var _input = function(event) {
-      HH._location = gURLBar.value;
-
+      HH._url.abort=false;
+	  HH._location = gURLBar.value;
       if (HH._isQuery()) {
         HH._observeURLBar();
         HH._query(gURLBar.value, event);
@@ -353,13 +363,13 @@
     // Bind Events to URLBar
     switch(event.type) {
       case 'load':
-        gURLBar.addEventListener('keydown', _keydown, true);
-        gURLBar.addEventListener('input', _input, true);
+        gURLBar.addEventListener('keydown', _keydown, false);
+        gURLBar.addEventListener('input', _input, false);
         break;
         
       case 'unload':
-	  	gURLBar.removeEventListener('keydown', _keydown, true);
-		gURLBar.removeEventListener('input', _input, true);
+	  	gURLBar.removeEventListener('keydown', _keydown, false);
+		gURLBar.removeEventListener('input', _input, false);
         break;
     }
     
@@ -381,7 +391,7 @@
 
   var observerService = Components.classes["@mozilla.org/observer-service;1"]
                           .getService(Components.interfaces.nsIObserverService);
-
+	/*
   var uninstallObserver = {
     observe: function observe(subject, topic, data) {
 	  if (topic == "em-action-requested") {
@@ -399,7 +409,7 @@
 
 
    observerService.addObserver(uninstallObserver, "em-action-requested", false);  
- 
+ 	*/
  /*
  
 	InFoxPrefs.clearUserPref('browser.urlbar.autocomplete.enabled');
