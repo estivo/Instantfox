@@ -247,6 +247,10 @@
 			
 			InstantFox_Comp.processed_results = false;
 			if(api){
+				if(InstantFox_Comp.Wnd.HH._url.abort){
+					this.historyAutoComplete.stopSearch();
+					return false;
+				}
 				var num_history_results = 4;
 				var history_string		= InstantFox_Comp.Wnd.InstantFox.rand4comp();
 				//searchString			= searchString.substr((api['key'].length+1),searchString.length); // key + space (+1) e.g. g = 2 chars				
