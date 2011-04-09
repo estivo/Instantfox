@@ -202,6 +202,7 @@
 
 		if(!this._url.seralw){ // go to first suggest if instant is disabled
 			content.document.location.assign(url2go);
+			gBrowser.mCurrentBrowser.userTypedValue = url2go;
 		}
 		return true;
 	},
