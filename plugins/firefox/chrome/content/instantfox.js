@@ -393,6 +393,7 @@
 		  
 		  if(content.document.location.href != tmp['loc']){
             content.document.location.assign(tmp['loc']);
+			gBrowser.mCurrentBrowser.userTypedValue = tmp['loc'];
 		  }
           event.preventDefault();
 		  gURLBar.value = tmp['loc'];		
