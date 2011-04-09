@@ -310,9 +310,16 @@
 		  }
 		  HH._url.abort=true;
 		  event.preventDefault();
-	    }
-		
-	    if (HH._isQuery() && (event.keyCode ? event.keyCode : event.which) == 13) { // 13 == ENTER
+	    } else if ((event.keyCode ? event.keyCode : event.which) == 39) { // 39 == RIGHT
+		  if(InstantFox.right_shaddow != '' && gURLBar.selectionEnd==gURLBar.value.length){
+		    /* window.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindowUtils)
+				.sendNativeKeyEvent(0, 0, 0, InstantFox.right_shaddow[0], ''); */			
+			gURLBar.value += InstantFox.right_shaddow[0]
+			gURLBar.controller.handleText(true)			
+			_input()
+		  }
+		  event.preventDefault();
+		} else if ((event.keyCode ? event.keyCode : event.which) == 13) { // 13 == ENTER
 		  HH._url.abort=true;
 		  //InstantFox.Plugins[InstantfoxHH._url.actp]; // improve it later!
 		  
