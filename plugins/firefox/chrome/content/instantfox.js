@@ -198,8 +198,9 @@
 		// Return power to Site
         if (HH._isOwnQuery) {
 		  HH._blankShaddow();
-          gURLBar.value   = content.document.location;
-		  HH._isOwnQuery  = false;
+          gURLBar.value = content.document.location;
+		  gBrowser.userTypedValue = null;
+		  HH._isOwnQuery = false;
           HH._focusPermission(true);
         }
       }, false);
@@ -324,7 +325,8 @@
             content.document.location.assign(tmp['loc']);
 		  }
           event.preventDefault();
-		  gURLBar.value = tmp['loc'];		
+		  gURLBar.value = tmp['loc'];
+          gBrowser.userTypedValue = null;
 
 		  
 	      HH._blankShaddow();
@@ -345,6 +347,7 @@
     var _input = function(event) {
       HH._url.abort=false;
 	  HH._location = gURLBar.value;
+	  gBrowser.userTypedValue = HH._location;
       if (HH._isQuery()) {
         HH._observeURLBar();
         HH._query(gURLBar.value, event);
@@ -363,7 +366,9 @@
     // Bind Events to URLBar
     switch(event.type) {
       case 'load':
-        gURLBar.addEventListener('keydown', _keydown, false);
+	    window.removeEventListener('load', bindings, true);        
+		gURLBar.addEventListener('keydown', _keydown, false);
+        gURLBar.removeAttribute('oninput');
         gURLBar.addEventListener('input', _input, false);
         break;
         
