@@ -194,9 +194,9 @@
     },
 	
     _observeURLBar: function() {
-      gURLBar.addEventListener('blur', function() {
-		// Return power to Site
-        if (HH._isOwnQuery) {
+      gURLBar.addEventListener('blur', function(e) {
+		// Return power to Site if urlbar really lost focus
+        if (HH._isOwnQuery && !gURLBar.mIgnoreFocus && e.originalTarget == gURLBar.mInputField) {
 		  HH._blankShaddow();
           gURLBar.value = content.document.location;
 		  gBrowser.userTypedValue = null;
@@ -356,9 +356,7 @@
 	  HH._location = gURLBar.value;
 	  gBrowser.userTypedValue = HH._location;
       if (HH._isQuery()) {
-        HH._observeURLBar();
         HH._query(gURLBar.value, event);
-
       }
       // show autocomplete popup when not InstantFox!
       else{
@@ -377,6 +375,7 @@
 		gURLBar.addEventListener('keydown', _keydown, false);
         gURLBar.removeAttribute('oninput');
         gURLBar.addEventListener('input', _input, false);
+		HH._observeURLBar();
         break;
         
       case 'unload':
