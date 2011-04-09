@@ -283,6 +283,7 @@
 					listener.onSearchResult(_search, new SearchAutoCompleteResult(result, internal_results, num_history_results));
 				}
 				*/
+				InstantFox_Comp.Wnd.HH._url.seralw = true;
 				return true;
 			}
 
@@ -317,13 +318,14 @@
 						type_not_found = false;
 						
 						var gotourl = api['gotourl'];
-						
+						if(xhr_return[2]['sug'].length == 0) InstantFox_Comp.Wnd.HH._url.seralw = true;
 						for(var i=0; i < xhr_return[2]['sug'].length;i++){		
 								var result_info	= {};
 								var result		= xhr_return[2]['sug'][i];
 								
 								if(i==0){
 									if(InstantFox_Comp.Wnd.InstantFox._tab_status[InstantFox_Comp.tabID]['current_shaddow'] != result){
+										InstantFox_Comp.Wnd.HH._url.seralw = false;
 										debug("COMP CALLED!");
 										InstantFox_Comp.Wnd.InstantFox._tab_status[InstantFox_Comp.tabID]['current_shaddow'] = result;										
 										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(InstantFox_Comp.tabID,result,api['query']);
@@ -363,13 +365,14 @@
 						type_not_found = false;
 						
 						var gotourl = api['gotourl'];
-						
+						if(xhr_return[3].length == 0) InstantFox_Comp.Wnd.HH._url.seralw = true;
 						for(var i=0; i < xhr_return[3].length;i++){		
 								var result_info	= {};
 								var result		= xhr_return[3][i];
 								
 								if(i==0){
 									if(InstantFox_Comp.Wnd.InstantFox._tab_status[InstantFox_Comp.tabID]['current_shaddow'] != result){
+										InstantFox_Comp.Wnd.HH._url.seralw = false;
 										debug("COMP CALLED!");
 										InstantFox_Comp.Wnd.InstantFox._tab_status[InstantFox_Comp.tabID]['current_shaddow'] = result;
 										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(InstantFox_Comp.tabID,result,api['query']);
@@ -408,12 +411,14 @@
 						
 						var gotourl = api['gotourl'];
 						
+						if(xhr_return[1].length == 0) InstantFox_Comp.Wnd.HH._url.seralw = true;					
 						for(var i=0; i < xhr_return[1].length;i++){		
 								var result_info	= {};
 								var result		= xhr_return[1][i];
 
 								if(i==0){
 									if(InstantFox_Comp.Wnd.InstantFox._tab_status[InstantFox_Comp.tabID]['current_shaddow'] != result){
+										InstantFox_Comp.Wnd.HH._url.seralw = false;
 										debug("COMP CALLED!");
 										InstantFox_Comp.Wnd.InstantFox._tab_status[InstantFox_Comp.tabID]['current_shaddow'] = result;																			
 										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(InstantFox_Comp.tabID,result,api['query']);
