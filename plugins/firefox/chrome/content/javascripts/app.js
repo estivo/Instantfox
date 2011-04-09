@@ -45,7 +45,7 @@ InstantFox = new ExtClass;
 	  // this query is executed by component
 	  
 	  var q			= gURLBar.value;
-	  var parsed    = this.parse(q.toString().replace(/^\s+|\s+$/g, ''));
+	  var parsed    = this.parse(q.trim());
       var shortcut  = this.Shortcuts[parsed.key];
 	  
 	  if (parsed.key && parsed.query && shortcut) {
@@ -101,7 +101,7 @@ InstantFox = new ExtClass;
 	
     query: function(q, event) {
       // Stip Whitespaces from Query
-      var parsed    = this.parse(q.toString().replace(/^\s+|\s+$/g, ''));
+      var parsed    = this.parse(q.toString().trim());
       var shortcut  = this.Shortcuts[parsed.key];
 	 
 	  // Set in InstantFox_Vars for Component!
