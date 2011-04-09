@@ -18,12 +18,13 @@
 	    Cr:Components.results,
 		Cu:Components.utils,		
 		
-		xhttpreq:false
+		xhttpreq:false,
+		tabID: null
+
 		
 	}
 	InstantFox_Comp.Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
-	/*
    function debug(aMessage) {
 
 		try {
@@ -42,8 +43,7 @@
 						else if (aMessage != null) consoleService.logStringMessage(aMessage.toString());
 						else consoleService.logStringMessage("null");
 	}
-	*/
-	
+
 	function SearchAutoCompleteResult(result, search_result, maxNumResults){
 		if(InstantFox_Comp.processed_results){return;}
 				
@@ -240,13 +240,15 @@
 		{
 			InstantFox_Comp.Wnd = Components.classes["@mozilla.org/appshell/window-mediator;1"].getService(Components.interfaces.nsIWindowMediator).getMostRecentWindow("navigator:browser");
 			
-			var api = InstantFox_Comp.Wnd.InstantFox.query4comp();
+			InstantFox_Comp.tabID = null;
+			var api = InstantFox_Comp.Wnd.InstantFox.query4comp(this.tabID);
 			/*
-				api return('query':query, 'key':parsed.key, 'json':json, 'gotourl':gotourl); OR false!
+				api return('query':query, 'key':parsed.key, 'json':json, 'gotourl':gotourl, 'tabID':tabID); OR false!
 			*/
 			
 			InstantFox_Comp.processed_results = false;
 			if(api){
+				InstantFox_Comp.tabID = api['tabID'];
 				if(InstantFox_Comp.Wnd.HH._url.abort){
 					this.historyAutoComplete.stopSearch();
 					return false;
@@ -259,6 +261,9 @@
 				var num_history_results = 10;
 				var history_string		= searchString;
 			}
+			
+			//debug(InstantFox_Comp.Wnd.HH._enumWnd(InstantFox_Comp.Wnd));
+			
 			//Search the user's history
 			this.historyAutoComplete		= Components.classes["@mozilla.org/autocomplete/search;1?name=history"].createInstance(Components.interfaces.nsIAutoCompleteSearch);
 			var _search						= this;
@@ -318,11 +323,19 @@
 								var result		= xhr_return[2]['sug'][i];
 								
 								if(i==0){
+									if(InstantFox_Comp.Wnd.InstantFox._tab_status[InstantFox_Comp.tabID]['current_shaddow'] != result){
+										debug("COMP CALLED!");
+										InstantFox_Comp.Wnd.InstantFox._tab_status[InstantFox_Comp.tabID]['current_shaddow'] = result;										
+										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(InstantFox_Comp.tabID,result,api['query']);
+										InstantFox_Comp.Wnd.HH._goto4comp(InstantFox_Comp.tabID,gotourl.replace('%q', encodeURIComponent(result)));
+									}
+									/*
 									if(InstantFox_Comp.Wnd.InstantFox.current_shaddow !=  result){
 										InstantFox_Comp.Wnd.InstantFox.current_shaddow = result;
 										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(result,api['query']);
 										InstantFox_Comp.Wnd.HH._goto4comp(gotourl.replace('%q', encodeURIComponent(result)));
 									}
+									*/
 								}
 								
 								result_info.icon			= null;
@@ -356,11 +369,19 @@
 								var result		= xhr_return[3][i];
 								
 								if(i==0){
+									if(InstantFox_Comp.Wnd.InstantFox._tab_status[InstantFox_Comp.tabID]['current_shaddow'] != result){
+										debug("COMP CALLED!");
+										InstantFox_Comp.Wnd.InstantFox._tab_status[InstantFox_Comp.tabID]['current_shaddow'] = result;
+										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(InstantFox_Comp.tabID,result,api['query']);
+										InstantFox_Comp.Wnd.HH._goto4comp(InstantFox_Comp.tabID,gotourl.replace('%q', encodeURIComponent(result)));
+									}
+									/*
 									if(InstantFox_Comp.Wnd.InstantFox.current_shaddow !=  result){
 										InstantFox_Comp.Wnd.InstantFox.current_shaddow = result;
 										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(result,api['query']);
 										InstantFox_Comp.Wnd.HH._goto4comp(gotourl.replace('%q', encodeURIComponent(result)));
 									}
+									*/
 								}
 								
 								result_info.icon			= null;
@@ -392,11 +413,19 @@
 								var result		= xhr_return[1][i];
 
 								if(i==0){
-									if(InstantFox_Comp.Wnd.InstantFox.current_shaddow != result){
+									if(InstantFox_Comp.Wnd.InstantFox._tab_status[InstantFox_Comp.tabID]['current_shaddow'] != result){
+										debug("COMP CALLED!");
+										InstantFox_Comp.Wnd.InstantFox._tab_status[InstantFox_Comp.tabID]['current_shaddow'] = result;																			
+										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(InstantFox_Comp.tabID,result,api['query']);
+										InstantFox_Comp.Wnd.HH._goto4comp(InstantFox_Comp.tabID,gotourl.replace('%q', encodeURIComponent(result)));
+									}
+									/*
+									if(InstantFox_Comp.Wnd.InstantFox.current_shaddow !=  result){
 										InstantFox_Comp.Wnd.InstantFox.current_shaddow = result;
 										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(result,api['query']);
 										InstantFox_Comp.Wnd.HH._goto4comp(gotourl.replace('%q', encodeURIComponent(result)));
 									}
+									*/
 								}
 								
 								result_info.icon			= null;

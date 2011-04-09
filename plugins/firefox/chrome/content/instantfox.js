@@ -8,8 +8,7 @@
         };
 
   InFoxPrefs.QueryInterface(Components.interfaces.nsIPrefBranch2);
-
-	/*
+  
 	function print_r(x, max, sep, l) {
 	
 		l = l || 0;
@@ -65,7 +64,7 @@
 		return r;
 	
 	};
-*/ 
+
   function debug(aMessage) {
 
 		try {
@@ -84,11 +83,14 @@
 						else if (aMessage != null) consoleService.logStringMessage(aMessage.toString());
 						else consoleService.logStringMessage("null");
   }
-  XULBrowserWindow.InsertShaddowLink = function (shaddow2dsp, query) {
-	
+  XULBrowserWindow.InsertShaddowLink = function (b2tab, shaddow2dsp, query) { // b2tab = belong to tab
+	// InstantFox._tab_status[b2tab]['right_shaddow']
+	if(!HH._belong2tab(b2tab) && shaddow2dsp != ''){
+		return false; // result is not for this tab!
+	}
 	if (gURLBar) {
-
-		if(shaddow2dsp != '' && shaddow2dsp != query){
+		//debug(print_r(InstantFox._tab_status));
+		if(shaddow2dsp != null && shaddow2dsp != '' && shaddow2dsp != query){
 			gURLBar.InsertSpacerLink(gURLBar.value);
 			var tmpshaddow = '';
 			
@@ -99,37 +101,68 @@
 				}else{
 					tmpshaddow = '';
 				}
-				InstantFox.right_shaddow = tmpshaddow;
+				//InstantFox.right_shaddow = tmpshaddow;
+				InstantFox._tab_status[b2tab]['right_shaddow'] = tmpshaddow;
 				gURLBar.InsertShaddowLink(tmpshaddow);
 			}else{
 				// keyword is new
-				InstantFox.right_shaddow = '';
+				//InstantFox.right_shaddow = '';
+				InstantFox._tab_status[b2tab]['right_shaddow'] = '';
 				gURLBar.InsertShaddowLink('');
 				//gURLBar.InsertShaddowLink(url);
 			}
 		}else{
-			InstantFox.right_shaddow = '';
+			//InstantFox.right_shaddow = '';
+			InstantFox._tab_status[b2tab]['right_shaddow'] = '';
 			gURLBar.InsertSpacerLink('');
 			gURLBar.InsertShaddowLink('');
 		}
 	}
   }
-  	
   var HH = {
-	  	
+	  
     _url: {
       hash: 'http://search.instantfox.net/#',
       host: 'search.instantfox.net',
       intn: 'chrome://instantfox/locale/index.html',
 	  actp: '', // current shortcut in use
 	  seralw: false, // search always on every key up!
-	  abort: '' // abort request because enter pressed
+	  abort: '', // abort request because enter pressed
+	  ctabID: '' // used for tab handeling
     },
     
+	_ctabID: null,	
     _isOwnQuery: false,
-    
+
     // -- Helper Methods --
-    _query: function(query, event) {
+ 
+   	_tabSelect: function(event) {
+	  //this._url.ctabID = gBrowser.mCurrentTab.linkedPanel;
+	  //HH._url.ctabID = gBrowser.mCurrentTab.linkedPanel;
+	  debug(HH._url.ctabID);
+	  //debug( this._url.ctabID);
+	  /*
+	  var browser = gBrowser.selectedBrowser;
+	  debug("TabSelect");
+	  debug("TabID:");
+	  debug(gBrowser.mCurrentTab.linkedPanel);
+	  debug(gBrowser.getBrowserIndexForDocument(gBrowser.contentDocument));
+	  var tabid = gBrowser.getBrowserIndexForDocument(gBrowser.contentDocument);
+	  */
+    },
+
+    _belong2tab: function(tab2check) {
+	  //debug(tab2check);
+	  //debug(gBrowser.mCurrentTab.linkedPanel);
+	  if(tab2check !=  gBrowser.mCurrentTab.linkedPanel){
+		//debug("Tabcheck failed!");
+		return false; // result is not for this tab!
+	  }else{
+	    return true;
+	  }
+	},
+	
+	_query: function(query, event) {
       // Query used to replace gURLBar.value onLocationChange
       HH._q = query || gURLBar.value;
       HH._cursorPosition = gURLBar.selectionStart || HH._q.length;
@@ -164,8 +197,10 @@
 	  
     },
 	
-	_goto4comp: function(url2go) {
-		if(!this._url.seralw){
+	_goto4comp: function(b2tab,url2go) {
+		if(!HH._belong2tab(b2tab)) return false; // result is not for this tab!
+
+		if(!this._url.seralw){ // go to first suggest if instant is disabled
 			content.document.location.assign(url2go);
 		}
 		return true;
@@ -195,13 +230,30 @@
 	
     _observeURLBar: function() {
       gURLBar.addEventListener('blur', function() {
+		//debug("blur event");
 		// Return power to Site
-        if (HH._isOwnQuery) {
-		  HH._blankShaddow();
-          gURLBar.value   = content.document.location;
-		  HH._isOwnQuery  = false;
-          HH._focusPermission(true);
-        }
+		if (HH._isOwnQuery) {
+			var taburl = gBrowser.selectedBrowser.currentURI.spec;
+			if(taburl == 'about:blank'){
+				taburl = '';
+			}
+			
+			if(!HH._belong2tab(HH._url.ctabID)){
+				debug("here");
+				gURLBar.value = taburl;
+				gBrowser.mCurrentBrowser.userTypedValue = taburl;
+				
+				InstantFox._tab_status[HH._url.ctabID]['urlbar_value'] = taburl;	
+				HH._blankShaddow(gBrowser.mCurrentTab.linkedPanel);
+			}else{
+				// connect with tabs event listener!
+				gURLBar.value   = content.document.location;
+				gBrowser.mCurrentBrowser.userTypedValue =  content.document.location
+				HH._blankShaddow(gBrowser.mCurrentTab.linkedPanel);
+				HH._isOwnQuery  = false;
+				HH._focusPermission(true);
+			}
+		}
       }, false);
     },
     
@@ -250,16 +302,29 @@
       catch(ex) { return false; }
     },
     
-	_blankShaddow: function(){	
-	  if(!InstantFox.current_shaddow) return false; 		// not needed already blank!
-	  InstantFox.current_shaddow = '';
-	  XULBrowserWindow.InsertShaddowLink('','');
+	_blankShaddow: function(tabID){
+	  if(!InstantFox._tab_status[tabID] || typeof(InstantFox._tab_status[tabID]) === 'undefined'){
+		InstantFox._tab_status[tabID] = new Array();
+	  }
+	  if(InstantFox._tab_status[tabID]['current_shaddow'] == '') return false;  
+	  InstantFox._tab_status[tabID]['current_shaddow'] = '';
+	  InstantFox._tab_status[tabID]['right_shaddow'] = '';
+ 	  //if(!InstantFox.current_shaddow) return false; 		// not needed already blank!
+	  //InstantFox.current_shaddow = '';
+	  //XULBrowserWindow.InsertShaddowLink('','');
+	  
+	  XULBrowserWindow.InsertShaddowLink(tabID,'','');
 	},
 	
     // Assuming that a space in the trimmed Urlbar indicates a InstantFox call
     _isQuery: function() {
-      if (gURLBar.value.length < 3){
-	    this._blankShaddow();
+	  this._url.ctabID =  gBrowser.mCurrentTab.linkedPanel;
+	  if(!InstantFox._tab_status[this._url.ctabID] || typeof(InstantFox._tab_status[this._url.ctabID]) === 'undefined'){
+		InstantFox._tab_status[this._url.ctabID] = new Array();
+	  }  
+	  
+	  if (gURLBar.value.length < 3){
+	    this._blankShaddow(this._url.ctabID);
 		return false;
 	  }
 	  // match keywords here!
@@ -272,14 +337,20 @@
 		}
       }
 	  if(!found){
-	  	this._blankShaddow('','');
+	  	this._blankShaddow(this._url.ctabID);
 		return false;
 	  }
 	  
-	  var query = gURLBar.value.substr((plugin.length+1),gURLBar.value.length); // plugin.length Shortkey + Space => length to cut off
-	  XULBrowserWindow.InsertShaddowLink(InstantFox.current_shaddow,query);
 	  
-	  return true; //(gURLBar.value.replace(/^\s+|\s+$/g, '').search(' ') > -1);
+	  var query = gURLBar.value.substr((plugin.length+1),gURLBar.value.length); // plugin.length Shortkey + Space => length to cut off
+	  //XULBrowserWindow.InsertShaddowLink(InstantFox.current_shaddow,query);
+	  //debug(this._url.ctabID);
+	  //debug(InstantFox._tab_status[this._url.ctabID]['current_shaddow']);
+	  //debug(query);
+	  XULBrowserWindow.InsertShaddowLink(this._url.ctabID,InstantFox._tab_status[this._url.ctabID]['current_shaddow'],query);
+	  
+	  return true;
+	 // return (gURLBar.value.replace(/^\s+|\s+$/g, '').search(' ') > -1);
     }
   };
   /*
@@ -303,9 +374,9 @@
  	  HH._url.abort=false;
 	  if(HH._isQuery()){
         if ((event.keyCode ? event.keyCode : event.which) == 9) { // 9 == Tab
-          if(InstantFox.right_shaddow != ''){
-		    gURLBar.value += InstantFox.right_shaddow;
-		    InstantFox.right_shaddow = '';
+          if(InstantFox._tab_status[HH._url.ctabID]['right_shaddow'] != ''){//if(InstantFox.right_shaddow != ''){
+		    gURLBar.value += InstantFox._tab_status[HH._url.ctabID]['right_shaddow'];//InstantFox.right_shaddow;
+		    InstantFox._tab_status[HH._url.ctabID]['right_shaddow'] = '';//InstantFox.right_shaddow = '';
 		  }
 		  HH._url.abort=true;
 		  event.preventDefault();
@@ -327,7 +398,7 @@
 		  gURLBar.value = tmp['loc'];		
 
 		  
-	      HH._blankShaddow();
+	      HH._blankShaddow(HH._url.ctabID);
           HH._isOwnQuery  = false;
           HH._focusPermission(true);
 		
@@ -348,7 +419,6 @@
       if (HH._isQuery()) {
         HH._observeURLBar();
         HH._query(gURLBar.value, event);
-
       }
       // show autocomplete popup when not InstantFox!
       else{
@@ -365,11 +435,13 @@
       case 'load':
         gURLBar.addEventListener('keydown', _keydown, false);
         gURLBar.addEventListener('input', _input, false);
+		//gBrowser.tabContainer.addEventListener("TabSelect", HH._tabSelect, false);
         break;
         
       case 'unload':
 	  	gURLBar.removeEventListener('keydown', _keydown, false);
 		gURLBar.removeEventListener('input', _input, false);
+		//gBrowser.tabContainer.removeEventListener("TabSelect", HH._tabSelect, false);
         break;
     }
     
@@ -385,13 +457,18 @@
     HH._init();
   };
   
+
+  
   // change the loader don't think that it would be supported in every version if you do it that way!
   window.addEventListener('load', bindings, true);
   window.addEventListener('unload', bindings, true);
-
+  gBrowser.tabContainer.addEventListener("TabSelect", HH._tabSelect, false);
+  
+  
+  /*
+  
   var observerService = Components.classes["@mozilla.org/observer-service;1"]
                           .getService(Components.interfaces.nsIObserverService);
-	/*
   var uninstallObserver = {
     observe: function observe(subject, topic, data) {
 	  if (topic == "em-action-requested") {

@@ -31,8 +31,8 @@ InstantFox = new ExtClass;
     _i18n:    undefined,
 	
 	// used to handle shaddow "caching"
-	current_shaddow: '',
-	right_shaddow:   '',
+	//current_shaddow: '',
+	//right_shaddow:   '',
 	/*
 		right_shaddow hint:
 		only grey letters e.g
@@ -41,10 +41,29 @@ InstantFox = new ExtClass;
 			right_shaddow = est
     */
 	
+	_tab_status:new Array(),
+	/*
+	_tab_status:
+		[tabID] =>
+					[urlbar_value]		= (e.g. "g m")
+					[current_shaddow]	= (e.g. "g m ")
+					[right_shaddow]		= (e.g. "artin"
+	*/
+
+	
 	query4comp: function(){
 	  // this query is executed by component
 	  
-	  var q			= gURLBar.value;
+	  var tabID = gBrowser.mCurrentTab.linkedPanel;
+	  
+	  if(!this._tab_status[tabID] || typeof(this._tab_status[tabID]) === 'undefined'){
+		this._tab_status[tabID] = new Array();
+	  }
+	  
+	  this._tab_status[tabID]['urlbar_value']		=  gURLBar.value;//gURLBar.value;
+	  // will be set by componente!
+
+	  var q			= this._tab_status[tabID]['urlbar_value'];
 	  var parsed    = this.parse(q.toString().replace(/^\s+|\s+$/g, ''));
       var shortcut  = this.Shortcuts[parsed.key];
 	  
@@ -73,17 +92,9 @@ InstantFox = new ExtClass;
       	gotourl = gotourl.replace('%ll', this._i18n('locale.long'));
       	gotourl = gotourl.replace('%ls', this._i18n('locale.short'));
       	gotourl = gotourl.replace('%ld', this._i18n('locale.domain'));
-		
-		// used to handle shaddow "caching"
-		this.next_kwd = parsed.query;
-		/*
-		if(this.next_kwd != this.current_kwd){
 			
-		}
-		*/
-		
 		// may add additional replaces!
-		return {'query': parsed.query, 'key':parsed.key, 'json':json, 'gotourl':gotourl};  
+		return {'query': parsed.query, 'key':parsed.key, 'json':json, 'gotourl':gotourl, 'tabID':tabID};  
 	  }else return false;
 	},
 	
