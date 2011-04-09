@@ -188,8 +188,10 @@
 	    if(HH._url.seralw){
 		  if (HH._state.id != HH._oldState.id) {
             content.document.location.replace(_location);
+			gBrowser.mCurrentBrowser.userTypedValue =  content.document.location;
           } else {
             content.document.location.assign(_location);
+			gBrowser.mCurrentBrowser.userTypedValue =  content.document.location;
           }
 		}
       }, 200, event);
@@ -249,7 +251,7 @@
 			}else{
 				// connect with tabs event listener!
 				gURLBar.value   = content.document.location;
-				gBrowser.mCurrentBrowser.userTypedValue =  content.document.location
+				gBrowser.mCurrentBrowser.userTypedValue =  content.document.location;
 				HH._blankShaddow(gBrowser.mCurrentTab.linkedPanel);
 				HH._isOwnQuery  = false;
 				HH._focusPermission(true);
