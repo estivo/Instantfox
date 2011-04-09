@@ -319,7 +319,8 @@
 			_input()
 		  }
 		  event.preventDefault();
-		} else if ((event.keyCode ? event.keyCode : event.which) == 13) { // 13 == ENTER
+		} else if ((event.keyCode ? event.keyCode : event.which) == 13 
+				&& !event.altKey && !event.metaKey && !event.ctrlKey) { // 13 == ENTER
 		  HH._url.abort=true;
 		  //InstantFox.Plugins[InstantfoxHH._url.actp]; // improve it later!
 		  
