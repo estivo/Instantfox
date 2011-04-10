@@ -50,11 +50,7 @@ InstantFox = new ExtClass;
 	  
 	  if (parsed.key && parsed.query && shortcut) {
 		var resource = InstantFox.Plugins[shortcut];
-		
-		if(!resource.json){
-			HH._showAutoCompletePopup(false);
-	  	}
-		
+						
 		if(parsed.key != 'e'){
 			if(resource.json){
 	    		var json	 = resource.json.replace('%q', encodeURIComponent(parsed.query));

@@ -303,24 +303,27 @@
     var _keydown = function(event) {
  	  HH._url.abort=false;
 	  if(HH._isQuery()){
-        if ((event.keyCode ? event.keyCode : event.which) == 9) { // 9 == Tab
+	    var key = event.keyCode ? event.keyCode : event.which,
+			alt = event.altKey, meta = event.metaKey, ctrl = event.ctrlKey, shift = event.shiftKey;
+        if (key == 9 || (!ctrl && !shift && key == 39)) { // 9 == Tab 
           if(InstantFox.right_shaddow != ''){
 		    gURLBar.value += InstantFox.right_shaddow;
 		    InstantFox.right_shaddow = '';
+			//gURLBar.controller.handleText(true)
+			_input()
+			HH._url.abort=true;
+			event.preventDefault();
 		  }
-		  HH._url.abort=true;
-		  event.preventDefault();
-	    } else if ((event.keyCode ? event.keyCode : event.which) == 39) { // 39 == RIGHT
+	    } else if (key == 39 && ctrl && !shift) { // 39 == RIGHT
 		  if(InstantFox.right_shaddow != '' && gURLBar.selectionEnd==gURLBar.value.length){
 		    /* window.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindowUtils)
 				.sendNativeKeyEvent(0, 0, 0, InstantFox.right_shaddow[0], ''); */			
 			gURLBar.value += InstantFox.right_shaddow[0]
-			gURLBar.controller.handleText(true)			
+			gURLBar.controller.handleText(true)
 			_input()
+			event.preventDefault();
 		  }
-		  event.preventDefault();
-		} else if ((event.keyCode ? event.keyCode : event.which) == 13 
-				&& !event.altKey && !event.metaKey && !event.ctrlKey) { // 13 == ENTER
+		} else if (key == 13 && !alt && !meta && !ctrl) { // 13 == ENTER
 		  HH._url.abort=true;
 		  //InstantFox.Plugins[InstantfoxHH._url.actp]; // improve it later!
 		  
@@ -344,11 +347,9 @@
 		  gBrowser.selectedBrowser.focus();	
 		  //gBrowser.selectedBrowser.focus();		
 		  //gBrowser.mCurrentBrowser.focus();
-		 //content.document.defaultView.focus();
-
+		  //content.document.defaultView.focus();
         }
-	  }
-	  
+	  }	  
     };
     
     // Perform query if space was detected
@@ -360,13 +361,7 @@
         HH._query(gURLBar.value, event);
       }
       // show autocomplete popup when not InstantFox!
-      else{
-		  /*
-		  		Needed due to execution of HH._showAutoCompletePopup(false);
-				in app.js (query4comp) <- called by componente!
-		  */
-		  
-		  HH._showAutoCompletePopup(true);
+      else{	
 	  }
     };
     // Bind Events to URLBar
