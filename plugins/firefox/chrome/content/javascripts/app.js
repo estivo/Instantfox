@@ -73,15 +73,7 @@ InstantFox = new ExtClass;
       	gotourl = gotourl.replace('%ll', this._i18n('locale.long'));
       	gotourl = gotourl.replace('%ls', this._i18n('locale.short'));
       	gotourl = gotourl.replace('%ld', this._i18n('locale.domain'));
-		
-		// used to handle shaddow "caching"
-		this.next_kwd = parsed.query;
-		/*
-		if(this.next_kwd != this.current_kwd){
 			
-		}
-		*/
-		
 		// may add additional replaces!
 		return {'query': parsed.query, 'key':parsed.key, 'json':json, 'gotourl':gotourl};  
 	  }else return false;

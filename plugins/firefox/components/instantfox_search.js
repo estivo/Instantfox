@@ -23,9 +23,8 @@
 	}
 	InstantFox_Comp.Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
-	/*
-   function debug(aMessage) {
-
+	
+    function debug(aMessage) {
 		try {
 			var objects = [];
 			objects.push.apply(objects, arguments);
@@ -36,13 +35,13 @@
 		catch (e) {
 		}
 			
-						var consoleService = Components.classes["@mozilla.org/consoleservice;1"].getService
+		var consoleService = Components.classes["@mozilla.org/consoleservice;1"].getService
 			(Components.interfaces.nsIConsoleService);
-						if (aMessage === "") consoleService.logStringMessage("(empty string)");
-						else if (aMessage != null) consoleService.logStringMessage(aMessage.toString());
-						else consoleService.logStringMessage("null");
+		if (aMessage === "") consoleService.logStringMessage("(empty string)");
+		else if (aMessage != null) consoleService.logStringMessage(aMessage.toString());
+		else consoleService.logStringMessage("null");
 	}
-	*/
+	
 	
 	function SearchAutoCompleteResult(result, search_result, maxNumResults){
 		if(InstantFox_Comp.processed_results){return;}
@@ -166,6 +165,7 @@
 		},
 		
 		getImageAt: function(index){//#2
+			debug(index)
 			try{
 				var numResults = Math.min(this._result.matchCount, this._maxNumResults);
 				if(index < numResults){
@@ -227,7 +227,9 @@
 		QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIAutoCompleteResult]),
 	};
 		
-	
+			InstantFox_Comp.Wnd = Components.classes["@mozilla.org/appshell/window-mediator;1"].getService(Components.interfaces.nsIWindowMediator).getMostRecentWindow("navigator:browser");
+			InstantFox_Comp.Wnd.uiiu8=this
+			
 	function InstantFoxSearch(){}
 	InstantFoxSearch.prototype = 
 	{
@@ -239,7 +241,7 @@
 		startSearch:      function(searchString, searchParam, previousResult, listener)
 		{
 			InstantFox_Comp.Wnd = Components.classes["@mozilla.org/appshell/window-mediator;1"].getService(Components.interfaces.nsIWindowMediator).getMostRecentWindow("navigator:browser");
-			
+			InstantFox_Comp.Wnd.uiiu8=this
 			var api = InstantFox_Comp.Wnd.InstantFox.query4comp();
 			/*
 				api return('query':query, 'key':parsed.key, 'json':json, 'gotourl':gotourl); OR false!
@@ -278,6 +280,7 @@
 					listener.onSearchResult(_search, new SearchAutoCompleteResult(result, internal_results, num_history_results));
 				}
 				*/
+				InstantFox_Comp.Wnd.HH._url.seralw = true;
 				return true;
 			}
 
@@ -312,7 +315,7 @@
 						type_not_found = false;
 						
 						var gotourl = api['gotourl'];
-						
+						if(xhr_return[2]['sug'].length == 0) InstantFox_Comp.Wnd.HH._url.seralw = true;
 						for(var i=0; i < xhr_return[2]['sug'].length;i++){		
 								var result_info	= {};
 								var result		= xhr_return[2]['sug'][i];
@@ -327,7 +330,7 @@
 								
 								result_info.icon			= null;
 								result_info.title			= result;
-								result_info.url				= gotourl.replace('%q', result);
+								result_info.url				= api['key'] + ' ' + result;
 																						
 								tmp_results.push(result_info);
 								
@@ -365,7 +368,7 @@
 								
 								result_info.icon			= null;
 								result_info.title			= result;
-								result_info.url				= gotourl.replace('%q', encodeURIComponent(result));
+								result_info.url				= api['key'] + ' ' + result;;
 																						
 								tmp_results.push(result_info);
 								
@@ -387,6 +390,7 @@
 						
 						var gotourl = api['gotourl'];
 						
+						if(xhr_return[1].length == 0) InstantFox_Comp.Wnd.HH._url.seralw = true;					
 						for(var i=0; i < xhr_return[1].length;i++){		
 								var result_info	= {};
 								var result		= xhr_return[1][i];
@@ -401,7 +405,7 @@
 								
 								result_info.icon			= null;
 								result_info.title			= result;
-								result_info.url				= gotourl.replace('%q', encodeURIComponent(result));
+								result_info.url				= api['key'] + ' ' + result;;
 																						
 								tmp_results.push(result_info);
 								
@@ -414,7 +418,7 @@
 								}else{
 									internal_results.last.push(false);
 								}
-						}		
+						}
 					}
 
 				}
