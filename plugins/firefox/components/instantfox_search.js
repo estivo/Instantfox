@@ -1,14 +1,45 @@
-	/*
-		InstantFoxComp Depends on:
-		(https://developer.mozilla.org/en/XPCOMUtils.jsm)
-		https://developer.mozilla.org/en/How_to_implement_custom_autocomplete_search_component
-		Firefox 4 handling
-	*/
-	/*
-	const Cc	= Components.classes;
-	const Ci	= Components.interfaces;
-	const Cr	= Components.results;
-	*/
+/*
+	InstantFoxComp Depends on:
+	(https://developer.mozilla.org/en/XPCOMUtils.jsm)
+	https://developer.mozilla.org/en/How_to_implement_custom_autocomplete_search_component
+	Firefox 4 handling
+*/
+//******************************** start debug region ****************************** /
+var Cc	= Components.classes;
+var Ci	= Components.interfaces;
+var Cr	= Components.results;
+
+function debug(aMessage) {
+	try {
+		var objects = [];
+		objects.push.apply(objects, arguments);
+		Firebug.Console.logFormatted(objects,
+		TabWatcher.getContextByWindow
+		(content.document.defaultView.wrappedJSObject));
+	}
+	catch (e) {
+	}
+		
+	var consoleService = Components.classes["@mozilla.org/consoleservice;1"].getService
+		(Components.interfaces.nsIConsoleService);
+	if (aMessage === "") consoleService.logStringMessage("(empty string)");
+	else if (aMessage != null) consoleService.logStringMessage(aMessage.toString());
+	else consoleService.logStringMessage("null");
+}
+function dump() {
+    var aMessage = "aMessage: ";
+    for (var i = 0; i < arguments.length; ++i) {
+        var a = arguments[i];
+        aMessage += (a && !a.toString ? "[object call]" : a) + " , ";
+    }
+    var consoleService = Components.classes['@mozilla.org/consoleservice;1'].getService(Components.interfaces.nsIConsoleService);
+    consoleService.logStringMessage("" + aMessage);
+}
+		
+Cc["@mozilla.org/appshell/window-mediator;1"]
+	.getService(Ci.nsIWindowMediator)
+	.getMostRecentWindow("navigator:browser")._InstantFox_Component_Scope_ = this;
+// ******************************** end debug region ******************************/
 	
 	var InstantFox_Comp = {
 		processed_results:false,
@@ -22,25 +53,6 @@
 		
 	}
 	InstantFox_Comp.Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-
-	
-    function debug(aMessage) {
-		try {
-			var objects = [];
-			objects.push.apply(objects, arguments);
-			Firebug.Console.logFormatted(objects,
-			TabWatcher.getContextByWindow
-			(content.document.defaultView.wrappedJSObject));
-		}
-		catch (e) {
-		}
-			
-		var consoleService = Components.classes["@mozilla.org/consoleservice;1"].getService
-			(Components.interfaces.nsIConsoleService);
-		if (aMessage === "") consoleService.logStringMessage("(empty string)");
-		else if (aMessage != null) consoleService.logStringMessage(aMessage.toString());
-		else consoleService.logStringMessage("null");
-	}
 	
 	
 	function SearchAutoCompleteResult(result, search_result, maxNumResults){
@@ -226,10 +238,7 @@
 		
 		QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIAutoCompleteResult]),
 	};
-		
-			InstantFox_Comp.Wnd = Components.classes["@mozilla.org/appshell/window-mediator;1"].getService(Components.interfaces.nsIWindowMediator).getMostRecentWindow("navigator:browser");
-			InstantFox_Comp.Wnd.uiiu8=this
-			
+
 	function InstantFoxSearch(){}
 	InstantFoxSearch.prototype = 
 	{
@@ -240,29 +249,35 @@
 		QueryInterface:   XPCOMUtils.generateQI([Components.interfaces.nsIAutoCompleteSearch]),
 		startSearch:      function(searchString, searchParam, previousResult, listener)
 		{
-			InstantFox_Comp.Wnd = Components.classes["@mozilla.org/appshell/window-mediator;1"].getService(Components.interfaces.nsIWindowMediator).getMostRecentWindow("navigator:browser");
-			InstantFox_Comp.Wnd.uiiu8=this
-			var api = InstantFox_Comp.Wnd.InstantFox.query4comp();
-			/*
-				api return('query':query, 'key':parsed.key, 'json':json, 'gotourl':gotourl); OR false!
-			*/
+			InstantFox_Comp.Wnd = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+				.getService(Components.interfaces.nsIWindowMediator).getMostRecentWindow("navigator:browser");
 			
+			/**api return('query':query, 'key':parsed.key, 'json':json, 'gotourl':gotourl); OR false!**/
+			var api = InstantFox_Comp.Wnd.InstantFox.query4comp();			
+			var self = this
 			InstantFox_Comp.processed_results = false;
 			if(api){
 				if(InstantFox_Comp.Wnd.HH._url.abort){
-					this.historyAutoComplete.stopSearch();
+					this.historyAutoComplete&&this.historyAutoComplete.stopSearch();
 					return false;
 				}
 				var num_history_results = 4;
-				var history_string		= InstantFox_Comp.Wnd.InstantFox.rand4comp();
 				//searchString			= searchString.substr((api['key'].length+1),searchString.length); // key + space (+1) e.g. g = 2 chars				
 
 			}else{
-				var num_history_results = 10;
-				var history_string		= searchString;
+				//Search the user's history
+				this.historyAutoComplete = this.historyAutoComplete || 
+					Components.classes["@mozilla.org/autocomplete/search;1?name=history"]
+					.getService(Components.interfaces.nsIAutoCompleteSearch);				
+				this.historyAutoComplete.startSearch(
+					searchString, searchParam, previousResult, {
+					onSearchResult: function(search, result){
+						listener.onSearchResult(self, result);
+					}
+				});
+				return
 			}
-			//Search the user's history
-			this.historyAutoComplete		= Components.classes["@mozilla.org/autocomplete/search;1?name=history"].createInstance(Components.interfaces.nsIAutoCompleteSearch);
+
 			var _search						= this;
 			_search._result					= null;
 			var internal_results			= {values: [], comments: [], images: [], last: []};
@@ -272,8 +287,8 @@
 					listener.onSearchResult(_search, new SearchAutoCompleteResult(result, internal_results, num_history_results));
 				}
 			};
-			this.historyAutoComplete.startSearch(history_string, searchParam, null, autoCompleteObserver);
 			
+			var internal_results = {values: [], comments: [], images: [], last: []};			
 			if(!api['json']){
 				/*
 				if(typeof result!='undefined'){
@@ -428,10 +443,20 @@
 				}
 
 				if(xhr_return != "error"){
-					if(_search._result != null){
-						listener.onSearchResult(_search, new SearchAutoCompleteResult(_search._result, internal_results, 9));
-					}
+					var newResult = new SimpleAutoCompleteResult(
+						searchString, Ci.nsIAutoCompleteResult.RESULT_SUCCESS,
+						0, "", 
+						internal_results
+					);
+				}else{					
+					var newResult = new SimpleAutoCompleteResult(
+						searchString, Ci.nsIAutoCompleteResult.RESULT_NOMATCH,
+						0, "", 
+						internal_results
+					);
 				}
+				listener.onSearchResult(self, newResult);
+	
 			}, false);
 						
 			xhttpreq.send(null);//InstantFox_Comp.xhttpreq.send(null);
@@ -447,7 +472,7 @@
 		},
 	};
 	
-	
+	dump('-----*-----')
 	
 	if (XPCOMUtils.generateNSGetFactory)
 	    var NSGetFactory = XPCOMUtils.generateNSGetFactory([InstantFoxSearch]);
@@ -459,4 +484,52 @@
 		return XPCOMUtils.generateModule([InstantFoxSearch]);
 	}
 	*/
-		
+
+function SimpleAutoCompleteResult(searchString, searchResult,
+                                  defaultIndex, errorDescription, list,
+                                  results, comments) {
+  this._searchString = searchString;
+  this._searchResult = searchResult;
+  this._defaultIndex = defaultIndex;
+  this._errorDescription = errorDescription;
+  this._results = results;
+  this._comments = comments;
+  this.list = list;
+}
+
+SimpleAutoCompleteResult.prototype = {
+	/**
+	 * The result code of this result object, either:
+	 *         RESULT_IGNORED   (invalid searchString)
+	 *         RESULT_FAILURE   (failure)
+	 *         RESULT_NOMATCH   (no matches found)
+	 *         RESULT_SUCCESS   (matches found)
+	 */
+	_searchResult: 0,
+	_searchString: "",
+	_defaultIndex: 0,
+	_errorDescription: "",
+	list: {values: [], comments: [], images: [], last: []},  
+
+	
+	get searchResult() this._searchResult,
+	get searchString() this._searchString,
+	get defaultIndex() this._defaultIndex,
+	get errorDescription() this._errorDescription,
+	get matchCount() this.list.values.length,
+
+	getValueAt: function(index) { return this.list.values[index];},
+	getCommentAt: function(index) { return this.list.comments[index];},
+	getImageAt : function (index) { return this.list.images[index];},
+	getLabelAt: function(index) { return this.list.comments[index]; },
+	getStyleAt: function(index) { return "InstantFoxSuggest"},
+	
+	removeValueAt: function(index, removeFromDb) {
+		this.list.values.splice(index, 1);		
+	},
+	QueryInterface: function(aIID) {
+		if (!aIID.equals(Ci.nsIAutoCompleteResult) && !aIID.equals(Ci.nsISupports))
+			throw Components.results.NS_ERROR_NO_INTERFACE;
+		return this;
+	}
+};

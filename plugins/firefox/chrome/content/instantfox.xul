@@ -3,7 +3,8 @@
 <?xml-stylesheet href="chrome://instantfox/content/skin/autocomplete.css" type="text/css"?>
 
 <overlay id="instantfox-browser-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-  <!--<script type="text/javascript" src="chrome://instantfox/content/javascripts/jquery.js"></script>-->
+  <!-- development helper. remove in release builds -->
+  <script type="text/javascript" src="__devel__.js"></script>
   <!-- Load InstantFox Core -->
   <script type="text/javascript" src="chrome://instantfox/content/javascripts/app.js"></script>
   <!-- Load General Plugins -->
