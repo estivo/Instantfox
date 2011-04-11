@@ -244,14 +244,14 @@
 			if(!HH._belong2tab(HH._url.ctabID)){
 				debug("here");
 				gURLBar.value = taburl;
-				gBrowser.mCurrentBrowser.userTypedValue = taburl;
+				gBrowser.mCurrentBrowser.userTypedValue = null;
 				
-				InstantFox._tab_status[HH._url.ctabID]['urlbar_value'] = taburl;	
+				InstantFox._tab_status[HH._url.ctabID]['urlbar_value'] = null;	
 				HH._blankShaddow(gBrowser.mCurrentTab.linkedPanel);
 			}else{
 				// connect with tabs event listener!
 				gURLBar.value   = content.document.location;
-				gBrowser.mCurrentBrowser.userTypedValue =  content.document.location;
+				gBrowser.mCurrentBrowser.userTypedValue =  null;
 				HH._blankShaddow(gBrowser.mCurrentTab.linkedPanel);
 				HH._isOwnQuery  = false;
 				HH._focusPermission(true);
@@ -396,7 +396,7 @@
 		  
 		  if(content.document.location.href != tmp['loc']){
             content.document.location.assign(tmp['loc']);
-			gBrowser.mCurrentBrowser.userTypedValue = tmp['loc'];
+			gBrowser.mCurrentBrowser.userTypedValue = null;
 		  }
           event.preventDefault();
 		  gURLBar.value = tmp['loc'];		
