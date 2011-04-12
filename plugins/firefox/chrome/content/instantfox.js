@@ -297,7 +297,7 @@
     // tell InstantFox which internationalization & URLBar to use
     InstantFox._i18n = I18n;
     
-    gBrowser.addProgressListener(HH._observe, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
+    gBrowser.addProgressListener(HH._observe);
     
     // Prevent pressing enter from performing it's default behaviour
     var _keydown = function(event) {
