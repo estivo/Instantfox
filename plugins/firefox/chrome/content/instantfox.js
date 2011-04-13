@@ -204,9 +204,7 @@
 	    if(HH._os.name == 'Darwin'){ // MAC style adjustments returned Darwin
 		  XULBrowserWindow.InsertShaddowStyle("-2px 0 0 0");
 		  XULBrowserWindow.InsertShaddowStyleStart("1px");
-	    }else{
-		  XULBrowserWindow.InsertShaddowStyleStart("-2px");
-		}
+	    }
 	  }
 	  HH._os.set = true;
 	  // execute it only once browser sttarts
