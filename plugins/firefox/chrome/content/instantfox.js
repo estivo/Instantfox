@@ -41,7 +41,17 @@
 		}
 	}
   }
-  	
+  XULBrowserWindow.InsertShaddowStyle = function (four_params) { //e.g. "0 0 0 0"
+	
+	if (gURLBar) {
+		if(four_params){
+			gURLBar.InsertShaddowStyle(four_params);
+		}
+	}
+
+  }
+
+
   var HH = {
 	  	
     _url: {
@@ -55,6 +65,12 @@
     },
     
 	get _ctabID() gBrowser.mCurrentTab.linkedPanel,
+	_os: {
+	  name:Components.classes["@mozilla.org/xre/app-info;1"]  
+           .getService(Components.interfaces.nsIXULRuntime).OS,
+	  set:false
+	},
+	
     _isOwnQuery: false,
     
     // -- Helper Methods --
@@ -102,7 +118,16 @@ dump(HH._url._ctabID)
 	},
     
     _init: function() {
-      /*
+      if(!HH._os.set){
+		// maybe add ff3 exeption need to talk back again.
+	    if(HH._os.name == 'MAC PLACHOLDER'){ // exchange that into the right one! (Don't know the ouput for MAC didn't find in describtion.
+		  XULBrowserWindow.InsertShaddowStyle("-1px 0 0 0"); // maybe adjust this one also
+	    }
+	  }
+	  HH._os.set = true;
+	  // execute it only once browser sttarts
+	  
+	  /*
 	  var _prefVersion = 'extensions.' + InstantFox._name + '.version';
       if (InFoxPrefs.getCharPref(_prefVersion) != InstantFox._version) {
           // open Locale Index and Help Document

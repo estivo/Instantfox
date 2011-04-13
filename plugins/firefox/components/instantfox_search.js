@@ -35,7 +35,7 @@ function dump() {
     var consoleService = Components.classes['@mozilla.org/consoleservice;1'].getService(Components.interfaces.nsIConsoleService);
     consoleService.logStringMessage("" + aMessage);
 }
-		
+
 Cc["@mozilla.org/appshell/appShellService;1"]
    .getService(Ci.nsIAppShellService).hiddenDOMWindow._InstantFox_Component_Scope_ = this;
 // ******************************** end debug region ******************************/
