@@ -35,10 +35,11 @@ function dump() {
     var consoleService = Components.classes['@mozilla.org/consoleservice;1'].getService(Components.interfaces.nsIConsoleService);
     consoleService.logStringMessage("" + aMessage);
 }
-		
+/*		
 Cc["@mozilla.org/appshell/window-mediator;1"]
 	.getService(Ci.nsIWindowMediator)
 	.getMostRecentWindow("navigator:browser")._InstantFox_Component_Scope_ = this;
+*/
 // ******************************** end debug region ******************************/
 	
 	var InstantFox_Comp = {
