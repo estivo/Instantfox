@@ -98,7 +98,15 @@
 				this.instantFoxShaddowNode.style.margin = px;
 			}
         ]]></body>
-      </method> 	       
+      </method>
+	  <method name="InsertShaddowStyleStart">
+        <parameter name="start"/>
+        <body><![CDATA[
+			if(start){
+				this.instantFoxShaddowNode.style.MozMarginStart = start;
+			}
+        ]]></body>
+      </method>        
     </implementation>
 
   </binding>
