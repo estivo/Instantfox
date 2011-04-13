@@ -1,3 +1,4 @@
+/*
 var __instantFoxDevel__ = {
 	reloadComponent: function(){
 		if(!_InstantFox_Component_Scope_)
