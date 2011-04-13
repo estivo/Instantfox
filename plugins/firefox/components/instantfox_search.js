@@ -255,16 +255,8 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 			var api = InstantFox_Comp.Wnd.InstantFox.query4comp();			
 			var self = this
 			InstantFox_Comp.processed_results = false;
-			if(api){
-				if(InstantFox_Comp.Wnd.HH._url.abort){
-					this.historyAutoComplete&&this.historyAutoComplete.stopSearch();
-					return false;
-				}
-				var num_history_results = 4;
-				//searchString			= searchString.substr((api['key'].length+1),searchString.length); // key + space (+1) e.g. g = 2 chars				
-
-			}else{
-				//Search the user's history
+			if(!api){
+				//Search user's history
 				this.historyAutoComplete = this.historyAutoComplete || 
 					Components.classes["@mozilla.org/autocomplete/search;1?name=history"]
 					.getService(Components.interfaces.nsIAutoCompleteSearch);				
@@ -276,24 +268,32 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 				});
 				return
 			}
-
+			
 			var _search						= this;
 			_search._result					= null;
 			var internal_results			= {values: [], comments: [], images: [], last: []};
-			autoCompleteObserver = {
-				onSearchResult: function(search, result){
-					_search._result = result;
-					listener.onSearchResult(_search, new SearchAutoCompleteResult(result, internal_results, num_history_results));
-				}
-			};
 			
-			var internal_results = {values: [], comments: [], images: [], last: []};			
+			if(InstantFox_Comp.Wnd.HH._url.abort){
+				this.historyAutoComplete&&this.historyAutoComplete.stopSearch();
+				var newResult = new SimpleAutoCompleteResult(
+					searchString, Ci.nsIAutoCompleteResult.RESULT_NOMATCH,
+						0, "", 
+						internal_results
+					);
+				listener.onSearchResult(self, newResult);
+				return false;
+			}
+
+			//searchString			= searchString.substr((api['key'].length+1),searchString.length); // key + space (+1) e.g. g = 2 chars				
+
+						
 			if(!api['json']){
-				/*
-				if(typeof result!='undefined'){
-					listener.onSearchResult(_search, new SearchAutoCompleteResult(result, internal_results, num_history_results));
-				}
-				*/
+				var newResult = new SimpleAutoCompleteResult(
+					searchString, Ci.nsIAutoCompleteResult.RESULT_NOMATCH,
+						0, "", 
+						internal_results
+					);
+				listener.onSearchResult(self, newResult);
 				InstantFox_Comp.Wnd.HH._url.seralw = true;
 				return true;
 			}
@@ -465,7 +465,7 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 		stopSearch: function(){
 			if(this.historyAutoComplete) this.historyAutoComplete.stopSearch();
 			if(this._req){
-			    //this._req.abort();
+			    this._req.abort();
 			}
 
 		},

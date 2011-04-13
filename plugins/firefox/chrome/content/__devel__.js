@@ -5,7 +5,7 @@ var __instantFoxDevel__ = {
 			.hiddenDOMWindow._InstantFox_Component_Scope_
 		
 		if(!p)
-			return;
+			return dump('**********************error component debugging disabled*******************');
 		// uregister
 		var reg = Components.manager.QueryInterface(Components.interfaces.nsIComponentRegistrar)
 		var CONTRACT_ID = p.InstantFoxSearch.prototype.contractID
