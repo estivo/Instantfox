@@ -234,9 +234,9 @@ dump(HH._url._ctabID)
     // Prevent pressing enter from performing it's default behaviour
     var _keydown = function(event) {
  	  HH._url.abort=false;
-	  if(HH._isQuery()){
-	    var key = event.keyCode ? event.keyCode : event.which,
+	  var key = event.keyCode ? event.keyCode : event.which,
 			alt = event.altKey, meta = event.metaKey, ctrl = event.ctrlKey, shift = event.shiftKey;
+	  if(HH._isQuery()){
         if (key == 9 || (!ctrl && !shift && key == 39)) { // 9 == Tab 
           if(InstantFox.right_shaddow != ''){
 		    gURLBar.value += InstantFox.right_shaddow;
@@ -280,8 +280,10 @@ dump(HH._url._ctabID)
 		  //gBrowser.selectedBrowser.focus();		
 		  //gBrowser.mCurrentBrowser.focus();
 		  //content.document.defaultView.focus();
-        }
-	  }	  
+        } 
+	  }else if(key == 32 && ctrl) { // 32 == SPACE
+		gURLBar.value = InstantFox.queryFromURL()
+	  }
     };
     
     // Perform query if space was detected

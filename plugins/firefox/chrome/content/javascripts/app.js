@@ -57,24 +57,26 @@ InstantFox = new ExtClass;
 		}
 		
 		var gotourl = resource.url;//resource.url.replace('%q', query), self = this;
-      	gotourl = gotourl.replace('%ll', this._i18n('locale.long'));
-      	gotourl = gotourl.replace('%ls', this._i18n('locale.short'));
-      	gotourl = gotourl.replace('%ld', this._i18n('locale.domain'));
+      	gotourl = gotourl.replace('%ll', this._i18n('locale.long'))
+      	                 .replace('%ls', this._i18n('locale.short'))
+      	                 .replace('%ld', this._i18n('locale.domain'));
 			
 		// may add additional replaces!
 		return {'query': parsed.query, 'key':parsed.key, 'json':json, 'gotourl':gotourl};  
 	  }else return false;
 	},
 	
-	rand4comp: function(){
-		var character_list = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
-		var random_string = '';
-		for(var i=0; i < 100; i++){
-			var random_number = Math.floor(Math.random() * character_list.length);
-			random_string += character_list.substring(random_number, random_number + 1);
-		}
+	queryFromURL: function(){
+		// todo: find a plugin key by url, for FS#79
+		var gotourl = InstantFox.Plugins.googleFrame.url;
+      	gotourl = gotourl.replace('%ll', this._i18n('locale.long'))
+      	                 .replace('%ls', this._i18n('locale.short'))
+      	                 .replace('%ld', this._i18n('locale.domain'));
+		var i = gotourl.indexOf('%q')
+		var queryString = gURLBar.value.slice(i, -gotourl.length+i+2)
+
 		
-		return random_string;
+		return 'g '+decodeURIComponent(queryString);
 	},
 
 	
