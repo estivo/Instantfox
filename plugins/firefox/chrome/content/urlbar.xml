@@ -103,7 +103,7 @@
         <parameter name="start"/>
         <body><![CDATA[
 			if(start){
-				this.instantFoxShaddowNode.style.MozMarginStart = start;
+				this.instantFoxShaddowNode.style.cssText = "-moz-margin-start:  "+start+" !important;";
 			}
         ]]></body>
       </method>        
