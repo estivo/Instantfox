@@ -114,7 +114,9 @@
 		}
 	}
   }
-  XULBrowserWindow.InsertShaddowStyle = function (four_params) { //e.g. "0 0 0 0"
+  
+  // MAC adjustments:
+  XULBrowserWindow.InsertShaddowStyle = function (four_params) { //e.g. "1px 0 0 0"
 	
 	if (gURLBar) {
 		if(four_params){
@@ -123,7 +125,17 @@
 	}
 
   }
+  
+  XULBrowserWindow.InsertShaddowStyleStart = function (start) { //e.g. "-2px"
+	
+	if (gURLBar) {
+		if(start){
+			gURLBar.InsertShaddowStyleStart(start);
+		}
+	}
 
+  }
+  // end MAC
 
   var HH = {
 	  	
@@ -189,9 +201,9 @@
     
     _init: function() {
       if(!HH._os.set){
-		// maybe add ff3 exeption need to talk back again.
-	    if(HH._os.name == 'MAC PLACHOLDER'){ // exchange that into the right one! (Don't know the ouput for MAC didn't find in describtion.
-		  XULBrowserWindow.InsertShaddowStyle("-1px 0 0 0"); // maybe adjust this one also
+	    if(HH._os.name == 'Darwin'){ // MAC style adjustments returned Darwin
+		  XULBrowserWindow.InsertShaddowStyle("-1px 0 0 0");
+		  XULBrowserWindow.InsertShaddowStyleStart("-2px");
 	    }
 	  }
 	  HH._os.set = true;
