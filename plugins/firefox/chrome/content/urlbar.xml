@@ -95,7 +95,7 @@
         <parameter name="px"/>
         <body><![CDATA[
 			if(px){
-				this.instantFoxShaddowNode.style.margin = px;
+				this.instantFoxShaddowNode.style.cssText = "margin "+px+" !important;";
 			}
         ]]></body>
       </method>
