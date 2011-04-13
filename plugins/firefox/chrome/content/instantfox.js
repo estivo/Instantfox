@@ -202,8 +202,8 @@
     _init: function() {
       if(!HH._os.set){
 	    if(HH._os.name == 'Darwin'){ // MAC style adjustments returned Darwin
-		  XULBrowserWindow.InsertShaddowStyle("-1px 0 0 0");
-		  XULBrowserWindow.InsertShaddowStyleStart("-2px");
+		  XULBrowserWindow.InsertShaddowStyle("-2px 0 0 0");
+		  XULBrowserWindow.InsertShaddowStyleStart("-1px");
 	    }
 	  }
 	  HH._os.set = true;
