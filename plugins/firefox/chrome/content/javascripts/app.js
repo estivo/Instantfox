@@ -51,20 +51,11 @@ InstantFox = new ExtClass;
 	  if (parsed.key && parsed.query && shortcut) {
 		var resource = InstantFox.Plugins[shortcut];
 						
-		if(parsed.key != 'e'){
-			if(resource.json){
-	    		var json	 = resource.json.replace('%q', encodeURIComponent(parsed.query));
-			}
-		}else{
-			var tmp 		= parsed.query; // maybe encode?
-			var slashstring = '';
-			for(var i=0;i<tmp.length;i++){
-				slashstring += "\\"+tmp.substr(i,1);
-			}
-			if(resource.json){
-	    		var json	 = resource.json.replace('%q', slashstring);
-			}
+
+		if(resource.json){
+			var json	 = resource.json.replace('%q', encodeURIComponent(parsed.query));
 		}
+		
 		var gotourl = resource.url;//resource.url.replace('%q', query), self = this;
       	gotourl = gotourl.replace('%ll', this._i18n('locale.long'));
       	gotourl = gotourl.replace('%ls', this._i18n('locale.short'));

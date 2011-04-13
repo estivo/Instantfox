@@ -239,8 +239,7 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 	};
 
 	function InstantFoxSearch(){}
-	InstantFoxSearch.prototype = 
-	{
+	InstantFoxSearch.prototype = {
 		classDescription: "Autocomplete 4 InstantFox",
 		historyAutoComplete: null,
 		classID:          Components.ID("c541b971-0729-4f5d-a5c4-1f4dadef365e"),
@@ -300,16 +299,11 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 
 			var xhttpreq = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
 			xhttpreq.open("GET", api['json'], true); 
-			
+			dump(api['json'])
 			
 			xhttpreq.addEventListener("load", function(event){
-				if(api['key'] == 'e'){
-					var rtoparse = xhttpreq.responseText;//JSON.parse(InstantFox_Comp.xhttpreq.responseText);
-					rtoparse = rtoparse.replace('vjo.darwin.domain.finding.autofill.AutoFill._do(', '');
-					rtoparse = rtoparse.substr(0,rtoparse.length-1);
-				}else{
-					var rtoparse = xhttpreq.responseText;	
-				}
+				var rtoparse = xhttpreq.responseText
+				dump(rtoparse)
 
 				try{
 					var xhr_return = JSON.parse(rtoparse);
@@ -323,44 +317,7 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 				var type_not_found = true;
 								
 				// code could be redcued but no need ;)
-				if(api['key'] == "e"){
-
-					if(xhr_return[2]['sug']){
-						type_not_found = false;
-						
-						var gotourl = api['gotourl'];
-						if(xhr_return[2]['sug'].length == 0) InstantFox_Comp.Wnd.HH._url.seralw = true;
-						for(var i=0; i < xhr_return[2]['sug'].length;i++){		
-								var result_info	= {};
-								var result		= xhr_return[2]['sug'][i];
-								
-								if(i==0){
-									if(InstantFox_Comp.Wnd.InstantFox.current_shaddow !=  result){
-										InstantFox_Comp.Wnd.InstantFox.current_shaddow = result;
-										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(result,api['query']);
-										InstantFox_Comp.Wnd.HH._goto4comp(gotourl.replace('%q', encodeURIComponent(result)));
-									}
-								}
-								
-								result_info.icon			= null;
-								result_info.title			= result;
-								result_info.url				= api['key'] + ' ' + result;
-																						
-								tmp_results.push(result_info);
-								
-								internal_results.values.push(result_info.url);
-								internal_results.comments.push(result_info.title);
-								internal_results.images.push(result_info.icon);
-								
-								if(i==xhr_return[2]['sug'].length-1){
-									internal_results.last.push(true);
-								}else{
-									internal_results.last.push(false);
-								}
-						}		
-					}
-				}
-				
+							
 				if(api['key'] == "m"){
 
 					if(xhr_return[2]){
@@ -398,7 +355,7 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 						}		
 					}
 				}
-				if(api['key'] == "g" || api['key'] == "i" || api['key'] == 'y' || api['key'] == 'w' || api['key'] == 'a'){
+				if('g,i,y,w,a,b,e'.indexOf(api['key'])!=-1){
 					if(xhr_return[1]){
 						type_not_found = false;
 						

@@ -50,7 +50,8 @@
     },
     ebay: {
       url: 'http://shop.ebay.de/?_nkw=%q',
-	  json: 'http://include.ebaystatic.com/autofill/f/77/1300464103%q.js' // /t/e/s/t.js
+	  //json: 'http://include.ebaystatic.com/autofill/f/77/1300464103%q.js' // /t/e/s/t.js
+	  json: 'http://anywhere.ebay.de/services/suggest/?s=0&q=d' // /t/e/s/t.js
     },
     yahoo: {
       url: 'http://de.search.yahoo.com/search?p=%q&ei=UTF-8',
@@ -58,7 +59,7 @@
     },
     bing: {
       url: 'http://www.bing.com/search?q=%q&form=QBLH',
-	  json: false
+	  json: 'http://api.bing.com/osjson.aspx?query=%q&form=OSDJAS'
     },
     leo: {
       url: 'http://dict.leo.org/?search=%q',
