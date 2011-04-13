@@ -1,10 +1,13 @@
 var __instantFoxDevel__ = {
 	reloadComponent: function(){
-		if(!_InstantFox_Component_Scope_)
+		var p = Cc["@mozilla.org/appshell/appShellService;1"]
+			.getService(Ci.nsIAppShellService)
+			.hiddenDOMWindow._InstantFox_Component_Scope_
+		
+		if(!p)
 			return;
 		// uregister
 		var reg = Components.manager.QueryInterface(Components.interfaces.nsIComponentRegistrar)
-		var p = _InstantFox_Component_Scope_;
 		var CONTRACT_ID = p.InstantFoxSearch.prototype.contractID
 		try{
 			reg.unregisterFactory(
@@ -29,7 +32,9 @@ var __instantFoxDevel__ = {
 		var sandbox = new Cu.Sandbox(Cc["@mozilla.org/systemprincipal;1"].createInstance(Ci.nsIPrincipal))
 		sandbox.__LOCATION__ = p.__LOCATION__.clone()
 		Cu.evalInSandbox(t, sandbox, '1.8', spec, 1);
-		var scope = _InstantFox_Component_Scope_
+		var scope = Cc["@mozilla.org/appshell/appShellService;1"]
+			.getService(Ci.nsIAppShellService)
+			.hiddenDOMWindow._InstantFox_Component_Scope_;
 		var f1 = scope.InstantFoxSearch.prototype
 		var f = scope.NSGetFactory(f1.classID)
 		reg.registerFactory(f1.classID, f1.classDescription, f1.contractID, f);
@@ -45,23 +50,30 @@ var __instantFoxDevel__ = {
 	},
 	
 	sourceList: [
-		
+		"chrome://instantfox/content/javascripts/app.js",
+		"chrome://instantfox/content/javascripts/plugins.js",
+		"chrome://instantfox/locale/plugins.js",
+		"chrome://instantfox/content/instantfox.js"
 	],
 	
-	doReload: function(){		
-		
-		for(var i in this.sourceList){
-			this.loadScript(this.sourceList[i],i)
-		}
+	doReload: function(){
 		this.reloadComponent()
+		var i = this.loadedScriptsCount = 0		
+		this.loadScript(this.sourceList[i], i)
+		
+		
 	},
-	onLoad: function(){
+	onLoad: function(e, script){
 		this.loadedScriptsCount++;
 		if(this.loadedScriptsCount == this.sourceList.length){
-			// simulate onload
-			
-		}
-		
+			// simulate document load event
+			instantFoxLoad()
+		}else{
+			//load next script
+			var i = this.loadedScriptsCount
+			this.loadScript(this.sourceList[i], i)
+			dump('next')
+		}		
 	}
 }
 
@@ -76,6 +88,88 @@ window.addEventListener('load', function(){
 		document.getElementById("status-bar").appendChild(t)
 	}
 }, false)
+
+
+function debug(aMessage) {
+	try {
+		var objects = [];
+		objects.push.apply(objects, arguments);
+		Firebug.Console.logFormatted(objects,
+		TabWatcher.getContextByWindow
+		(content.document.defaultView.wrappedJSObject));
+	}
+	catch (e) {
+	}
+
+	var consoleService = Components.classes["@mozilla.org/consoleservice;1"].getService
+		(Components.interfaces.nsIConsoleService);
+	if (aMessage === "") consoleService.logStringMessage("(empty string)");
+	else if (aMessage != null) consoleService.logStringMessage(aMessage.toString());
+	else consoleService.logStringMessage("null");
+}
+function dump() {
+    var aMessage = "aMessage: ";
+    for (var i = 0; i < arguments.length; ++i) {
+        var a = arguments[i];
+        aMessage += (a && !a.toString ? "[object call]" : a) + " , ";
+    }
+    var consoleService = Components.classes['@mozilla.org/consoleservice;1'].getService(Components.interfaces.nsIConsoleService);
+    consoleService.logStringMessage("" + aMessage);
+}
+/*
+function print_r(x, max, sep, l) {	
+	l = l || 0;
+	max = max || 10;
+	sep = sep || ' ';
+	
+	if (l > max) {
+		return "[WARNING: Too much recursion]\n";
+	}
+
+	var
+		i,
+		r = '',
+		t = typeof x,
+		tab = '';
+
+	if (x === null) {
+		r += "(null)\n";
+	} else if (t == 'object') {
+		l++;
+
+		for (i = 0; i < l; i++) {
+			tab += sep;
+		}
+
+		if (x && x.length) {
+			t = 'array';
+		}
+
+		r += '(' + t + ") :\n";
+
+		for (i in x) {
+			try {
+				r += tab + '[' + i + '] : ' + print_r(x[i], max, sep, (l + 1));
+			} catch(e) {
+				return "[ERROR: " + e + "]\n";
+			}
+		}
+
+	} else {
+
+		if (t == 'string') {
+			if (x == '') {
+				x = '(empty)';
+			}
+		}
+
+		r += '(' + t + ') ' + x + "\n";
+
+	}	
+	return r;	
+};
+*/ 
+
 
 
 /*

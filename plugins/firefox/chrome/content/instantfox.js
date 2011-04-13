@@ -1,5 +1,5 @@
 //(function() {
-  const InFoxPrefs    = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService),
+  var   InFoxPrefs    = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService),
         StringService = Components.classes["@mozilla.org/intl/stringbundle;1"].getService(Components.interfaces.nsIStringBundleService),
         LocaleService = Components.classes["@mozilla.org/intl/nslocaleservice;1"].getService(Components.interfaces.nsILocaleService),
         StringBundle  = StringService.createBundle("chrome://instantfox/locale/instantfox.properties", LocaleService.getApplicationLocale()),
@@ -9,81 +9,8 @@
 
   InFoxPrefs.QueryInterface(Components.interfaces.nsIPrefBranch2);
 
-	/*
-	function print_r(x, max, sep, l) {
 	
-		l = l || 0;
-		max = max || 10;
-		sep = sep || ' ';
-	
-		if (l > max) {
-			return "[WARNING: Too much recursion]\n";
-		}
-	
-		var
-			i,
-			r = '',
-			t = typeof x,
-			tab = '';
-	
-		if (x === null) {
-			r += "(null)\n";
-		} else if (t == 'object') {
-	
-			l++;
-	
-			for (i = 0; i < l; i++) {
-				tab += sep;
-			}
-	
-			if (x && x.length) {
-				t = 'array';
-			}
-	
-			r += '(' + t + ") :\n";
-	
-			for (i in x) {
-				try {
-					r += tab + '[' + i + '] : ' + print_r(x[i], max, sep, (l + 1));
-				} catch(e) {
-					return "[ERROR: " + e + "]\n";
-				}
-			}
-	
-		} else {
-	
-			if (t == 'string') {
-				if (x == '') {
-					x = '(empty)';
-				}
-			}
-	
-			r += '(' + t + ') ' + x + "\n";
-	
-		}
-	
-		return r;
-	
-	};
-*/ 
-  function debug(aMessage) {
 
-		try {
-			var objects = [];
-			objects.push.apply(objects, arguments);
-			Firebug.Console.logFormatted(objects,
-			TabWatcher.getContextByWindow
-			(content.document.defaultView.wrappedJSObject));
-		}
-		catch (e) {
-		}
-			
-						var consoleService = Components.classes["@mozilla.org/consoleservice;1"].getService
-			(Components.interfaces.nsIConsoleService);
-						if (aMessage === "") consoleService.logStringMessage("(empty string)");
-						else if (aMessage != null) consoleService.logStringMessage(aMessage.toString());
-						else consoleService.logStringMessage("null");
-  }
   XULBrowserWindow.InsertShaddowLink = function (shaddow2dsp, query) {
 	
 	if (gURLBar) {
@@ -123,16 +50,19 @@
       intn: 'chrome://instantfox/locale/index.html',
 	  actp: '', // current shortcut in use
 	  seralw: false, // search always on every key up!
-	  abort: '' // abort request because enter pressed
+	  abort: '', // abort request because enter pressed
+	  ctabID: '' // used for tab handeling
     },
     
+	get _ctabID() gBrowser.mCurrentTab.linkedPanel,
     _isOwnQuery: false,
     
     // -- Helper Methods --
     _query: function(query, event) {
       // Query used to replace gURLBar.value onLocationChange
       HH._q = query || gURLBar.value;
-      HH._cursorPosition = gURLBar.selectionStart || HH._q.length;
+      HH._url._ctabID = HH._ctabID;
+dump(HH._url._ctabID)
       
       if (HH._timeout) window.clearTimeout(HH._timeout);
       
@@ -184,15 +114,11 @@
     },
     
     _focusPermission: function(access) {
-      var permission = (access ? 'allAccess' : 'noAccess');
+      var permission = (true ? 'allAccess' : 'noAccess');
       InFoxPrefs.setCharPref('capability.policy.default.HTMLInputElement.focus',   permission);
       InFoxPrefs.setCharPref('capability.policy.default.HTMLAnchorElement.focus',  permission);
     },
-    
-	_showAutoCompletePopup: function(display) {
-      InFoxPrefs.setBoolPref('browser.urlbar.autocomplete.enabled', !!display);
-    },
-	
+    	
     _observeURLBar: function() {
       gURLBar.addEventListener('blur', function(e) {
 		// Return power to Site if urlbar really lost focus
@@ -204,44 +130,6 @@
           HH._focusPermission(true);
         }
       }, false);
-    },
-    
-    _observe: {
-      QueryInterface: function(aIID) {
-       if (aIID.equals(Components.interfaces.nsIWebProgressListener) ||
-           aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
-           aIID.equals(Components.interfaces.nsISupports))
-         return this;
-       throw Components.results.NS_NOINTERFACE;
-      },
-      
-      onLocationChange: function(a, b, c) {
-        // replace location in URLBar with InstantFox-Query (if InstantFox)
-		if (HH._isOwnQuery) {
-          gURLBar.value = HH._location;
-          gURLBar.setSelectionRange(HH._cursorPosition || HH._location.length, HH._cursorPosition || HH._location.length);
-        }
-      },
-      
-      onStateChange: function(aWebProgress, aRequest, aStatus, aMessage) {//function(a, b, flag, d) {
-		if (aStatus & Components.interfaces.nsIWebProgressListener.STATE_START){//if (flag && StateStop) {
-		  if (HH._isOwnQuery) {
-			gURLBar.value = HH._location;
-			gURLBar.setSelectionRange(HH._cursorPosition || HH._location.length, HH._cursorPosition || HH._location.length);
-		  }
-		}
-		if (aStatus & Components.interfaces.nsIWebProgressListener.STATE_STOP){//if (flag && StateStop) {
-          // on load
-          if (HH._isInstantFox() && HH._state.id && HH._state.id != HH._oldState.id) {
-            // Got a query hash - perform it ONCE on page load!
-			if(content.document.location.hash.substr(1)) InstantFox.query(content.document.location.hash.substr(1));
-          }
-        }
-      },
-      
-      onProgressChange: function(a, b, c, d, e, f) {},
-      onStatusChange: function(a, b, c, d) {},
-      onSecurityChange: function(a, b, c) {}
     },
     
     // The current content-window-location is the InstantFox Output-Site
@@ -283,21 +171,40 @@
 	  return true; //(gURLBar.value.replace(/^\s+|\s+$/g, '').search(' ') > -1);
     }
   };
-  /*
-  function InstantFox_BarClick(){
-	HH._url.clickres = true;
-	//content.document.location = gURLBar.value;
-	return true;
-  }
-  */
-  var bindings = function(event) {
+  
+  var instantFoxLoad = function(event) {
+	dump('onload')
+	//window.removeEventListener('load', arguments.callee, true);        
 	// setup URLBar for components
 	gURLBar.setAttribute('autocompletesearch',	'instantFoxAutoComplete');
-	//gURLBar.setAttribute('onclick',				'InstantFox_BarClick();' + gURLBar.getAttribute('oninput'));
-    // tell InstantFox which internationalization & URLBar to use
+	// tell InstantFox which internationalization & URLBar to use
     InstantFox._i18n = I18n;
-    
-    gBrowser.addProgressListener(HH._observe);
+	//gBrowser.addProgressListener(HH._observe, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
+	
+	gURLBar.addEventListener('keydown', _keydown, false);
+	gURLBar.removeAttribute('oninput');
+	gURLBar.addEventListener('input', _input, false);
+	HH._observeURLBar();
+	
+	// init plugins
+    gBrowser.addEventListener("load", function(event) {
+      if (event.originalTarget instanceof HTMLDocument) {
+        for(var plugin in InstantFox.Plugins) {
+          try { InstantFox.Plugins[plugin].init(event.originalTarget.defaultView.wrappedJSObject); }
+          catch(ex) {}
+        }
+      }
+    }, true);
+    HH._init();
+
+  }
+  
+  var instantFoxUnload = function(event) {
+	dump('---***---',arguments.callee.caller)
+	// todo: better cleanup
+	//gURLBar.removeEventListener('keydown', _keydown, false);
+	//gURLBar.removeEventListener('input', _input, false);	
+  }
     
     // Prevent pressing enter from performing it's default behaviour
     var _keydown = function(event) {
@@ -357,6 +264,7 @@
       HH._url.abort=false;
 	  HH._location = gURLBar.value;
 	  gBrowser.userTypedValue = HH._location;
+	  dump(HH._isQuery())
       if (HH._isQuery()) {
         HH._query(gURLBar.value, event);
       }
@@ -364,59 +272,11 @@
       else{	
 	  }
     };
-    // Bind Events to URLBar
-    switch(event.type) {
-      case 'load':
-	    window.removeEventListener('load', bindings, true);        
-		gURLBar.addEventListener('keydown', _keydown, false);
-        gURLBar.removeAttribute('oninput');
-        gURLBar.addEventListener('input', _input, false);
-		HH._observeURLBar();
-        break;
-        
-      case 'unload':
-	  	gURLBar.removeEventListener('keydown', _keydown, false);
-		gURLBar.removeEventListener('input', _input, false);
-        break;
-    }
-    
-    // init plugins
-    gBrowser.addEventListener("load", function(event) {
-      if (event.originalTarget instanceof HTMLDocument) {
-        for(var plugin in InstantFox.Plugins) {
-          try { InstantFox.Plugins[plugin].init(event.originalTarget.defaultView.wrappedJSObject); }
-          catch(ex) {}
-        }
-      }
-    }, true);
-    HH._init();
-  };
-  
-  // change the loader don't think that it would be supported in every version if you do it that way!
-  window.addEventListener('load', bindings, true);
-  window.addEventListener('unload', bindings, true);
-
-  var observerService = Components.classes["@mozilla.org/observer-service;1"]
-                          .getService(Components.interfaces.nsIObserverService);
-	/*
-  var uninstallObserver = {
-    observe: function observe(subject, topic, data) {
-	  if (topic == "em-action-requested") {
-		subject.QueryInterface(Components.interfaces.nsIUpdateItem);
-
-		if (subject.id == "activities@kaply.com") {
-		  alert(data);
-		  if (data == "item-uninstalled") {
-		  }
-		}
-	  }
-    }
-  }
+     
+  window.addEventListener('load', instantFoxLoad, true);
+  //window.addEventListener('unload', instantFoxUnload, true);
 
 
-
-   observerService.addObserver(uninstallObserver, "em-action-requested", false);  
- 	*/
  /*
  
 	InFoxPrefs.clearUserPref('browser.urlbar.autocomplete.enabled');
@@ -425,3 +285,31 @@
 
   */
 //})();
+
+// modify URLBarSetURI defined in browser.js
+function URLBarSetURI(aURI) {
+	if (HH._isOwnQuery) {
+		if (HH._url._ctabID == HH._ctabID){
+			return;
+		} else { //hide shadow if user switched tabs
+			HH._blankShaddow();
+			HH._isOwnQuery  = false;
+			HH._focusPermission(true);
+		}
+	}
+    var value = gBrowser.userTypedValue;
+    var valid = false;
+    if (value == null) {
+        let uri = aURI || getWebNavigation().currentURI;
+        if (gInitialPages.indexOf(uri.spec) != -1) {
+            value = content.opener ? uri.spec : "";
+        } else {
+            value = losslessDecodeURI(uri);
+        }
+        valid = uri.spec != "about:blank";
+		// do not allow "about:blank"
+		if(!valid) value = ''			
+    }
+    gURLBar.value = value;
+    SetPageProxyState(valid ? "valid" : "invalid");
+}
