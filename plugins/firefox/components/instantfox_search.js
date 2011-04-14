@@ -330,6 +330,7 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 								var result		= xhr_return[3][i];
 								
 								if(i==0){
+									InstantFox_Comp.Wnd.HH._url.seralw = false;
 									if(InstantFox_Comp.Wnd.InstantFox.current_shaddow !=  result){
 										InstantFox_Comp.Wnd.InstantFox.current_shaddow = result;
 										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(result,api['query']);
@@ -340,7 +341,7 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 								result_info.icon			= null;
 								result_info.title			= result;
 								result_info.url				= api['key'] + ' ' + result;;
-																						
+
 								tmp_results.push(result_info);
 								
 								internal_results.values.push(result_info.url);
@@ -367,6 +368,7 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 								var result		= xhr_return[1][i];
 
 								if(i==0){
+									InstantFox_Comp.Wnd.HH._url.seralw = false;
 									if(InstantFox_Comp.Wnd.InstantFox.current_shaddow != result){
 										InstantFox_Comp.Wnd.InstantFox.current_shaddow = result;
 										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(result,api['query']);

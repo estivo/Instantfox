@@ -67,10 +67,10 @@
     calculator: {
       // Accepted Chars
       scope: "0123456789.+-*/%(, )",
-      
+	  
       script: function(query) {
-        
         var ret = this.parse(query);
+        var url = "http://search.instantfox.net/#c "+ret;
         if (ret) {
           try {
             // .. Calculate ..
@@ -82,7 +82,7 @@
           } catch(ex) {}
         }
         
-        return { loc: false, id: 'calculator' };
+        return { loc: url, id: 'calculator' };
       },
     
       parse: function(vlr){

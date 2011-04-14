@@ -7,7 +7,7 @@
 
 .instantfox-shaddow{
 	 position:relative;
-	 -moz-margin-start:  0px !important;
+	 -moz-margin-start:  -2px !important;
 	 -moz-padding-start: 0px !important;
 	 margin: 0px;
 	 color: graytext;
@@ -17,6 +17,6 @@
 	 clear:both !important;
 	 -moz-margin-start: 0px !important;
 	 -moz-padding-start: 0px !important;
-	 margin:1px 0 0 0;
+	 margin:3px 0 0 0;
 	 visibility:hidden;
 }

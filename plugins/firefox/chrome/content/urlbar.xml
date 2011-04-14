@@ -95,10 +95,18 @@
         <parameter name="px"/>
         <body><![CDATA[
 			if(px){
-				this.instantFoxShaddowNode.style.margin = px;
+				this.instantFoxShaddowNode.style.cssText += "margin: "+px+" !important;";
 			}
         ]]></body>
-      </method> 	       
+      </method>
+	  <method name="InsertShaddowStyleStart">
+        <parameter name="start"/>
+        <body><![CDATA[
+			if(start){
+				this.instantFoxShaddowNode.style.cssText += "-moz-margin-start:  "+start+" !important;";
+			}
+        ]]></body>
+      </method>        
     </implementation>
 
   </binding>

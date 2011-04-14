@@ -55,12 +55,13 @@ InstantFox = new ExtClass;
 		if(resource.json){
 			var json	 = resource.json.replace('%q', encodeURIComponent(parsed.query));
 		}
-		
-		var gotourl = resource.url;//resource.url.replace('%q', query), self = this;
-      	gotourl = gotourl.replace('%ll', this._i18n('locale.long'))
-      	                 .replace('%ls', this._i18n('locale.short'))
-      	                 .replace('%ld', this._i18n('locale.domain'));
-			
+		var gotourl = false;
+		if(resource.url){
+			var gotourl = resource.url;//resource.url.replace('%q', query);
+      		gotourl = gotourl.replace('%ll', this._i18n('locale.long'))
+      		                 .replace('%ls', this._i18n('locale.short'))
+      		                 .replace('%ld', this._i18n('locale.domain'));
+		}
 		// may add additional replaces!
 		return {'query': parsed.query, 'key':parsed.key, 'json':json, 'gotourl':gotourl};  
 	  }else return false;
