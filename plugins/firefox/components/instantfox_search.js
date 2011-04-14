@@ -332,11 +332,12 @@ Cc["@mozilla.org/appshell/window-mediator;1"]
 						
 						var gotourl = api['gotourl'];
 						if(xhr_return[2]['sug'].length == 0) InstantFox_Comp.Wnd.HH._url.seralw = true;
-						for(var i=0; i < xhr_return[2]['sug'].length;i++){		
+						for(var i=0; i < xhr_return[2]['sug'].length;i++){	
 								var result_info	= {};
 								var result		= xhr_return[2]['sug'][i];
 								
 								if(i==0){
+									InstantFox_Comp.Wnd.HH._url.seralw = false;
 									if(InstantFox_Comp.Wnd.InstantFox.current_shaddow !=  result){
 										InstantFox_Comp.Wnd.InstantFox.current_shaddow = result;
 										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(result,api['query']);
@@ -375,6 +376,7 @@ Cc["@mozilla.org/appshell/window-mediator;1"]
 								var result		= xhr_return[3][i];
 								
 								if(i==0){
+									InstantFox_Comp.Wnd.HH._url.seralw = false;
 									if(InstantFox_Comp.Wnd.InstantFox.current_shaddow !=  result){
 										InstantFox_Comp.Wnd.InstantFox.current_shaddow = result;
 										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(result,api['query']);
@@ -412,6 +414,7 @@ Cc["@mozilla.org/appshell/window-mediator;1"]
 								var result		= xhr_return[1][i];
 
 								if(i==0){
+									InstantFox_Comp.Wnd.HH._url.seralw = false;
 									if(InstantFox_Comp.Wnd.InstantFox.current_shaddow != result){
 										InstantFox_Comp.Wnd.InstantFox.current_shaddow = result;
 										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(result,api['query']);
