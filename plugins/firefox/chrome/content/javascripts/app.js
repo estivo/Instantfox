@@ -65,11 +65,13 @@ InstantFox = new ExtClass;
 	    		var json	 = resource.json.replace('%q', slashstring);
 			}
 		}
-		var gotourl = resource.url;//resource.url.replace('%q', query), self = this;
-      	gotourl = gotourl.replace('%ll', this._i18n('locale.long'));
-      	gotourl = gotourl.replace('%ls', this._i18n('locale.short'));
-      	gotourl = gotourl.replace('%ld', this._i18n('locale.domain'));
-			
+		var gotourl = false;
+		if(resource.url){
+		  gotourl = resource.url;//resource.url.replace('%q', query), self = this;
+      	  gotourl = gotourl.replace('%ll', this._i18n('locale.long'));
+      	  gotourl = gotourl.replace('%ls', this._i18n('locale.short'));
+      	  gotourl = gotourl.replace('%ld', this._i18n('locale.domain'));
+		}
 		// may add additional replaces!
 		return {'query': parsed.query, 'key':parsed.key, 'json':json, 'gotourl':gotourl};  
 	  }else return false;
