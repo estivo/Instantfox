@@ -51,7 +51,7 @@
     ebay: {
       url: 'http://shop.ebay.de/?_nkw=%q',
 	  //json: 'http://include.ebaystatic.com/autofill/f/77/1300464103%q.js' // /t/e/s/t.js
-	  json: 'http://anywhere.ebay.de/services/suggest/?s=0&q=d' // /t/e/s/t.js
+	  json: 'http://anywhere.ebay.de/services/suggest/?s=0&q=%q' // /t/e/s/t.js
     },
     yahoo: {
       url: 'http://de.search.yahoo.com/search?p=%q&ei=UTF-8',
