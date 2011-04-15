@@ -123,6 +123,8 @@ var HH = {
 	
 	_goto4comp: function(url2go) {
 		if(!this._url.seralw){
+			// add belong2tab check!
+			HH._isOwnQuery = true;
 			content.document.location.assign(url2go);
 		}
 		return true;
