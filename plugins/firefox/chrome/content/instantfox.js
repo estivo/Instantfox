@@ -90,7 +90,7 @@ var HH = {
 	  hide: function(url2remove){
 		if(!url2remove) return false;
 		
-	  	var toRemove = this.uri(decodeURIComponent(url2remove));
+	  	var toRemove = this.uri(url2remove);
 		this.service.removePage(toRemove);
 		
 		return true;
