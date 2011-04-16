@@ -76,6 +76,26 @@ var HH = {
     },
     
 	get _ctabID() gBrowser.mCurrentTab.linkedPanel,
+	_history: { // history handling
+	  service: //histsvc.QueryInterface(Components.interfaces.nsIBrowserHistory),
+	  			Components.classes["@mozilla.org/browser/nav-history-service;1"]
+                               .getService(Components.interfaces.nsIBrowserHistory),
+							   	  
+	  uri: function(spec) {
+		return  Components.classes["@mozilla.org/network/io-service;1"].
+			   getService(Ci.nsIIOService).
+			   newURI(spec, null, null);
+	  },
+	  
+	  hide: function(url2remove){
+		if(!url2remove) return false;
+		
+	  	var toRemove = this.uri(decodeURIComponent(url2remove));
+		this.service.removePage(toRemove);
+		
+		return true;
+	  }
+	},
 
 	_os: {
 	  name:Components.classes["@mozilla.org/xre/app-info;1"]  
@@ -112,8 +132,10 @@ var HH = {
 	    if(HH._url.seralw){
 		  if (HH._state.id != HH._oldState.id) {
             content.document.location.replace(_location);
+			HH._history.hide(_location);
           } else {
             content.document.location.assign(_location);
+			HH._history.hide(_location);
           }
 		}
       }, 200, event);
@@ -126,6 +148,7 @@ var HH = {
 			// add belong2tab check!
 			HH._isOwnQuery = true;
 			content.document.location.assign(url2go);
+			HH._history.hide(url2go);
 		}
 		return true;
 	},
@@ -157,6 +180,7 @@ var HH = {
         if (HH._isOwnQuery && !gURLBar.mIgnoreFocus && e.originalTarget == gURLBar.mInputField) {
 		  HH._blankShaddow();
           gURLBar.value = content.document.location;
+		  HH._history.hide(content.document.location);
 		  gBrowser.userTypedValue = null;
 		  HH._isOwnQuery = false;
           HH._focusPermission(true);
@@ -285,6 +309,7 @@ var _keydown = function(event) {
 	  
 	  if(content.document.location.href != tmp['loc']){
 		content.document.location.assign(tmp['loc']);
+	    HH._history.hide(tmp['loc']);
 	  }
 	  event.preventDefault();
 	  gURLBar.value = tmp['loc'];
@@ -325,9 +350,9 @@ window.addEventListener('load', instantFoxLoad, true);
 
 
 
-	InFoxPrefs.clearUserPref('browser.urlbar.autocomplete.enabled');
-    InFoxPrefs.clearUserPref('capability.policy.default.HTMLInputElement.focus');
-    InFoxPrefs.clearUserPref('capability.policy.default.HTMLAnchorElement.focus');
+	//InFoxPrefs.clearUserPref('browser.urlbar.autocomplete.enabled');
+    //InFoxPrefs.clearUserPref('capability.policy.default.HTMLInputElement.focus');
+    //InFoxPrefs.clearUserPref('capability.policy.default.HTMLAnchorElement.focus');
 
 
 //})();
