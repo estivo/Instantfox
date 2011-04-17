@@ -110,11 +110,7 @@ var HH = {
 
         // Don't spam the history!
 	    if(HH._url.seralw){
-		  if (HH._state.id != HH._oldState.id) {
-            content.document.location.replace(_location);
-          } else {
-            content.document.location.assign(_location);
-          }
+		 content.location.replace(_location);
 		}
       }, 200, event);
       
@@ -125,7 +121,8 @@ var HH = {
 		if(!this._url.seralw){
 			// add belong2tab check!
 			HH._isOwnQuery = true;
-			content.document.location.assign(url2go);
+			content.location.replace(url2go);
+			//content.document.location.assign(url2go);
 		}
 		return true;
 	},
@@ -284,7 +281,8 @@ var _keydown = function(event) {
 	  gURLBar.value = tmp['loc'];		
 	  
 	  if(content.document.location.href != tmp['loc']){
-		content.document.location.assign(tmp['loc']);
+		content.location.replace(tmp['loc']);
+		//content.document.location.assign(tmp['loc']);
 	  }
 	  event.preventDefault();
 	  gURLBar.value = tmp['loc'];
