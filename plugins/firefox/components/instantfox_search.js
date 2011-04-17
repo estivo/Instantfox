@@ -298,7 +298,7 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 			}
 
 			var xhttpreq = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
-			xhttpreq.open("GET", api['json'], true);
+			xhttpreq.open("GET", api['json'], true); // must be asyncron (syncron slow down performance and lock querys / sometimes browser die)
 			dump(api['json'])
 			
 			xhttpreq.addEventListener("load", function(event){
@@ -424,7 +424,7 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 		stopSearch: function(){
 			if(this.historyAutoComplete) this.historyAutoComplete.stopSearch();
 			if(this._req){
-			    this._req.abort();
+			    //this._req.abort();
 			}
 
 		},

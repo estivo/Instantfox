@@ -109,9 +109,13 @@ var HH = {
         }
 
         // Don't spam the history!
-	    if(HH._url.seralw){
-		 content.location.replace(_location);
-		}
+       if(HH._url.seralw){
+	     if (HH._state.id != HH._oldState.id) {
+           content.location.replace(_location);
+	     } else {
+		   content.document.location.assign(_location);
+	     }
+	   } 
       }, 200, event);
       
 	  
