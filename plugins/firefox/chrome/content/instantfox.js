@@ -63,6 +63,106 @@
 
   }
   // end MAC
+var myHist2 = {
+	newURI:'',
+	
+	sHistory: Components.classes["@mozilla.org/browser/shistory;1"].createInstance(Components.interfaces.nsISHistoryInternal),
+	
+	OnHistoryGoBack:function(backURI) {
+		dump("OnHistoryGoBack");
+		//HH._history.hide(backURI);
+		return true;
+	},
+	
+	OnHistoryGoForward:function(forwardURI) {
+		dump("OnHistoryGoForward");
+		return true;
+	},
+	
+	OnHistoryGotoIndex:function(index, gotoURI) {
+		dump("OnHistoryGoForward");
+		return true;
+	},
+	
+	OnHistoryNewEntry:function(newURI) {
+		dump("OnHistoryNewEntry");
+		this.newURI = newURI;
+		
+		var OldHistory = getWebNavigation().sessionHistory;
+		var oldIndex = -1;
+		
+		dump("Current History:");
+		dump("__________________");
+		
+		for (var i = 0; i < OldHistory.count; i++){
+			dump(OldHistory.getEntryAtIndex(i, false).URI.spec);
+		}
+		dump("__________________");
+
+		if(OldHistory.count != 0){
+			//OldHistory.getEntryAtIndex(OldHistory.count-1,true);
+			//OldHistory.addEntry(OldHistory.getEntryAtIndex(OldHistory.count-1,false),true) 
+			//newHistory.addEntry(OldHistory.getEntryAtIndex(0, false), true);
+			//getWebNavigation().sessionHistory = this.sHistory;
+		}
+		/*
+		add in onload!
+		gBrowser.selectedBrowser.addEventListener("DOMContentLoaded", function() {
+			dump("loaded!");
+			HH._history.hide(myHist2.newURI);
+		}, true);
+		*/
+		//HH._history.hide(newURI);
+		return true;
+	},
+	
+	OnHistoryPurge:function(numEntries) {
+		dump("OnHistoryPurge");
+		return true;
+	},
+	OnHistoryReload:function(reloadURI, reloadFlags) {
+		dump("OnHistoryReload");
+		return true;
+	},
+	
+	QueryInterface:function(aIID)
+	{
+		if (aIID.equals(Components.interfaces.nsISHistoryListener) ||
+						aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
+						aIID.equals(Components.interfaces.nsISupports)){
+			return this;
+		}
+		throw Components.Exception(Components.results.NS_ERROR_NO_INTERFACE);
+	},
+
+	GetWeakReference: function() {
+		return Components.classes["@mozilla.org/appshell/appShellService;1"].createInstance(Components.interfaces.nsIWeakReference);
+	}
+};
+
+
+var gMyExtension = {
+  init : function() {
+    dump("Ok");
+	/*
+	var content = document.getElementById("content");
+	var OldHistory = content.webNavigation.sessionHistory;
+	newHistory = Components.classes["@mozilla.org/browser/shistory;1"].createInstance(Components.interfaces.nsISHistoryInternal);
+	for (i = 0; i < OldHistory.count; i++)
+	{
+		newHistory.addEntry(OldHistory.getEntryAtIndex(i, false), true);
+	}
+	aIndex = OldHistory.index; 
+		*/
+	//var oldIndex = 1;
+	//var sh=gBrowser.mCurrentBrowser.sessionHistory.QueryInterface(Components.interfaces.nsISHistoryInternal);
+	//sh.getEntryAtIndex(oldIndex,false);
+	
+	//sh.addEntry(sh.getEntryAtIndex(sh.count-1,false),true);
+
+    gBrowser.sessionHistory.addSHistoryListener(myHist2);
+  }
+};
 
 var HH = {
     _url: {
@@ -77,10 +177,12 @@ var HH = {
     
 	get _ctabID() gBrowser.mCurrentTab.linkedPanel,
 	_history: { // history handling
+	  
 	  service: //histsvc.QueryInterface(Components.interfaces.nsIBrowserHistory),
-	  			Components.classes["@mozilla.org/browser/nav-history-service;1"]
+	  			//Components.classes["@mozilla.org/browser/nav-history-service;1"]
+				Components.classes["@mozilla.org/browser/global-history;2"]
                                .getService(Components.interfaces.nsIBrowserHistory),
-							   	  
+					   	  
 	  uri: function(spec) {
 		return  Components.classes["@mozilla.org/network/io-service;1"].
 			   getService(Ci.nsIIOService).
@@ -89,11 +191,15 @@ var HH = {
 	  
 	  hide: function(url2remove){
 		if(!url2remove) return false;
-		
-	  	var toRemove = this.uri(url2remove);
-		this.service.removePage(toRemove);
-		
-		return true;
+		dump("url2remove",url2remove.spec);
+		//this.service.removePage(url2remove);
+		//var toRemove = this.uri(url2remove);
+		try
+  		{
+			this.service.removePage(url2remove);
+		}catch(err){
+			dump(err);
+		}
 	  }
 	},
 
@@ -131,11 +237,9 @@ var HH = {
         // Don't spam the history!
 	    if(HH._url.seralw){
 		  if (HH._state.id != HH._oldState.id) {
-            content.document.location.replace(_location);
-			HH._history.hide(_location);
+            content.location.replace(_location);
           } else {
-            content.document.location.assign(_location);
-			HH._history.hide(_location);
+            content.location.replace(_location);
           }
 		}
       }, 200, event);
@@ -147,8 +251,7 @@ var HH = {
 		if(!this._url.seralw){
 			// add belong2tab check!
 			HH._isOwnQuery = true;
-			content.document.location.assign(url2go);
-			HH._history.hide(url2go);
+			content.location.replace(url2go);
 		}
 		return true;
 	},
@@ -180,7 +283,6 @@ var HH = {
         if (HH._isOwnQuery && !gURLBar.mIgnoreFocus && e.originalTarget == gURLBar.mInputField) {
 		  HH._blankShaddow();
           gURLBar.value = content.document.location;
-		  HH._history.hide(content.document.location);
 		  gBrowser.userTypedValue = null;
 		  HH._isOwnQuery = false;
           HH._focusPermission(true);
@@ -241,9 +343,12 @@ if('Services' in window) {
 }
   
 var instantFoxLoad = function(event) {
-	dump('onload')
+	//dump('onload');
+	//gBrowser.addProgressListener(myListener,Components.interfaces.nsIWebProgress.NOTIFY_STATE_DOCUMENT);
 	//window.removeEventListener('load', arguments.callee, true);        
 	// setup URLBar for components
+	gMyExtension.init();
+	
 	gURLBar.setAttribute('autocompletesearch',	'instantFoxAutoComplete');
 	// tell InstantFox which internationalization & URLBar to use
     InstantFox._i18n = I18n;
@@ -268,7 +373,7 @@ var instantFoxLoad = function(event) {
 }
   
 var instantFoxUnload = function(event) {
-	dump('---***---',arguments.callee.caller)
+	//dump('---***---',arguments.callee.caller)
 	// todo: better cleanup
 	//gURLBar.removeEventListener('keydown', _keydown, false);
 	//gURLBar.removeEventListener('input', _input, false);	
@@ -303,13 +408,13 @@ var _keydown = function(event) {
 	  //InstantFox.Plugins[InstantfoxHH._url.actp]; // improve it later!
 	  
 	  var tmp = InstantFox.query(gURLBar.value,event);
-	  //content.document.location.assign(tmp['loc']);
+	  //content.location.replace(tmp['loc']);
 	  
 	  gURLBar.value = tmp['loc'];		
 	  
 	  if(content.document.location.href != tmp['loc']){
-		content.document.location.assign(tmp['loc']);
-	    HH._history.hide(tmp['loc']);
+		content.location.replace(tmp['loc']);
+		//content.location.replace(tmp['loc']);
 	  }
 	  event.preventDefault();
 	  gURLBar.value = tmp['loc'];
@@ -335,7 +440,7 @@ var _input = function(event) {
 	HH._url.abort=false;
 	HH._location = gURLBar.value;
 	gBrowser.userTypedValue = HH._location;
-	dump(HH._isQuery())
+	//dump(HH._isQuery())
 	if (HH._isQuery()) {
 		HH._query(gURLBar.value, event);
 	}
