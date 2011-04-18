@@ -112,8 +112,23 @@
       script: function(query) {
         var html = '', self = this,
             locale = '&hl=' + InstantFox._i18n('locale.short');
-        
-        $.ajax({
+			
+        function cloneArray(array) {
+			var newArray = [];
+			for (var i = 0; i < array.length; ++i) {
+				 newArray.push(array[i]);        
+			}
+			return newArray;
+		}
+		
+		function FtoC(F)(F - 32) * 5/9 
+		function FAndC(F)Math.round(FtoC(parseFloat(F)))+'°C / '+F+'°F'
+		function getData(dom,name){
+			try{
+				return dom.querySelector(name).getAttribute('data')
+			}catch(e){return ''}
+		}
+        this.ajax({
           url: this.url + encodeURIComponent(query) + locale,
           method: 'get',
           dataType: 'xml',
@@ -121,35 +136,36 @@
             // Reset InstantFox-Content ..
             // .. so that nothing confuses while loading
             InstantFox.content('');
-            
-            var city = $('city', data);
+            var doc = data.target.responseXML
+            var city = doc.querySelectorAll('city');
             
             if(city.length > 0) {
-              html += '<h1 class="ccity">'+city.attr('data')+'</h1>';
+              html += '<h1 class="ccity">'+city[0].getAttribute('data')+'</h1>';
             }
             
             // Current Condition HTML-Building from XML
-            var current = $('current_conditions', data);
+            var current = doc.querySelectorAll('current_conditions');
             if (current.length > 0) {
+			  current = current[0]
               html += '<div class="weather current">';
               html += '<div class="day">Today</div>';
-              html += '<img class="icon" src="'+self.baseUrl+current.find('icon').attr('data')+'" />';
-              html += '<div class="condition">Condition: '+current.find('condition').attr('data')+'</div>';
-              html += '<div class="temp_c">Temperature: '+current.find('temp_c').attr('data')+'°C / '+current.find('temp_f').attr('data')+'°F</div>';
+              html += '<img class="icon" src="'+self.baseUrl+getData(current,'icon')+'" />';
+              html += '<div class="condition">Condition: '+getData(current,'condition')+'</div>';
+              html += '<div class="temp_c">Temperature: '+getData(current,'temp_c')+'°C / '
+			                        +getData(current,'temp_f')+'°F</div>';
               html += '</div>';
             };
             
             // Forecast HTML-Building from XML
-            var forecast = $('forecast_conditions', data);
+            var forecast = cloneArray(doc.querySelectorAll('forecast_conditions'));
             if (forecast.length > 0) {
-              forecast.each(function(index, value) {
-                var dom = $(value);
+              forecast.forEach(function(dom) {                
                 html += '<div class="weather forecast">';
-                html += '<div class="day">'+dom.find('day_of_week').attr('data')+'</div>';
-                html += '<img class="icon" src="'+self.baseUrl+dom.find('icon').attr('data')+'" />';
-                html += '<div class="condition">Condition: '+dom.find('condition').attr('data')+'</div>';
-                html += '<div class="low">Low: '+dom.find('low').attr('data')+'°</div>';
-                html += '<div class="high">High: '+dom.find('high').attr('data')+'°</div>';
+                html += '<div class="day">'+getData(dom,'day_of_week')+'</div>';
+                html += '<img class="icon" src="'+self.baseUrl+getData(dom,'icon')+'" />';
+                html += '<div class="condition">Condition: '+getData(dom,'condition')+'</div>';
+                html += '<div class="low">Low: '+FAndC(getData(dom,'low'))+'</div>';
+                html += '<div class="high">High: '+FAndC(getData(dom,'high'))+'</div>';
                 html += '</div>';
               });
             }
@@ -157,13 +173,21 @@
             // If there were any results, make them visible
             if (html.length > 0) {
               InstantFox.content('<div class="env">'+html+'</div>');
-              InstantFox.title(city.attr('data')+' weather');
+              InstantFox.title(city.getAttribute('data')+' weather');
             }
           }
         });
         
         return { loc: false, id: 'weather' };
-      }
+      },
+	  ajax: function(o){
+	    var req = new XMLHttpRequest() 
+		req.open("GET", o.url, true); 
+		req.onload = o.success;
+	    try {
+          req.send(null);
+        } catch (e) {}
+	  }
     }
   });
 //})();
