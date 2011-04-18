@@ -299,7 +299,6 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 
 			var xhttpreq = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
 			xhttpreq.open("GET", api['json'], true); // must be asyncron (syncron slow down performance and lock querys / sometimes browser die)
-			dump(api['json'])
 			
 			xhttpreq.addEventListener("load", function(event){
 				var rtoparse = xhttpreq.responseText
