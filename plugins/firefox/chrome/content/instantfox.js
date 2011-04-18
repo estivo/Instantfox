@@ -72,7 +72,8 @@ var HH = {
 	  actp: '', // current shortcut in use
 	  seralw: false, // search always on every key up!
 	  abort: '', // abort request because enter pressed
-	  ctabID: '' // used for tab handeling
+	  ctabID: '', // used for tab handeling
+	  hist_last: '' // used for history replace / assign
     },
     
 	get _ctabID() gBrowser.mCurrentTab.linkedPanel,
@@ -86,6 +87,20 @@ var HH = {
     _isOwnQuery: false,
     
     // -- Helper Methods --
+	_overwriteHist: function(){ // Used to decide if histroy should be overwritten or not (replace or assign)
+		var currentTab = getWebNavigation().sessionHistory;
+		if(currentTab.count <= 0){
+		  return false;
+		}else{
+		  if(currentTab.getEntryAtIndex(currentTab.count-1, false).URI.spec == this._url.hist_last){ // maybe encoding needed?! check that later
+		    return true; // got it last histroy entry is the same as this._url.hist_last so overwrite it!
+		  }else{
+		    return false; // not found in latest index of history
+		  }
+		}
+		return false;
+	},
+	
     _query: function(query, event) {
       // Query used to replace gURLBar.value onLocationChange
       HH._q = query || gURLBar.value;
@@ -110,11 +125,19 @@ var HH = {
 
         // Don't spam the history!
        if(HH._url.seralw){
-	     if (HH._state.id != HH._oldState.id) {
+	     /*
+		 if (HH._state.id != HH._oldState.id) {
            content.location.replace(_location);
 	     } else {
 		   content.document.location.assign(_location);
 	     }
+		 */
+		 if(HH._overwriteHist()){
+		   content.location.replace(_location);
+		 }else{
+		   content.location.assign(_location);
+		 }		 
+		 HH._url.hist_last = _location;
 	   } 
       }, 200, event);
       
@@ -125,7 +148,12 @@ var HH = {
 		if(!this._url.seralw){
 			// add belong2tab check!
 			HH._isOwnQuery = true;
-			content.location.replace(url2go);
+			if(HH._overwriteHist()){
+			  content.location.replace(url2go);
+			}else{
+			  content.location.assign(url2go);
+			}
+			HH._url.hist_last = url2go;
 			//content.document.location.assign(url2go);
 		}
 		return true;
@@ -285,7 +313,12 @@ var _keydown = function(event) {
 	  gURLBar.value = tmp['loc'];		
 	  
 	  if(content.document.location.href != tmp['loc']){
-		content.location.replace(tmp['loc']);
+		if(HH._overwriteHist()){
+		  content.location.replace(tmp['loc']);
+		}else{
+		  content.location.assign(tmp['loc']);
+		}
+		HH._url.hist_last = tmp['loc'];
 		//content.document.location.assign(tmp['loc']);
 	  }
 	  event.preventDefault();
