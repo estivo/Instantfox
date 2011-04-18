@@ -3,8 +3,6 @@
 <?xml-stylesheet href="chrome://instantfox/content/skin/autocomplete.css" type="text/css"?>
 
 <overlay id="instantfox-browser-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-  <!-- development helper. remove in release builds -->
-  <script type="text/javascript" src="__devel__.js"></script>
   <!-- Load InstantFox Core -->
   <script type="text/javascript" src="chrome://instantfox/content/javascripts/app.js"></script>
   <!-- Load General Plugins -->
@@ -13,12 +11,5 @@
   <script type="text/javascript" src="chrome://instantfox/locale/plugins.js"></script>
   <!-- Load Browser-Specific Execution -->
   <script type="text/javascript" src="chrome://instantfox/content/instantfox.js"></script>
-  
-  <!-- @TODO: Add Autocomplete Feature -->
-  <!-- autocomplete-richlistbox -->
-  <!-- <popupset id="mainPopupSet">
-    <panel id="InstantFoxList" ignorekeys="true" level="top" type="autocomplete-richlistbox" noautofocus="true">
-    </panel>
-  </popupset> -->
   
 </overlay>

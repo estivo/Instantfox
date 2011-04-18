@@ -1,4 +1,4 @@
-//(function() {
+(function() {
   var   InFoxPrefs    = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService),
         StringService = Components.classes["@mozilla.org/intl/stringbundle;1"].getService(Components.interfaces.nsIStringBundleService),
         LocaleService = Components.classes["@mozilla.org/intl/nslocaleservice;1"].getService(Components.interfaces.nsILocaleService),
@@ -233,6 +233,8 @@ var HH = {
     }
 };
 
+InstantFox.HH = HH
+
 //firefox 4 doesn't need _focusPermission
 if('Services' in window) {
 	HH._focusPermission = function() {	
@@ -246,13 +248,12 @@ if('Services' in window) {
 }
   
 var instantFoxLoad = function(event) {
-	dump('onload')
-	//window.removeEventListener('load', arguments.callee, true);        
+	//dump('onload')
+	window.removeEventListener('load', arguments.callee, true);        
 	// setup URLBar for components
 	gURLBar.setAttribute('autocompletesearch',	'instantFoxAutoComplete');
 	// tell InstantFox which internationalization & URLBar to use
     InstantFox._i18n = I18n;
-	//gBrowser.addProgressListener(HH._observe, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
 	
 	gURLBar.addEventListener('keydown', _keydown, false);
 	gURLBar.removeAttribute('oninput');
@@ -273,7 +274,7 @@ var instantFoxLoad = function(event) {
 }
   
 var instantFoxUnload = function(event) {
-	dump('---***---',arguments.callee.caller)
+	//dump('---***---',arguments.callee.caller)
 	// todo: better cleanup
 	//gURLBar.removeEventListener('keydown', _keydown, false);
 	//gURLBar.removeEventListener('input', _input, false);	
@@ -345,7 +346,7 @@ var _input = function(event) {
 	HH._url.abort=false;
 	HH._location = gURLBar.value;
 	gBrowser.userTypedValue = HH._location;
-	dump(HH._isQuery())
+
 	if (HH._isQuery()) {
 		HH._query(gURLBar.value, event);
 	}
@@ -359,16 +360,17 @@ window.addEventListener('load', instantFoxLoad, true);
 
 
 
-
+try{
 	InFoxPrefs.clearUserPref('browser.urlbar.autocomplete.enabled');
     InFoxPrefs.clearUserPref('capability.policy.default.HTMLInputElement.focus');
     InFoxPrefs.clearUserPref('capability.policy.default.HTMLAnchorElement.focus');
+}catch(e){}
 
-
-//})();
+})();
 
 // modify URLBarSetURI defined in browser.js
 function URLBarSetURI(aURI) {
+	var HH = InstantFox.HH
 	if (HH._isOwnQuery) {
 		if (HH._url._ctabID == HH._ctabID){
 			return;

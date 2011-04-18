@@ -4,41 +4,11 @@
 	https://developer.mozilla.org/en/How_to_implement_custom_autocomplete_search_component
 	Firefox 4 handling
 */
-//******************************** start debug region ****************************** /
+
 var Cc	= Components.classes;
 var Ci	= Components.interfaces;
-var Cr	= Components.results;
 
-function debug(aMessage) {
-	try {
-		var objects = [];
-		objects.push.apply(objects, arguments);
-		Firebug.Console.logFormatted(objects,
-		TabWatcher.getContextByWindow
-		(content.document.defaultView.wrappedJSObject));
-	}
-	catch (e) {
-	}
-		
-	var consoleService = Components.classes["@mozilla.org/consoleservice;1"].getService
-		(Components.interfaces.nsIConsoleService);
-	if (aMessage === "") consoleService.logStringMessage("(empty string)");
-	else if (aMessage != null) consoleService.logStringMessage(aMessage.toString());
-	else consoleService.logStringMessage("null");
-}
-function dump() {
-    var aMessage = "aMessage: ";
-    for (var i = 0; i < arguments.length; ++i) {
-        var a = arguments[i];
-        aMessage += (a && !a.toString ? "[object call]" : a) + " , ";
-    }
-    var consoleService = Components.classes['@mozilla.org/consoleservice;1'].getService(Components.interfaces.nsIConsoleService);
-    consoleService.logStringMessage("" + aMessage);
-}
 
-Cc["@mozilla.org/appshell/appShellService;1"]
-   .getService(Ci.nsIAppShellService).hiddenDOMWindow._InstantFox_Component_Scope_ = this;
-// ******************************** end debug region ******************************/
 	
 	var InstantFox_Comp = {
 		processed_results:false,
@@ -272,7 +242,7 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 			_search._result					= null;
 			var internal_results			= {values: [], comments: [], images: [], last: []};
 			
-			if(InstantFox_Comp.Wnd.HH._url.abort){
+			if(InstantFox_Comp.Wnd.InstantFox.HH._url.abort){
 				this.historyAutoComplete&&this.historyAutoComplete.stopSearch();
 				var newResult = new SimpleAutoCompleteResult(
 					searchString, Ci.nsIAutoCompleteResult.RESULT_NOMATCH,
@@ -293,7 +263,7 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 						internal_results
 					);
 				listener.onSearchResult(self, newResult);
-				InstantFox_Comp.Wnd.HH._url.seralw = true;
+				InstantFox_Comp.Wnd.InstantFox.HH._url.seralw = true;
 				return true;
 			}
 
@@ -330,11 +300,11 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 								var result		= xhr_return[3][i];
 								
 								if(i==0){
-									InstantFox_Comp.Wnd.HH._url.seralw = false;
+									InstantFox_Comp.Wnd.InstantFox.HH._url.seralw = false;
 									if(InstantFox_Comp.Wnd.InstantFox.current_shaddow !=  result){
 										InstantFox_Comp.Wnd.InstantFox.current_shaddow = result;
 										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(result,api['query']);
-										InstantFox_Comp.Wnd.HH._goto4comp(gotourl.replace('%q', encodeURIComponent(result)));
+										InstantFox_Comp.Wnd.InstantFox.HH._goto4comp(gotourl.replace('%q', encodeURIComponent(result)));
 									}
 								}
 								
@@ -362,17 +332,17 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 						
 						var gotourl = api['gotourl'];
 						
-						if(xhr_return[1].length == 0) InstantFox_Comp.Wnd.HH._url.seralw = true;					
+						if(xhr_return[1].length == 0) InstantFox_Comp.Wnd.InstantFox.HH._url.seralw = true;
 						for(var i=0; i < xhr_return[1].length;i++){		
 								var result_info	= {};
 								var result		= xhr_return[1][i];
 
 								if(i==0){
-									InstantFox_Comp.Wnd.HH._url.seralw = false;
+									InstantFox_Comp.Wnd.InstantFox.HH._url.seralw = false;
 									if(InstantFox_Comp.Wnd.InstantFox.current_shaddow != result){
 										InstantFox_Comp.Wnd.InstantFox.current_shaddow = result;
 										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(result,api['query']);
-										InstantFox_Comp.Wnd.HH._goto4comp(gotourl.replace('%q', encodeURIComponent(result)));
+										InstantFox_Comp.Wnd.InstantFox.HH._goto4comp(gotourl.replace('%q', encodeURIComponent(result)));
 									}
 								}
 								
@@ -430,8 +400,6 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 		},
 	};
 	
-	dump('-----*-----')
-	
 	if (XPCOMUtils.generateNSGetFactory)
 	    var NSGetFactory = XPCOMUtils.generateNSGetFactory([InstantFoxSearch]);
 	else
@@ -478,7 +446,7 @@ SimpleAutoCompleteResult.prototype = {
 
 	getValueAt: function(index) { return this.list.values[index];},
 	getCommentAt: function(index) { return this.list.comments[index];},
-	getImageAt : function (index) { return this.list.images[index];},
+	getImageAt: function(index) { return this.list.images[index];},
 	getLabelAt: function(index) { return this.list.comments[index]; },
 	getStyleAt: function(index) { return "InstantFoxSuggest"},
 	
