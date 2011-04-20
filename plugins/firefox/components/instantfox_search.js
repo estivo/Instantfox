@@ -272,7 +272,6 @@ var Ci	= Components.interfaces;
 			
 			xhttpreq.addEventListener("load", function(event){
 				var rtoparse = xhttpreq.responseText
-				dump(rtoparse)
 
 				try{
 					var xhr_return = JSON.parse(rtoparse);
