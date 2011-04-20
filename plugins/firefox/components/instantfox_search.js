@@ -302,7 +302,6 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 			
 			xhttpreq.addEventListener("load", function(event){
 				var rtoparse = xhttpreq.responseText
-				dump(rtoparse)
 
 				try{
 					var xhr_return = JSON.parse(rtoparse);
