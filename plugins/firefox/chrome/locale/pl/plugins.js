@@ -11,22 +11,20 @@
     y:    'youTube',
     yh:   'yahoo',
     b:    'bing',
-    l:    'leo',
     t:    'twitter',
     a:    'amazon',
     e:    'ebay',
-    gg:		'googleluck',
     wa:   'wolframalpha'
   };
   
   InstantFox.Plugins.extend({
     googleFrame: {
       url: 'http://www.google.%ld/#hl=%ls&q=%q&fp=1&cad=b',
-	  json: 'http://suggestqueries.google.com/complete/search?json&q=%q&hl=ch'
+      json: 'http://suggestqueries.google.com/complete/search?json&q=%q&hl=pl'
     },
     googleImages: {
       url: 'http://www.google.%ld/images?q=%q&hl=%ls',
-	  json: 'http://suggestqueries.google.com/complete/search?json&ds=i&q=%q'
+      json: 'http://suggestqueries.google.com/complete/search?json&ds=i&q=%q'
     },
     googleMaps: {
       url: 'http://maps.google.com/maps?q=%q',
@@ -36,37 +34,30 @@
       url: 'http://www.youtube.com/results?search_query=%q',
 	  json: 'http://suggestqueries.google.com/complete/search?json&ds=yt&q=%q'
     },
-    googleluck: {
-      url: 'http://www.google.de/search?hl=de&q=%q&btnI=Auf+gut+Gl%C3%BCck!',
-  	  json: false
-    },
     twitter: {
       url: 'http://search.twitter.com/search?q=%q',
    	  json: false
     },
     amazon: {
-      url: 'http://www.amazon.de/gp/search?ie=UTF8&keywords=%q&tag=324-21&index=aps&linkCode=ur2&camp=1638&creative=6742',
+      url: 'http://www.amazon.com/gp/search?ie=UTF8&keywords=%q&tag=406-20&index=aps&linkCode=ur2&camp=1789&creative=9325',
 	  json: 'http://completion.amazon.co.uk/search/complete?method=completion&q=%q&search-alias=aps&mkt=4'
     },
     ebay: {
       url: 'http://shop.ebay.%ld/?_nkw=%q',
-	  json: 'http://anywhere.ebay.de/services/suggest/?s=0&q=%q'
+	  //json: 'http://include.ebaystatic.com/autofill/f/77/1300464103%q.js' // /t/e/s/t.js
+	  json: 'http://anywhere.ebay.com/services/suggest/?s=0&q=%q' // from firefoxes searchservice
     },
     yahoo: {
-      url: 'http://%ld.search.yahoo.com/search?p=%q&ei=UTF-8',
+      url: 'http://search.yahoo.com/search?p=%q&ei=UTF-8',
 	  json: false
     },
     bing: {
       url: 'http://www.bing.com/search?q=%q&form=QBLH',
 	  json: 'http://api.bing.com/osjson.aspx?query=%q&form=OSDJAS'
     },
-    leo: {
-      url: 'http://dict.leo.org/?search=%q',
-	  json: false
-    },
     wikipedia: {
-      url: 'http://de.wikipedia.org/w/index.php?search=%q',
-	  json: 'http://de.wikipedia.org/w/api.php?action=opensearch&search=%q'
+      url: 'http://%ls.wikipedia.org/w/index.php?search=%q',
+	  json: 'http://pl.wikipedia.org/w/api.php?action=opensearch&search=%q'
     },
     wolframalpha: {
       url: 'http://www.wolframalpha.com/input/?i=%q',

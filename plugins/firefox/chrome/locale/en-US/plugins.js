@@ -14,6 +14,7 @@
     t:    'twitter',
     a:    'amazon',
     e:    'ebay',
+    gg:		'googleluck',
     wa:   'wolframalpha'
   };
   
@@ -34,6 +35,10 @@
       url: 'http://www.youtube.com/results?search_query=%q',
 	  json: 'http://suggestqueries.google.com/complete/search?json&ds=yt&q=%q'
     },
+    googleluck: {
+      url: 'http://www.google.com/search?hl=%ls&q=%q&btnI=Auf+gut+Gl%C3%BCck!',
+  	  json: false
+    },
     twitter: {
       url: 'http://search.twitter.com/search?q=%q',
    	  json: false
@@ -44,7 +49,6 @@
     },
     ebay: {
       url: 'http://shop.ebay.%ld/?_nkw=%q',
-	  //json: 'http://include.ebaystatic.com/autofill/f/77/1300464103%q.js' // /t/e/s/t.js
 	  json: 'http://anywhere.ebay.com/services/suggest/?s=0&q=%q' // from firefoxes searchservice
     },
     yahoo: {
@@ -56,8 +60,8 @@
 	  json: 'http://api.bing.com/osjson.aspx?query=%q&form=OSDJAS'
     },
     wikipedia: {
-      url: 'http://%ls.wikipedia.org/w/index.php?search=%q',
-	  json: 'http://de.wikipedia.org/w/api.php?action=opensearch&search=%q'
+      url: 'http://en.wikipedia.org/w/index.php?search=%q',
+	  json: 'http://en.wikipedia.org/w/api.php?action=opensearch&search=%q'
     },
     wolframalpha: {
       url: 'http://www.wolframalpha.com/input/?i=%q',
