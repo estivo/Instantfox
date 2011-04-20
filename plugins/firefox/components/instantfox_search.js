@@ -423,7 +423,7 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 		stopSearch: function(){
 			if(this.historyAutoComplete) this.historyAutoComplete.stopSearch();
 			if(this._req){
-			    //this._req.abort();
+			    this._req.abort();
 			}
 
 		},
