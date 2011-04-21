@@ -118,11 +118,33 @@ InstantFox = new ExtClass;
       
       return { loc: src, id: false };
     },
-  
+    
     content: function(c) {
       content.document.getElementById('container').innerHTML = c;
     },
     
+	attr_create: function(div_c, div_n, span_c, span_n){
+	  var doc = content.document;//document.implementation.createDocument("", "", null);
+	  var container = content.document.getElementById('container');  
+	  if(container.firstChild) container.removeChild(container.firstChild);
+  
+	  var div = doc.createElement('div');
+	  div.setAttribute("class", div_c);
+	  div.appendChild( doc.createTextNode(div_n) );
+	  //div.style.color = 'green';
+	  
+	  if(typeof span_c!='undefined'){
+	  	var span = doc.createElement('span');
+	    span.setAttribute("class", span_c);
+	    span.appendChild( doc.createTextNode(span_n) );
+		div.appendChild(span);
+	  }
+	  
+	  container.appendChild(div);
+	  
+	},
+	
+	
     title: function(t) {
       content.document.title = t + ' | InstantFox';
     },

@@ -361,9 +361,11 @@ window.addEventListener('load', instantFoxLoad, true);
 
 
 try{
+	/*
 	InFoxPrefs.clearUserPref('browser.urlbar.autocomplete.enabled');
     InFoxPrefs.clearUserPref('capability.policy.default.HTMLInputElement.focus');
     InFoxPrefs.clearUserPref('capability.policy.default.HTMLAnchorElement.focus');
+	*/
 }catch(e){}
 
 })();

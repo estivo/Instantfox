@@ -76,8 +76,9 @@
             // .. Calculate ..
             var vlr = eval('('+ret+')').toString();
             if (vlr != ret) {
-              InstantFox.content('<div class="env calculator">'+ret+' = <span class="result">'+vlr+'</span></div>');
-              InstantFox.title(ret+' = '+vlr);
+              //InstantFox.content('<div class="env calculator">'+ret+' = <span class="result">'+vlr+'</span></div>');
+			  InstantFox.attr_create('env calculator',ret+' = ','result',vlr);
+			  InstantFox.title(ret+' = '+vlr);
             }
           } catch(ex) {}
         }
@@ -90,8 +91,9 @@
           if (vlr.length>0) {
             for(var i=0;i<vlr.length;i++) {
               if (this.scope.indexOf(vlr.charAt(i)) < 0) {
-                InstantFox.content('<div class="env calculator">Unkown operation.<br />Available operators: '+this.scope+'</div>');
-                return null;
+                //InstantFox.content('<div class="env calculator">Unkown operation.<br />Available operators: '+this.scope+'</div>');
+				InstantFox.attr_create('env calculator','Unkown operation. Available operators:'+this.scope);
+				return null;
               }
             };
             return vlr;
