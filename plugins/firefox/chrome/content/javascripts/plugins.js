@@ -125,9 +125,15 @@
 		function FAndC(F)Math.round(FtoC(parseFloat(F)))+'°C / '+F+'°F'
 		function getData(dom,name){
 			try{
-				return dom.querySelector(name).getAttribute('data')
+				if(name)
+					return escapeHTML(dom.querySelector(name).getAttribute('data'))
+				else
+					return escapeHTML(dom.getAttribute('data'))
 			}catch(e){return ''}
 		}
+		function escapeHTML(str) str.replace(/[&"<>]/g, function(m)"&"+escapeMap[m]+";");
+		var escapeMap = { "&": "amp", '"': "quot", "<": "lt", ">": "gt" }
+		
         this.ajax({
           url: this.url + encodeURIComponent(query) + locale,
           method: 'get',
@@ -140,7 +146,7 @@
             var city = doc.querySelectorAll('city');
             
             if(city.length > 0) {
-              html += '<h1 class="ccity">'+city[0].getAttribute('data')+'</h1>';
+              html += '<h1 class="ccity">'+getData(city[0])+'</h1>';
             }
             
             // Current Condition HTML-Building from XML
@@ -173,7 +179,7 @@
             // If there were any results, make them visible
             if (html.length > 0) {
               InstantFox.content('<div class="env">'+html+'</div>');
-              InstantFox.title(city.getAttribute('data')+' weather');
+              InstantFox.title(getData(city[0])+' weather');
             }
           }
         });

@@ -23,6 +23,7 @@
     <em:description>Search via your addressbar with shortcuts at your fingertips. Use g for Google, m for Maps, e for eBay, y for Youtube, w for Wikipedia, c for Calculator, f for Weather Forecast and many more.</em:description>
     <em:creator>instantfox.net</em:creator>
     <em:iconURL>chrome://instantfox/content/skin/logo.png</em:iconURL>
+	<em:optionsURL>chrome://instantfox/content/options.xul</em:optionsURL>
     <em:homepageURL>http://www.instantfox.net/</em:homepageURL>
   </Description>      
 </RDF>

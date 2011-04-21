@@ -357,14 +357,6 @@ var _input = function(event) {
 window.addEventListener('load', instantFoxLoad, true);
 //window.addEventListener('unload', instantFoxUnload, true);
 
-
-
-
-	InFoxPrefs.clearUserPref('browser.urlbar.autocomplete.enabled');
-    InFoxPrefs.clearUserPref('capability.policy.default.HTMLInputElement.focus');
-    InFoxPrefs.clearUserPref('capability.policy.default.HTMLAnchorElement.focus');
-
-
 //})();
 
 // modify URLBarSetURI defined in browser.js
