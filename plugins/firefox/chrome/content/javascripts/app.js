@@ -144,6 +144,17 @@ InstantFox = new ExtClass;
 	  
 	},
 	
+	elem_create: function(tag, class, content){
+	  var doc = content.document;//document.implementation.createDocument("", "", null);
+  
+	  var elem = doc.createElement(tag);
+	  elem.setAttribute("class", class);
+	  elem.appendChild( doc.createTextNode(content) );
+	  //div.style.color = 'green';
+	  
+	  return elem;
+	  
+	},
 	
     title: function(t) {
       content.document.title = t + ' | InstantFox';
