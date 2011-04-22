@@ -1,5 +1,3 @@
-//(function() {
-  // @TODO: Handle Shortcuts in Config
   InstantFox.Shortcuts = { 
     ga:   'googleApi',
     c:    'calculator',
@@ -29,7 +27,7 @@
     },
     googleMaps: {
       url: 'http://maps.google.com/maps?q=%q',
-	  json:false //json: 'http://maps.google.de/maps/suggest?q=%q&cp=1&hl=de&gl=de&v=2&json=b' !leads into syntax error!
+	  json:false
     },
     youTube: {
       url: 'http://www.youtube.com/results?search_query=%q',
@@ -68,5 +66,3 @@
 	  json: false
     }
   });
-  
-//})();
