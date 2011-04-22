@@ -242,7 +242,7 @@ var Ci	= Components.interfaces;
 			_search._result					= null;
 			var internal_results			= {values: [], comments: [], images: [], last: []};
 			
-			if(InstantFox_Comp.Wnd.InstantFox.HH._url.abort){
+			if(InstantFox_Comp.Wnd.HH._url.abort){
 				this.historyAutoComplete&&this.historyAutoComplete.stopSearch();
 				var newResult = new SimpleAutoCompleteResult(
 					searchString, Ci.nsIAutoCompleteResult.RESULT_NOMATCH,
@@ -263,7 +263,7 @@ var Ci	= Components.interfaces;
 						internal_results
 					);
 				listener.onSearchResult(self, newResult);
-				InstantFox_Comp.Wnd.InstantFox.HH._url.seralw = true;
+				InstantFox_Comp.Wnd.HH._url.seralw = true;
 				return true;
 			}
 
@@ -298,11 +298,11 @@ var Ci	= Components.interfaces;
 								var result		= xhr_return[3][i];
 								
 								if(i==0){
-									InstantFox_Comp.Wnd.InstantFox.HH._url.seralw = false;
+									InstantFox_Comp.Wnd.HH._url.seralw = false;
 									if(InstantFox_Comp.Wnd.InstantFox.current_shaddow !=  result){
 										InstantFox_Comp.Wnd.InstantFox.current_shaddow = result;
 										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(result,api['query']);
-										InstantFox_Comp.Wnd.InstantFox.HH._goto4comp(gotourl.replace('%q', encodeURIComponent(result)));
+										InstantFox_Comp.Wnd.HH._goto4comp(gotourl.replace('%q', encodeURIComponent(result)));
 									}
 								}
 								
@@ -330,17 +330,17 @@ var Ci	= Components.interfaces;
 						
 						var gotourl = api['gotourl'];
 						
-						if(xhr_return[1].length == 0) InstantFox_Comp.Wnd.InstantFox.HH._url.seralw = true;
+						if(xhr_return[1].length == 0) InstantFox_Comp.Wnd.HH._url.seralw = true;
 						for(var i=0; i < xhr_return[1].length;i++){		
 								var result_info	= {};
 								var result		= xhr_return[1][i];
 
 								if(i==0){
-									InstantFox_Comp.Wnd.InstantFox.HH._url.seralw = false;
+									InstantFox_Comp.Wnd.HH._url.seralw = false;
 									if(InstantFox_Comp.Wnd.InstantFox.current_shaddow != result){
 										InstantFox_Comp.Wnd.InstantFox.current_shaddow = result;
 										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(result,api['query']);
-										InstantFox_Comp.Wnd.InstantFox.HH._goto4comp(gotourl.replace('%q', encodeURIComponent(result)));
+										InstantFox_Comp.Wnd.HH._goto4comp(gotourl.replace('%q', encodeURIComponent(result)));
 									}
 								}
 								

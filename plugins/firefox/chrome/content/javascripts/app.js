@@ -120,8 +120,17 @@ InstantFox = new ExtClass;
     },
     
     content: function(c) {
-      content.document.getElementById('container').innerHTML = c;
-    },
+	  var container = content.document.getElementById('container');
+	  if(!container){
+		  // fixing of content.document.getElementById("container") is null
+		  var div = content.document.createElement('div');
+		  div.setAttribute("id", container);
+		  div.innerHTML = c;
+		  content.document.appendChild(div);
+	  }else{
+        content.document.getElementById('container').innerHTML = c;
+	  }
+	},
     
 	attr_create: function(div_c, div_n, span_c, span_n){
 	  var doc = content.document;//document.implementation.createDocument("", "", null);

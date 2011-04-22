@@ -186,7 +186,7 @@
           }
         });
         
-        return { loc: false, id: 'weather' };
+        return { loc: 'http://search.instantfox.net/#f '+encodeURIComponent(query), id: 'weather' };
       },
 	  ajax: function(o){
 	    var req = new XMLHttpRequest() 
