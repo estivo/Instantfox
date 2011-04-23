@@ -20,5 +20,10 @@
     <panel id="InstantFoxList" ignorekeys="true" level="top" type="autocomplete-richlistbox" noautofocus="true">
     </panel>
   </popupset> -->
-  
+  <toolbarpalette id="BrowserToolbarPalette">
+	<toolbarbutton type="menu" id='instantFox-options' class='toolbarbutton-1 chromeclass-toolbar-additional'
+	style='list-style-image:none'>
+		<panel onpopupshowing="HH.openOptionsPopup(this)"></panel>
+	</toolbarbutton>
+  </toolbarpalette>
 </overlay>

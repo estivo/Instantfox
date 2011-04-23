@@ -103,15 +103,14 @@
     },
     
     weather: {
-      url: 'http://search.instantfox.net/gapi.php?weather=',
+      url: 'http://search.instantfox.net/gapi.php?weather=%q&hl=%ls',
       baseUrl: 'http://www.google.com',
     
       // Using Apache-Proxy
       // ProxyPass /gapi http://www.google.com/ig/api
     
       script: function(query) {
-        var html = '', self = this,
-            locale = '&hl=' + InstantFox._i18n('locale.short');
+        var html = '', self = this;
 			
         function cloneArray(array) {
 			var newArray = [];
@@ -135,7 +134,7 @@
 		var escapeMap = { "&": "amp", '"': "quot", "<": "lt", ">": "gt" }
 		
         this.ajax({
-          url: this.url + encodeURIComponent(query) + locale,
+          url: this.url.replace('%q', encodeURIComponent(query)),
           method: 'get',
           dataType: 'xml',
           success: function(data) {

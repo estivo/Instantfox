@@ -14,7 +14,7 @@
     t:    'twitter',
     a:    'amazon',
     e:    'ebay',
-    gg:		'googleluck',
+    gg:   'googleluck',
     wa:   'wolframalpha'
   };
   
@@ -68,5 +68,10 @@
 	  json: false
     }
   });
+
+
+  InstantFox.localeMap = {'%ls': 'en', '%ll': 'en-US', '%ld': 'com'}
   
+  InstantFox.preprocessPlugins()
+
 //})();

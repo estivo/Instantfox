@@ -74,4 +74,9 @@
     }
   });
   
+
+  InstantFox.localeMap = {'%ls': 'de', '%ll': 'de-DE', '%ld': 'de'}
+  
+  InstantFox.preprocessPlugins()
+
 //})();

@@ -1,13 +1,7 @@
 //(function() {
-  var   InFoxPrefs    = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService),
-        StringService = Components.classes["@mozilla.org/intl/stringbundle;1"].getService(Components.interfaces.nsIStringBundleService),
-        LocaleService = Components.classes["@mozilla.org/intl/nslocaleservice;1"].getService(Components.interfaces.nsILocaleService),
-        StringBundle  = StringService.createBundle("chrome://instantfox/locale/instantfox.properties", LocaleService.getApplicationLocale()),
-        I18n          = function(param) {
-          return StringBundle.GetStringFromName(param);
-        };
+  var InFoxPrefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService);
 
-  InFoxPrefs.QueryInterface(Components.interfaces.nsIPrefBranch2);
+  InFoxPrefs.QueryInterface(Ci.nsIPrefBranch2);
 
 	
 
@@ -232,6 +226,15 @@ var HH = {
 	  return true; //(gURLBar.value.replace(/^\s+|\s+$/g, '').search(' ') > -1);
     }
 };
+HH.openOptionsPopup = function(p){
+	while(p.hasChildNodes())
+		p.removeChild(p.firstChild)
+	var i = document.createElement('iframe')
+	i.setAttribute('src','chrome://instantfox/content/options.xul')
+	p.appendChild(i)
+	i.width=500
+	i.height=500
+}
 
 //firefox 4 doesn't need _focusPermission
 if('Services' in window) {
@@ -251,7 +254,6 @@ var instantFoxLoad = function(event) {
 	// setup URLBar for components
 	gURLBar.setAttribute('autocompletesearch',	'instantFoxAutoComplete');
 	// tell InstantFox which internationalization & URLBar to use
-    InstantFox._i18n = I18n;
 	//gBrowser.addProgressListener(HH._observe, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
 	
 	gURLBar.addEventListener('keydown', _keydown, false);

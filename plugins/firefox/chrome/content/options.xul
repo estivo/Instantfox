@@ -1,0 +1,213 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://shadia/content/css/global.css" type="text/css"?>
+
+
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	title="instantfox options"
+	resizable='yes'>
+
+<html:style>
+textbox{
+	-moz-appearance:none;
+	border:none;
+	background: #EEF9FF;
+	color:#777;
+	width:5ch
+}
+textbox[type=name]{
+	position:absolute;	
+	margin-top:-12px;
+	border-top:2px solid #9ED1E9!important;
+	border-left:2px solid #9ED1E9!important;
+	border-radius:15px;
+	width:20ch
+}
+.plugin{
+	position:relative;
+}
+input:focus{	
+	color:#666;
+	background: #EFFAFF;
+	-moz-box-shadow:0px 0px 2px #777;
+}
+#container{
+	background: #d8f2ff;
+	margin:20px;
+	box-shadow: 0pt 0pt 1px #37A0D3;
+}
+window,#head{
+	color: #FFFFFF;
+	background-color: #9ED1E9;
+}
+.externalContainer{
+	background: #d8f2ff;
+	overflow-y:auto;
+	position:relative;
+	width:500px;
+	height:400px;
+}
+.image{
+	width:44px;
+    -moz-box-align: center;
+    -moz-box-pack: center;	
+}
+img{
+	display:-moz-box;
+}
+.bigger{
+	font-size: 14px;
+}
+.bold{
+	font-weight: bold;
+}
+.center{
+	text-align: center;
+} 
+.key,.urls,.image{
+	border: 1px solid #E8F0FC;
+	font-family: "Lucida Sans Unicode","Lucida Grande",Sans-Serif;
+	font-size: 12px;
+	text-align: left;
+	padding: 3px;
+	background-color: #EEF9FF;
+}
+</html:style>
+
+<vbox id="vbox1" flex='1'>
+  <!-- for development -->
+  <shadiaglue/>
+  
+  <!--<iframe src='chrome://instantfox/locale/index.html' width='500px' height='350px'/>-->
+  <vbox class='externalContainer' flex='1'>
+    <vbox id='head'></vbox>
+    <vbox id='container'/>
+  </vbox>
+  <hbox>
+	<toolbarbutton id='cleanupPrefs' label='cleanup Prefs' oncommand='clearPrefs();updatePrefButtonVisibility()'/>
+	<spacer flex='1'/>
+	<button label='ok' oncommand='close()'/>
+  </hbox>
+</vbox>
+
+  <script type="text/javascript" src="__devel__.js"></script>
+  <script type="text/javascript" src="chrome://instantfox/content/javascripts/app.js"></script>
+  <script type="text/javascript" src="chrome://instantfox/content/javascripts/plugins.js"></script>
+  <script type="text/javascript" src="chrome://instantfox/locale/plugins.js"></script>
+
+<script type="application/x-javascript" ><![CDATA[
+var Cc = Components.classes
+var Ci = Components.interfaces
+var prefB = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService).getBranch('')
+
+var prefNames = ['browser.urlbar.autocomplete.enabled'
+				,'capability.policy.default.HTMLInputElement.focus'
+				,'capability.policy.default.HTMLAnchorElement.focus'
+				]
+
+function updatePrefButtonVisibility()
+	$('cleanupPrefs').hidden=!prefNames.some(prefB.prefHasUserValue)
+
+function clearPrefs()
+	prefNames.forEach(function(x)
+		prefB.prefHasUserValue(x) && prefB.clearUserPref(x)
+	)
+function $(x)document.getElementById(x)
+
+updatePrefButtonVisibility()
+
+
+
+
+
+// todo use Services when 3.6 is dropped
+var faviconService = Cc["@mozilla.org/browser/favicon-service;1"].getService(Ci.nsIFaviconService);
+var tldService = Cc["@mozilla.org/network/effective-tld-service;1"].getService(Ci.nsIEffectiveTLDService);
+var ioService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
+
+function makeURI(aURL, aOriginCharset, aBaseURI) {
+    return ioService.newURI(aURL, aOriginCharset, aBaseURI);
+}
+
+function getFavicon(url){
+	//try{
+		var host = url.match(/:\/\/([^\/#?]*)/)[1];
+		dump(host)
+		var icon = faviconService.getFaviconImageForPage(makeURI('http://'+host)).spec
+		if(icon != faviconService.defaultFavicon.spec)
+			return icon
+		host = tldService.getBaseDomainFromHost(host)
+		var icon = faviconService.getFaviconImageForPage(makeURI('http://'+host)).spec
+		if(icon != faviconService.defaultFavicon.spec)
+			return icon
+		var icon = faviconService.getFaviconImageForPage(makeURI('http://www.'+host)).spec
+		return icon 	
+	//}catch(e){}
+	
+	return faviconService.defaultFavicon.spec 
+}
+
+function appendXML(element, xml){
+	var range = document.createRange()
+	range.selectNode(element)
+	range.collapse(true)
+	var fragment = range.createContextualFragment(xml)
+
+	element.appendChild(fragment)
+}
+function formatString(string, options){	
+	return string.replace(/\$[^\$]*\$/g, function(x){
+		return escapeHTML(options[x.slice(1,-1)]||'')
+	})
+}
+function escapeHTML(str) str.replace(/[&"<>]/g, function(m)"&"+escapeMap[m]+";");
+var escapeMap = { "&": "amp", '"': "quot", "<": "lt", ">": "gt" }
+
+xmlFragment = <hbox class='plugin'>
+		<hbox align="center" class='image'>
+			<image src="$favicon$" />
+		</hbox>
+		<vbox flex='1' class='urls'>
+			<hbox align='start'>
+				<textbox type='name' value='$name$' class='bold'/>
+			</hbox>
+			<textbox type='url' value='$url$'/>
+			<textbox type='json' value='$json$'/>
+		</vbox>
+		<hbox align="center" class='key'>
+			<textbox class='center bigger bold' type='key' value='$key$'/>
+		</hbox>
+	  </hbox>.toXMLString()
+
+
+
+var xml=[]
+for(var key in InstantFox.Shortcuts){
+	var i = InstantFox.Shortcuts[key]
+	var p = InstantFox.Plugins[i]
+	if(p && p.url){
+		p.favicon = getFavicon(p.url)
+		p.name = i
+		xml.push(formatString(xmlFragment,p))
+	}
+}
+appendXML($("container"), xml.join(''))
+
+]]></script>
+
+
+</window>
+
+
+<!-- 
+
+InstantFox.Shortcuts
+
+
+for each(var i in InstantFox.Plugins){
+		if(typeof i.url == 'string')
+			jn.say()
+	}//jn.say(m=i.url.match(/(.[^&?#\/]*)%q(.?)/))
+ -->
+

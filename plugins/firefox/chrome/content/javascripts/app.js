@@ -28,7 +28,6 @@ InstantFox = new ExtClass;
     _name:    'instantfox',
     _version: '1.0.3',
     _xul:     'http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul',
-    _i18n:    undefined,
 	
 	// used to handle shaddow "caching"
 	current_shaddow: '',
@@ -40,6 +39,30 @@ InstantFox = new ExtClass;
 			current_shaddow = test
 			right_shaddow = est
     */
+	preprocessPlugins: function(){
+		var localeRe=/%l(?:s|l|d)/g,
+			domainRe = /:\/\/([^#?]*)/;
+		function replacer(m) InstantFox.localeMap[m]
+		
+		for(var key in InstantFox.Shortcuts){
+			var i = InstantFox.Shortcuts[key]
+			var p = InstantFox.Plugins[i]
+			if(!p)
+				continue
+			
+			if(p.url){
+				p.url = p.url.replace(localeRe, replacer)
+				p.domain = p.url.match(domainRe)[1]
+				p.key = key
+			}
+			
+			if(p.json)
+				p.json = p.json.replace(localeRe, replacer)
+			else
+				p.json = false
+		}
+		
+	},
 	
 	query4comp: function(){
 	  // this query is executed by component
@@ -58,9 +81,6 @@ InstantFox = new ExtClass;
 		var gotourl = false;
 		if(resource.url){
 			var gotourl = resource.url;//resource.url.replace('%q', query);
-      		gotourl = gotourl.replace('%ll', this._i18n('locale.long'))
-      		                 .replace('%ls', this._i18n('locale.short'))
-      		                 .replace('%ld', this._i18n('locale.domain'));
 		}
 		// may add additional replaces!
 		return {'query': parsed.query, 'key':parsed.key, 'json':json, 'gotourl':gotourl};  
@@ -68,16 +88,33 @@ InstantFox = new ExtClass;
 	},
 	
 	queryFromURL: function(){
-		// todo: find a plugin key by url, for FS#79
-		var gotourl = InstantFox.Plugins.googleFrame.url;
-      	gotourl = gotourl.replace('%ll', this._i18n('locale.long'))
-      	                 .replace('%ls', this._i18n('locale.short'))
-      	                 .replace('%ld', this._i18n('locale.domain'));
-		var i = gotourl.indexOf('%q')
-		var queryString = gURLBar.value.slice(i, -gotourl.length+i+2)
+		function escapeRexp(text) {
+			return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+		}
 
+		function escapeRexp(text) {
+			return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+		}
+
+		var url=gURLBar.value, match=false;
+		for(var key in InstantFox.Shortcuts){
+			var i = InstantFox.Shortcuts[key]
+			var p = InstantFox.Plugins[i]
+			if(p && p.url){
+				if(url.indexOf(p.domain)!=-1){
+					match=true;
+					break;
+				}
+			}
+		}
+		if(!match)
+			return '';
+
+		var m = p.url.match(/(.[^&?#\/]*)%q(.?)/)
+		var re = RegExp(escapeRexp(m[1])+'([^&]*)')
+		var queryString = (url.match(re)||{})[1]
 		
-		return 'g '+decodeURIComponent(queryString);
+		return p.key + ' ' + decodeURIComponent(queryString);
 	},
 
 	
@@ -111,10 +148,7 @@ InstantFox = new ExtClass;
 	
     // No Plugin-Script found, load given location
     perform: function(resource, query) {
-      var src = resource.url.replace('%q', query), self = this;
-      src = src.replace('%ll', this._i18n('locale.long'));
-      src = src.replace('%ls', this._i18n('locale.short'));
-      src = src.replace('%ld', this._i18n('locale.domain'));
+      var src = resource.url.replace('%q', query);
       
       return { loc: src, id: false };
     },
