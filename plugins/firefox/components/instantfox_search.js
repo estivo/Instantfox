@@ -146,7 +146,6 @@ var Ci	= Components.interfaces;
 		},
 		
 		getImageAt: function(index){//#2
-			debug(index)
 			try{
 				var numResults = Math.min(this._result.matchCount, this._maxNumResults);
 				if(index < numResults){
@@ -274,6 +273,9 @@ var Ci	= Components.interfaces;
 				var rtoparse = xhttpreq.responseText
 
 				try{
+					if(api['key'] == "m"){
+						 rtoparse = rtoparse.replace(/(\w+):/gi, '"\$1":');
+					}
 					var xhr_return = JSON.parse(rtoparse);
 				}
 				catch(e){
@@ -287,17 +289,33 @@ var Ci	= Components.interfaces;
 				// code could be redcued but no need ;)
 							
 				if(api['key'] == "m"){
-
-					if(xhr_return[2]){
+					if(xhr_return['suggestion']){
 						type_not_found = false;
 						
 						var gotourl = api['gotourl'];
 						
-						for(var i=0; i < xhr_return[3].length;i++){		
+						// google doesn't sort the array for us. We must sort it by our own
+						var sorted_results = new Array();
+						// put match at first place if all searches match array is reversed!
+						// to avoid that added api['query'].length <= 2
+						var shifted = false;
+						
+						for(var i=0; i < xhr_return['suggestion'].length;i++){
+							var tmpresult = xhr_return['suggestion'][i]['query'];
+							if(!tmpresult) continue;
+							
+							if(tmpresult.toLowerCase().indexOf(api['query'].toLowerCase()) == 0 && !shifted){
+								sorted_results.unshift(tmpresult);
+								if(api['query'].length <= 2) shifted = true;
+							}else{
+								sorted_results.push(tmpresult);
+							}
+						}
+						for(var j=0; j < sorted_results.length; j++){
 								var result_info	= {};
-								var result		= xhr_return[3][i];
+								var result		= sorted_results[j];
 								
-								if(i==0){
+								if(j==0){
 									InstantFox_Comp.Wnd.HH._url.seralw = false;
 									if(InstantFox_Comp.Wnd.InstantFox.current_shaddow !=  result){
 										InstantFox_Comp.Wnd.InstantFox.current_shaddow = result;
@@ -316,13 +334,14 @@ var Ci	= Components.interfaces;
 								internal_results.comments.push(result_info.title);
 								internal_results.images.push(result_info.icon);
 								
-								if(i==xhr_return[3].length-1){
+								if(j==sorted_results.length-1){
 									internal_results.last.push(true);
 								}else{
 									internal_results.last.push(false);
 								}
-						}		
+						}
 					}
+					
 				}
 				if('g,i,y,w,a,b,e'.indexOf(api['key'])!=-1){
 					if(xhr_return[1]){
