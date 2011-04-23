@@ -88,11 +88,7 @@ InstantFox = new ExtClass;
 	},
 	
 	queryFromURL: function(){
-		function escapeRexp(text) {
-			return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
-		}
-
-		function escapeRexp(text) {
+		function escapeRegexp(text) {
 			return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 		}
 
@@ -110,7 +106,7 @@ InstantFox = new ExtClass;
 		if(!match)
 			return '';
 
-		var m = p.url.match(/(.[^&?#\/]*)%q(.?)/)
+		var m = p.url.match(/(.[^&?#]*)%q(.?)/)
 		var re = RegExp(escapeRexp(m[1])+'([^&]*)')
 		var queryString = (url.match(re)||{})[1]
 		
