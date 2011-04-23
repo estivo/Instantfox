@@ -363,7 +363,8 @@ window.addEventListener('load', instantFoxLoad, true);
 
 // modify URLBarSetURI defined in browser.js
 function URLBarSetURI(aURI) {
-	if (HH._isOwnQuery) {
+	// aURI isn't defined if URLBarSetURI is called from urlbar.handleRevert
+	if (aURI && HH._isOwnQuery) {
 		if (HH._url._ctabID == HH._ctabID){
 			return;
 		} else { //hide shadow if user switched tabs
