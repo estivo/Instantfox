@@ -317,8 +317,8 @@
         <![CDATA[
         event.preventDefault()
 		event.stopPropagation()
-      ]]> -->
-      </handler>
+      ]]>
+      </handler> -->
     </handlers>
   </binding>
 </bindings>
