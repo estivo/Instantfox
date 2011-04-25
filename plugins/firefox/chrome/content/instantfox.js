@@ -1,4 +1,4 @@
-//(function() {
+(function() {
   var   InFoxPrefs    = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService),
         StringService = Components.classes["@mozilla.org/intl/stringbundle;1"].getService(Components.interfaces.nsIStringBundleService),
         LocaleService = Components.classes["@mozilla.org/intl/nslocaleservice;1"].getService(Components.interfaces.nsILocaleService),
@@ -355,10 +355,11 @@ var _input = function(event) {
 window.addEventListener('load', instantFoxLoad, true);
 //window.addEventListener('unload', instantFoxUnload, true);
 
-//})();
+})();
 
 // modify URLBarSetURI defined in browser.js
 function URLBarSetURI(aURI) {
+	var HH = InstantFox.HH;
 	// auri is null if URLBarSetURI is called from urlbar.handleRevert
 	if (HH._isOwnQuery) {
 		if (aURI && HH._url._ctabID == HH._ctabID){
