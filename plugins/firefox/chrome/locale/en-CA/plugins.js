@@ -17,6 +17,10 @@
   };
   
   InstantFox.Plugins.extend({
+    weather: {
+      url: 'http://weather.instantfox.net/%q',
+      json: 'http://maps.google.de/maps/suggest?q=%q&cp=999&gl=en-ca&gl=en-ca&v=2&json=b'
+    },
     googleFrame: {
       url: 'http://www.google.%ld/#hl=%ls&q=%q&fp=1&cad=b',
       json: 'http://suggestqueries.google.com/complete/search?json&q=%q&hl=en-ca'
@@ -27,11 +31,11 @@
     },
     googleMaps: {
       url: 'http://maps.google.ca/maps?q=%q',
-	  json:false 
+      json: 'http://maps.google.de/maps/suggest?q=%q&cp=999&gl=en-ca&gl=en-ca&v=2&json=b'
     },
     youTube: {
       url: 'http://www.youtube.com/results?search_query=%q',
-	  json: 'http://suggestqueries.google.com/complete/search?json&ds=yt&q=%q'
+      json: 'http://suggestqueries.google.com/complete/search?json&ds=yt&q=%q'
     },
     googleluck: {
       url: 'http://www.google.com/search?hl=%ls&q=%q&btnI=Auf+gut+Gl%C3%BCck!',
@@ -42,27 +46,27 @@
    	  json: false
     },
     amazon: {
-       url: 'http://www.amazon.ca/gp/search?ie=UTF8&keywords=%q&tag=609-20&index=aps&linkCode=ur2&camp=15121&creative=330641',
-	  json: 'http://completion.amazon.co.uk/search/complete?method=completion&q=%q&search-alias=aps&mkt=4'
+      url: 'http://www.amazon.ca/gp/search?ie=UTF8&keywords=%q&tag=609-20&index=aps&linkCode=ur2&camp=15121&creative=330641',
+      json: 'http://completion.amazon.co.uk/search/complete?method=completion&q=%q&search-alias=aps&mkt=4'
     },
     ebay: {
       url: 'http://shop.ebay.%ld/?_nkw=%q',
-	  json: 'http://anywhere.ebay.com/services/suggest/?s=0&q=%q'
+      json: 'http://anywhere.ebay.com/services/suggest/?s=0&q=%q'
     },
     yahoo: {
       url: 'http://search.yahoo.com/search?p=%q&ei=UTF-8',
-	  json: false
+      json: false
     },
     bing: {
       url: 'http://www.bing.com/search?q=%q&form=QBLH',
-	  json: 'http://api.bing.com/osjson.aspx?query=%q&form=OSDJAS'
+      json: 'http://api.bing.com/osjson.aspx?query=%q&form=OSDJAS'
     },
     wikipedia: {
       url: 'http://en.wikipedia.org/w/index.php?search=%q',
-	  json: 'http://en.wikipedia.org/w/api.php?action=opensearch&search=%q'
+      json: 'http://en.wikipedia.org/w/api.php?action=opensearch&search=%q'
     },
     wolframalpha: {
       url: 'http://www.wolframalpha.com/input/?i=%q',
-	  json: false
+      json: false
     }
   });
