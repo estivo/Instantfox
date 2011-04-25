@@ -19,11 +19,11 @@
   InstantFox.Plugins.extend({
     weather: {
       url: 'http://weather.instantfox.net/%q',
-      json:false
+      json: 'http://maps.google.com/maps/suggest?q=%q&cp=999&hl=de&gl=de&v=2&json=b'
     },
     googleFrame: {
       url: 'http://www.google.%ld/#hl=%ls&q=%q&fp=1&cad=b',
-      json: 'http://maps.google.de/maps/suggest?q=%q&cp=999&hl=en-us&gl=en-us&v=2&json=b'
+      json: 'http://suggestqueries.google.com/complete/search?json&q=%q&hl=en-us'
     },
     googleImages: {
       url: 'http://www.google.%ld/images?q=%q&hl=%ls',
