@@ -283,8 +283,11 @@ var Ci	= Components.interfaces;
 				}
 				
 				
+				var tmp_results = new Array();
 				var type_not_found = true;
 								
+				// code could be redcued but no need ;)
+							
 				if('m,f'.indexOf(api['key'])!=-1){
 					if(xhr_return['suggestion']){
 						type_not_found = false;
