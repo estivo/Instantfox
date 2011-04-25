@@ -300,5 +300,25 @@
 
 
     </implementation>
+	<handlers>
+      <handler event="mouseup">
+        <![CDATA[
+		// todo: find why key is stripped from url and gURLBar.controller.getValueAt(gURLBar.popup.selectedIndex);
+		var key = this.getAttribute("text").trim().split(' ')[0]
+		var search = key + ' ' + this.getAttribute("url")
+
+		InstantFox.HH.onEnter(search)
+        event.preventDefault()
+		event.stopPropagation()
+      ]]>
+      </handler>
+
+     <!--  <handler event="mousemove">
+        <![CDATA[
+        event.preventDefault()
+		event.stopPropagation()
+      ]]> -->
+      </handler>
+    </handlers>
   </binding>
 </bindings>

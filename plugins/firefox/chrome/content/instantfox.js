@@ -230,7 +230,32 @@ var HH = {
 	  XULBrowserWindow.InsertShaddowLink(InstantFox.current_shaddow,query);
 	  
 	  return true; //(gURLBar.value.replace(/^\s+|\s+$/g, '').search(' ') > -1);
-    }
+    },
+	
+	onEnter: function(value){
+	  HH._url.abort=true;
+	  //InstantFox.Plugins[InstantfoxHH._url.actp]; // improve it later!
+	  
+	  var tmp = InstantFox.query(value);
+	  	  
+	  if(content.document.location.href != tmp['loc']){
+		if(HH._overwriteHist()){
+		  content.location.replace(tmp['loc']);
+		}else{
+		  content.location.assign(tmp['loc']);
+		}
+		HH._url.hist_last = tmp['loc'];
+		//content.document.location.assign(tmp['loc']);
+	  }
+	  gURLBar.value = tmp['loc'];
+	  gBrowser.userTypedValue = null;
+	  
+	  HH._blankShaddow();
+	  HH._isOwnQuery  = false;
+	  HH._focusPermission(true);
+	
+	  gBrowser.selectedBrowser.focus();		
+	}
 };
 
 //firefox 4 doesn't need _focusPermission
@@ -252,6 +277,7 @@ var instantFoxLoad = function(event) {
 	gURLBar.setAttribute('autocompletesearch',	'instantFoxAutoComplete');
 	// tell InstantFox which internationalization & URLBar to use
     InstantFox._i18n = I18n;
+	InstantFox.HH = HH;
 	//gBrowser.addProgressListener(HH._observe, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
 	
 	gURLBar.addEventListener('keydown', _keydown, false);
@@ -304,36 +330,8 @@ var _keydown = function(event) {
 		event.preventDefault();
 	  }
 	} else if (key == 13 && !alt && !meta && !ctrl) { // 13 == ENTER
-	  HH._url.abort=true;
-	  //InstantFox.Plugins[InstantfoxHH._url.actp]; // improve it later!
-	  
-	  var tmp = InstantFox.query(gURLBar.value,event);
-	  //content.document.location.assign(tmp['loc']);
-	  
-	  gURLBar.value = tmp['loc'];		
-	  
-	  if(content.document.location.href != tmp['loc']){
-		if(HH._overwriteHist()){
-		  content.location.replace(tmp['loc']);
-		}else{
-		  content.location.assign(tmp['loc']);
-		}
-		HH._url.hist_last = tmp['loc'];
-		//content.document.location.assign(tmp['loc']);
-	  }
-	  event.preventDefault();
-	  gURLBar.value = tmp['loc'];
-	  gBrowser.userTypedValue = null;
-
-	  
-	  HH._blankShaddow();
-	  HH._isOwnQuery  = false;
-	  HH._focusPermission(true);
-	
-	  gBrowser.selectedBrowser.focus();	
-	  //gBrowser.selectedBrowser.focus();		
-	  //gBrowser.mCurrentBrowser.focus();
-	  //content.document.defaultView.focus();
+	  HH.onEnter(gURLBar.value)
+ 	  event.preventDefault();
 	} 
   }else if(key == 32 && ctrl) { // 32 == SPACE
 	gURLBar.value = InstantFox.queryFromURL()
@@ -361,8 +359,9 @@ window.addEventListener('load', instantFoxLoad, true);
 
 // modify URLBarSetURI defined in browser.js
 function URLBarSetURI(aURI) {
+	// auri is null if URLBarSetURI is called from urlbar.handleRevert
 	if (HH._isOwnQuery) {
-		if (HH._url._ctabID == HH._ctabID){
+		if (aURI && HH._url._ctabID == HH._ctabID){
 			return;
 		} else { //hide shadow if user switched tabs
 			HH._blankShaddow();
