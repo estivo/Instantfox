@@ -54,6 +54,8 @@ InstantFox = new ExtClass;
 				p.url = p.url.replace(localeRe, replacer)
 				p.domain = p.url.match(domainRe)[1]
 				p.key = key
+				p.name = i 
+				p.id = i
 			}
 			
 			if(p.json)
@@ -87,12 +89,12 @@ InstantFox = new ExtClass;
 	  }else return false;
 	},
 	
-	queryFromURL: function(){
+	queryFromURL: function(url){
 		function escapeRegexp(text) {
 			return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 		}
 
-		var url=gURLBar.value, match=false;
+		var match=false;
 		for(var key in InstantFox.Shortcuts){
 			var i = InstantFox.Shortcuts[key]
 			var p = InstantFox.Plugins[i]
@@ -103,13 +105,22 @@ InstantFox = new ExtClass;
 				}
 			}
 		}
-		if(!match)
-			return '';
-
-		var m = p.url.match(/(.[^&?#]*)%q(.?)/)
-		var re = RegExp(escapeRexp(m[1])+'([^&]*)')
-		var queryString = (url.match(re)||{})[1]
+		if(!match){
+			if(url.indexOf('.wikipedia.') > 0){
+				var regexp=/\/([^\/#]*)(?:#|$)/
+				p = InstantFox.Plugins.wikipedia
+			}else
+				return null;
+		}
 		
+		if(!regexp){
+			var m = p.url.match(/(.[^&?#]*)%q(.?)/)
+			regexp = RegExp(escapeRegexp(m[1])+'([^&]*)')
+		}
+		var queryString = (url.match(regexp)||{})[1]
+		if(!queryString)
+			return null;
+
 		return p.key + ' ' + decodeURIComponent(queryString);
 	},
 

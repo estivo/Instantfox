@@ -73,6 +73,28 @@ img{
 	padding: 3px;
 	background-color: #EEF9FF;
 }
+.plugin:hover{
+	background-image:-moz-radial-gradient(50%  bottom, rgba(250,250,100,0.3)0%,  rgba(250,250,250,0.0) 100%);
+	-moz-box-shadow:0px 0px 2px 2px rgba(250,250,100,0.8);
+}
+/* close button */
+.close-button {
+  -moz-appearance: none;
+  -moz-image-region: rect(0, 64px, 16px, 48px);
+  border: none;
+  padding: 0px;
+  list-style-image: url("chrome://global/skin/icons/close.png");
+}
+
+
+.tab-close-button:hover {
+  -moz-image-region: rect(0, 32px, 16px, 16px);
+}
+
+.tab-close-button:hover:active {
+  -moz-image-region: rect(0, 48px, 16px, 32px);
+}
+
 </html:style>
 
 <vbox id="vbox1" flex='1'>
@@ -84,7 +106,12 @@ img{
     <vbox id='head'></vbox>
     <vbox id='container'/>
   </vbox>
-  <hbox>
+  <hbox id='status-bar'>
+	<toolbarbutton id='' label='add plugin' type='menu' oncommand='clearPrefs();updatePrefButtonVisibility()'>
+		<menupopup>
+		</menupopup>
+	</toolbarbutton>
+
 	<toolbarbutton id='cleanupPrefs' label='cleanup Prefs' oncommand='clearPrefs();updatePrefButtonVisibility()'/>
 	<spacer flex='1'/>
 	<button label='ok' oncommand='close()'/>
@@ -133,7 +160,6 @@ function makeURI(aURL, aOriginCharset, aBaseURI) {
 function getFavicon(url){
 	//try{
 		var host = url.match(/:\/\/([^\/#?]*)/)[1];
-		dump(host)
 		var icon = faviconService.getFaviconImageForPage(makeURI('http://'+host)).spec
 		if(icon != faviconService.defaultFavicon.spec)
 			return icon
@@ -187,12 +213,37 @@ for(var key in InstantFox.Shortcuts){
 	var i = InstantFox.Shortcuts[key]
 	var p = InstantFox.Plugins[i]
 	if(p && p.url){
-		p.favicon = getFavicon(p.url)
+		p.favicon = p.iconURI || getFavicon(p.url)
 		p.name = i
 		xml.push(formatString(xmlFragment,p))
 	}
 }
 appendXML($("container"), xml.join(''))
+
+
+function pluginFromNsiSearch(bp){
+	var url = bp.getSubmission('%qqq',"text/html")
+	if(!url)
+		return
+	url = url.uri.spec.replace('%25qqq','%q')
+	
+	var json = bp.getSubmission('%qqq',"application/x-suggestions+json")
+	if(json)
+		json = json.uri.spec.replace('%25qqq','%q')
+	else
+		json = false
+	
+	var name = bp.name
+	var iconURI = bp.iconURI && bp.iconURI.spec
+	return {
+		json:json,url:url,iconURI:iconURI,name:name,id:name
+	}	
+}
+bss=Cc["@mozilla.org/browser/search-service;1"].getService(Ci.nsIBrowserSearchService)
+bss.getEngines().map(pluginFromNsiSearch)
+
+
+
 
 ]]></script>
 

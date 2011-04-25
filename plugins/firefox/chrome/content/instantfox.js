@@ -232,8 +232,14 @@ HH.openOptionsPopup = function(p){
 	var i = document.createElement('iframe')
 	i.setAttribute('src','chrome://instantfox/content/options.xul')
 	p.appendChild(i)
+	i.contentWindow.close=HH.closeOptionsPopup
 	i.width=500
 	i.height=500
+}
+
+HH.closeOptionsPopup = function(p){
+	p =p || document.getElementById('instantFox-options').firstChild
+	p.hidePopup()
 }
 
 //firefox 4 doesn't need _focusPermission
@@ -336,9 +342,33 @@ var _keydown = function(event) {
 	  //gBrowser.selectedBrowser.focus();		
 	  //gBrowser.mCurrentBrowser.focus();
 	  //content.document.defaultView.focus();
-	} 
-  }else if(key == 32 && ctrl) { // 32 == SPACE
-	gURLBar.value = InstantFox.queryFromURL()
+	}
+  }
+  if(key == 32 && ctrl) { // 32 == SPACE
+	var origVal = gURLBar.value, simulateInput
+	var keyIndex = origVal.indexOf(' ')
+	var key=origVal.substring(0,keyIndex)
+	
+	if(key in InstantFox.Shortcuts){
+		gURLBar.value = '`'+origVal
+		gURLBar.selectionStart=1
+		gURLBar.selectionEnd=keyIndex+1
+		simulateInput=true
+	}else{	
+		var val = InstantFox.queryFromURL(origVal)
+		if(val){
+			gURLBar.value = val		
+		}else{
+			gURLBar.selectionStart = 0
+			gURLBar.selectionEnd = origVal.length
+		}
+	}
+	
+	if(simulateInput){
+		gURLBar.controller.handleText(true)
+		_input()
+		event.preventDefault();	
+	}
   }
 };
 
