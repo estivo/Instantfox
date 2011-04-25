@@ -153,11 +153,11 @@ InstantFox = new ExtClass;
 	  
 	},
 	
-	elem_create: function(tag, class, content){
+	elem_create: function(tag, className, content){
 	  var doc = content.document;//document.implementation.createDocument("", "", null);
   
 	  var elem = doc.createElement(tag);
-	  elem.setAttribute("class", class);
+	  elem.setAttribute("class", className);
 	  elem.appendChild( doc.createTextNode(content) );
 	  //div.style.color = 'green';
 	  
