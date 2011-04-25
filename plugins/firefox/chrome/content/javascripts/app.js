@@ -40,6 +40,37 @@ InstantFox = new ExtClass;
 			current_shaddow = test
 			right_shaddow = est
     */
+	preprocessPlugins: function(){
+      	this.localeMap = {
+				'%ll': this._i18n('locale.long'),
+      			'%ls': this._i18n('locale.short'),
+      			'%ld': this._i18n('locale.domain')
+			};
+		var localeRe=/%l(?:s|l|d)/g,
+			domainRe = /:\/\/([^#?]*)/;
+		function replacer(m) InstantFox.localeMap[m]
+		
+		for(var key in InstantFox.Shortcuts){
+			var i = InstantFox.Shortcuts[key]
+			var p = InstantFox.Plugins[i]
+			if(!p)
+				continue
+			
+			if(p.url){
+				p.url = p.url.replace(localeRe, replacer)
+				p.domain = p.url.match(domainRe)[1]
+				p.key = key
+				p.name = i 
+				p.id = i
+			}
+			
+			if(p.json)
+				p.json = p.json.replace(localeRe, replacer)
+			else
+				p.json = false
+		}
+		
+	},
 	
 	query4comp: function(){
 	  // this query is executed by component
@@ -67,17 +98,46 @@ InstantFox = new ExtClass;
 	  }else return false;
 	},
 	
-	queryFromURL: function(){
-		// todo: find a plugin key by url, for FS#79
-		var gotourl = InstantFox.Plugins.googleFrame.url;
-      	gotourl = gotourl.replace('%ll', this._i18n('locale.long'))
-      	                 .replace('%ls', this._i18n('locale.short'))
-      	                 .replace('%ld', this._i18n('locale.domain'));
-		var i = gotourl.indexOf('%q')
-		var queryString = gURLBar.value.slice(i, -gotourl.length+i+2)
+	queryFromURL: function(url){
+		if(!this.pluginsReady){
+			this.preprocessPlugins();
+			this.pluginsReady = true;
+		}
+		function escapeRegexp(text) {
+			return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+		}
 
+		var match=false;
+		for(var key in InstantFox.Shortcuts){
+			var i = InstantFox.Shortcuts[key]
+			var p = InstantFox.Plugins[i]
+			if(p && p.url){
+				if(url.indexOf(p.domain)!=-1){
+					match=true;
+					break;
+				}
+			}
+		}
+		if(!match){
+			if(url.indexOf('.wikipedia.') > 0){
+				var regexp=/\/([^\/#]*)(?:#|$)/
+				p = InstantFox.Plugins.wikipedia
+			}else if(url.indexOf('weather.instantfox.net') > 0){
+				var regexp=/\/([^\/#]*)(?:#|$)/
+				p = InstantFox.Plugins.weather
+			}else 
+				return null;
+		}
 		
-		return 'g '+decodeURIComponent(queryString);
+		if(!regexp){
+			var m = p.url.match(/(.[^&?#]*)%q(.?)/)
+			regexp = RegExp(escapeRegexp(m[1])+'([^&]*)')
+		}
+		var queryString = (url.match(regexp)||{})[1]
+		if(!queryString)
+			return null;
+
+		return p.key + ' ' + decodeURIComponent(queryString);
 	},
 
 	

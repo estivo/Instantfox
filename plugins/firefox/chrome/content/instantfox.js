@@ -333,8 +333,37 @@ var _keydown = function(event) {
 	  HH.onEnter(gURLBar.value)
  	  event.preventDefault();
 	} 
-  }else if(key == 32 && ctrl) { // 32 == SPACE
-	gURLBar.value = InstantFox.queryFromURL()
+  }
+  if(key == 32 && ctrl) { // 32 == SPACE
+	var origVal = gURLBar.value, simulateInput
+	var keyIndex = origVal.indexOf(' ')
+	var key=origVal.substring(0,keyIndex)
+	
+	if(key in InstantFox.Shortcuts){
+		//gURLBar.value = '`'+origVal
+		if (gURLBar.selectionStart<=keyIndex) {
+			gURLBar.selectionStart = keyIndex+1
+			gURLBar.selectionEnd = origVal.length
+		} else {
+			gURLBar.selectionStart=0
+			gURLBar.selectionEnd=keyIndex
+		}
+		simulateInput=true
+	}else{	
+		var val = InstantFox.queryFromURL(origVal)
+		if(val){
+			gURLBar.value = val		
+		}else{
+			gURLBar.selectionStart = 0
+			gURLBar.selectionEnd = origVal.length
+		}
+	}
+	
+	if(simulateInput){
+		gURLBar.controller.handleText(true)
+		_input()
+		event.preventDefault();	
+	}
   }
 };
 
