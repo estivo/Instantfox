@@ -23,7 +23,7 @@
   <toolbarpalette id="BrowserToolbarPalette">
 	<toolbarbutton type="menu" id='instantFox-options' class='toolbarbutton-1 chromeclass-toolbar-additional'
 	style='list-style-image:none'>
-		<panel onpopupshowing="if(event.target==this)HH.openOptionsPopup(this)"></panel>
+		<panel onpopupshowing="if(event.target==this)InstantFox.HH.openOptionsPopup(this)"></panel>
 	</toolbarbutton>
   </toolbarpalette>
 </overlay>

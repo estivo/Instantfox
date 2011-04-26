@@ -1,5 +1,3 @@
-//(function() {
-  
   /**
    * Plugins for Shortcuts
    * Defining: InstantFox.Plugins.extend(obj Plugin);
@@ -76,8 +74,9 @@
             // .. Calculate ..
             var vlr = eval('('+ret+')').toString();
             if (vlr != ret) {
-              InstantFox.content('<div class="env calculator">'+ret+' = <span class="result">'+vlr+'</span></div>');
-              InstantFox.title(ret+' = '+vlr);
+              //InstantFox.content('<div class="env calculator">'+ret+' = <span class="result">'+vlr+'</span></div>');
+			  InstantFox.attr_create('env calculator',ret+' = ','result',vlr);
+			  InstantFox.title(ret+' = '+vlr);
             }
           } catch(ex) {}
         }
@@ -90,8 +89,9 @@
           if (vlr.length>0) {
             for(var i=0;i<vlr.length;i++) {
               if (this.scope.indexOf(vlr.charAt(i)) < 0) {
-                InstantFox.content('<div class="env calculator">Unkown operation.<br />Available operators: '+this.scope+'</div>');
-                return null;
+                //InstantFox.content('<div class="env calculator">Unkown operation.<br />Available operators: '+this.scope+'</div>');
+				InstantFox.attr_create('env calculator','Unkown operation. Available operators:'+this.scope);
+				return null;
               }
             };
             return vlr;
@@ -101,98 +101,5 @@
         }
       }
     },
-    
-    weather: {
-      url: 'http://search.instantfox.net/gapi.php?weather=%q&hl=%ls',
-      baseUrl: 'http://www.google.com',
-    
-      // Using Apache-Proxy
-      // ProxyPass /gapi http://www.google.com/ig/api
-    
-      script: function(query) {
-        var html = '', self = this;
-			
-        function cloneArray(array) {
-			var newArray = [];
-			for (var i = 0; i < array.length; ++i) {
-				 newArray.push(array[i]);        
-			}
-			return newArray;
-		}
-		
-		function FtoC(F)(F - 32) * 5/9 
-		function FAndC(F)Math.round(FtoC(parseFloat(F)))+'°C / '+F+'°F'
-		function getData(dom,name){
-			try{
-				if(name)
-					return escapeHTML(dom.querySelector(name).getAttribute('data'))
-				else
-					return escapeHTML(dom.getAttribute('data'))
-			}catch(e){return ''}
-		}
-		function escapeHTML(str) str.replace(/[&"<>]/g, function(m)"&"+escapeMap[m]+";");
-		var escapeMap = { "&": "amp", '"': "quot", "<": "lt", ">": "gt" }
-		
-        this.ajax({
-          url: this.url.replace('%q', encodeURIComponent(query)),
-          method: 'get',
-          dataType: 'xml',
-          success: function(data) {
-            // Reset InstantFox-Content ..
-            // .. so that nothing confuses while loading
-            InstantFox.content('');
-            var doc = data.target.responseXML
-            var city = doc.querySelectorAll('city');
-            
-            if(city.length > 0) {
-              html += '<h1 class="ccity">'+getData(city[0])+'</h1>';
-            }
-            
-            // Current Condition HTML-Building from XML
-            var current = doc.querySelectorAll('current_conditions');
-            if (current.length > 0) {
-			  current = current[0]
-              html += '<div class="weather current">';
-              html += '<div class="day">Today</div>';
-              html += '<img class="icon" src="'+self.baseUrl+getData(current,'icon')+'" />';
-              html += '<div class="condition">Condition: '+getData(current,'condition')+'</div>';
-              html += '<div class="temp_c">Temperature: '+getData(current,'temp_c')+'°C / '
-			                        +getData(current,'temp_f')+'°F</div>';
-              html += '</div>';
-            };
-            
-            // Forecast HTML-Building from XML
-            var forecast = cloneArray(doc.querySelectorAll('forecast_conditions'));
-            if (forecast.length > 0) {
-              forecast.forEach(function(dom) {                
-                html += '<div class="weather forecast">';
-                html += '<div class="day">'+getData(dom,'day_of_week')+'</div>';
-                html += '<img class="icon" src="'+self.baseUrl+getData(dom,'icon')+'" />';
-                html += '<div class="condition">Condition: '+getData(dom,'condition')+'</div>';
-                html += '<div class="low">Low: '+FAndC(getData(dom,'low'))+'</div>';
-                html += '<div class="high">High: '+FAndC(getData(dom,'high'))+'</div>';
-                html += '</div>';
-              });
-            }
-            
-            // If there were any results, make them visible
-            if (html.length > 0) {
-              InstantFox.content('<div class="env">'+html+'</div>');
-              InstantFox.title(getData(city[0])+' weather');
-            }
-          }
-        });
-        
-        return { loc: false, id: 'weather' };
-      },
-	  ajax: function(o){
-	    var req = new XMLHttpRequest() 
-		req.open("GET", o.url, true); 
-		req.onload = o.success;
-	    try {
-          req.send(null);
-        } catch (e) {}
-	  }
-    }
+
   });
-//})();

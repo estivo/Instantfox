@@ -109,7 +109,10 @@ InstantFox = new ExtClass;
 			if(url.indexOf('.wikipedia.') > 0){
 				var regexp=/\/([^\/#]*)(?:#|$)/
 				p = InstantFox.Plugins.wikipedia
-			}else
+			}else if(url.indexOf('weather.instantfox.net') > 0){
+				var regexp=/\/([^\/#]*)(?:#|$)/
+				p = InstantFox.Plugins.weather
+			}else 
 				return null;
 		}
 		
@@ -159,11 +162,53 @@ InstantFox = new ExtClass;
       
       return { loc: src, id: false };
     },
-  
+
     content: function(c) {
-      content.document.getElementById('container').innerHTML = c;
-    },
+	  var container = content.document.getElementById('container');
+	  if(!container){
+		  // fixing of content.document.getElementById("container") is null
+		  var div = content.document.createElement('div');
+		  div.setAttribute("id", container);
+		  div.innerHTML = c;
+		  content.document.appendChild(div);
+	  }else{
+        content.document.getElementById('container').innerHTML = c;
+	  }
+	},
     
+	attr_create: function(div_c, div_n, span_c, span_n){
+	  var doc = content.document;//document.implementation.createDocument("", "", null);
+	  var container = content.document.getElementById('container');  
+	  if(container.firstChild) container.removeChild(container.firstChild);
+  
+	  var div = doc.createElement('div');
+	  div.setAttribute("class", div_c);
+	  div.appendChild( doc.createTextNode(div_n) );
+	  //div.style.color = 'green';
+	  
+	  if(typeof span_c!='undefined'){
+	  	var span = doc.createElement('span');
+	    span.setAttribute("class", span_c);
+	    span.appendChild( doc.createTextNode(span_n) );
+		div.appendChild(span);
+	  }
+	  
+	  container.appendChild(div);
+	  
+	},
+	
+	elem_create: function(tag, className, content){
+	  var doc = content.document;//document.implementation.createDocument("", "", null);
+  
+	  var elem = doc.createElement(tag);
+	  elem.setAttribute("class", className);
+	  elem.appendChild( doc.createTextNode(content) );
+	  //div.style.color = 'green';
+	  
+	  return elem;
+	  
+	},
+	
     title: function(t) {
       content.document.title = t + ' | InstantFox';
     },

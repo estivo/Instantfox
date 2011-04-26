@@ -39,7 +39,7 @@ function dump() {
 Cc["@mozilla.org/appshell/appShellService;1"]
    .getService(Ci.nsIAppShellService).hiddenDOMWindow._InstantFox_Component_Scope_ = this;
 // ******************************** end debug region ******************************/
-	
+
 	var InstantFox_Comp = {
 		processed_results:false,
 		Wnd:'',
@@ -176,7 +176,6 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 		},
 		
 		getImageAt: function(index){//#2
-			debug(index)
 			try{
 				var numResults = Math.min(this._result.matchCount, this._maxNumResults);
 				if(index < numResults){
@@ -272,7 +271,7 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 			_search._result					= null;
 			var internal_results			= {values: [], comments: [], images: [], last: []};
 			
-			if(InstantFox_Comp.Wnd.HH._url.abort){
+			if(InstantFox_Comp.Wnd.InstantFox.HH._url.abort){
 				this.historyAutoComplete&&this.historyAutoComplete.stopSearch();
 				var newResult = new SimpleAutoCompleteResult(
 					searchString, Ci.nsIAutoCompleteResult.RESULT_NOMATCH,
@@ -293,7 +292,7 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 						internal_results
 					);
 				listener.onSearchResult(self, newResult);
-				InstantFox_Comp.Wnd.HH._url.seralw = true;
+				InstantFox_Comp.Wnd.InstantFox.HH._url.seralw = true;
 				return true;
 			}
 
@@ -304,6 +303,9 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 				var rtoparse = xhttpreq.responseText
 
 				try{
+					if('m,f'.indexOf(api['key'])!=-1){
+						 rtoparse = rtoparse.replace(/(\w+):/gi, '"\$1":');
+					}
 					var xhr_return = JSON.parse(rtoparse);
 				}
 				catch(e){
@@ -316,23 +318,22 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 								
 				// code could be redcued but no need ;)
 							
-				if(api['key'] == "m"){
-
-					if(xhr_return[2]){
+				if('m,f'.indexOf(api['key'])!=-1){
+					if(xhr_return['suggestion']){
 						type_not_found = false;
 						
 						var gotourl = api['gotourl'];
 						
-						for(var i=0; i < xhr_return[3].length;i++){		
+						for(var i=0; i <  xhr_return['suggestion'].length; i++){
 								var result_info	= {};
-								var result		= xhr_return[3][i];
+								var result		= xhr_return['suggestion'][i]['query']; //sorted_results[j];
 								
 								if(i==0){
-									InstantFox_Comp.Wnd.HH._url.seralw = false;
+									InstantFox_Comp.Wnd.InstantFox.HH._url.seralw = false;
 									if(InstantFox_Comp.Wnd.InstantFox.current_shaddow !=  result){
 										InstantFox_Comp.Wnd.InstantFox.current_shaddow = result;
 										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(result,api['query']);
-										InstantFox_Comp.Wnd.HH._goto4comp(gotourl.replace('%q', encodeURIComponent(result)));
+										InstantFox_Comp.Wnd.InstantFox.HH._goto4comp(gotourl.replace('%q', encodeURIComponent(result)));
 									}
 								}
 								
@@ -346,13 +347,14 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 								internal_results.comments.push(result_info.title);
 								internal_results.images.push(result_info.icon);
 								
-								if(i==xhr_return[3].length-1){
+								if(i== xhr_return['suggestion'].length-1){
 									internal_results.last.push(true);
 								}else{
 									internal_results.last.push(false);
 								}
-						}		
+						}
 					}
+					
 				}
 				if('g,i,y,w,a,b,e'.indexOf(api['key'])!=-1){
 					if(xhr_return[1]){
@@ -360,17 +362,17 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 						
 						var gotourl = api['gotourl'];
 						
-						if(xhr_return[1].length == 0) InstantFox_Comp.Wnd.HH._url.seralw = true;					
+						if(xhr_return[1].length == 0) InstantFox_Comp.Wnd.InstantFox.HH._url.seralw = true;
 						for(var i=0; i < xhr_return[1].length;i++){		
 								var result_info	= {};
 								var result		= xhr_return[1][i];
 
 								if(i==0){
-									InstantFox_Comp.Wnd.HH._url.seralw = false;
+									InstantFox_Comp.Wnd.InstantFox.HH._url.seralw = false;
 									if(InstantFox_Comp.Wnd.InstantFox.current_shaddow != result){
 										InstantFox_Comp.Wnd.InstantFox.current_shaddow = result;
 										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(result,api['query']);
-										InstantFox_Comp.Wnd.HH._goto4comp(gotourl.replace('%q', encodeURIComponent(result)));
+										InstantFox_Comp.Wnd.InstantFox.HH._goto4comp(gotourl.replace('%q', encodeURIComponent(result)));
 									}
 								}
 								
@@ -428,8 +430,6 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 		},
 	};
 	
-	dump('-----*-----')
-	
 	if (XPCOMUtils.generateNSGetFactory)
 	    var NSGetFactory = XPCOMUtils.generateNSGetFactory([InstantFoxSearch]);
 	else
@@ -476,12 +476,12 @@ SimpleAutoCompleteResult.prototype = {
 
 	getValueAt: function(index) { return this.list.values[index];},
 	getCommentAt: function(index) { return this.list.comments[index];},
-	getImageAt : function (index) { return this.list.images[index];},
+	getImageAt: function(index) { return this.list.images[index];},
 	getLabelAt: function(index) { return this.list.comments[index]; },
 	getStyleAt: function(index) { return "InstantFoxSuggest"},
 	
 	removeValueAt: function(index, removeFromDb) {
-		this.list.values.splice(index, 1);		
+		this.list.values.splice(index, 1);
 	},
 	QueryInterface: function(aIID) {
 		if (!aIID.equals(Ci.nsIAutoCompleteResult) && !aIID.equals(Ci.nsISupports))

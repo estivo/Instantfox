@@ -224,7 +224,32 @@ var HH = {
 	  XULBrowserWindow.InsertShaddowLink(InstantFox.current_shaddow,query);
 	  
 	  return true; //(gURLBar.value.replace(/^\s+|\s+$/g, '').search(' ') > -1);
-    }
+    },
+	
+	onEnter: function(value){
+	  HH._url.abort=true;
+	  //InstantFox.Plugins[InstantfoxHH._url.actp]; // improve it later!
+	  
+	  var tmp = InstantFox.query(value);
+	  	  
+	  if(content.document.location.href != tmp['loc']){
+		if(HH._overwriteHist()){
+		  content.location.replace(tmp['loc']);
+		}else{
+		  content.location.assign(tmp['loc']);
+		}
+		HH._url.hist_last = tmp['loc'];
+		//content.document.location.assign(tmp['loc']);
+	  }
+	  gURLBar.value = tmp['loc'];
+	  gBrowser.userTypedValue = null;
+	  
+	  HH._blankShaddow();
+	  HH._isOwnQuery  = false;
+	  HH._focusPermission(true);
+	
+	  gBrowser.selectedBrowser.focus();		
+	}
 };
 HH.openOptionsPopup = function(p){
 	while(p.hasChildNodes())
@@ -255,11 +280,12 @@ if('Services' in window) {
 }
   
 var instantFoxLoad = function(event) {
-	dump('onload')
+	dump('instantFoxOnLoad')
 	//window.removeEventListener('load', arguments.callee, true);        
 	// setup URLBar for components
 	gURLBar.setAttribute('autocompletesearch',	'instantFoxAutoComplete');
 	// tell InstantFox which internationalization & URLBar to use
+	InstantFox.HH = HH;
 	//gBrowser.addProgressListener(HH._observe, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
 	
 	gURLBar.addEventListener('keydown', _keydown, false);
@@ -268,6 +294,7 @@ var instantFoxLoad = function(event) {
 	HH._observeURLBar();
 	
 	// init plugins
+	InstantFox.preprocessPlugins();
     gBrowser.addEventListener("load", function(event) {
       if (event.originalTarget instanceof HTMLDocument) {
         for(var plugin in InstantFox.Plugins) {
@@ -281,7 +308,7 @@ var instantFoxLoad = function(event) {
 }
   
 var instantFoxUnload = function(event) {
-	dump('---***---',arguments.callee.caller)
+	//dump('---***---',arguments.callee.caller)
 	// todo: better cleanup
 	//gURLBar.removeEventListener('keydown', _keydown, false);
 	//gURLBar.removeEventListener('input', _input, false);	
@@ -312,37 +339,9 @@ var _keydown = function(event) {
 		event.preventDefault();
 	  }
 	} else if (key == 13 && !alt && !meta && !ctrl) { // 13 == ENTER
-	  HH._url.abort=true;
-	  //InstantFox.Plugins[InstantfoxHH._url.actp]; // improve it later!
-	  
-	  var tmp = InstantFox.query(gURLBar.value,event);
-	  //content.document.location.assign(tmp['loc']);
-	  
-	  gURLBar.value = tmp['loc'];		
-	  
-	  if(content.document.location.href != tmp['loc']){
-		if(HH._overwriteHist()){
-		  content.location.replace(tmp['loc']);
-		}else{
-		  content.location.assign(tmp['loc']);
-		}
-		HH._url.hist_last = tmp['loc'];
-		//content.document.location.assign(tmp['loc']);
-	  }
+	  HH.onEnter(gURLBar.value)
 	  event.preventDefault();
-	  gURLBar.value = tmp['loc'];
-	  gBrowser.userTypedValue = null;
-
-	  
-	  HH._blankShaddow();
-	  HH._isOwnQuery  = false;
-	  HH._focusPermission(true);
-	
-	  gBrowser.selectedBrowser.focus();	
-	  //gBrowser.selectedBrowser.focus();		
-	  //gBrowser.mCurrentBrowser.focus();
-	  //content.document.defaultView.focus();
-	}
+	} 
   }
   if(key == 32 && ctrl) { // 32 == SPACE
 	var origVal = gURLBar.value, simulateInput
@@ -350,9 +349,14 @@ var _keydown = function(event) {
 	var key=origVal.substring(0,keyIndex)
 	
 	if(key in InstantFox.Shortcuts){
-		gURLBar.value = '`'+origVal
-		gURLBar.selectionStart=1
-		gURLBar.selectionEnd=keyIndex+1
+		//gURLBar.value = '`'+origVal
+		if (gURLBar.selectionStart<=keyIndex) {
+			gURLBar.selectionStart = keyIndex+1
+			gURLBar.selectionEnd = origVal.length
+		} else {
+			gURLBar.selectionStart=0
+			gURLBar.selectionEnd=keyIndex
+		}
 		simulateInput=true
 	}else{	
 		var val = InstantFox.queryFromURL(origVal)
@@ -377,7 +381,7 @@ var _input = function(event) {
 	HH._url.abort=false;
 	HH._location = gURLBar.value;
 	gBrowser.userTypedValue = HH._location;
-	dump(HH._isQuery())
+
 	if (HH._isQuery()) {
 		HH._query(gURLBar.value, event);
 	}
@@ -393,9 +397,10 @@ window.addEventListener('load', instantFoxLoad, true);
 
 // modify URLBarSetURI defined in browser.js
 function URLBarSetURI(aURI) {
-	// aURI isn't defined if URLBarSetURI is called from urlbar.handleRevert
-	if (aURI && HH._isOwnQuery) {
-		if (HH._url._ctabID == HH._ctabID){
+	var HH = InstantFox.HH;
+	// auri is null if URLBarSetURI is called from urlbar.handleRevert
+	if (HH._isOwnQuery) {
+		if (aURI && HH._url._ctabID == HH._ctabID){
 			return;
 		} else { //hide shadow if user switched tabs
 			HH._blankShaddow();

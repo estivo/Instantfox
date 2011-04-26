@@ -241,23 +241,6 @@
         </body>
       </method>
 
-      <method name="_needsAlternateEmphasis">
-        <parameter name="aText"/>
-        <body>
-          <![CDATA[
-          for (let i = aText.length; --i >= 0; ) {
-            let charCode = aText.charCodeAt(i);
-            // Arabic, Syriac, Indic languages are likely to have ligatures
-            // that are broken when using the main emphasis styling
-            if (0x0600 <= charCode && charCode <= 0x109F)
-              return true;
-          }
-
-          return false;
-          ]]>
-        </body>
-      </method>
-
       <method name="_setUpDescription">
         <parameter name="aDescriptionElement"/>
         <parameter name="aText"/>
@@ -308,95 +291,27 @@
           var url = this.getAttribute("url");
           var title = this.getAttribute("title");
           var type = this.getAttribute("type");
-dump(type,title,url)
-this._setUpDescription(this._title, title);
-return
-          this.removeAttribute("actiontype");
 
-
-          // If the type includes an action, set up the item appropriately.
-          var types = type.split(/\s+/);
-          var actionIndex = types.indexOf("action");
-          if (actionIndex >= 0) {
-            let [,action, param] = url.match(/^moz-action:([^,]+),(.*)$/);
-            this.setAttribute("actiontype", action);
-            url = param;
-            this._setUpDescription(this._action, desc, true);
-
-            // Remove the "action" substring so that the correct style, if any,
-            // is applied below.
-            types.splice(actionIndex, 1);
-            type = types.join(" ");
-          }
-
-          // If we have a tag match, show the tags and icon
-          if (type == "tag") {
-            // Configure the extra box for tags display
-            this._extraBox.hidden = false;
-            this._extraBox.childNodes[0].hidden = false;
-            this._extraBox.childNodes[1].hidden = true;
-            this._extraBox.pack = "end";
-            this._titleBox.flex = 1;
-
-            // The title is separated from the tags by an endash
-            let tags;
-            [, title, tags] = title.match(/^(.+) \u2013 (.+)$/);
-
-            // Each tag is split by a comma in an undefined order, so sort it
-            let sortedTags = tags.split(",").sort().join(", ");
-
-            // Emphasize the matching text in the tags
-            this._setUpDescription(this._extra, sortedTags);
-
-            // Treat tagged matches as bookmarks for the star
-            type = "bookmark";
-          } else if (type == "keyword") {
-            // Configure the extra box for keyword display
-            this._extraBox.hidden = false;
-            this._extraBox.childNodes[0].hidden = true;
-            this._extraBox.childNodes[1].hidden = false;
-            this._extraBox.pack = "start";
-            this._titleBox.flex = 0;
-
-            // Hide the ellipsis so it doesn't take up space.
-            this._titleOverflowEllipsis.hidden = true;
-
-            // Put the parameters next to the title if we have any
-            let search = this.getAttribute("text");
-            let params = "";
-            let paramsIndex = search.indexOf(' ');
-            if (paramsIndex != -1)
-              params = search.substr(paramsIndex + 1);
-
-            // Emphasize the keyword parameters
-            this._setUpDescription(this._extra, params);
-
-            // Don't emphasize keyword searches in the title or url
-            this.setAttribute("text", "");
-          } else {
-            // Hide the title's extra box if we don't need extra stuff
-            this._extraBox.hidden = true;
-            this._titleBox.flex = 1;
-          }
-
-          // Give the image the icon style and a special one for the type
-          this._typeImage.className = "ac-type-icon" +
-            (type ? " ac-result-type-" + type : "");
-
-          // Show the url as the title if we don't have a title
-          if (title == "")
-            title = url;
-
-          // Emphasize the matching search terms for the description
-          this._setUpDescription(this._title, title);
-          this._setUpDescription(this._url, url);
-
-         
+		  this._setUpDescription(this._title, title);
+		  return;
           ]]>
         </body>
       </method>
 
 
     </implementation>
+	<handlers>
+      <handler event="mouseup">
+        <![CDATA[
+		// todo: find why key is stripped from url and gURLBar.controller.getValueAt(gURLBar.popup.selectedIndex);
+		var key = this.getAttribute("text").trim().split(' ')[0]
+		var search = key + ' ' + this.getAttribute("url")
+
+		InstantFox.HH.onEnter(search)
+        event.preventDefault()
+		event.stopPropagation()
+      ]]>
+      </handler>
+    </handlers>
   </binding>
 </bindings>
