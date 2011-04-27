@@ -133,10 +133,10 @@ var HH = {
 	     }
 		 */
 		 if(HH._overwriteHist()){
-		   getWebNavigation().loadURI(_location, (nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY || nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE), null, null, null);
+		   getWebNavigation().loadURI(_location, (nsIWebNavigation.LOAD_FLAGS_IS_LINK || nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY || nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE), null, null, null);
 		   //content.location.replace(_location);
 		 }else{
-    	   getWebNavigation().loadURI(_location, (nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE), null, null, null);
+    	   getWebNavigation().loadURI(_location, (nsIWebNavigation.LOAD_FLAGS_IS_LINK || nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE || nsIWebNavigation.LOAD_FLAGS_FIRST_LOAD), null, null, null);
 		   //content.location.assign(_location);
 		 }		 
 		 HH._url.hist_last = _location;
@@ -164,10 +164,10 @@ var HH = {
 			//debug((nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY | nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE));
 			HH._isOwnQuery = true;
 			if(HH._overwriteHist()){
-			  getWebNavigation().loadURI(url2go, (nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY || nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE), null, null, null);
+			  getWebNavigation().loadURI(url2go, (nsIWebNavigation.LOAD_FLAGS_IS_LINK || nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY || nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE), null, null, null);
 			  //content.location.replace(url2go);
 			}else{
-	 		  getWebNavigation().loadURI(url2go, (nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE), null, null, null);
+	 		  getWebNavigation().loadURI(url2go, (nsIWebNavigation.LOAD_FLAGS_IS_LINK || nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE || nsIWebNavigation.LOAD_FLAGS_FIRST_LOAD), null, null, null);
 			  //content.location.assign(url2go);
 			}
 			HH._url.hist_last = url2go;
@@ -257,10 +257,10 @@ var HH = {
 	  	  
 	  if(content.document.location.href != tmp['loc']){
 		if(HH._overwriteHist()){
-		  getWebNavigation().loadURI(tmp['loc'], (nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY || nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE), null, null, null);
+		  getWebNavigation().loadURI(tmp['loc'], (nsIWebNavigation.LOAD_FLAGS_IS_LINK || nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY || nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE), null, null, null);
 		  //content.location.replace(tmp['loc']);
 		}else{
-		  getWebNavigation().loadURI(tmp['loc'], (nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE), null, null, null);
+		  getWebNavigation().loadURI(tmp['loc'], (nsIWebNavigation.LOAD_FLAGS_IS_LINK || nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE || nsIWebNavigation.LOAD_FLAGS_FIRST_LOAD), null, null, null);
 		  //content.location.assign(tmp['loc']);
 		}
 		HH._url.hist_last = tmp['loc'];
