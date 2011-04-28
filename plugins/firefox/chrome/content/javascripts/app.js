@@ -117,9 +117,11 @@ InstantFox = new ExtClass;
 		}
 		
 		if(!regexp){
-			var m = p.url.match(/(.[^&?#]*)%q(.?)/)
-			regexp = RegExp(escapeRegexp(m[1])+'([^&]*)')
+			var m = p.url.match(/.([^&?#]*)%q(.?)/)
+			regexp = escapeRegexp(m[1])
+			regexp = RegExp('[&?#]'+regexp+'([^&]*)')
 		}
+		dump(regexp, p.url)
 		var queryString = (url.match(regexp)||{})[1]
 		if(!queryString)
 			return null;
