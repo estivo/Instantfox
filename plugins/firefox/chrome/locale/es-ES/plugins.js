@@ -62,7 +62,7 @@
       json: 'http://api.bing.com/osjson.aspx?query=%q&form=OSDJAS'
     },
     wikipedia: {
-      url: 'http://es.wikipedia.org/w/index.php?search=%q',
+      url: 'http://es.wikipedia.org/wiki/%q',
       json: 'http://es.wikipedia.org/w/api.php?action=opensearch&search=%q'
     },
     wolframalpha: {
