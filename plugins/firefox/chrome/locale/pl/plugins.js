@@ -37,7 +37,7 @@
       json: 'http://suggestqueries.google.com/complete/search?json&ds=yt&q=%q'
     },
     twitter: {
-      url: 'http://search.twitter.com/search?q=%q',
+      url: 'http://twitter.com/#!/search/%q',
    	  json: false
     },
     amazon: {
