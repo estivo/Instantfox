@@ -9,9 +9,10 @@ richlistitem[type ~= 'InstantFoxSuggest'] {
 	-moz-binding: url(chrome://instantfox/content/urlbar.xml#autocomplete-richlistitem) !important;
 	-moz-appearance: none;
 	border: none !important;
+	font-weight:bold !important;
 }
 html|span.InstantFoxSuggest.ac-emphasize-text{
 	text-decoration:none !important;
-	font-weight:bold !important;
+	font-weight:normal !important;
 	color:#000 !important;
 }
