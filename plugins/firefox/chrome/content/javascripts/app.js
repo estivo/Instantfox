@@ -1,4 +1,4 @@
-var ExtClass = function(parent){  
+var HHExtClass = function(parent){  
   var result = function() {};
 
   result.fn = result.prototype;
@@ -21,7 +21,7 @@ var ExtClass = function(parent){
  * .. parses URLBar Input Value and calls matching Plugin
  */
 
-InstantFox = new ExtClass;
+InstantFox = new HHExtClass;
 
 //(function() {
   InstantFox.extend({
@@ -245,4 +245,4 @@ InstantFox = new ExtClass;
   });
 //})();
 
-InstantFox.Plugins = new ExtClass;
+InstantFox.Plugins = new HHExtClass;
