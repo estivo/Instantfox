@@ -7,52 +7,40 @@
 
   <binding id="urlbar" extends="chrome://browser/content/urlbarBindings.xml#urlbar">
     <content sizetopopup="pref">
-      <xul:hbox class="autocomplete-textbox-container urlbar-textbox-container" flex="1">
-        <xul:stack flex="1">
-          <children includes="progressmeter"/>
-          <xul:hbox class="autocomplete-textbox-container-fission">
-        <xul:hbox class="textbox-icon-box"
-                  onmouseover="gURLBar._iconWasHovered = true;">
-          <children includes="image|deck|stack|box">
-            <xul:image class="autocomplete-icon" allowevents="true"/>
-          </children>
-        </xul:hbox>
-
-        <xul:stack flex="1" anonid="textbox-input-box" class="textbox-input-box urlbar-input-box">
-		  <xul:hbox class="textbox-input-box urlbar-input-box">
-			  <xul:label anonid="instantFoxSpacer" class="instantfox-spacer urlbar-input textbox-input uri-element-right-align"/>		
-			  <xul:label anonid="instantFoxShaddow"
-						flex="1"
-						onmousedown="gURLBar.focus();"
-						ondragover="nsDragAndDrop.dragOver(event, gURLBar);"
-						ondragdrop="nsDragAndDrop.drop(event, gURLBar);"
-						ondragexit="nsDragAndDrop.dragExit(event, gURLBar);"
-						class="instantfox-shaddow urlbar-input textbox-input uri-element-right-align" />
-		  </xul:hbox>		
-		  <xul:hbox anonid="textbox-input-box-inner" xbl:inherits="tooltiptext=inputtooltiptext"
-                    flex="1" align="center">
-            <children/>
-            <html:input anonid="input" class="autocomplete-textbox urlbar-input textbox-input uri-element-right-align"
-                        flex="1" allowevents="true"
-                        xbl:inherits="tooltiptext=inputtooltiptext,onfocus,onblur,value,type,maxlength,disabled,size,readonly,placeholder,userAction"/>
-		  </xul:hbox>
-        </xul:stack>
-
+      <xul:hbox anonid="textbox-container"
+                class="autocomplete-textbox-container urlbar-textbox-container"
+                flex="1" xbl:inherits="focused">
+        <children includes="image|deck|stack|box">
+          <xul:image class="autocomplete-icon" allowevents="true"/>
+        </children>
+		<xul:stack flex="1">
+			<xul:hbox class="instantfox-box">
+			  <xul:hbox anonid="instantFoxKey" class="instantfox-key"/>		
+			  <xul:hbox anonid="instantFoxSpacer" class="instantfox-spacer"/>		
+			  <xul:hbox anonid="instantFoxShaddow" class="instantfox-shaddow" />
+			</xul:hbox>
+			<xul:hbox class='instantfox-tip'  bottom='0'  right='0'/>
+			<xul:hbox anonid="textbox-input-box"
+					  class="textbox-input-box urlbar-input-box"
+					  flex="1" xbl:inherits="tooltiptext=inputtooltiptext">
+			  <children/>
+			  <html:input anonid="input"
+						  class="autocomplete-textbox urlbar-input textbox-input uri-element-right-align"
+						  allowevents="true"
+						  xbl:inherits="tooltiptext=inputtooltiptext,onfocus,onblur,value,type,maxlength,disabled,size,readonly,placeholder,tabindex,accesskey"/>
+			</xul:hbox>
+		</xul:stack>
         <children includes="hbox"/>
-          </xul:hbox>
-        </xul:stack>
       </xul:hbox>
-
       <xul:dropmarker anonid="historydropmarker"
                       class="autocomplete-history-dropmarker urlbar-history-dropmarker"
                       allowevents="true"
                       xbl:inherits="open,enablehistory,parentfocused=focused"/>
-
+      <xul:popupset anonid="popupset"
+                    class="autocomplete-result-popupset"/>
       <children includes="toolbarbutton"/>
-
-      <xul:popupset anonid="popupset" class="autocomplete-result-popupset"/>
     </content>
-
+	
     <implementation implements="nsIDOMEventListener, nsIObserver">
 
       <field name="uri"/>
@@ -73,27 +61,43 @@
       </field>  
 	  <field name="instantFoxSpacerNode">
         document.getAnonymousElementByAttribute(this, "anonid", "instantFoxSpacer");
+      </field> 
+	  <field name="instantFoxKeyNode">
+        document.getAnonymousElementByAttribute(this, "anonid", "instantFoxKey");
+      </field> 
+	  <field name="tip">
+        document.getAnonymousElementByAttribute(this, "class", "instantfox-tip");
       </field>  
 
+	  <method name="showTip">
+        <parameter name="aURL"/>
+        <body><![CDATA[
+			this.tip.hidden=false
+			this.tip.textContent = aURL;
+        ]]></body>
+      </method> 
+	  
 	  <method name="InsertShaddowLink">
         <parameter name="aURL"/>
         <body><![CDATA[
 			//if(aURL){
-			this.instantFoxShaddowNode.value = aURL;
+			this.instantFoxShaddowNode.textContent = aURL;
 			//}
         ]]></body>
       </method> 
 	  <method name="InsertSpacerLink">
         <parameter name="aURL"/>
         <body><![CDATA[
-			if(aURL){
-				this.instantFoxSpacerNode.value = aURL;
-			}
+			if(!aURL){aURL='';this.tip.hidden=true}
+			var i = aURL.indexOf(' ')
+			this.instantFoxKeyNode.textContent = aURL.substring(0,i)
+			this.instantFoxSpacerNode.textContent = aURL.substr(i);
+			
         ]]></body>
       </method> 
 	  <method name="InsertShaddowStyle">
         <parameter name="px"/>
-        <body><![CDATA[
+        <body><![CDATA[return
 			if(px){
 				this.instantFoxShaddowNode.style.cssText += "margin: "+px+" !important;";
 			}
@@ -101,7 +105,7 @@
       </method>
 	  <method name="InsertShaddowStyleStart">
         <parameter name="start"/>
-        <body><![CDATA[
+        <body><![CDATA[return
 			if(start){
 				this.instantFoxShaddowNode.style.cssText += "-moz-margin-start:  "+start+" !important;";
 			}

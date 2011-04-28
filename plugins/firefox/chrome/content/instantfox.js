@@ -126,13 +126,7 @@ var HH = {
 		   content.document.location.assign(_location);
 	     }
 		 */
-		 if(HH._overwriteHist()){
-		   getWebNavigation().loadURI(_location, (nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY || nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE), null, null, null);
-		   //content.location.replace(_location);
-		 }else{
-    	   getWebNavigation().loadURI(_location, (nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE), null, null, null);
-		   //content.location.assign(_location);
-		 }		 
+		this.loadPage(_location)		 
 		 HH._url.hist_last = _location;
 	   } 
       }, 200, event);
@@ -143,31 +137,23 @@ var HH = {
 	_goto4comp: function(url2go) {
 		if(!this._url.seralw){
 			// add belong2tab check!
-			// LOAD_FLAGS_BYPASS_HISTORY	= 0x0040
-			// LOAD_FLAGS_REPLACE_HISTORY	= 0x0080
-			
-			// LOAD_FLAGS_BYPASS_CACHE		= 0x0100
-			// LOAD_FLAGS_IS_REFRESH 		= 0x0010
-			
-			// LOAD_FLAGS_STOP_CONTENT      = 0x0800
-			// (LOAD_FLAGS_FIRST_LOAD 		= 0x4000)
-			// STOP_NETWORK 				= 0x01
-			// STOP_CONTENT 				= 0x02
-			// STOP_ALL 					= 0x03
-			
-			//debug((nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY | nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE));
 			HH._isOwnQuery = true;
-			if(HH._overwriteHist()){
-			  getWebNavigation().loadURI(url2go, (nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY || nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE), null, null, null);
-			  //content.location.replace(url2go);
-			}else{
-	 		  getWebNavigation().loadURI(url2go, (nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE), null, null, null);
-			  //content.location.assign(url2go);
-			}
+			this.loadPage(url2go)
 			HH._url.hist_last = url2go;
 			//content.document.location.assign(url2go);
 		}
 		return true;
+	},
+	
+	loadPage: function(url2go){
+		// see load_flags at http://
+		if(HH._overwriteHist()){
+			getWebNavigation().loadURI(url2go, (nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY | nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY), null, null, null);
+			//content.location.replace(url2go);
+		}else{
+			getWebNavigation().loadURI(url2go, (nsIWebNavigation.LOAD_FLAGS_NONE), null, null, null);
+			//content.location.assign(url2go);
+		}
 	},
     
     _init: function() {
@@ -250,13 +236,7 @@ var HH = {
 	  var tmp = InstantFox.query(value);
 	  	  
 	  if(content.document.location.href != tmp['loc']){
-		if(HH._overwriteHist()){
-		  getWebNavigation().loadURI(tmp['loc'], (nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY || nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE), null, null, null);
-		  //content.location.replace(tmp['loc']);
-		}else{
-		  getWebNavigation().loadURI(tmp['loc'], (nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE), null, null, null);
-		  //content.location.assign(tmp['loc']);
-		}
+		this.loadPage(tmp['loc'])
 		HH._url.hist_last = tmp['loc'];
 		//content.document.location.assign(tmp['loc']);
 	  }

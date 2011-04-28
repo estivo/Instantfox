@@ -5,18 +5,30 @@
   -moz-binding: url(chrome://instantfox/content/urlbar.xml#urlbar) !important;
 }
 
-.instantfox-shaddow{
-	 position:relative;
-	 -moz-margin-start:  -2px !important;
-	 -moz-padding-start: 0px !important;
-	 margin: 0px;
-	 color: graytext;
+.instantfox-box{
+	padding:  0px 3px!important;
+	color:red;
+	overflow:hidden;
+	white-space:pre
 }
-.instantfox-spacer{
-	 position:relative;
-	 clear:both !important;
-	 -moz-margin-start: 0px !important;
-	 -moz-padding-start: 0px !important;
-	 margin:3px 0 0 0;
-	 visibility:hidden;
+.instantfox-key{
+	/box-shadow: 0px 0px 2px 2px yellow inset;
+	border-radius: 2px;
+	background:lightblue; 
+	color: transparent;
+}
+.instantfox-shaddow{	 
+	color: graytext;
+	/*do we need to leave this extra space for cursor?*/
+	-moz-margin-start:2px;
+}
+.instantfox-spacer{	 
+	visibility:hidden;
+}
+
+.instantfox-tip{
+	color:graytext;
+	right:0px;
+	background:rgb(255,246,171);
+	border-radius: 4px;
 }
