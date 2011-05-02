@@ -36,29 +36,59 @@
 	}
   }
   
-  // MAC adjustments:
-  XULBrowserWindow.InsertShaddowStyle = function (four_params) { //e.g. "1px 0 0 0"
-	
-	if (gURLBar) {
-		if(four_params){
-			gURLBar.InsertShaddowStyle(four_params);
-		}
-	}
+function writeToFile(file, text){
+	var ostream = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
+	ostream.init(file, 0x02 | 0x08 | 0x20, 0664, 0);
 
-  }
-  
-  XULBrowserWindow.InsertShaddowStyleStart = function (start) { //e.g. "-2px"
-	
-	if (gURLBar) {
-		if(start){
-			gURLBar.InsertShaddowStyleStart(start);
-		}
-	}
+	var converter = Cc["@mozilla.org/intl/converter-output-stream;1"].createInstance(Ci.nsIConverterOutputStream);
+	converter.init(ostream, "UTF-8", 4096, 0x0000);
+	converter.writeString(text);
+	converter.close();
+}
+function savePlugins(){
+	var ob={}
+	for each(var i in InstantFox.Plugins)
+		if(i.url)
+			ob[i.name]=i
 
-  }
-  // end MAC
+	var js = JSON.stringify(ob).replace(',','\n,','g')
+
+	writeToFile(HH.getPluginFile(),js)
+}
+
+function loadCustomizedPlugins(){
+	var file = HH.getPluginFile()
+	if(file.exists()){
+		var spec = ContentAreaUtils.ioService.newFileURI(file).spec
+		var req = new XMLHttpRequest
+		req.overrideMimeType("text/plain");
+		req.open("GET", spec, true);
+		req.onload=onPluginsLoaded
+		req.send(null)
+	}	
+}
+function onPluginsLoaded(e){
+	e.target.onload=null
+	var js = e.target.responseText
+	var plugins = JSON.parse(js)
+	InstantFox.Shortcuts={}
+	InstantFox.Plugins={}
+	for each (var i in plugins){
+	if(i.key)
+		InstantFox.Shortcuts[i.key] = i.name
+		InstantFox.Plugins[i.name] = i
+	}
+	if(InstantFox.onPluginsLoaded)
+		InstantFox.onPluginsLoaded()
+}
 
 var HH = {
+	getPluginFile: function(){
+		var file=Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("ProfD", Ci.nsIFile);
+		file.append('instantFoxPlugins.js')	
+		return file
+	},
+	loadPlugins: loadCustomizedPlugins,
     _url: {
       hash: 'http://search.instantfox.net/#',
       host: 'search.instantfox.net',
@@ -136,6 +166,7 @@ var HH = {
 	
 	_goto4comp: function(url2go) {
 		if(!this._url.seralw){
+			if (HH._timeout) window.clearTimeout(HH._timeout);
 			// add belong2tab check!
 			HH._isOwnQuery = true;
 			this.loadPage(url2go)
@@ -157,7 +188,7 @@ var HH = {
 	},
     
     _init: function() {
-      if(!HH._os.set){
+      /*if(!HH._os.set){
 	    if(HH._os.name == 'Darwin'){ // MAC style adjustments returned Darwin
 		  XULBrowserWindow.InsertShaddowStyle("-2px 0 0 0");
 		  XULBrowserWindow.InsertShaddowStyleStart("1px");

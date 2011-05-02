@@ -119,9 +119,7 @@ img{
 </vbox>
 
   <script type="text/javascript" src="__devel__.js"></script>
-  <script type="text/javascript" src="chrome://instantfox/content/javascripts/app.js"></script>
-  <script type="text/javascript" src="chrome://instantfox/content/javascripts/plugins.js"></script>
-  <script type="text/javascript" src="chrome://instantfox/locale/plugins.js"></script>
+
 
 <script type="application/x-javascript" ><![CDATA[
 var Cc = Components.classes
@@ -207,14 +205,13 @@ xmlFragment = <hbox class='plugin'>
 	  </hbox>.toXMLString()
 
 
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 var xml=[]
-for(var key in InstantFox.Shortcuts){
-	var i = InstantFox.Shortcuts[key]
-	var p = InstantFox.Plugins[i]
-	if(p && p.url){
+InstantFox = Services.wm.getMostRecentWindow('navigator:browser').InstantFox
+for each(var p in InstantFox.Plugins){
+	if(p.url){
 		p.favicon = p.iconURI || getFavicon(p.url)
-		p.name = i
 		xml.push(formatString(xmlFragment,p))
 	}
 }
@@ -242,9 +239,19 @@ function pluginFromNsiSearch(bp){
 bss=Cc["@mozilla.org/browser/search-service;1"].getService(Ci.nsIBrowserSearchService)
 bss.getEngines().map(pluginFromNsiSearch)
 
+/*
+gBrowser.mCurrentBrowser.engines[0].uri
 
-
-
+if (target.getAttribute("class").indexOf("addengine-item") != -1) {
+	var searchService =
+		Cc["@mozilla.org/browser/search-service;1"]
+			  .getService(Ci.nsIBrowserSearchService);
+	// We only detect OpenSearch files
+	var type = Components.interfaces.nsISearchEngine.DATA_XML;
+	searchService.addEngine(target.getAttribute("uri"), type,
+							target.getAttribute("src"), false);
+}
+*/
 ]]></script>
 
 
