@@ -14,7 +14,7 @@
           <xul:image class="autocomplete-icon" allowevents="true"/>
         </children>
 		<xul:stack flex="1">
-			<xul:hbox class="instantfox-box">
+			<xul:hbox class="instantfox-box" align='center'>
 			  <xul:hbox anonid="instantFoxKey" class="instantfox-key"/>		
 			  <xul:hbox anonid="instantFoxSpacer" class="instantfox-spacer"/>		
 			  <xul:hbox anonid="instantFoxShaddow" class="instantfox-shaddow" />
@@ -42,6 +42,9 @@
     </content>
 	
     <implementation implements="nsIDOMEventListener, nsIObserver">
+	  <constructor><![CDATA[  //nsIDOMEventListener,
+		setTimeout(this.InsertShaddowStyle, 1000)
+	  ]]></constructor>
 
       <field name="uri"/>
       <field name="_focused"/>
@@ -96,21 +99,18 @@
         ]]></body>
       </method> 
 	  <method name="InsertShaddowStyle">
-        <parameter name="px"/>
-        <body><![CDATA[return
-			if(px){
-				this.instantFoxShaddowNode.style.cssText += "margin: "+px+" !important;";
-			}
+        <body><![CDATA[
+			var boxStyle = document.getAnonymousElementByAttribute(gURLBar, "class", "instantfox-box").style;
+			var compStyle = getComputedStyle(gURLBar.inputBox,'')
+			boxStyle.marginLeft = compStyle.marginLeft
+			boxStyle.marginRight = compStyle.marginRight
+			dump(boxStyle.marginRight, compStyle.marginRight)
+			// 1px is from getComputedStyle(gURLBar.mInputField.editor.rootElement).paddingLeft
+			// is this platform independant?
+			boxStyle.paddingLeft = '1px'
+			boxStyle.paddingRight = '1px'
         ]]></body>
-      </method>
-	  <method name="InsertShaddowStyleStart">
-        <parameter name="start"/>
-        <body><![CDATA[return
-			if(start){
-				this.instantFoxShaddowNode.style.cssText += "-moz-margin-start:  "+start+" !important;";
-			}
-        ]]></body>
-      </method>        
+      </method>   
     </implementation>
 
   </binding>

@@ -6,13 +6,11 @@
 }
 
 .instantfox-box{
-	padding:  0px 3px!important;
-	color:red;
 	overflow:hidden;
 	white-space:pre
 }
 .instantfox-key{
-	/box-shadow: 0px 0px 2px 2px yellow inset;
+	/*box-shadow: 0px 0px 2px 2px yellow inset;*/
 	border-radius: 2px;
 	background:lightblue; 
 	color: transparent;
@@ -20,7 +18,7 @@
 .instantfox-shaddow{	 
 	color: graytext;
 	/*do we need to leave this extra space for cursor?*/
-	-moz-margin-start:2px;
+	-moz-margin-start:1px;
 }
 .instantfox-spacer{	 
 	visibility:hidden;
