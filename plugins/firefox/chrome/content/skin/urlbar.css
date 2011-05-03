@@ -17,8 +17,6 @@
 }
 .instantfox-shaddow{	 
 	color: graytext;
-	/*do we need to leave this extra space for cursor?*/
-	-moz-margin-start:1px;
 }
 .instantfox-spacer{	 
 	visibility:hidden;
