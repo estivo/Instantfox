@@ -24,7 +24,7 @@
 					  class="textbox-input-box urlbar-input-box"
 					  flex="1" xbl:inherits="tooltiptext=inputtooltiptext">
 			  <children/>
-			  <html:input anonid="input"
+			  <html:input anonid="input" flex="1"
 						  class="autocomplete-textbox urlbar-input textbox-input uri-element-right-align"
 						  allowevents="true"
 						  xbl:inherits="tooltiptext=inputtooltiptext,onfocus,onblur,value,type,maxlength,disabled,size,readonly,placeholder,tabindex,accesskey"/>
