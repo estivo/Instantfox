@@ -109,6 +109,15 @@
 			// is this platform independant?
 			boxStyle.paddingLeft = '1px'
 			boxStyle.paddingRight = '1px'
+			// very very hacky
+			var ss=document.styleSheets
+			for(var i=ss.length;i--;){
+				var s=ss[i]
+				if(s.href=="chrome://instantfox/content/skin/autocomplete.css"){
+					s.cssRules[3].style.fontSize=compStyle.fontSize
+					break
+				}
+			}
         ]]></body>
       </method>   
     </implementation>
