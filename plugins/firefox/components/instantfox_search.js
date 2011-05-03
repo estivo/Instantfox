@@ -276,18 +276,61 @@ var Ci	= Components.interfaces;
 					if('m,f'.indexOf(api['key'])!=-1){
 						 rtoparse = rtoparse.replace(/(\w+):/gi, '"\$1":');
 					}
+					if(api['key']=='imdb'){
+						 // from { to } other is invalid!
+						 var sposp = rtoparse.indexOf('{');
+						 var eposp = rtoparse.lastIndexOf('}');
+						 rtoparse = rtoparse.substr(sposp,(eposp-(sposp-1))); // include last sign so -1
+					}
 					var xhr_return = JSON.parse(rtoparse);
 				}
 				catch(e){
 					var xhr_return = 'error';
 				}
 				
-				
 				var tmp_results = new Array();
 				var type_not_found = true;
 								
 				// code could be redcued but no need ;)
-							
+				if(api['key'] == 'imdb'){
+					if(xhr_return['d']){
+						type_not_found = false;
+						
+						var gotourl = api['gotourl'];
+						
+						for(var i=0; i <  xhr_return['d'].length; i++){
+								var result_info	= {};
+								var result		= xhr_return['d'][i]['l']; //sorted_results[j];
+								
+								if(i==0){
+									InstantFox_Comp.Wnd.InstantFox.HH._url.seralw = false;
+									if(InstantFox_Comp.Wnd.InstantFox.current_shaddow !=  result){
+										InstantFox_Comp.Wnd.InstantFox.current_shaddow = result;
+										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(result,api['query']);
+										InstantFox_Comp.Wnd.InstantFox.HH._goto4comp(gotourl.replace('%q', encodeURIComponent(result)));
+									}
+								}
+								
+								result_info.icon			= null;
+								result_info.title			= result;
+								result_info.url				= api['key'] + ' ' + result;;
+
+								tmp_results.push(result_info);
+								
+								internal_results.values.push(result_info.url);
+								internal_results.comments.push(result_info.title);
+								internal_results.images.push(result_info.icon);
+								
+								if(i== xhr_return['d'].length-1){
+									internal_results.last.push(true);
+								}else{
+									internal_results.last.push(false);
+								}
+						}
+					}
+					
+				}
+				
 				if('m,f'.indexOf(api['key'])!=-1){
 					if(xhr_return['suggestion']){
 						type_not_found = false;

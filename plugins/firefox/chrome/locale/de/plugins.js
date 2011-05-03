@@ -14,7 +14,8 @@
     a:    'amazon',
     e:    'ebay',
     gg:		'googleluck',
-    wa:   'wolframalpha'
+    wa:   'wolframalpha',
+	imdb: 'imdb'
   };
   
   InstantFox.Plugins.extend({
@@ -73,5 +74,9 @@
     wolframalpha: {
       url: 'http://www.wolframalpha.com/input/?i=%q',
       json: false
+    },
+    imdb: {
+      url: 'http://www.imdb.com/find?s=all&q=%q',
+      json: 'http://sg.media-imdb.com/suggests/%fq/%q.json' // fq = first letter of query
     }
   });

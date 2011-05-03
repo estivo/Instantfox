@@ -84,7 +84,14 @@ InstantFox = new HHExtClass;
 						
 
 		if(resource.json){
-			var json	 = resource.json.replace('%q', encodeURIComponent(parsed.query));
+			// fq = first letter of query
+			
+			if(shortcut=="imdb"){
+				var json	 = resource.json.replace('%q', encodeURIComponent(parsed.query.toLowerCase()));
+				json = json.replace('%fq', (parsed.query.substr(0,1).toLowerCase()));
+			}else{
+				var json	 = resource.json.replace('%q', encodeURIComponent(parsed.query));
+			}
 		}
 		var gotourl = false;
 		if(resource.url){
