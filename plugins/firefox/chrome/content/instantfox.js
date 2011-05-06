@@ -191,7 +191,7 @@ var HH = {
 			}
 			HH.call_id = window.setTimeout(function(){
 													dump(HH.call_url);
-													getWebNavigation().loadURI(HH.call_url, (nsIWebNavigation.LOAD_FLAGS_IS_LINK || nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY || nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE), null, null, null); }, 150); 
+													getWebNavigation().loadURI(HH.call_url, (nsIWebNavigation.LOAD_FLAGS_IS_LINK || nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY || nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE), null, null, null); }, 200); 
 			//getWebNavigation().loadURI("http://www.google.de/", (nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE), null, null, null);
 			//getWebNavigation().loadURI("http://www.google.de/#hl=de&q=ebay&fp=1&cad=b", (nsIWebNavigation.LOAD_FLAGS_IS_LINK || nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY || nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE), null, null, null);
 			//getWebNavigation().loadURI("http://www.google.de/#hl=de&q=element%20girlst&fp=1&cad=b", (nsIWebNavigation.LOAD_FLAGS_IS_LINK || nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY || nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE), null, null, null);
