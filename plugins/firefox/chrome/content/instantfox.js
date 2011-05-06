@@ -1,3 +1,12 @@
+function dump() {
+    var aMessage = "aMessage: ";
+    for (var i = 0; i < arguments.length; ++i) {
+        var a = arguments[i];
+        aMessage += (a && !a.toString ? "[object call]" : a) + " , ";
+    }
+    var consoleService = Components.classes['@mozilla.org/consoleservice;1'].getService(Components.interfaces.nsIConsoleService);
+    consoleService.logStringMessage("" + aMessage);
+}
 (function() {
   var   InFoxPrefs    = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService),
         StringService = Components.classes["@mozilla.org/intl/stringbundle;1"].getService(Components.interfaces.nsIStringBundleService),
@@ -146,6 +155,9 @@ var HH = {
 	  
     },
 	
+	call_url: null,
+	call_id: null,
+	
 	_goto4comp: function(url2go) {
 		if(!this._url.seralw){
 			// add belong2tab check!
@@ -162,6 +174,30 @@ var HH = {
 			// STOP_ALL 					= 0x03
 			
 			//debug((nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY | nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE));
+			//dump(url2go);
+			/*
+			aMessage: http://www.google.de/#hl=de&q=ebay&fp=1&cad=b ,
+			aMessage: http://www.google.de/#hl=de&q=elster&fp=1&cad=b , 
+			aMessage: http://www.google.de/#hl=de&q=element%20girls&fp=1&cad=b , 
+			*/
+			//getWebNavigation().loadURI("http://www.google.de/", (nsIWebNavigation.LOAD_FLAGS_IS_LINK), null, null, null);
+
+			HH.call_url = url2go;
+			dump("Callid:",HH.call_id);
+			if(HH.call_id){
+				window.clearTimeout(HH.call_id);
+				delete this.call_id;
+
+			}
+			HH.call_id = window.setTimeout(function(){
+													dump(HH.call_url);
+													getWebNavigation().loadURI(HH.call_url, (nsIWebNavigation.LOAD_FLAGS_IS_LINK || nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY || nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE), null, null, null); }, 150); 
+			//getWebNavigation().loadURI("http://www.google.de/", (nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE), null, null, null);
+			//getWebNavigation().loadURI("http://www.google.de/#hl=de&q=ebay&fp=1&cad=b", (nsIWebNavigation.LOAD_FLAGS_IS_LINK || nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY || nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE), null, null, null);
+			//getWebNavigation().loadURI("http://www.google.de/#hl=de&q=element%20girlst&fp=1&cad=b", (nsIWebNavigation.LOAD_FLAGS_IS_LINK || nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY || nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE), null, null, null);
+			/*
+			
+		    //getWebNavigation().loadURI(url2go, (nsIWebNavigation.LOAD_FLAGS_IS_LINK || nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY || nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE), null, null, null);
 			HH._isOwnQuery = true;
 			if(HH._overwriteHist()){
 			  getWebNavigation().loadURI(url2go, (nsIWebNavigation.LOAD_FLAGS_IS_LINK || nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY || nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE), null, null, null);
@@ -171,6 +207,7 @@ var HH = {
 			  //content.location.assign(url2go);
 			}
 			HH._url.hist_last = url2go;
+			*/
 			//content.document.location.assign(url2go);
 		}
 		return true;
