@@ -200,7 +200,7 @@ var HH = {
     _observeURLBar: function() {
       gURLBar.addEventListener('blur', function(e) {
 		// Return power to Site if urlbar really lost focus
-        if (HH._isOwnQuery && !gURLBar.mIgnoreFocus && e.originalTarget == gURLBar.mInputField) {
+        if (HH._isQuery() && !gURLBar.mIgnoreFocus && e.originalTarget == gURLBar.mInputField) {
 		  HH._blankShaddow();
           gURLBar.value = content.document.location;
 		  gBrowser.userTypedValue = null;
