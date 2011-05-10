@@ -200,7 +200,7 @@ var HH = {
     _observeURLBar: function() {
       gURLBar.addEventListener('blur', function(e) {
 		// Return power to Site if urlbar really lost focus
-        if (HH._isQuery() && !gURLBar.mIgnoreFocus && e.originalTarget == gURLBar.mInputField) {
+        if (HH._isQuery('checkonly') && !gURLBar.mIgnoreFocus && e.originalTarget == gURLBar.mInputField) {
 		  HH._blankShaddow();
           gURLBar.value = content.document.location;
 		  gBrowser.userTypedValue = null;
@@ -227,6 +227,7 @@ var HH = {
     _isQuery: function() {
       if (gURLBar.value.length < 3){
 	    this._blankShaddow();
+		InstantFox.previous_query = false;
 		return false;
 	  }
 	  // match keywords here!
@@ -240,12 +241,14 @@ var HH = {
       }
 	  if(!found){
 	  	this._blankShaddow('','');
+		InstantFox.previous_query = false;
 		return false;
 	  }
 	  
-	  var query = gURLBar.value.substr((plugin.length+1),gURLBar.value.length); // plugin.length Shortkey + Space => length to cut off
-	  XULBrowserWindow.InsertShaddowLink(InstantFox.current_shaddow,query);
-	  
+	  if(this._isQuery.arguments.length == 0){
+	  	var query = gURLBar.value.substr((plugin.length+1),gURLBar.value.length); // plugin.length Shortkey + Space => length to cut off
+	  	XULBrowserWindow.InsertShaddowLink(InstantFox.current_shaddow,query);
+	  }
 	  return true; //(gURLBar.value.replace(/^\s+|\s+$/g, '').search(' ') > -1);
     },
 	
@@ -270,6 +273,7 @@ var HH = {
 	  gBrowser.userTypedValue = null;
 	  
 	  HH._blankShaddow();
+	  InstantFox.previous_query = false;
 	  HH._isOwnQuery  = false;
 	  HH._focusPermission(true);
 	

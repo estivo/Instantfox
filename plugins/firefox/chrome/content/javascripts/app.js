@@ -33,6 +33,7 @@ InstantFox = new HHExtClass;
 	// used to handle shaddow "caching"
 	current_shaddow: '',
 	right_shaddow:   '',
+	previous_query:	 false,
 	/*
 		right_shaddow hint:
 		only grey letters e.g
@@ -78,6 +79,8 @@ InstantFox = new HHExtClass;
 	  var q			= gURLBar.value;
 	  var parsed    = this.parse(q.trimLeft());
       var shortcut  = this.Shortcuts[parsed.key];
+	  var pq4use 	= this.previous_query;				 // pq = previous query 4 use 
+	  // pq4use is used for handling imdb
 	  
 	  if (parsed.key && parsed.query && shortcut) {
 		var resource = InstantFox.Plugins[shortcut];
@@ -88,6 +91,7 @@ InstantFox = new HHExtClass;
 			
 			if(shortcut=="imdb"){
 				var json	 = resource.json.replace('%q', encodeURIComponent(parsed.query.toLowerCase()));
+				json = json.replace(/%20/g, '_');
 				json = json.replace('%fq', (parsed.query.substr(0,1).toLowerCase()));
 			}else{
 				var json	 = resource.json.replace('%q', encodeURIComponent(parsed.query));
@@ -100,8 +104,9 @@ InstantFox = new HHExtClass;
       		                 .replace('%ls', this._i18n('locale.short'))
       		                 .replace('%ld', this._i18n('locale.domain'));
 		}
+		this.previous_query = parsed.query;
 		// may add additional replaces!
-		return {'query': parsed.query, 'key':parsed.key, 'json':json, 'gotourl':gotourl};  
+		return {'query': parsed.query, 'lastquery': pq4use, 'key':parsed.key, 'json':json, 'gotourl':gotourl};  
 	  }else return false;
 	},
 	

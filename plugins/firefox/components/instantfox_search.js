@@ -18,6 +18,7 @@ var Ci	= Components.interfaces;
 	    Cr:Components.results,
 		Cu:Components.utils,		
 		
+		imdb_lastres:'',
 		xhttpreq:false
 		
 	}
@@ -283,6 +284,9 @@ var Ci	= Components.interfaces;
 						 rtoparse = rtoparse.substr(sposp,(eposp-(sposp-1))); // include last sign so -1
 					}
 					var xhr_return = JSON.parse(rtoparse);
+					if(api['key']=='imdb' && xhr_return){
+						InstantFox_Comp.imdb_lastres = xhr_return;
+					}
 				}
 				catch(e){
 					var xhr_return = 'error';
@@ -293,6 +297,10 @@ var Ci	= Components.interfaces;
 								
 				// code could be redcued but no need ;)
 				if(api['key'] == 'imdb'){
+					// last results must be "cashed" and saved in a var. If last query matches current query get last possible query
+					if(api['query'].indexOf(api['lastquery']) == 0 && xhr_return == 'error'){
+						xhr_return = InstantFox_Comp.imdb_lastres;
+					}
 					if(xhr_return['d']){
 						type_not_found = false;
 						
