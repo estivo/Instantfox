@@ -310,18 +310,21 @@ var Ci	= Components.interfaces;
 								var result_info	= {};
 								var result		= xhr_return['d'][i]['l']; //sorted_results[j];
 								
+								var escapeurl 	= gotourl.replace('%q', escape(result));
+									escapeurl	= escapeurl.replace(/%20/g, '+');
+									
 								if(i==0){
 									InstantFox_Comp.Wnd.InstantFox.HH._url.seralw = false;
 									if(InstantFox_Comp.Wnd.InstantFox.current_shaddow !=  result){
 										InstantFox_Comp.Wnd.InstantFox.current_shaddow = result;
 										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(result,api['query']);
-										InstantFox_Comp.Wnd.InstantFox.HH._goto4comp(gotourl.replace('%q', result));
+										InstantFox_Comp.Wnd.InstantFox.HH._goto4comp(escapeurl);
 									}
 								}
 								
 								result_info.icon			= null;
 								result_info.title			= result;
-								result_info.url				= api['key'] + ' ' + result;;
+								result_info.url				= escapeurl;//api['key'] + ' ' + result;;
 
 								tmp_results.push(result_info);
 								
