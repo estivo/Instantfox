@@ -93,6 +93,11 @@ InstantFox = new HHExtClass;
 				var json	 = resource.json.replace('%q', encodeURIComponent(parsed.query.toLowerCase()));
 				json = json.replace(/%20/g, '_');
 				json = json.replace('%fq', (parsed.query.substr(0,1).toLowerCase()));
+				
+				json = json.replace(/ß/ig, 'ss');
+				json = json.replace(/ö/ig, 'o');
+				json = json.replace(/ä/ig, 'a');
+				json = json.replace(/ü/ig, 'u');
 			}else{
 				var json	 = resource.json.replace('%q', encodeURIComponent(parsed.query));
 			}

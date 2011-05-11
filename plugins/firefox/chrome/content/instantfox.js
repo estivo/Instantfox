@@ -239,6 +239,13 @@ var HH = {
 			break;
 		}
       }
+	  
+	  if(gURLBar.value.length  < (this._url.actp.length+2)){
+	    this._blankShaddow();
+		InstantFox.previous_query = false;
+		return false;
+	  }
+	  
 	  if(!found){
 	  	this._blankShaddow('','');
 		InstantFox.previous_query = false;

@@ -298,7 +298,7 @@ var Ci	= Components.interfaces;
 				// code could be redcued but no need ;)
 				if(api['key'] == 'imdb'){
 					// last results must be "cashed" and saved in a var. If last query matches current query get last possible query
-					if(api['query'].indexOf(api['lastquery']) == 0 && xhr_return == 'error'){
+					if(api['query'].indexOf(api['lastquery']) == 0 && xhr_return == 'error' && api['lastquery']){
 						xhr_return = InstantFox_Comp.imdb_lastres;
 					}
 					if(xhr_return['d']){
@@ -315,7 +315,7 @@ var Ci	= Components.interfaces;
 									if(InstantFox_Comp.Wnd.InstantFox.current_shaddow !=  result){
 										InstantFox_Comp.Wnd.InstantFox.current_shaddow = result;
 										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(result,api['query']);
-										InstantFox_Comp.Wnd.InstantFox.HH._goto4comp(gotourl.replace('%q', encodeURIComponent(result)));
+										InstantFox_Comp.Wnd.InstantFox.HH._goto4comp(gotourl.replace('%q', result));
 									}
 								}
 								
@@ -445,6 +445,7 @@ var Ci	= Components.interfaces;
 		stopSearch: function(){
 			if(this.historyAutoComplete) this.historyAutoComplete.stopSearch();
 			if(this._req){
+				//InstantFox_Comp.imdb_lastres = '';
 			    this._req.abort();
 			}
 
