@@ -73,6 +73,13 @@ InstantFox = new HHExtClass;
 		
 	},
 	
+	imdburl: function(url2tidy){
+		//if (url2tidy.length > 20) url2tidy = url2tidy.substr(0, 20);
+		url2tidy = url2tidy.replace(/^\s*/, "").replace(/[ ]+/g, "_");
+		url2tidy = url2tidy.replace(/[\u00e0\u00c0\u00e1\u00c1\u00e2\u00c2\u00e3\u00c3\u00e4\u00c4\u00e5\u00c5\u00e6\u00c6]/g, "a").replace(/[\u00e7\u00c7]/g, "c").replace(/[\u00e8\u00c8\u00e9\u00c9\u00ea\u00ca\u00eb\u00cb]/g, "e").replace(/[\u00ec\u00cd\u00ed\u00cd\u00ee\u00ce\u00ef\u00cf]/g, "i").replace(/[\u00f0\u00d0]/g, "d").replace(/[\u00f1\u00d1]/g, "n").replace(/[\u00f2\u00d2\u00f3\u00d3\u00f4\u00d4\u00f5\u00d5\u00f6\u00d6\u00f8\u00d8]/g, "o").replace(/[\u00f9\u00d9\u00fa\u00da\u00fb\u00db\u00fc\u00dc]/g, "u").replace(/[\u00fd\u00dd\u00ff]/g, "y").replace(/[\u00fe\u00de]/g, "t").replace(/[\u00df]/g, "ss");
+		return url2tidy = url2tidy.replace(/[\W]/g, "")
+	},
+	
 	query4comp: function(){
 	  // this query is executed by component
 	  
@@ -90,14 +97,8 @@ InstantFox = new HHExtClass;
 			// fq = first letter of query
 			
 			if(shortcut=="imdb"){
-				var json	 = resource.json.replace('%q', encodeURIComponent(parsed.query.toLowerCase()));
-				json = json.replace(/%20/g, '_');
-				json = json.replace('%fq', (parsed.query.substr(0,1).toLowerCase()));
-				
-				json = json.replace(/ß/ig, 'ss');
-				json = json.replace(/ö/ig, 'o');
-				json = json.replace(/ä/ig, 'a');
-				json = json.replace(/ü/ig, 'u');
+				var json	 = resource.json.replace('%q', this.imdburl(parsed.query.toLowerCase()));
+				json = json.replace('%fq', this.imdburl(parsed.query.substr(0,1).toLowerCase()));
 			}else{
 				var json	 = resource.json.replace('%q', encodeURIComponent(parsed.query));
 			}
