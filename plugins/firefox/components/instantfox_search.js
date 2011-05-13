@@ -324,7 +324,7 @@ var Ci	= Components.interfaces;
 								
 								result_info.icon			= null;
 								result_info.title			= result;
-								result_info.url				= escapeurl;//api['key'] + ' ' + result;;
+								result_info.url				= api['key'] + ' ' + result;;
 
 								tmp_results.push(result_info);
 								

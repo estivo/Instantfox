@@ -98,7 +98,7 @@ InstantFox = new HHExtClass;
 			
 			if(shortcut=="imdb"){
 				var json	 = resource.json.replace('%q', this.imdburl(parsed.query.toLowerCase()));
-				json = json.replace('%fq', this.imdburl(parsed.query.substr(0,1).toLowerCase()));
+				json 		 = json.replace('%fq', this.imdburl(parsed.query.substr(0,1).toLowerCase()));
 			}else{
 				var json	 = resource.json.replace('%q', encodeURIComponent(parsed.query));
 			}
@@ -160,7 +160,7 @@ InstantFox = new HHExtClass;
 
 	
     query: function(q, event) {
-      // Stip Whitespaces from Query
+	  // Stip Whitespaces from Query
       var parsed    = this.parse(q.toString().trimLeft());
       var shortcut  = this.Shortcuts[parsed.key];
 	 
@@ -174,8 +174,12 @@ InstantFox = new HHExtClass;
           return resource.script(parsed.query);
         // .. or load location
         } else {
-          return InstantFox.perform(resource, encodeURIComponent(parsed.query));
-        }
+          if(shortcut == 'imdb'){
+		    return InstantFox.perform(resource, escape(parsed.query.replace(/ /g, '+')) );
+		  }else{
+		    return InstantFox.perform(resource, encodeURIComponent(parsed.query));
+		  }
+		}
       }
       
       return { loc: this._name, id: false };
@@ -183,7 +187,7 @@ InstantFox = new HHExtClass;
     
     parse: function(q) {
       // We assume that the sting before the space indicates a InstantFox-Plugin
-      var index = q.indexOf(' ');
+	  var index = q.indexOf(' ');
       return { key: q.substr(0, index), query: q.substr(index+1, q.length), keyindex: index, keylength: q.length };
     },
 	
