@@ -110,7 +110,7 @@ var HH = {
       
       HH._timeout = window.setTimeout(function(e) {
         HH._oldState    = HH._state ? { loc: HH._state.loc, id: HH._state.id } : { loc: false, id: false };
-        HH._state       = InstantFox.query(HH._q, e);
+		HH._state       = InstantFox.query(HH._q, e);
         HH._isOwnQuery  = true;
         HH._focusPermission(false);
         
@@ -259,9 +259,13 @@ var HH = {
 	  return true; //(gURLBar.value.replace(/^\s+|\s+$/g, '').search(' ') > -1);
     },
 	
-	onEnter: function(value){
+	onEnter: function(value,event){
 	  HH._url.abort=true;
 	  //InstantFox.Plugins[InstantfoxHH._url.actp]; // improve it later!
+	  if(typeof event  == "undefined"){
+	    // shortcut exits two times on click of result!
+		value = value.substr((value.indexOf(" ")+1));
+	  }
 	  
 	  var tmp = InstantFox.query(value);
 	  	  
@@ -360,7 +364,7 @@ var _keydown = function(event) {
 		event.preventDefault();
 	  }
 	} else if (key == 13 && !alt && !meta && !ctrl) { // 13 == ENTER
-	  HH.onEnter(gURLBar.value)
+	  HH.onEnter(gURLBar.value,event)
  	  event.preventDefault();
 	} 
   }
