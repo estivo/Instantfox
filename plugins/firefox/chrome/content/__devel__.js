@@ -1,3 +1,14 @@
+function makeReq(href) {
+	var req = new XMLHttpRequest;
+	req.overrideMimeType("text/plain");
+	req.open("GET", href, false);
+	try {
+		req.send(null);
+	} catch (e) {
+	}
+	return req.responseText;
+}
+
 var __instantFoxDevel__ = {
 	reloadComponent: function(){
 		var p = Cc["@mozilla.org/appshell/appShellService;1"]
@@ -16,16 +27,6 @@ var __instantFoxDevel__ = {
 			)
 		}catch(e){}
 		
-		function makeReq(href) {
-			var req = new XMLHttpRequest;
-			req.overrideMimeType("text/plain");
-			req.open("GET", href, false);
-			try {
-				req.send(null);
-			} catch (e) {
-			}
-			return req.responseText;
-		}
 		var spec = 	Services.io.newFileURI(p.__LOCATION__).spec
 		var t = makeReq(spec)
 		//p.eval(t,p)		
@@ -39,6 +40,11 @@ var __instantFoxDevel__ = {
 		var f = scope.NSGetFactory(f1.classID)
 		reg.registerFactory(f1.classID, f1.classDescription, f1.contractID, f);
 	},
+	
+	reloadModule: function(href){
+		Cu.import(href).eval(makeReq(href))
+		return Cu.import(href)
+	},
 
 	loadScript: function(href, index){
 		var s=document.createElementNS('http://www.w3.org/1999/xhtml', "script")
@@ -50,18 +56,18 @@ var __instantFoxDevel__ = {
 	},
 	
 	sourceList: [
-		"chrome://instantfox/content/javascripts/app.js",
-		"chrome://instantfox/content/javascripts/plugins.js",
-		"chrome://instantfox/locale/plugins.js",
+		//"chrome://instantfox/content/javascripts/app.js",
+		//"chrome://instantfox/content/javascripts/plugins.js",
+		//"chrome://instantfox/locale/plugins.js",
 		"chrome://instantfox/content/instantfox.js"
 	],
 	
 	doReload: function(){
-		this.reloadComponent()
+		//this.reloadComponent()
 		var i = this.loadedScriptsCount = 0		
 		this.loadScript(this.sourceList[i], i)
 		
-		
+		this.reloadModule('chrome://instantFox/content/instantFoxModule.js')		
 	},
 	onLoad: function(e, script){
 		this.loadedScriptsCount++;
@@ -117,6 +123,14 @@ function dump() {
     consoleService.logStringMessage("" + aMessage);
 }
 /*
+function log(msg) {
+  if(typeof Firebug != 'undefined') {
+	Firebug.Console.log(msg);
+  } else {
+	Components.utils.reportError(msg);
+  }
+  return msg;
+}
 function print_r(x, max, sep, l) {	
 	l = l || 0;
 	max = max || 10;

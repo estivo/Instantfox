@@ -372,7 +372,7 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 									if(InstantFox_Comp.Wnd.InstantFox.current_shaddow != result){
 										InstantFox_Comp.Wnd.InstantFox.current_shaddow = result;
 										InstantFox_Comp.Wnd.XULBrowserWindow.InsertShaddowLink(result,api['query']);
-										InstantFox_Comp.Wnd.InstantFox.HH._goto4comp(gotourl.replace('%q', encodeURIComponent(result)));
+										InstantFox_Comp.Wnd.InstantFox.HH._goto4comp(gotourl.replace('%q', result));
 									}
 								}
 								
@@ -442,15 +442,14 @@ Cc["@mozilla.org/appshell/appShellService;1"]
 	*/
 
 function SimpleAutoCompleteResult(searchString, searchResult,
-                                  defaultIndex, errorDescription, list,
-                                  results, comments) {
-  this._searchString = searchString;
-  this._searchResult = searchResult;
-  this._defaultIndex = defaultIndex;
-  this._errorDescription = errorDescription;
-  this._results = results;
-  this._comments = comments;
-  this.list = list;
+        defaultIndex, errorDescription, list, results, comments) {
+	this._searchString = searchString;
+	this._searchResult = searchResult;
+	this._defaultIndex = defaultIndex;
+	this._errorDescription = errorDescription;
+	this._results = results;
+	this._comments = comments;
+	this.list = list;
 }
 
 SimpleAutoCompleteResult.prototype = {

@@ -1,14 +1,13 @@
 //(function() {
-  var InFoxPrefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService);
+var InFoxPrefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService);
 
-  InFoxPrefs.QueryInterface(Ci.nsIPrefBranch2);
+InFoxPrefs.QueryInterface(Ci.nsIPrefBranch2);
 
+InstantFox={}
 	
 
-  XULBrowserWindow.InsertShaddowLink = function (shaddow2dsp, query) {
-	
+XULBrowserWindow.InsertShaddowLink = function (shaddow2dsp, query) {	
 	if (gURLBar) {
-
 		if(shaddow2dsp != '' && shaddow2dsp != query){
 			gURLBar.InsertSpacerLink(gURLBar.value);
 			var tmpshaddow = '';
@@ -34,61 +33,11 @@
 			gURLBar.InsertShaddowLink('');
 		}
 	}
-  }
+}
   
-function writeToFile(file, text){
-	var ostream = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
-	ostream.init(file, 0x02 | 0x08 | 0x20, 0664, 0);
 
-	var converter = Cc["@mozilla.org/intl/converter-output-stream;1"].createInstance(Ci.nsIConverterOutputStream);
-	converter.init(ostream, "UTF-8", 4096, 0x0000);
-	converter.writeString(text);
-	converter.close();
-}
-function savePlugins(){
-	var ob={}
-	for each(var i in InstantFox.Plugins)
-		if(i.url)
-			ob[i.name]=i
-
-	var js = JSON.stringify(ob).replace(',','\n,','g')
-
-	writeToFile(HH.getPluginFile(),js)
-}
-
-function loadCustomizedPlugins(){
-	var file = HH.getPluginFile()
-	if(file.exists()){
-		var spec = ContentAreaUtils.ioService.newFileURI(file).spec
-		var req = new XMLHttpRequest
-		req.overrideMimeType("text/plain");
-		req.open("GET", spec, true);
-		req.onload=onPluginsLoaded
-		req.send(null)
-	}	
-}
-function onPluginsLoaded(e){
-	e.target.onload=null
-	var js = e.target.responseText
-	var plugins = JSON.parse(js)
-	InstantFox.Shortcuts={}
-	InstantFox.Plugins={}
-	for each (var i in plugins){
-	if(i.key)
-		InstantFox.Shortcuts[i.key] = i.name
-		InstantFox.Plugins[i.name] = i
-	}
-	if(InstantFox.onPluginsLoaded)
-		InstantFox.onPluginsLoaded()
-}
 
 var HH = {
-	getPluginFile: function(){
-		var file=Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("ProfD", Ci.nsIFile);
-		file.append('instantFoxPlugins.js')	
-		return file
-	},
-	loadPlugins: loadCustomizedPlugins,
     _url: {
       hash: 'http://search.instantfox.net/#',
       host: 'search.instantfox.net',
@@ -324,7 +273,6 @@ var instantFoxLoad = function(event) {
 	HH._observeURLBar();
 	
 	// init plugins
-	InstantFox.preprocessPlugins();
     gBrowser.addEventListener("load", function(event) {
       if (event.originalTarget instanceof HTMLDocument) {
         for(var plugin in InstantFox.Plugins) {

@@ -17,7 +17,7 @@
     wa:   'wolframalpha'
   };
   
-  InstantFox.Plugins.extend({
+  InstantFox.Plugins = {
     weather: {
       url: 'http://weather.instantfox.net/%q',
       json: 'http://maps.google.de/maps/suggest?q=%q&cp=999&hl=de&gl=de&v=2&json=b'
@@ -74,7 +74,7 @@
       url: 'http://www.wolframalpha.com/input/?i=%q',
       json: false
     }
-  });
+  };
 
   InstantFox.localeMap = {'%ls': 'de', '%ll': 'de-DE', '%ld': 'de'}
 

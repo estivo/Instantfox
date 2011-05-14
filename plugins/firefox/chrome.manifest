@@ -18,5 +18,5 @@ locale    instantfox it chrome/locale/it/
 locale    instantfox it-IT chrome/locale/it/
 
 #FF4
-component {c541b971-0729-4f5d-a5c4-1f4dadef365e} components/instantfox_search.js
-contract @mozilla.org/autocomplete/search;1?name=instantFoxAutoComplete {c541b971-0729-4f5d-a5c4-1f4dadef365e}
+#component {c541b971-0729-4f5d-a5c4-1f4dadef365e} components/instantfox_search.js
+#contract @mozilla.org/autocomplete/search;1?name=instantFoxAutoComplete {c541b971-0729-4f5d-a5c4-1f4dadef365e}

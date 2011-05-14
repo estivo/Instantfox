@@ -114,7 +114,7 @@
 			for(var i=ss.length;i--;){
 				var s=ss[i]
 				if(s.href=="chrome://instantfox/content/skin/autocomplete.css"){
-					s.cssRules[3].style.fontSize=compStyle.fontSize
+					s.cssRules[3].style.fontSize=parseInt(compStyle.fontSize)-2 + 'px'
 					break
 				}
 			}
