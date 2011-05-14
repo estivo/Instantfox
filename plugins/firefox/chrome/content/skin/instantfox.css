@@ -1,3 +1,62 @@
-/* Placehoder */
 @namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
 @namespace html url("http://www.w3.org/1999/xhtml");
+/** popup ****************************************/
+#PopupAutoCompleteRichResult {
+	opacity: 0.9;
+}
+
+richlistitem[type ~= 'InstantFoxSuggest'] {
+	-moz-binding: url(chrome://instantfox/content/urlbar.xml#autocomplete-richlistitem) !important;
+	-moz-appearance: none;
+	border: none !important;
+	font-weight:bold !important;
+	font-size:13px!important;/*this is modified by urlbar.xml*/
+	padding:0px!important;
+}
+html|span.InstantFoxSuggest.ac-emphasize-text{
+	text-decoration:none !important;
+	font-weight:normal !important;
+	/color:#000 !important;
+}
+/** urlbar ***************************************/
+#urlbar {
+  -moz-binding: url(chrome://instantfox/content/urlbar.xml#urlbar) !important;
+}
+.instantfox-box{
+	overflow:hidden;
+	white-space:pre
+}
+.instantfox-key{
+	/*box-shadow: 0px 0px 2px 2px yellow inset;*/
+	border-radius: 2px;
+	background:lightblue; 
+	color: transparent;
+}
+.instantfox-shaddow{	 
+	color: graytext;
+}
+.instantfox-spacer{	 
+	visibility:hidden;
+}
+.instantfox-tip{
+	color:graytext;
+	right:0px;
+	background:rgb(255,246,171);
+	border-radius: 4px;
+}
+/** splitmenu ************************************/
+menuitem.split-menuitem-item[_moz-menuactive="true"], .split-menu-right-image[_moz-menuactive="true"] {
+    background-color: -moz-menuhover;
+    color: -moz-menuhovertext;
+}
+.split-menu-right-image {
+    -moz-appearance: menuitem;
+    -moz-box-pack: end;
+}
+menu[type=splitmenu] {
+    -moz-binding: url(chrome://instantfox/content/urlbar.xml#splitmenu);
+    -moz-box-orient: horizontal;
+    -moz-appearance: none !important;
+    color: menutext;
+    background-color: transparent !important;
+}

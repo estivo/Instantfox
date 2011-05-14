@@ -1,6 +1,4 @@
 <?xml version="1.0"?>
-<!-- @TODO: Add Autocomplete Feature -->
-<?xml-stylesheet href="chrome://instantfox/content/skin/autocomplete.css" type="text/css"?>
 
 <overlay id="instantfox-browser-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   <!-- development helper. remove in release builds -->
@@ -20,4 +18,12 @@
 		<panel onpopupshowing="if(event.target==this)InstantFox.HH.openOptionsPopup(this)"></panel>
 	</toolbarbutton>
   </toolbarpalette>
+  
+  <menupopup id="contentAreaContextMenu">
+	<menuitem id="context-searchselect" removeelement="true"/>
+	<menu id="context-searchselect" type='splitmenu' label=""  iconic="true" 
+			onclick='gContextMenu.doSearch(event)' insertbefore='context-sep-open'>
+		<menupopup 	onpopupshowing="gContextMenu.fillSearchSubmenu(this)"/>
+	</menu>	  
+  </menupopup>
 </overlay>

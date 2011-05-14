@@ -402,3 +402,85 @@ function URLBarSetURI(aURI) {
     gURLBar.value = value;
     SetPageProxyState(valid ? "valid" : "invalid");
 }
+
+/*********************************************************
+ *
+ *******/
+nsContextMenu.prototype.getSelectedText = function() {
+	var selectedText = getBrowserSelection();
+
+    if (selectedText)
+		return selectedText
+	try{
+		var editor = content.document.activeElement
+			.QueryInterface(Ci.nsIDOMNSEditableElement).editor
+	}catch(e){
+		try{
+			var editor = document.popupNode
+				.QueryInterface(Ci.nsIDOMNSEditableElement).editor
+		}catch(e){}
+	}
+	try{
+		return editor.selection.toString()
+	}catch(e){}
+	
+}
+nsContextMenu.prototype.isTextSelection = function() {
+	var menu = document.getElementById("context-searchselect")
+
+    var selectedText = this.getSelectedText()
+	
+	if (!selectedText){
+		menu.hidden = true
+		return false;
+	}
+	
+    if (selectedText.length > 15)
+      selectedText = selectedText.substr(0,15) + this.ellipsis;
+
+    // Use the current engine if the search bar is visible, the default
+    // engine otherwise.
+    var engine = Services.search[isElementVisible(BrowserSearch.searchBar)?
+												"currentEngine": "defaultEngine"];
+  
+    // format "Search <engine> for <selection>" string to show in menu
+    var menuLabel = gNavigatorBundle.getFormattedString("contextMenuSearchText",
+                                                        [engine.name, selectedText]);
+	if(menu){
+		menu.label = menuLabel;
+		menu.image = engine.iconURI.spec
+		menu.item.setAttribute('name', engine.name)
+		menu.accessKey = gNavigatorBundle.getString("contextMenuSearchText.accesskey"); 
+		menu.hidden = false
+	}
+
+    return true;
+}
+nsContextMenu.prototype.fillSearchSubmenu=function(popup){
+	var menu
+	while(menu = popup.firstChild)
+		popup.removeChild(menu)
+	Services.search.getVisibleEngines().forEach(function(engine){
+		menu = document.createElement('menuitem')
+		menu.setAttribute('name', engine.name)
+		menu.setAttribute('label', engine.name)
+		menu.setAttribute('image', engine.iconURI.spec)
+		menu.setAttribute('class', "menuitem-iconic")		
+		popup.appendChild(menu)
+	})
+}
+nsContextMenu.prototype.doSearch=function(e){
+	var name = e.originalTarget.getAttribute('name')
+	if(!name)
+		return
+	var selectedText = this.getSelectedText()
+	if(name == 'open as link')
+		openLinkIn(selectedText, e.button!=0?"current":"tab", {relatedToCurrent: true});
+    var engine = Services.search.getEngineByName(name);
+    var submission = engine.getSubmission(selectedText);
+    if (!submission) {
+        return;
+    }
+    openLinkIn(submission.uri.spec, e.button!=0?"current":"tab", {postData: submission.postData, relatedToCurrent: true});
+}
+
