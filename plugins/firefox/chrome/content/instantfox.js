@@ -404,7 +404,7 @@ function URLBarSetURI(aURI) {
 }
 
 /*********************************************************
- *
+ * contextMenu
  *******/
 nsContextMenu.prototype.getSelectedText = function() {
 	var selectedText = getBrowserSelection();

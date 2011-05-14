@@ -113,7 +113,7 @@ InstantFoxModule = {
 			keylength: q.length
 		};
     },
-
+	
 
 }
 
