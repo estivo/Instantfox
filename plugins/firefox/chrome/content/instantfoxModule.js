@@ -85,7 +85,7 @@ InstantFoxModule = {
 
 		return p.key + ' ' + decodeURIComponent(queryString);
 	},
-	URLFromQuery: function(q){
+	URLFromQuery: function(q) {
 		var q			= gURLBar.value;
 		var parsed    = this.parse(q.trimLeft());
 		var shortcut  = InstantFox.Shortcuts[parsed.key];
@@ -297,12 +297,11 @@ InstantFoxSearch.prototype = {
 			});
 			return
 		}
+		
+		this.listener = listener;
 
-		var _search	= this;
-		_search._result	= null;
-		var internal_results = {values: [], comments: [], images: [], last: []};
 
-		if(InstantFox_Comp.Wnd.InstantFox.HH._url.abort){
+		/* if(InstantFox_Comp.Wnd.InstantFox.HH._url.abort){
 			this.historyAutoComplete&&this.historyAutoComplete.stopSearch();
 			var newResult = new SimpleAutoCompleteResult(
 					searchString, Ci.nsIAutoCompleteResult.RESULT_NOMATCH,
@@ -311,7 +310,7 @@ InstantFoxSearch.prototype = {
 				);
 			listener.onSearchResult(self, newResult);
 			return false;
-		}
+		} */
 
 		if(!api['json']){
 			var newResult = new SimpleAutoCompleteResult(
@@ -324,14 +323,7 @@ InstantFoxSearch.prototype = {
 			return true;
 		}
 
-		var xhttpreq = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
-		xhttpreq.open("GET", api['json'], true);
-
-		xhttpreq.onload = this.onSearchReady.bind(this)
 		
-
-		xhttpreq.send(null);//InstantFox_Comp.xhttpreq.send(null);
-		this._req = xhttpreq;
 	},
 
 	stopSearch: function(){
@@ -339,7 +331,7 @@ InstantFoxSearch.prototype = {
 		if(this._req){
 			this._req.abort();
 		}
-
+		this.listener = null;
 	},
 	
 	onSearchReady: function(e){
@@ -363,6 +355,17 @@ InstantFoxSearch.prototype = {
 		this.listener = null;
 	},
 	
+	startReq: function(){
+		if(this._req)
+			this._req.abort()
+		else{
+			this._req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
+			this._req.onload = this.onSearchReady.bind(this)
+		}
+		this._req.open("GET", api['json'], true);
+
+		this._req.send(null);
+	}
 };
 /*******************************************************
  *  json handlers
