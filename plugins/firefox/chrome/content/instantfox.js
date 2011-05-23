@@ -65,25 +65,6 @@ XULBrowserWindow.InsertShaddowLink = function (shaddow2dsp, query) {
 
 
 var HH = {
-    _url: {
-      hash: 'http://search.instantfox.net/#',
-      host: 'search.instantfox.net',
-      intn: 'chrome://instantfox/locale/index.html',
-	  actp: '', // current shortcut in use
-	  seralw: false, // search always on every key up!
-	  abort: '', // abort request because enter pressed
-	  ctabID: '', // used for tab handeling
-	  hist_last: '' // used for history replace / assign
-    },
-    
-	
-
-	_os: {
-	  name:Components.classes["@mozilla.org/xre/app-info;1"]  
-           .getService(Components.interfaces.nsIXULRuntime).OS,
-	  set:false
-	},
-	
     _isOwnQuery: false,
     
     // -- Helper Methods --
@@ -185,16 +166,7 @@ var HH = {
     },
     	
     _observeURLBar: function() {
-      gURLBar.addEventListener('blur', function(e) {
-		// Return power to Site if urlbar really lost focus
-        if (HH._isOwnQuery && !gURLBar.mIgnoreFocus && e.originalTarget == gURLBar.mInputField) {
-		  HH._blankShaddow();
-          gURLBar.value = content.document.location;
-		  gBrowser.userTypedValue = null;
-		  HH._isOwnQuery = false;
-          HH._focusPermission(true);
-        }
-      }, false);
+      
     },
     
     // The current content-window-location is the InstantFox Output-Site
@@ -250,26 +222,15 @@ HH.closeOptionsPopup = function(p){
 	p.hidePopup()
 }
 
-//firefox 4 doesn't need _focusPermission
-if('Services' in window) {
-	HH._focusPermission = function() {	
-	}
-} else {
-	HH._focusPermission = function(access) {
-		var permission = (access ? 'allAccess' : 'noAccess');
-		InFoxPrefs.setCharPref('capability.policy.default.HTMLInputElement.focus',   permission);
-		InFoxPrefs.setCharPref('capability.policy.default.HTMLAnchorElement.focus',  permission);
-    }
-}
   
 var instantFoxLoad = function(event) {
 	dump('instantFoxOnLoad')
 	//window.removeEventListener('load', arguments.callee, true);        
 	// setup URLBar for components
-	gURLBar.setAttribute('autocompletesearch',	'instantFoxAutoComplete');
-	
 	Cu.import('chrome://instantFox/content/instantFoxModule.js')
-	InstantFoxModule.initialize()
+	
+	gURLBar.setAttribute('autocompletesearch',	'instantFoxAutoComplete');
+		
 	// tell InstantFox which internationalization & URLBar to use
 	InstantFox.HH = HH;
 	//gBrowser.addProgressListener(HH._observe, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
@@ -277,18 +238,15 @@ var instantFoxLoad = function(event) {
 	gURLBar.addEventListener('keydown', _keydown, false);
 	gURLBar.removeAttribute('oninput');
 	gURLBar.addEventListener('input', _input, false);
-	HH._observeURLBar();
-	
-	// init plugins
-    gBrowser.addEventListener("load", function(event) {
-      if (event.originalTarget instanceof HTMLDocument) {
-        for(var plugin in InstantFox.Plugins) {
-          try { InstantFox.Plugins[plugin].init(event.originalTarget.defaultView.wrappedJSObject); }
-          catch(ex) {}
+	gURLBar.addEventListener('blur', function(e) {
+		// Return power to Site if urlbar really lost focus
+        if (HH._isOwnQuery && !gURLBar.mIgnoreFocus && e.originalTarget == gURLBar.mInputField) {
+			InstantFox._blankShaddow();
+			gURLBar.value = content.document.location;
+			gBrowser.userTypedValue = null;
+			HH._isOwnQuery = false;
         }
-      }
-    }, true);
-    HH._init();
+    }, false);
 
 }
   
@@ -300,7 +258,7 @@ var instantFoxUnload = function(event) {
 }
     
 // Prevent pressing enter from performing it's default behaviour
-var _keydown = function(event) {
+var _keydown = function(event) {return
 	HH._url.abort=false;
 	var key = event.keyCode ? event.keyCode : event.which,
 		alt = event.altKey, meta = event.metaKey, ctrl = event.ctrlKey, shift = event.shiftKey;
@@ -363,17 +321,46 @@ var _keydown = function(event) {
 
 // Perform query if space was detected
 var _input = function(event) {
-	HH._url.abort=false;
-	HH._location = gURLBar.value;
-	gBrowser.userTypedValue = HH._location;
+	var val = gURLBar.value;
+	gBrowser.userTypedValue = val;
 
-	if (HH._isQuery()) {
-		HH._query(gURLBar.value, event);
-	}
-	// show autocomplete popup when not InstantFox!
-	else{	
+	var q	
+	if (q = HH.getQuery(val, InstantFoxModule.currentQuery)) {
+		InstantFoxModule.currentQuery = q;
+	} else if (InstantFoxModule.currentQuery) {
+		InstantFoxModule.currentQuery = null;
+		InstantFox._blankShaddow();
 	}
 };
+ 
+HH = {
+	getQuery: function(val, oldQ){
+		var i = val.indexOf(' ');
+		if (i == -1)
+			return false
+		
+		var plugin = InstantFoxModule.Shortcuts[val.substr(0, i)]
+		if (!plugin)
+			return
+		plugin = InstantFoxModule.Plugins[plugin]
+		if (oldQ) {
+			oldQ.plugin = plugin
+			oldQ.query = val.substr(i)
+			oldQ.value = val			
+			return oldQ
+		}
+
+		return {
+			plugin: plugin,
+			query: val.substr(i),
+			value: val,
+			browserText: nsContextMenu.prototype.getSelectedText().substr(0, 50),
+			tabId: gBrowser.mCurrentTab.linkedPanel
+		}
+	}
+
+}
+
  
 window.addEventListener('load', instantFoxLoad, true);
 //window.addEventListener('unload', instantFoxUnload, true);
@@ -430,7 +417,7 @@ nsContextMenu.prototype.getSelectedText = function() {
 	try{
 		return editor.selection.toString()
 	}catch(e){}
-	
+	return ''
 }
 nsContextMenu.prototype.isTextSelection = function() {
 	var menu = document.getElementById("context-searchselect")

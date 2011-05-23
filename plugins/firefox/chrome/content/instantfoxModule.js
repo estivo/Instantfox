@@ -226,14 +226,12 @@ onRawPluginsLoaded=function(){
  *    search component
  ***************/
 function SimpleAutoCompleteResult(searchString, searchResult,
-        defaultIndex, errorDescription, list, results, comments) {
+        defaultIndex, errorDescription, list) {
 	this._searchString = searchString;
 	this._searchResult = searchResult;
 	this._defaultIndex = defaultIndex;
 	this._errorDescription = errorDescription;
-	this._results = results;
-	this._comments = comments;
-	this.list = list;
+	if(list) this.list = list;
 }
 SimpleAutoCompleteResult.prototype = {
 	/**
@@ -247,23 +245,23 @@ SimpleAutoCompleteResult.prototype = {
 	_searchString: "",
 	_defaultIndex: 0,
 	_errorDescription: "",
-	list: {values: [], comments: [], images: [], last: []},
+	list: [{}],
 
 
 	get searchResult() this._searchResult,
 	get searchString() this._searchString,
 	get defaultIndex() this._defaultIndex,
 	get errorDescription() this._errorDescription,
-	get matchCount() this.list.values.length,
+	get matchCount() this.list.length,
 
-	getValueAt: function(index) { return this.list.values[index];},
-	getCommentAt: function(index) { return this.list.comments[index];},
-	getImageAt: function(index) { return this.list.images[index];},
-	getLabelAt: function(index) { return this.list.comments[index]; },
+	getValueAt: function(index) { return this.list[index].url;},
+	getCommentAt: function(index) { return this.list[index].url;},
+	getImageAt: function(index) { return this.list[index].url;},
+	getLabelAt: function(index) { return this.list[index].url; },
 	getStyleAt: function(index) { return "InstantFoxSuggest"},
 
 	removeValueAt: function(index, removeFromDb) {
-		this.list.values.splice(index, 1);
+		this.list.splice(index, 1);
 	},
 	QueryInterface: function(aIID) {
 		if (!aIID.equals(Ci.nsIAutoCompleteResult) && !aIID.equals(Ci.nsISupports))
@@ -282,23 +280,25 @@ InstantFoxSearch.prototype = {
 
 	startSearch: function(searchString, searchParam, previousResult, listener) {
 		dump(searchString, searchParam, previousResult, listener)
-		win = Services.wm.getMostRecentWindow("navigator:browser");
-
-		/**api return('query':query, 'key':parsed.key, 'json':json, 'gotourl':gotourl); OR false!**/
-		var api = null//InstantFox_Comp.Wnd.InstantFox.query4comp();
+		//win = Services.wm.getMostRecentWindow("navigator:browser");
+bb=this
 		var self = this
-		if(!api){
+		if(!InstantFoxModule.currentQuery){
 			//Search user's history
 			this.historyAutoComplete = this.historyAutoComplete ||
 					Cc["@mozilla.org/autocomplete/search;1?name=history"]
 									.getService(Ci.nsIAutoCompleteSearch);
+			this.$searchingHistory = true
 			this.historyAutoComplete.startSearch(searchString, searchParam, previousResult, {
-				onSearchResult: function(search, result){listener.onSearchResult(self, result)}
+				onSearchResult: function(search, result) {
+					self.$searchingHistory = false;
+					listener.onSearchResult(self, result)
+				}
 			});
 			return
-		}
+		} else if(this.$searchingHistory)
+			this.historyAutoComplete.stopSearch()
 		
-		this.listener = listener;
 
 
 		/* if(InstantFox_Comp.Wnd.InstantFox.HH._url.abort){
@@ -311,19 +311,22 @@ InstantFoxSearch.prototype = {
 			listener.onSearchResult(self, newResult);
 			return false;
 		} */
-
+		var api = InstantFoxModule.currentQuery.plugin
+dump(api)
 		if(!api['json']){
 			var newResult = new SimpleAutoCompleteResult(
 				searchString, Ci.nsIAutoCompleteResult.RESULT_NOMATCH,
 					0, "",
-					internal_results
+					null
 				);
 			listener.onSearchResult(self, newResult);
-			InstantFox_Comp.Wnd.InstantFox.HH._url.seralw = true;
+			//InstantFox_Comp.Wnd.InstantFox.HH._url.seralw = true;
 			return true;
 		}
-
 		
+		this.listener = listener;
+		dump(api['json'])
+		this.startReq()		
 	},
 
 	stopSearch: function(){
@@ -334,23 +337,24 @@ InstantFoxSearch.prototype = {
 		this.listener = null;
 	},
 	
-	onSearchReady: function(e){
+	onSearchReady: function(e){dump(e)
 		var json = e.target.responseText;
-		key='g'
+		var key = InstantFoxModule.currentQuery.plugin.key
 		var results = parseSimpleJson(json, key)
 		if(results){
 			var newResult = new SimpleAutoCompleteResult(
-				searchString, Ci.nsIAutoCompleteResult.RESULT_SUCCESS,
+				InstantFoxModule.currentQuery.value, Ci.nsIAutoCompleteResult.RESULT_SUCCESS,
 				0, "",
 				results
 			);
 		}else{
 			var newResult = new SimpleAutoCompleteResult(
-				searchString, Ci.nsIAutoCompleteResult.RESULT_NOMATCH,
+				InstantFoxModule.currentQuery.value, Ci.nsIAutoCompleteResult.RESULT_NOMATCH,
 				0, "",
 				results
 			);
 		}
+		dump(this.listener,newResult,results)
 		this.listener.onSearchResult(this, newResult);
 		this.listener = null;
 	},
@@ -362,11 +366,14 @@ InstantFoxSearch.prototype = {
 			this._req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
 			this._req.onload = this.onSearchReady.bind(this)
 		}
-		this._req.open("GET", api['json'], true);
-
+		var q = InstantFoxModule.currentQuery
+		var url = q.plugin.json.replace('%q', q.query)
+		this._req.open("GET", url, true);
+dump(url)
 		this._req.send(null);
 	}
 };
+dump('****')
 /*******************************************************
  *  json handlers
  *************/
@@ -388,6 +395,7 @@ var parseSimpleJson = function(json, key){
 			url: key + ' ' + result
 		})
 	}
+	return results
 }
 var parseMapsJson = function(json, key){
 	var xhrReturn = json.match(/query:"[^"]*/g);	
@@ -403,6 +411,7 @@ var parseMapsJson = function(json, key){
 			url: key + ' ' + result
 		})
 	}
+	return results
 }
 /*******************************************************
  *  register component
@@ -421,3 +430,6 @@ var parseMapsJson = function(json, key){
 	var factory = XPCOMUtils.generateNSGetFactory([component])(cp.classID);
 	reg.registerFactory(cp.classID, cp.classDescription, cp.contractID, factory);
 })(InstantFoxSearch);
+
+
+InstantFoxModule.initialize()

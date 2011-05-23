@@ -67,7 +67,7 @@ var __instantFoxDevel__ = {
 		var i = this.loadedScriptsCount = 0		
 		this.loadScript(this.sourceList[i], i)
 		
-		this.reloadModule('chrome://instantFox/content/instantFoxModule.js')		
+		this.m=this.reloadModule('chrome://instantFox/content/instantFoxModule.js')		
 	},
 	onLoad: function(e, script){
 		this.loadedScriptsCount++;
