@@ -113,7 +113,7 @@ InstantFoxModule = {
 			keylength: q.length
 		};
     },
-	
+
 
 }
 
@@ -214,7 +214,7 @@ preprocessPlugins = function(){
 	}
 }
 
-onRawPluginsLoaded=function(){
+onRawPluginsLoaded=function(e){
 	e.target.onload=null
 	var js = e.target.responseText
 	eval(js)
@@ -225,13 +225,16 @@ onRawPluginsLoaded=function(){
 /*************************************************************************
  *    search component
  ***************/
-function SimpleAutoCompleteResult(searchString, searchResult,
-        defaultIndex, errorDescription, list) {
+function SimpleAutoCompleteResult(list, searchString, defaultIndex) {
 	this._searchString = searchString;
-	this._searchResult = searchResult;
-	this._defaultIndex = defaultIndex;
-	this._errorDescription = errorDescription;
-	if(list) this.list = list;
+	this._defaultIndex = defaultIndex || 0;
+	if (list){
+		this._searchResult = (list.length?'SUCCESS':'NOMATCH')
+		this.list = list;
+	} else
+		this._searchResult = 'FAILURE';
+
+	this._searchResult = Ci.nsIAutoCompleteResult['RESULT_' + this._searchResult]
 }
 SimpleAutoCompleteResult.prototype = {
 	/**
@@ -245,8 +248,7 @@ SimpleAutoCompleteResult.prototype = {
 	_searchString: "",
 	_defaultIndex: 0,
 	_errorDescription: "",
-	list: [{}],
-
+	list: [],
 
 	get searchResult() this._searchResult,
 	get searchString() this._searchString,
@@ -254,8 +256,8 @@ SimpleAutoCompleteResult.prototype = {
 	get errorDescription() this._errorDescription,
 	get matchCount() this.list.length,
 
-	getValueAt: function(index) { return this.list[index].url;},
-	getCommentAt: function(index) { return this.list[index].url;},
+	getValueAt: function(index) { return this.list[index].url;},//displayed in urlbar
+	getCommentAt: function(index) { return this.list[index].url;},//displayed in popup
 	getImageAt: function(index) { return this.list[index].url;},
 	getLabelAt: function(index) { return this.list[index].url; },
 	getStyleAt: function(index) { return "InstantFoxSuggest"},
@@ -286,8 +288,7 @@ bb=this
 		if(!InstantFoxModule.currentQuery){
 			//Search user's history
 			this.historyAutoComplete = this.historyAutoComplete ||
-					Cc["@mozilla.org/autocomplete/search;1?name=history"]
-									.getService(Ci.nsIAutoCompleteSearch);
+					Cc["@mozilla.org/autocomplete/search;1?name=history"].getService(Ci.nsIAutoCompleteSearch);
 			this.$searchingHistory = true
 			this.historyAutoComplete.startSearch(searchString, searchParam, previousResult, {
 				onSearchResult: function(search, result) {
@@ -298,7 +299,7 @@ bb=this
 			return
 		} else if(this.$searchingHistory)
 			this.historyAutoComplete.stopSearch()
-		
+
 
 
 		/* if(InstantFox_Comp.Wnd.InstantFox.HH._url.abort){
@@ -312,53 +313,48 @@ bb=this
 			return false;
 		} */
 		var api = InstantFoxModule.currentQuery.plugin
-dump(api)
-		if(!api['json']){
-			var newResult = new SimpleAutoCompleteResult(
-				searchString, Ci.nsIAutoCompleteResult.RESULT_NOMATCH,
-					0, "",
-					null
-				);
+		if(!api.json){
+			var newResult = new SimpleAutoCompleteResult(null, searchString);
 			listener.onSearchResult(self, newResult);
 			//InstantFox_Comp.Wnd.InstantFox.HH._url.seralw = true;
 			return true;
 		}
-		
+
 		this.listener = listener;
 		dump(api['json'])
-		this.startReq()		
+		this.startReq()
 	},
 
 	stopSearch: function(){
 		if(this.historyAutoComplete) this.historyAutoComplete.stopSearch();
-		if(this._req){
+		if(this._req)
 			this._req.abort();
-		}
+
 		this.listener = null;
 	},
-	
+
 	onSearchReady: function(e){dump(e)
 		var json = e.target.responseText;
-		var key = InstantFoxModule.currentQuery.plugin.key
-		var results = parseSimpleJson(json, key)
-		if(results){
-			var newResult = new SimpleAutoCompleteResult(
-				InstantFoxModule.currentQuery.value, Ci.nsIAutoCompleteResult.RESULT_SUCCESS,
-				0, "",
-				results
-			);
-		}else{
-			var newResult = new SimpleAutoCompleteResult(
-				InstantFoxModule.currentQuery.value, Ci.nsIAutoCompleteResult.RESULT_NOMATCH,
-				0, "",
-				results
-			);
-		}
-		dump(this.listener,newResult,results)
+		var q = InstantFoxModule.currentQuery
+		var key = q.plugin.key
+		
+		if(q.plugin.json.indexOf('http://maps.google') == 0)
+			var results = parseMapsJson(json, key)
+		else
+			var results = parseSimpleJson(json, key)
+
+		if(results && results[0])
+			q.shaddow = results[0].url
+
+		var newResult = new SimpleAutoCompleteResult(results, q.value);
+
 		this.listener.onSearchResult(this, newResult);
 		this.listener = null;
+		
+		q.results = results;
+		q.onSearchReady()
 	},
-	
+
 	startReq: function(){
 		if(this._req)
 			this._req.abort()
@@ -369,7 +365,7 @@ dump(api)
 		var q = InstantFoxModule.currentQuery
 		var url = q.plugin.json.replace('%q', q.query)
 		this._req.open("GET", url, true);
-dump(url)
+
 		this._req.send(null);
 	}
 };
@@ -398,7 +394,7 @@ var parseSimpleJson = function(json, key){
 	return results
 }
 var parseMapsJson = function(json, key){
-	var xhrReturn = json.match(/query:"[^"]*/g);	
+	var xhrReturn = json.match(/query:"[^"]*/g);
 	if(!xhrReturn.length)
 		return
 

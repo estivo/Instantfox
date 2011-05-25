@@ -10,7 +10,7 @@ richlistitem[type ~= 'InstantFoxSuggest'] {
 	-moz-appearance: none;
 	border: none !important;
 	font-weight:bold !important;
-	font-size:13px!important;/*this is modified by urlbar.xml*/
+	font-size:1em!important;/*this is modified by urlbar.xml*/
 	padding:0px!important;
 }
 html|span.InstantFoxSuggest.ac-emphasize-text{

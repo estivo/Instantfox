@@ -42,8 +42,12 @@ var __instantFoxDevel__ = {
 	},
 	
 	reloadModule: function(href){
-		Cu.import(href).eval(makeReq(href))
-		return Cu.import(href)
+		//Cu.import(href).eval(makeReq(href))
+		//return Cu.import(href)
+		//Cc["@mozilla.org/moz/jssubscript-loader;1"].getService(Ci.mozIJSSubScriptLoader) 
+		var bp = Cu.import(href)
+		Services.scriptloader.loadSubScript(href, bp);
+		return bp
 	},
 
 	loadScript: function(href, index){
@@ -54,20 +58,21 @@ var __instantFoxDevel__ = {
 		s.onload = function(e){__instantFoxDevel__.onLoad(e, this)}
 		document.documentElement.appendChild(s)
 	},
-	
+
 	sourceList: [
 		//"chrome://instantfox/content/javascripts/app.js",
 		//"chrome://instantfox/content/javascripts/plugins.js",
 		//"chrome://instantfox/locale/plugins.js",
 		"chrome://instantfox/content/instantfox.js"
 	],
+	moduleHref: 'chrome://instantFox/content/instantFoxModule.js',
 	
 	doReload: function(){
 		//this.reloadComponent()
 		var i = this.loadedScriptsCount = 0		
 		this.loadScript(this.sourceList[i], i)
 		
-		this.m=this.reloadModule('chrome://instantFox/content/instantFoxModule.js')		
+		this.m = this.reloadModule(this.moduleHref)		
 	},
 	onLoad: function(e, script){
 		this.loadedScriptsCount++;
