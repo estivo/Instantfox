@@ -281,7 +281,7 @@ InstantFoxSearch.prototype = {
 	QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIAutoCompleteSearch]),
 
 	startSearch: function(searchString, searchParam, previousResult, listener) {
-		dump(searchString, searchParam, previousResult, listener)
+		dump(searchString, 'InstantFoxSearch-**-')
 		//win = Services.wm.getMostRecentWindow("navigator:browser");
 bb=this
 		var self = this

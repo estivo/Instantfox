@@ -32,38 +32,6 @@ InstantFox = {
 	}
 }
 
-
-XULBrowserWindow.InsertShaddowLink = function (shaddow2dsp, query) {
-	if (gURLBar) {
-		if(shaddow2dsp != '' && shaddow2dsp != query){
-			gURLBar.InsertSpacerLink(gURLBar.value);
-			var tmpshaddow = '';
-
-			if(shaddow2dsp.toLowerCase().indexOf(query.toLowerCase()) == 0){
-				// continue typing current keyword remove typed chars!
-				if(query.length != shaddow2dsp.length){
-					tmpshaddow = shaddow2dsp.substr(query.length, shaddow2dsp.length);
-				}else{
-					tmpshaddow = '';
-				}
-				InstantFox.right_shaddow = tmpshaddow;
-				gURLBar.InsertShaddowLink(tmpshaddow);
-			}else{
-				// keyword is new
-				InstantFox.right_shaddow = '';
-				gURLBar.InsertShaddowLink('');
-				//gURLBar.InsertShaddowLink(url);
-			}
-		}else{
-			InstantFox.right_shaddow = '';
-			gURLBar.InsertSpacerLink('');
-			gURLBar.InsertShaddowLink('');
-		}
-	}
-}
-
-
-
 var HH = {
     _isOwnQuery: false,
 
@@ -121,50 +89,6 @@ var HH = {
 
     },
 
-	_goto4comp: function(url2go) {
-		if(!this._url.seralw){
-			if (HH._timeout) window.clearTimeout(HH._timeout);
-			// add belong2tab check!
-			HH._isOwnQuery = true;
-			this.loadPage(url2go)
-			HH._url.hist_last = url2go;
-			//content.document.location.assign(url2go);
-		}
-		return true;
-	},
-
-	loadPage: function(url2go){
-		// see load_flags at http://
-		if(HH._overwriteHist()){
-			getWebNavigation().loadURI(url2go, (nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY | nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY), null, null, null);
-			//content.location.replace(url2go);
-		}else{
-			getWebNavigation().loadURI(url2go, (nsIWebNavigation.LOAD_FLAGS_NONE), null, null, null);
-			//content.location.assign(url2go);
-		}
-	},
-
-    _init: function() {
-      /*if(!HH._os.set){
-	    if(HH._os.name == 'Darwin'){ // MAC style adjustments returned Darwin
-		  XULBrowserWindow.InsertShaddowStyle("-2px 0 0 0");
-		  XULBrowserWindow.InsertShaddowStyleStart("1px");
-	    }
-	  }
-	  HH._os.set = true;
-	  // execute it only once browser sttarts
-
-	  /*
-	  var _prefVersion = 'extensions.' + InstantFox._name + '.version';
-      if (InFoxPrefs.getCharPref(_prefVersion) != InstantFox._version) {
-          // open Locale Index and Help Document
-          content.document.location = HH._url.intn;
-          // set new Version
-          InFoxPrefs.setCharPref(_prefVersion, InstantFox._version);
-       }
-	   */
-    },
-
     _observeURLBar: function() {
 
     },
@@ -206,21 +130,7 @@ var HH = {
 
 
 };
-HH.openOptionsPopup = function(p){
-	while(p.hasChildNodes())
-		p.removeChild(p.firstChild)
-	var i = document.createElement('iframe')
-	i.setAttribute('src','chrome://instantfox/content/options.xul')
-	p.appendChild(i)
-	i.contentWindow.close=HH.closeOptionsPopup
-	i.width=500
-	i.height=500
-}
 
-HH.closeOptionsPopup = function(p){
-	p =p || document.getElementById('instantFox-options').firstChild
-	p.hidePopup()
-}
 
 
 var instantFoxLoad = function(event) {
@@ -238,15 +148,7 @@ var instantFoxLoad = function(event) {
 	gURLBar.addEventListener('keydown', _keydown, false);
 	gURLBar.removeAttribute('oninput');
 	gURLBar.addEventListener('input', _input, false);
-	gURLBar.addEventListener('blur', function(e) {
-		// Return power to Site if urlbar really lost focus
-        if (HH._isOwnQuery && !gURLBar.mIgnoreFocus && e.originalTarget == gURLBar.mInputField) {
-			InstantFox._blankShaddow();
-			gURLBar.value = content.document.location;
-			gBrowser.userTypedValue = null;
-			HH._isOwnQuery = false;
-        }
-    }, false);
+	gURLBar.addEventListener('blur', HH.onblur, false);
 
 }
 
@@ -258,7 +160,7 @@ var instantFoxUnload = function(event) {
 }
 
 // Prevent pressing enter from performing it's default behaviour
-var _keydown = function(event) {
+var _keydown = function(event) {dump(gURLBar.value, '_keydown-**-')
 	var key = event.keyCode ? event.keyCode : event.which,
 		alt = event.altKey, meta = event.metaKey, ctrl = event.ctrlKey, shift = event.shiftKey;
 
@@ -292,7 +194,7 @@ var _keydown = function(event) {
 		var keyIndex = origVal.indexOf(' ')
 		var key=origVal.substring(0,keyIndex)
 
-		if(key in InstantFox.Shortcuts){
+		if(key in InstantFoxModule.Shortcuts){
 		//gURLBar.value = '`'+origVal
 			if (gURLBar.selectionStart<=keyIndex) {
 				gURLBar.selectionStart = keyIndex+1
@@ -303,7 +205,7 @@ var _keydown = function(event) {
 			}
 			simulateInput=true
 		}else{
-			var val = InstantFox.queryFromURL(origVal)
+			var val = InstantFoxModule.queryFromURL(origVal)
 			if(val){
 				gURLBar.value = val
 			}else{
@@ -321,23 +223,32 @@ var _keydown = function(event) {
 };
 
 // Perform query if space was detected
-var _input = function(event) {
+var _input = function(event) {		dump(gURLBar.value, '_input-**-')
+
 	var val = gURLBar.value;
 	gBrowser.userTypedValue = val;
 
-	var q
-	if (q = HH.getQuery(val, InstantFoxModule.currentQuery)) {
+	var q = HH.getQuery(val, InstantFoxModule.currentQuery)
+	if (q) {
 		InstantFoxModule.currentQuery = q;
 		dump(q.shaddow, q.value,'**/')
-		XULBrowserWindow.InsertShaddowLink(q.shaddow, q.value);
+		HH.updateShaddowLink(q);
 	} else if (InstantFoxModule.currentQuery) {
 		InstantFoxModule.currentQuery = null;
-		InstantFox._blankShaddow();
+		HH.updateShaddowLink(q);
 	}
 };
 
 HH = {
+	get _ctabID() gBrowser.mCurrentTab.linkedPanel,
+	get _url() InstantFoxModule.currentQuery,
+	
 	getQuery: function(val, oldQ){
+		if(val[0]=='`'){
+			
+		
+		}
+			
 		var i = val.indexOf(' ');
 		if (i == -1)
 			return false
@@ -346,6 +257,8 @@ HH = {
 		if (!plugin)
 			return
 		plugin = InstantFoxModule.Plugins[plugin]
+		
+		var j = val.substr()
 		if (oldQ) {
 			oldQ.plugin = plugin
 			oldQ.query = val.substr(i)
@@ -364,13 +277,108 @@ HH = {
 	},
 	onSearchReady: function(){
 		var q = this;//
-		dump(this)
-		XULBrowserWindow.InsertShaddowLink(q.shaddow||"", q.value||"");
+		//dump(this)
+		//XULBrowserWindow.InsertShaddowLink(q.shaddow||"", q.value||"");
+		HH.updateShaddowLink(q)
+		if(q.shaddow && !q.plugin.disablePageLoad)
+			HH.doPreload(q)
+	},	
+	updateShaddowLink: function(q){
+		//var q = InstantFoxModule.currentQuery;
+		if(!q || !q.shaddow) {
+			if(!gURLBar.currentShaddow)
+				return
+			gURLBar.currentShaddow = null;
+			gURLBar.instantFoxKeyNode.textContent = 
+			gURLBar.instantFoxSpacerNode.textContent = 
+			gURLBar.instantFoxShaddowNode.textContent = '';
+			gURLBar.tip.hidden=true;
+			return
+		}
+		var key = q.plugin.key;
+		var l = 1
+		var s = {
+			key: key,
+			spacer: q.value.substr(key.length).replace(' ', '\u00a0', 'g'),
+			shaddow: q.shaddow.substr(q.value.length)
+		}
+		gURLBar.instantFoxKeyNode.textContent = s.key;
+		gURLBar.instantFoxSpacerNode.textContent = s.spacer
+		gURLBar.instantFoxShaddowNode.textContent = s.shaddow;
+		gURLBar.currentShaddow = s
+		gURLBar.tip.hidden = false;
+		//if(!aURL){aURL='';this.tip.hidden=true}
+		//	var i = aURL.indexOf(' ')
+	},
+	
+	doPreload: function(q){
+		if(this.timeout)
+			this._timeout = clearTimeout(this._timeout)
 
+		var url2go = q.plugin.url;
+		url2go = url2go.replace('%q', q.shaddow || q.query);
+		
+		if(url2go == q.preloadURL)
+			return
+			
+		q.preloadURL = url2go
+		
+		// see load_flags at http://
+		if(HH._isOwnQuery){
+			getWebNavigation().loadURI(url2go, (nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY | nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY), null, null, null);
+			//content.location.replace(url2go);
+		}else{
+			getWebNavigation().loadURI(url2go, (nsIWebNavigation.LOAD_FLAGS_NONE), null, null, null);
+			//content.location.assign(url2go);
+			HH._isOwnQuery = true;
+		}
+	},
+	
+	scedulePreload: function(delay){
+		this.timeout = setTimeout(function(self){
+			self._timeout = null
+			self.doPreload(InstantFoxModule.currentQuery)
+		}, delay, this)
+	},
+	
+	onblur: function(e) {
+		// Return power to Site if urlbar really lost focus
+        if (HH._isOwnQuery && !gURLBar.mIgnoreFocus && e.originalTarget == gURLBar.mInputField) {
+			gURLBar.value = content.document.location;
+			gBrowser.userTypedValue = null;
+			HH.finishSearch();
+        }
+    },
+	
+	finishSearch: function(){
+		this._isOwnQuery = false
+		this.updateShaddowLink(null) //
+		InstantFoxModule.currentQuery = null;
+		if(this.timeout)
+			this._timeout = clearTimeout(this._timeout)
 	}
+	
 }
 
+//************************************************************************
+// experimental options popup
+HH.openOptionsPopup = function(p){
+	while(p.hasChildNodes())
+		p.removeChild(p.firstChild)
+	var i = document.createElement('iframe')
+	i.setAttribute('src','chrome://instantfox/content/options.xul')
+	p.appendChild(i)
+	i.contentWindow.close=HH.closeOptionsPopup
+	i.width=500
+	i.height=500
+}
 
+HH.closeOptionsPopup = function(p){
+	p =p || document.getElementById('instantFox-options').firstChild
+	p.hidePopup()
+}
+
+//************************************************************************
 window.addEventListener('load', instantFoxLoad, true);
 //window.addEventListener('unload', instantFoxUnload, true);
 
@@ -378,15 +386,14 @@ window.addEventListener('load', instantFoxLoad, true);
 
 // modify URLBarSetURI defined in browser.js
 function URLBarSetURI(aURI) {
-	var HH = InstantFox.HH;
+	// var HH = InstantFox.HH;
 	// auri is null if URLBarSetURI is called from urlbar.handleRevert
 	if (HH._isOwnQuery) {
-		if (aURI && HH._url._ctabID == HH._ctabID){
+		if (aURI && HH._url.tabID == HH._ctabID){
 			return;
 		} else { //hide shadow if user switched tabs
 			HH._blankShaddow();
 			HH._isOwnQuery  = false;
-			HH._focusPermission(true);
 		}
 	}
     var value = gBrowser.userTypedValue;

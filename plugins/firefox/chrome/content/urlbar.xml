@@ -15,11 +15,12 @@
         </children>
 		<xul:stack flex="1">
 			<xul:hbox class="instantfox-box" align='center'>
-			  <xul:hbox anonid="instantFoxKey" class="instantfox-key"/>		
-			  <xul:hbox anonid="instantFoxSpacer" class="instantfox-spacer"/>		
-			  <xul:hbox anonid="instantFoxShaddow" class="instantfox-shaddow" />
+			  <xul:hbox anonid="instantFoxKey" class="instantfox-key"><html:div/></xul:hbox>
+			  <xul:hbox anonid="instantFoxSpacer" class="instantfox-spacer"><html:div/></xul:hbox>
+			  <xul:hbox anonid="instantFoxShaddow" class="instantfox-shaddow"><html:div/></xul:hbox>
 			</xul:hbox>
-			<xul:hbox class='instantfox-tip'  bottom='0'  right='0'/>
+			<xul:hbox class='instantfox-tip' right='0' align='center'><html:div/></xul:hbox>
+
 			<xul:hbox anonid="textbox-input-box"
 					  class="textbox-input-box urlbar-input-box"
 					  flex="1" xbl:inherits="tooltiptext=inputtooltiptext">
@@ -40,7 +41,7 @@
                     class="autocomplete-result-popupset"/>
       <children includes="toolbarbutton"/>
     </content>
-	
+
     <implementation implements="nsIDOMEventListener, nsIObserver">
 	  <constructor><![CDATA[  //nsIDOMEventListener,
 		setTimeout(this.InsertShaddowStyle, 1000)
@@ -51,35 +52,35 @@
       <field name="_mouseover"/>
       <field name="_iconWasHovered"/>
       <field name="_tooltipTimer"/>
-	  
+
       <field name="inputBox">
         document.getAnonymousElementByAttribute(this, "anonid", "textbox-input-box");
       </field>
       <field name="inputBoxInner">
         document.getAnonymousElementByAttribute(this, "anonid", "textbox-input-box-inner");
       </field>
-	  
+
 	  <field name="instantFoxShaddowNode">
-        document.getAnonymousElementByAttribute(this, "anonid", "instantFoxShaddow");
-      </field>  
+        document.getAnonymousElementByAttribute(this, "anonid", "instantFoxShaddow").firstChild;
+      </field>
 	  <field name="instantFoxSpacerNode">
-        document.getAnonymousElementByAttribute(this, "anonid", "instantFoxSpacer");
-      </field> 
+        document.getAnonymousElementByAttribute(this, "anonid", "instantFoxSpacer").firstChild;
+      </field>
 	  <field name="instantFoxKeyNode">
-        document.getAnonymousElementByAttribute(this, "anonid", "instantFoxKey");
-      </field> 
+        document.getAnonymousElementByAttribute(this, "anonid", "instantFoxKey").firstChild;
+      </field>
 	  <field name="tip">
         document.getAnonymousElementByAttribute(this, "class", "instantfox-tip");
-      </field>  
+      </field>
 
 	  <method name="showTip">
         <parameter name="aURL"/>
         <body><![CDATA[
 			this.tip.hidden=false
-			this.tip.textContent = aURL;
+			this.tip.firstChild.textContent = aURL;
         ]]></body>
-      </method> 
-	  
+      </method>
+
 	  <method name="InsertShaddowLink">
         <parameter name="aURL"/>
         <body><![CDATA[
@@ -87,7 +88,7 @@
 			this.instantFoxShaddowNode.textContent = aURL;
 			//}
         ]]></body>
-      </method> 
+      </method>
 	  <method name="InsertSpacerLink">
         <parameter name="aURL"/>
         <body><![CDATA[
@@ -95,9 +96,9 @@
 			var i = aURL.indexOf(' ')
 			this.instantFoxKeyNode.textContent = aURL.substring(0,i)
 			this.instantFoxSpacerNode.textContent = aURL.substr(i);
-			
+
         ]]></body>
-      </method> 
+      </method>
 	  <method name="InsertShaddowStyle">
         <body><![CDATA[
 			var boxStyle = document.getAnonymousElementByAttribute(gURLBar, "class", "instantfox-box").style;
@@ -119,7 +120,7 @@
 				}
 			}*/
         ]]></body>
-      </method>   
+      </method>
     </implementation>
 
   </binding>
@@ -129,9 +130,7 @@
     <content>
       <xul:hbox align="center" class="ac-title-box">
         <xul:image xbl:inherits="src=image" class="ac-site-icon"/>
-        <xul:hbox anonid="title-box" class="ac-title" flex="1"
-                  onunderflow="_doUnderflow('_title');"
-                  onoverflow="_doOverflow('_title');">
+        <xul:hbox anonid="title-box" class="ac-title" flex="1">
           <xul:description anonid="title" class="ac-normal-text ac-comment" xbl:inherits="selected"/>
         </xul:hbox>
         <xul:hbox anonid="extra-box" class="ac-extra" align="center" hidden="true">
@@ -264,7 +263,7 @@
           while (aDescriptionElement.hasChildNodes())
             aDescriptionElement.removeChild(aDescriptionElement.firstChild);
 
-          
+
           // Get the indices that separate match and non-match text
           let search = this.getAttribute("text");
           let tokens = this._getSearchTokens(search);
@@ -327,8 +326,8 @@
       </handler>
     </handlers>
   </binding>
-  
-  
+
+
   <binding id="splitmenu" extends="chrome://global/content/bindings/menu.xml#menuitem-base">
     <content align='stretch'>
         <xul:menuitem anonid="item" flex="1"
