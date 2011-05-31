@@ -161,15 +161,8 @@
           <![CDATA[
             var title = this.getAttribute("title");
             var url = this.getAttribute("url");
-            var panel = this.parentNode.parentNode;
-
-            // allow consumers that have extended popups to override
-            // the label values for the richlistitems
-            if (panel.createResultLabel)
-              return panel.createResultLabel(title, url, this.getAttribute("type"));
-
-            // aType (ex: "ac-result-type-<aType>") is related to the class of the image,
-            // and is not "visible" text so don't use it for the label (for accessibility).
+           
+		   dump(title, url)
             return title + " " + url;
           ]]>
         </getter>
@@ -181,7 +174,6 @@
         <parameter name="aSearchTokens"/>
         <body>
           <![CDATA[
-          // Short circuit for empty search ([""] == "")
           if (aSearchTokens == "")
             return [0, aText.length];
 
@@ -300,9 +292,8 @@
       <method name="_adjustAcItem">
         <body>
           <![CDATA[
-          var url = this.getAttribute("url");
+         // var url = this.getAttribute("url");
           var title = this.getAttribute("title");
-          var type = this.getAttribute("type");
 
 		  this._setUpDescription(this._title, title);
 		  return;
@@ -316,10 +307,10 @@
       <handler event="mouseup">
         <![CDATA[
 		// todo: find why key is stripped from url and gURLBar.controller.getValueAt(gURLBar.popup.selectedIndex);
-		var key = this.getAttribute("text").trim().split(' ')[0]
-		var search = key + ' ' + this.getAttribute("url")
+		var q=InstantFoxModule.currentQuery		
+		var search = q.plugin.key + q.splitSpace + this.getAttribute("url")
 
-		InstantFox.HH.onEnter(search)
+		HH.onEnter(search)
         event.preventDefault()
 		event.stopPropagation()
       ]]>

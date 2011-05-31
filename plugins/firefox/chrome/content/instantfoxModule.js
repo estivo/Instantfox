@@ -256,11 +256,11 @@ SimpleAutoCompleteResult.prototype = {
 	get errorDescription() this._errorDescription,
 	get matchCount() this.list.length,
 
-	getValueAt: function(index) { return this.list[index].url;},//displayed in urlbar
-	getCommentAt: function(index) { return this.list[index].url;},//displayed in popup
-	getImageAt: function(index) { return this.list[index].url;},
-	getLabelAt: function(index) { return this.list[index].url; },
-	getStyleAt: function(index) { return "InstantFoxSuggest"},
+	getCommentAt: function(index) this.list[index].title,//displayed in popup
+	getValueAt: function(index) this.list[index].url,//displayed in urlbar
+	getImageAt: function(index) this.list[index].url,
+	getLabelAt: function(index) this.list[index].url+'***---',
+	getStyleAt: function(index) "InstantFoxSuggest",
 
 	removeValueAt: function(index, removeFromDb) {
 		this.list.splice(index, 1);
@@ -283,7 +283,6 @@ InstantFoxSearch.prototype = {
 	startSearch: function(searchString, searchParam, previousResult, listener) {
 		dump(searchString, 'InstantFoxSearch-**-')
 		//win = Services.wm.getMostRecentWindow("navigator:browser");
-bb=this
 		var self = this
 		if(!InstantFoxModule.currentQuery){
 			//Search user's history
@@ -339,12 +338,12 @@ bb=this
 		var key = q.plugin.key
 		
 		if(q.plugin.json.indexOf('http://maps.google') == 0)
-			var results = parseMapsJson(json, key)
+			var results = parseMapsJson(json, key, q.splitSpace)
 		else
-			var results = parseSimpleJson(json, key)
+			var results = parseSimpleJson(json, key, q.splitSpace)
 
 		if(results && results[0])
-			q.shaddow = results[0].url
+			q.shaddow = results[0].title
 
 		var newResult = new SimpleAutoCompleteResult(results, q.value);
 
@@ -373,7 +372,7 @@ dump('****')
 /*******************************************************
  *  json handlers
  *************/
-var parseSimpleJson = function(json, key){
+var parseSimpleJson = function(json, key, splitSpace){
 	try{
 		var xhrReturn = JSON.parse(json)[1];
 	}catch(e){
@@ -388,12 +387,12 @@ var parseSimpleJson = function(json, key){
 		results.push({
 			icon: '',
 			title: result,
-			url: key + ' ' + result
+			url: key + splitSpace + result
 		})
 	}
 	return results
 }
-var parseMapsJson = function(json, key){
+var parseMapsJson = function(json, key, splitSpace){
 	var xhrReturn = json.match(/query:"[^"]*/g);
 	if(!xhrReturn.length)
 		return
@@ -404,7 +403,7 @@ var parseMapsJson = function(json, key){
 		results.push({
 			icon: '',
 			title: result,
-			url: key + ' ' + result
+			url: key + splitSpace + result
 		})
 	}
 	return results

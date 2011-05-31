@@ -3,34 +3,6 @@ var InFoxPrefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefS
 
 InFoxPrefs.QueryInterface(Ci.nsIPrefBranch2);
 
-InstantFox = {
-	get _ctabID() gBrowser.mCurrentTab.linkedPanel,
-	_blankShaddow: function(){
-		if(!InstantFox.current_shaddow) return false; 		// not needed already blank!
-		InstantFox.current_shaddow = '';
-		XULBrowserWindow.InsertShaddowLink('','');
-	},
-	onEnter: function(value){
-		HH._url.abort=true;
-		//InstantFox.Plugins[InstantfoxHH._url.actp]; // improve it later!
-
-		var tmp = InstantFox.query(value);
-
-		if(content.document.location.href != tmp['loc']){
-			this.loadPage(tmp['loc'])
-			HH._url.hist_last = tmp['loc'];
-			//content.document.location.assign(tmp['loc']);
-		}
-		gURLBar.value = tmp['loc'];
-		gBrowser.userTypedValue = null;
-
-		HH._blankShaddow();
-		HH._isOwnQuery  = false;
-		HH._focusPermission(true);
-
-		gBrowser.selectedBrowser.focus();
-	}
-}
 
 var HH = {
     _isOwnQuery: false,
@@ -89,46 +61,12 @@ var HH = {
 
     },
 
-    _observeURLBar: function() {
-
-    },
-
     // The current content-window-location is the InstantFox Output-Site
     _isInstantFox: function(loc) {
       loc = loc || content.document.location;
       try { return loc.hostname ? loc.hostname.search(HH._url.host) > -1 : false; }
       catch(ex) { return false; }
     },
-
-
-
-    // Assuming that a space in the trimmed Urlbar indicates a InstantFox call
-    _isQuery: function() {
-      if (gURLBar.value.length < 3){
-	    this._blankShaddow();
-		return false;
-	  }
-	  // match keywords here!
-      var found = false;
-	  for(var plugin in  InstantFox.Shortcuts) {
-      	if(gURLBar.value.indexOf(plugin+' ') == 0){
-			found = plugin; // set Shortkey
-			this._url.actp = plugin;
-			break;
-		}
-      }
-	  if(!found){
-	  	this._blankShaddow('','');
-		return false;
-	  }
-
-	  var query = gURLBar.value.substr((plugin.length+1),gURLBar.value.length); // plugin.length Shortkey + Space => length to cut off
-	  
-
-	  return true; //(gURLBar.value.replace(/^\s+|\s+$/g, '').search(' ') > -1);
-    },
-
-
 };
 
 
@@ -162,20 +100,20 @@ var instantFoxUnload = function(event) {
 // Prevent pressing enter from performing it's default behaviour
 var _keydown = function(event) {dump(gURLBar.value, '_keydown-**-')
 	var key = event.keyCode ? event.keyCode : event.which,
-		alt = event.altKey, meta = event.metaKey, ctrl = event.ctrlKey, shift = event.shiftKey;
+		alt = event.altKey, meta = event.metaKey,
+		ctrl = event.ctrlKey, shift = event.shiftKey;
 
-	if(HH._isQuery){
+	if (InstantFoxModule.currentQuery) {
 		if (key == 9 || (!ctrl && !shift && key == 39)) { // 9 == Tab
-			if(InstantFox.right_shaddow != ''){
-				gURLBar.value += InstantFox.right_shaddow;
-				InstantFox.right_shaddow = '';
+			if (InstantFox.rightShaddow != '') {
+				gURLBar.value += InstantFox.rightShaddow;
+				InstantFox.rightShaddow = '';
 				//gURLBar.controller.handleText(true)
 				_input()
-				HH._url.abort=true;
 				event.preventDefault();
 			}
 		} else if (key == 39 && ctrl && !shift) { // 39 == RIGHT
-			if(InstantFox.right_shaddow != '' && gURLBar.selectionEnd==gURLBar.value.length){
+			if (InstantFox.rightShaddow != '' && gURLBar.selectionEnd == gURLBar.value.length) {
 				/* window.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindowUtils)
 					.sendNativeKeyEvent(0, 0, 0, InstantFox.right_shaddow[0], ''); */
 				gURLBar.value += InstantFox.right_shaddow[0]
@@ -239,14 +177,14 @@ var _input = function(event) {		dump(gURLBar.value, '_input-**-')
 	}
 };
 
-HH = {
+InstantFox = HH = {
 	get _ctabID() gBrowser.mCurrentTab.linkedPanel,
 	get _url() InstantFoxModule.currentQuery,
 	
 	getQuery: function(val, oldQ){
 		if(val[0]=='`'){
 			
-		
+			
 		}
 			
 		var i = val.indexOf(' ');
@@ -258,22 +196,19 @@ HH = {
 			return
 		plugin = InstantFoxModule.Plugins[plugin]
 		
-		var j = val.substr()
-		if (oldQ) {
-			oldQ.plugin = plugin
-			oldQ.query = val.substr(i)
-			oldQ.value = val
-			return oldQ
+		var j = val.substr(i).match(/^\s*/)[0].length
+		if (!oldQ) {
+			oldQ = {
+				browserText: nsContextMenu.prototype.getSelectedText().substr(0, 50),
+				tabId: gBrowser.mCurrentTab.linkedPanel,
+				onSearchReady: this.onSearchReady
+			}
 		}
-
-		return {
-			plugin: plugin,
-			query: val.substr(i),
-			value: val,
-			browserText: nsContextMenu.prototype.getSelectedText().substr(0, 50),
-			tabId: gBrowser.mCurrentTab.linkedPanel,
-			onSearchReady: this.onSearchReady
-		}
+		oldQ.plugin = plugin
+		oldQ.query = val.substr(i+j)
+		oldQ.splitSpace = val.substr(i,j)
+		oldQ.value = val
+		return oldQ
 	},
 	onSearchReady: function(){
 		var q = this;//
@@ -293,6 +228,7 @@ HH = {
 			gURLBar.instantFoxSpacerNode.textContent = 
 			gURLBar.instantFoxShaddowNode.textContent = '';
 			gURLBar.tip.hidden=true;
+			this.rightShaddow = ''
 			return
 		}
 		var key = q.plugin.key;
@@ -300,15 +236,15 @@ HH = {
 		var s = {
 			key: key,
 			spacer: q.value.substr(key.length).replace(' ', '\u00a0', 'g'),
-			shaddow: q.shaddow.substr(q.value.length)
+			shaddow: q.shaddow.substr(q.query.length)
 		}
 		gURLBar.instantFoxKeyNode.textContent = s.key;
 		gURLBar.instantFoxSpacerNode.textContent = s.spacer
 		gURLBar.instantFoxShaddowNode.textContent = s.shaddow;
-		gURLBar.currentShaddow = s
-		gURLBar.tip.hidden = false;
-		//if(!aURL){aURL='';this.tip.hidden=true}
-		//	var i = aURL.indexOf(' ')
+		gURLBar.currentShaddow = s		
+		this.rightShaddow = s.shaddow // fixme
+		gURLBar.tip.hidden = false;		
+		gURLBar.showTip('hello')
 	},
 	
 	doPreload: function(q){
@@ -319,7 +255,7 @@ HH = {
 		url2go = url2go.replace('%q', q.shaddow || q.query);
 		
 		if(url2go == q.preloadURL)
-			return
+			return url2go
 			
 		q.preloadURL = url2go
 		
@@ -332,6 +268,7 @@ HH = {
 			//content.location.assign(url2go);
 			HH._isOwnQuery = true;
 		}
+		return url2go
 	},
 	
 	scedulePreload: function(delay){
@@ -350,12 +287,26 @@ HH = {
         }
     },
 	
-	finishSearch: function(){
+	finishSearch: function() {
 		this._isOwnQuery = false
 		this.updateShaddowLink(null) //
 		InstantFoxModule.currentQuery = null;
 		if(this.timeout)
 			this._timeout = clearTimeout(this._timeout)
+	},
+	
+	onEnter: function(value){
+		InstantfoxModule.previousQuery = InstantfoxModule.currentQuery	
+
+		var tmp = this.doPreload(InstantfoxModule.currentQuery)
+		gURLBar.value = tmp;
+		gBrowser.userTypedValue = null;
+
+		this.finishSearch()
+		
+		InstantfoxModule.currentQuery=null;
+
+		gBrowser.selectedBrowser.focus();
 	}
 	
 }
@@ -389,11 +340,10 @@ function URLBarSetURI(aURI) {
 	// var HH = InstantFox.HH;
 	// auri is null if URLBarSetURI is called from urlbar.handleRevert
 	if (HH._isOwnQuery) {
-		if (aURI && HH._url.tabID == HH._ctabID){
+		if (InstantFoxModule.currentQuery.tabId == HH._ctabID){
 			return;
 		} else { //hide shadow if user switched tabs
-			HH._blankShaddow();
-			HH._isOwnQuery  = false;
+			HH.finishSearch();
 		}
 	}
     var value = gBrowser.userTypedValue;
