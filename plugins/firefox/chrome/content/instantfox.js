@@ -5,7 +5,6 @@ InFoxPrefs.QueryInterface(Ci.nsIPrefBranch2);
 
 
 var HH = {
-    _isOwnQuery: false,
 
     // -- Helper Methods --
 	_overwriteHist: function(){ // Used to decide if histroy should be overwritten or not (replace or assign)
@@ -116,7 +115,7 @@ var _keydown = function(event) {dump(gURLBar.value, '_keydown-**-')
 			if (InstantFox.rightShaddow != '' && gURLBar.selectionEnd == gURLBar.value.length) {
 				/* window.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindowUtils)
 					.sendNativeKeyEvent(0, 0, 0, InstantFox.right_shaddow[0], ''); */
-				gURLBar.value += InstantFox.right_shaddow[0]
+				gURLBar.value += InstantFox.rightShaddow[0]
 				gURLBar.controller.handleText(true)
 				_input()
 				event.preventDefault();
@@ -124,6 +123,9 @@ var _keydown = function(event) {dump(gURLBar.value, '_keydown-**-')
 		} else if (key == 13 && !alt && !meta && !ctrl) { // 13 == ENTER
 			HH.onEnter(gURLBar.value)
 			event.preventDefault();
+		} else if (!alt && !meta && !ctrl && [38,40,34,33].indexOf(key)!=-1) {//UP,DOWN,PAGE_UP,PAGE_DOWN
+			HH.schedulePreload()
+			InstantFoxModule.currentQuery.shaddow = '';
 		}
 	}
 	
@@ -178,6 +180,8 @@ var _input = function(event) {		dump(gURLBar.value, '_input-**-')
 };
 
 InstantFox = HH = {
+	_isOwnQuery: false,
+	
 	get _ctabID() gBrowser.mCurrentTab.linkedPanel,
 	get _url() InstantFoxModule.currentQuery,
 	
@@ -271,11 +275,14 @@ InstantFox = HH = {
 		return url2go
 	},
 	
-	scedulePreload: function(delay){
-		this.timeout = setTimeout(function(self){
+	schedulePreload: function(delay){
+		if (this._timeout)
+			return
+
+		this._timeout = setTimeout(function(self){
 			self._timeout = null
 			self.doPreload(InstantFoxModule.currentQuery)
-		}, delay, this)
+		}, delay||200, this)
 	},
 	
 	onblur: function(e) {
