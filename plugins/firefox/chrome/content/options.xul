@@ -16,7 +16,7 @@ textbox{
 	color:#777;
 	width:5ch
 }
-textbox[type=name]{
+/*textbox[type=name]{
 	position:absolute;	
 	margin-top:-12px;
 	border-top:2px solid #9ED1E9!important;
@@ -109,25 +109,8 @@ img{
 			<spacer flex="1"></spacer>
 			<menulist id="locale"></menulist>
 		</hbox>
-		<richlistbox>
-		  <richlistitem>
-			<description>A XUL Description!</description>
-			<button label="A XUL Button"/>
-		  </richlistitem>
-		  <richlistitem>
-			<button label="A XUL Button"/>
-		  </richlistitem>
-		  <richlistitem>
-			<button label="A XUL Button"/>
-		  </richlistitem>
-		  <richlistitem>
-			<description>A XUL Description!</description>
-			<button label="A XUL Button"/>
-		  </richlistitem>
-		  <richlistitem>
-			<description>A XUL Description!</description>
-			<button label="A XUL Button"/>
-		  </richlistitem>
+		<richlistbox id='standard-shortcuts'>
+		  
 		</richlistbox>
 	</vbox>
 	<vbox>
@@ -136,43 +119,12 @@ img{
 			<spacer flex="1"></spacer>
 			<toolbarbutton id="add" label='add +'/>
 		</hbox>
-		<richlistbox>
-		  <richlistitem>
-			<hbox align="center" class='image'>
-				<image src="moz-anno:favicon:http://www.mozilla.com/favicon.ico" />
-			</hbox>
-			<label value="google"/>
-			<hbox flex='1' class='urls'>
-			<checkbox label='ddd'/>
-			<checkbox label='ddd'/>
-	<!-- 			<hbox align='start'>
-					<textbox type='name' value='$name$' class='bold'/>
-				</hbox>
-				<textbox type='url' value='$url$'/>
-				<textbox type='json' value='$json$'/> -->
-			</hbox>
-			<hbox align="center" class='key'>
-				<textbox class='center bigger bold' type='key' value='$key$'/>
-			</hbox>
-		  </richlistitem>
-		  <richlistitem>
-			<button label="A XUL Button"/>
-		  </richlistitem>
-		  <richlistitem>
-			<button label="A XUL Button"/>
-		  </richlistitem>
-		  <richlistitem>
-			<description>A XUL Description!</description>
-			<button label="A XUL Button"/>
-		  </richlistitem>
-		  <richlistitem>
-			<description>A XUL Description!</description>
-			<button label="A XUL Button"/>
-		  </richlistitem>
+		<richlistbox id='container'>
+		  
 		</richlistbox>
 	</vbox>
     <vbox id='head'></vbox>
-    <vbox id='container'/>
+    <vbox id='container8'/>
   </vbox>
   <hbox id='status-bar'>
 	<toolbarbutton id='' label='add plugin' type='menu' oncommand='clearPrefs();updatePrefButtonVisibility()'>
@@ -229,15 +181,16 @@ function getFavicon(url){
 		var icon = faviconService.getFaviconImageForPage(makeURI('http://'+host)).spec
 		if(icon != faviconService.defaultFavicon.spec)
 			return icon
-		host = tldService.getBaseDomainFromHost(host)
-		var icon = faviconService.getFaviconImageForPage(makeURI('http://'+host)).spec
+		var baseDomain = tldService.getBaseDomainFromHost(host)
+		var icon = faviconService.getFaviconImageForPage(makeURI('http://'+baseDomain)).spec
 		if(icon != faviconService.defaultFavicon.spec)
 			return icon
-		var icon = faviconService.getFaviconImageForPage(makeURI('http://www.'+host)).spec
-		return icon 	
-	//}catch(e){}
-	
-	return faviconService.defaultFavicon.spec 
+		var icon = faviconService.getFaviconImageForPage(makeURI('http://www.'+baseDomain)).spec
+		if(icon != faviconService.defaultFavicon.spec)
+			return icon
+		
+		return 'http://g.etfv.co/http://'+host
+	//}catch(e){}	
 }
 
 function appendXML(element, xml){
@@ -256,28 +209,28 @@ function formatString(string, options){
 function escapeHTML(str) str.replace(/[&"<>]/g, function(m)"&"+escapeMap[m]+";");
 var escapeMap = { "&": "amp", '"': "quot", "<": "lt", ">": "gt" }
 
-xmlFragment = <hbox class='plugin'>
+xmlFragment = 
+	  <richlistitem align="center">
 		<hbox align="center" class='image'>
 			<image src="$favicon$" />
 		</hbox>
-		<vbox flex='1' class='urls'>
-			<hbox align='start'>
-				<textbox type='name' value='$name$' class='bold'/>
-			</hbox>
-			<textbox type='url' value='$url$'/>
-			<textbox type='json' value='$json$'/>
-		</vbox>
-		<hbox align="center" class='key'>
-			<textbox class='center bigger bold' type='key' value='$key$'/>
+		<label value="$name$"/>
+		<hbox flex='1' class='urls' pack='end'>
+			<checkbox label='instant' checked='$instant$'/>
+			<checkbox label='enabled' checked='true'/>
 		</hbox>
-	  </hbox>.toXMLString()
+		<button label='edit'/>
+		<hbox align="center" class='key'>
+			<textbox class='key' type='key' value='$key$'/>
+		</hbox>
+	  </richlistitem>.toXMLString()
 
 
 Components.utils.import("resource://gre/modules/Services.jsm");
+Components.utils.import('chrome://instantFox/content/instantFoxModule.js')
 
 var xml=[]
-InstantFox = Services.wm.getMostRecentWindow('navigator:browser').InstantFox
-for each(var p in InstantFox.Plugins){
+for each(var p in InstantFoxModule.Plugins){
 	if(p.url){
 		p.favicon = p.iconURI || getFavicon(p.url)
 		xml.push(formatString(xmlFragment,p))
