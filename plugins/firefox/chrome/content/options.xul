@@ -9,6 +9,9 @@
 	resizable='yes'>
 
 <html:style>
+richlistbox{
+	overflow-y:auto;
+}
 textbox{
 	-moz-appearance:none;
 	border:none;
@@ -113,13 +116,13 @@ img{
 		  
 		</richlistbox>
 	</vbox>
-	<vbox>
+	<vbox flex='1'>
 		<hbox>
 			<label value="your shortcuts"></label>
 			<spacer flex="1"></spacer>
 			<toolbarbutton id="add" label='add +'/>
 		</hbox>
-		<richlistbox id='container'>
+		<richlistbox id='container' flex='1'>
 		  
 		</richlistbox>
 	</vbox>
@@ -203,21 +206,24 @@ function appendXML(element, xml){
 }
 function formatString(string, options){	
 	return string.replace(/\$[^\$]*\$/g, function(x){
-		return escapeHTML(options[x.slice(1,-1)]||'')
+		var x = x.slice(1,-1)
+		if(x[0]=='!')
+			return options[x.substr(1)]?'false':'true'
+		return escapeHTML(options[x]||'')
 	})
 }
 function escapeHTML(str) str.replace(/[&"<>]/g, function(m)"&"+escapeMap[m]+";");
 var escapeMap = { "&": "amp", '"': "quot", "<": "lt", ">": "gt" }
 
 xmlFragment = 
-	  <richlistitem align="center">
+	  <richlistitem align="center" id='$id$'>
 		<hbox align="center" class='image'>
-			<image src="$favicon$" />
+			<image src="$iconURI$" />
 		</hbox>
 		<label value="$name$"/>
 		<hbox flex='1' class='urls' pack='end'>
-			<checkbox label='instant' checked='$instant$'/>
-			<checkbox label='enabled' checked='true'/>
+			<checkbox label='instant' checked='$!disableInstant$'/>
+			<checkbox label='enabled' checked='$!disabled$'/>
 		</hbox>
 		<button label='edit'/>
 		<hbox align="center" class='key'>
@@ -230,9 +236,16 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 Components.utils.import('chrome://instantFox/content/instantFoxModule.js')
 
 var xml=[]
-for each(var p in InstantFoxModule.Plugins){
+var activePlugins = InstantFoxModule.Plugins
+for each(var p in activePlugins){
 	if(p.url){
-		p.favicon = p.iconURI || getFavicon(p.url)
+		p.iconURI = p.iconURI || getFavicon(p.url)
+		xml.push(formatString(xmlFragment,p))
+	}
+}
+var browserPlugins = Services.search.getEngines().map(pluginFromNsiSearch)
+for each(var p in browserPlugins){
+	if(!activePlugins[p.id]){
 		xml.push(formatString(xmlFragment,p))
 	}
 }
@@ -254,11 +267,14 @@ function pluginFromNsiSearch(bp){
 	var name = bp.name
 	var iconURI = bp.iconURI && bp.iconURI.spec
 	return {
-		json:json,url:url,iconURI:iconURI,name:name,id:name
+		json:json,
+		url:url,
+		iconURI:iconURI,
+		name:name,
+		id:name,
+		disabled:true
 	}	
 }
-bss=Cc["@mozilla.org/browser/search-service;1"].getService(Ci.nsIBrowserSearchService)
-bss.getEngines().map(pluginFromNsiSearch)
 
 /*
 gBrowser.mCurrentBrowser.engines[0].uri

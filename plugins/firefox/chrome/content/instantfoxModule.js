@@ -259,7 +259,7 @@ SimpleAutoCompleteResult.prototype = {
 	getCommentAt: function(index) this.list[index].title,//displayed in popup
 	getValueAt: function(index) this.list[index].url,//displayed in urlbar
 	getImageAt: function(index) this.list[index].url,
-	getLabelAt: function(index) this.list[index].url+'***---',
+	getLabelAt: function(index) this.list[index].url,
 	getStyleAt: function(index) "InstantFoxSuggest",
 
 	removeValueAt: function(index, removeFromDb) {
@@ -299,18 +299,6 @@ InstantFoxSearch.prototype = {
 		} else if(this.$searchingHistory)
 			this.historyAutoComplete.stopSearch()
 
-
-
-		/* if(InstantFox_Comp.Wnd.InstantFox.HH._url.abort){
-			this.historyAutoComplete&&this.historyAutoComplete.stopSearch();
-			var newResult = new SimpleAutoCompleteResult(
-					searchString, Ci.nsIAutoCompleteResult.RESULT_NOMATCH,
-					0, "",
-					internal_results
-				);
-			listener.onSearchResult(self, newResult);
-			return false;
-		} */
 		var api = InstantFoxModule.currentQuery.plugin
 		if(!api.json){
 			var newResult = new SimpleAutoCompleteResult(null, searchString);

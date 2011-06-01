@@ -120,12 +120,18 @@ var _keydown = function(event) {dump(gURLBar.value, '_keydown-**-')
 				_input()
 				event.preventDefault();
 			}
-		} else if (key == 13 && !alt && !meta && !ctrl) { // 13 == ENTER
-			HH.onEnter(gURLBar.value)
+		} else if (key == 13 && !meta && !ctrl) { // 13 == ENTER
+			if(!alt)
+				HH.onEnter(gURLBar.value)
+			else {
+				HH.openLoadedPageInNewTab()
+			}
 			event.preventDefault();
 		} else if (!alt && !meta && !ctrl && [38,40,34,33].indexOf(key)!=-1) {//UP,DOWN,PAGE_UP,PAGE_DOWN
-			HH.schedulePreload()
-			InstantFoxModule.currentQuery.shaddow = '';
+			if(!InstantFoxModule.currentQuery.plugin.disableInstant) {
+				HH.schedulePreload()
+				InstantFoxModule.currentQuery.shaddow = '';
+			}
 		}
 	}
 	
@@ -219,7 +225,7 @@ InstantFox = HH = {
 		//dump(this)
 		//XULBrowserWindow.InsertShaddowLink(q.shaddow||"", q.value||"");
 		HH.updateShaddowLink(q)
-		if(q.shaddow && !q.plugin.disablePageLoad)
+		if(q.shaddow && !q.plugin.disableInstant)
 			HH.doPreload(q)
 	},	
 	updateShaddowLink: function(q){
@@ -303,18 +309,24 @@ InstantFox = HH = {
 	},
 	
 	onEnter: function(value){
-		InstantfoxModule.previousQuery = InstantfoxModule.currentQuery	
+		InstantFoxModule.previousQuery = InstantFoxModule.currentQuery	
 
-		var tmp = this.doPreload(InstantfoxModule.currentQuery)
+		var tmp = this.doPreload(InstantFoxModule.currentQuery)
 		gURLBar.value = tmp;
 		gBrowser.userTypedValue = null;
 
 		this.finishSearch()
 		
-		InstantfoxModule.currentQuery=null;
+		InstantFoxModule.currentQuery=null;
 
 		gBrowser.selectedBrowser.focus();
-	}
+	},
+	
+	openLoadedPageInNewTab: function(){
+		var tab=gBrowser.mCurrentTab;
+		var newTab = Cc['@mozilla.org/browser/sessionstore;1'].getService(Ci.nsISessionStore).duplicateTab(window, tab, -1);
+		gBrowser.moveTabTo(tab,tab._tPos+1)
+	},
 	
 }
 
