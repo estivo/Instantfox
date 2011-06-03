@@ -211,6 +211,8 @@ preprocessPlugins = function(){
 			p.json = p.json.replace(localeRe, replacer)
 		else
 			p.json = false
+		
+		p.type = 'default.' + InstantFox.localeMap.ll
 	}
 }
 

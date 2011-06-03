@@ -9,15 +9,32 @@
 	resizable='yes'>
 
 <html:style>
-richlistbox{
+.link {
+	color:blue;
+	cursor:pointer;
+}
+.link:hover {
+	text-decoration:underline;
+}
+richlistbox {
 	overflow-y:auto;
 }
+richlistitem:nth-child(odd) {
+	background-color: #FBFBFB;
+}
+richlistitem[selected="true"] {
+	background-color: #EEF9FF;
+	color:#0500A0
+} 
 textbox{
 	-moz-appearance:none;
 	border:none;
 	background: #EEF9FF;
 	color:#777;
 	width:5ch
+}
+richlistitem[selected="true"]>hbox>textbox{
+	background: white;
 }
 /*textbox[type=name]{
 	position:absolute;	
@@ -106,13 +123,15 @@ img{
   
   <!--<iframe src='chrome://instantfox/locale/index.html' width='500px' height='350px'/>-->
   <vbox class='externalContainer' flex='1'>
-	<vbox>
+	<vbox flex='1'>
 		<hbox>
 			<label value="standard shortcuts"></label>
 			<spacer flex="1"></spacer>
-			<menulist id="locale"></menulist>
+			<menulist id="locale">
+				<menupopup/>
+			</menulist>
 		</hbox>
-		<richlistbox id='standard-shortcuts'>
+		<richlistbox id='standard-shortcuts' flex='1' seltype='multiple' context='context'>
 		  
 		</richlistbox>
 	</vbox>
@@ -122,7 +141,7 @@ img{
 			<spacer flex="1"></spacer>
 			<toolbarbutton id="add" label='add +'/>
 		</hbox>
-		<richlistbox id='container' flex='1'>
+		<richlistbox id='user-shortcuts' flex='1' seltype='multiple' context='context'>
 		  
 		</richlistbox>
 	</vbox>
@@ -135,47 +154,65 @@ img{
 		</menupopup>
 	</toolbarbutton>
 
-	<toolbarbutton id='cleanupPrefs' label='cleanup Prefs' oncommand='clearPrefs();updatePrefButtonVisibility()'/>
 	<spacer flex='1'/>
 	<button label='ok' oncommand='close()'/>
   </hbox>
 </vbox>
-
+<menupopup id="context">
+	<menuitem label='instant' type='checkbox'/>
+	<menuitem label='enabled' type='checkbox'/>
+</menupopup>
   <script type="text/javascript" src="__devel__.js"></script>
 
 
 <script type="application/x-javascript" ><![CDATA[
 var Cc = Components.classes
 var Ci = Components.interfaces
-var prefB = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService).getBranch('')
 
-var prefNames = ['browser.urlbar.autocomplete.enabled'
-				,'capability.policy.default.HTMLInputElement.focus'
-				,'capability.policy.default.HTMLAnchorElement.focus'
-				]
+Components.utils.import("resource://gre/modules/Services.jsm");
+Components.utils.import('chrome://instantFox/content/instantFoxModule.js')
 
-function updatePrefButtonVisibility()
-	$('cleanupPrefs').hidden=!prefNames.some(prefB.prefHasUserValue)
-
-function clearPrefs()
-	prefNames.forEach(function(x)
-		prefB.prefHasUserValue(x) && prefB.clearUserPref(x)
-	)
-function $(x)document.getElementById(x)
-
-updatePrefButtonVisibility()
-
-
-
-
-
-// todo use Services when 3.6 is dropped
 var faviconService = Cc["@mozilla.org/browser/favicon-service;1"].getService(Ci.nsIFaviconService);
 var tldService = Cc["@mozilla.org/network/effective-tld-service;1"].getService(Ci.nsIEffectiveTLDService);
-var ioService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
+var gChromeReg = Cc["@mozilla.org/chrome/chrome-registry;1"].getService(Ci.nsIXULChromeRegistry);
 
+//************** find all avaliable locales
+function getFileUri(mPath) {
+    var uri = Services.io.newURI(mPath, null, null), file;
+    while (uri.schemeIs("chrome")) {
+        uri = gChromeReg.convertChromeURL(uri);
+    }
+	return uri.spec
+}
+
+function makeReqAsync(href,callback){
+    var req = new XMLHttpRequest();
+    req.open('GET', href, true);
+	req.overrideMimeType('text/plain')
+
+    req.onload = function() {
+		callback(req.responseText);
+	}
+
+    req.send(null);
+}
+
+InstantFoxModule.selectedLocale='en-US'
+
+var upre=/\/[^\/]*$/
+var href = getFileUri('chrome://instantfox/locale/plugins.js').replace(upre,'').replace(upre,'')
+makeReqAsync(href, function(t){
+	var locales = t.match(/201\: [^ ]* /g).map(function(x)x.slice(5,-1))
+	var menulist = $('locale')
+	appendXML(menulist.firstChild,
+		'<menuitem label="' + locales.join('"/><menuitem label="') + '"/>'
+	)
+	menulist.selectedIndex = locales.indexOf(InstantFoxModule.selectedLocale)
+})
+
+//************** favicon utils
 function makeURI(aURL, aOriginCharset, aBaseURI) {
-    return ioService.newURI(aURL, aOriginCharset, aBaseURI);
+    return Services.io.newURI(aURL, aOriginCharset, aBaseURI);
 }
 
 function getFavicon(url){
@@ -196,6 +233,9 @@ function getFavicon(url){
 	//}catch(e){}	
 }
 
+//************* dom utils
+function $(x)document.getElementById(x)
+
 function appendXML(element, xml){
 	var range = document.createRange()
 	range.selectNode(element)
@@ -215,27 +255,23 @@ function formatString(string, options){
 function escapeHTML(str) str.replace(/[&"<>]/g, function(m)"&"+escapeMap[m]+";");
 var escapeMap = { "&": "amp", '"': "quot", "<": "lt", ">": "gt" }
 
+
 xmlFragment = 
 	  <richlistitem align="center" id='$id$'>
 		<hbox align="center" class='image'>
 			<image src="$iconURI$" />
 		</hbox>
 		<label value="$name$"/>
-		<hbox flex='1' class='urls' pack='end'>
-			<checkbox label='instant' checked='$!disableInstant$'/>
-			<checkbox label='enabled' checked='$!disabled$'/>
-		</hbox>
-		<button label='edit'/>
+		<spacer flex='1' />
+		<label class='link' value='edit'/>
 		<hbox align="center" class='key'>
 			<textbox class='key' type='key' value='$key$'/>
 		</hbox>
 	  </richlistitem>.toXMLString()
 
 
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import('chrome://instantFox/content/instantFoxModule.js')
 
-var xml=[]
+var xml=[], userxml = []
 var activePlugins = InstantFoxModule.Plugins
 for each(var p in activePlugins){
 	if(p.url){
@@ -246,10 +282,11 @@ for each(var p in activePlugins){
 var browserPlugins = Services.search.getEngines().map(pluginFromNsiSearch)
 for each(var p in browserPlugins){
 	if(!activePlugins[p.id]){
-		xml.push(formatString(xmlFragment,p))
+		userxml.push(formatString(xmlFragment,p))
 	}
 }
-appendXML($("container"), xml.join(''))
+appendXML($("standard-shortcuts"), xml.join(''))
+appendXML($("user-shortcuts"), userxml.join(''))
 
 
 function pluginFromNsiSearch(bp){
