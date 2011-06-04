@@ -92,33 +92,28 @@ var instantFoxLoad = function(event) {
 var instantFoxUnload = function(event) {
 	//dump('---***---',arguments.callee.caller)
 	// todo: better cleanup
-	//gURLBar.removeEventListener('keydown', _keydown, false);
-	//gURLBar.removeEventListener('input', _input, false);
+	gURLBar.removeEventListener('keydown', _keydown, false);
+	gURLBar.removeEventListener('input', _input, false);
 }
 
 // Prevent pressing enter from performing it's default behaviour
-var _keydown = function(event) {dump(gURLBar.value, '_keydown-**-')
+var _keydown = function(event) {
 	var key = event.keyCode ? event.keyCode : event.which,
 		alt = event.altKey, meta = event.metaKey,
-		ctrl = event.ctrlKey, shift = event.shiftKey;
+		ctrl = event.ctrlKey, shift = event.shiftKey,
+		simulateInput;
 
 	if (InstantFoxModule.currentQuery) {
 		if (key == 9 || (!ctrl && !shift && key == 39)) { // 9 == Tab
 			if (InstantFox.rightShaddow != '') {
 				gURLBar.value += InstantFox.rightShaddow;
 				InstantFox.rightShaddow = '';
-				//gURLBar.controller.handleText(true)
-				_input()
-				event.preventDefault();
+				simulateInput = true;
 			}
 		} else if (key == 39 && ctrl && !shift) { // 39 == RIGHT
 			if (InstantFox.rightShaddow != '' && gURLBar.selectionEnd == gURLBar.value.length) {
-				/* window.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindowUtils)
-					.sendNativeKeyEvent(0, 0, 0, InstantFox.right_shaddow[0], ''); */
 				gURLBar.value += InstantFox.rightShaddow[0]
-				gURLBar.controller.handleText(true)
-				_input()
-				event.preventDefault();
+				simulateInput = true;
 			}
 		} else if (key == 13 && !meta && !ctrl) { // 13 == ENTER
 			if(!alt)
@@ -136,7 +131,7 @@ var _keydown = function(event) {dump(gURLBar.value, '_keydown-**-')
 	}
 	
 	if(key == 32 && ctrl) { // 32 == SPACE
-		var origVal = gURLBar.value, simulateInput
+		var origVal = gURLBar.value;
 		var keyIndex = origVal.indexOf(' ')
 		var key=origVal.substring(0,keyIndex)
 
@@ -159,17 +154,17 @@ var _keydown = function(event) {dump(gURLBar.value, '_keydown-**-')
 				gURLBar.selectionEnd = origVal.length
 			}
 		}
+	}
 
-		if(simulateInput){
-			gURLBar.controller.handleText(true)
-			_input()
-			event.preventDefault();
-		}
+	if(simulateInput){
+		gURLBar.controller.handleText(true)
+		_input()
+		event.preventDefault();
 	}
 };
 
 // Perform query if space was detected
-var _input = function(event) {		dump(gURLBar.value, '_input-**-')
+var _input = function(event) {
 
 	var val = gURLBar.value;
 	gBrowser.userTypedValue = val;
@@ -177,7 +172,6 @@ var _input = function(event) {		dump(gURLBar.value, '_input-**-')
 	var q = HH.getQuery(val, InstantFoxModule.currentQuery)
 	if (q) {
 		InstantFoxModule.currentQuery = q;
-		dump(q.shaddow, q.value,'**/')
 		HH.updateShaddowLink(q);
 	} else if (InstantFoxModule.currentQuery) {
 		InstantFoxModule.currentQuery = null;
@@ -222,15 +216,27 @@ InstantFox = HH = {
 	},
 	onSearchReady: function(){
 		var q = this;//
-		//dump(this)
 		//XULBrowserWindow.InsertShaddowLink(q.shaddow||"", q.value||"");
+		HH.findBestShaddow(q)
 		HH.updateShaddowLink(q)
-		if(q.shaddow && !q.plugin.disableInstant)
-			HH.doPreload(q)
-	},	
+		if(!q.plugin.disableInstant)
+			q.shaddow ? HH.doPreload(q):HH.schedulePreload(100)
+	},
+	findBestShaddow: function(q){
+		q.shaddow = ''
+		for each(var i in q.results) {
+			if (i.title == q.query) {
+				q.shaddow = i.title
+				break
+			}
+			if (!q.shaddow && i.title.indexOf(q.query)==0)
+				q.shaddow = i.title
+		}
+		
+	},
 	updateShaddowLink: function(q){
 		//var q = InstantFoxModule.currentQuery;
-		if(!q || !q.shaddow) {
+		if(!q) {
 			if(!gURLBar.currentShaddow)
 				return
 			gURLBar.currentShaddow = null;
@@ -261,6 +267,8 @@ InstantFox = HH = {
 		if(this.timeout)
 			this._timeout = clearTimeout(this._timeout)
 
+		if(!q.query)
+			return
 		var url2go = q.plugin.url;
 		url2go = url2go.replace('%q', q.shaddow || q.query);
 		
@@ -269,7 +277,7 @@ InstantFox = HH = {
 			
 		q.preloadURL = url2go
 		
-		// see load_flags at http://
+		// see load_flags at http://mxr.mozilla.org/mozilla-central/source/docshell/base/nsIWebNavigation.idl#149
 		if(HH._isOwnQuery){
 			getWebNavigation().loadURI(url2go, (nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY | nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY), null, null, null);
 			//content.location.replace(url2go);
@@ -339,7 +347,7 @@ HH.openOptionsPopup = function(p){
 	i.setAttribute('src','chrome://instantfox/content/options.xul')
 	p.appendChild(i)
 	i.contentWindow.close=HH.closeOptionsPopup
-	i.width=500
+	i.width=250
 	i.height=500
 }
 

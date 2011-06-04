@@ -129,19 +129,51 @@ InstantFox={
 /*************************************************************************
  *    load and save customized plugins
  ***************/
+var pluginLoader = {
+	preprocessRawData: function (pluginData){
+		var localeRe=/%l(?:s|l|d)/g,
+			domainRe = /:\/\/([^#?]*)/;
+		function replacer(m) pluginData.localeMap[m]
+
+		for(var i in pluginData.plugins){
+			var p = pluginData.plugins[i];
+			if(!p)
+				continue
+			var key = p.key
+
+			if(p.url){
+				p.url = p.url.replace(localeRe, replacer)
+				p.domain = p.url.match(domainRe)[1]
+				p.key = key
+				p.name = i
+				p.id = i.toLowerCase()
+			}
+
+			if(p.json)
+				p.json = p.json.replace(localeRe, replacer)
+			else
+				p.json = false
+			
+			p.type = 'default.' + InstantFox.localeMap.ll
+		}
+		return pluginData
+	},
+
+}
+ 
 function savePlugins(){
 	var ob={}
-	for each(var i in InstantFox.Plugins)
+	for each(var i in InstantFoxModule.Plugins)
 		if(i.url)
 			ob[i.name]=i
 
 	var js = JSON.stringify(ob).replace(',','\n,','g')
 
-	writeToFile(HH.getPluginFile(),js)
+	writeToFile(HH.getUserFile('instantFoxPlugins.js'),js)
 }
 
 function loadCustomizedPlugins(){
-	var file = getPluginFile()
+	var file = getUserFile('instantFoxPlugins.js')
 	var req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
 	if(file.exists()){
 		var spec = Services.io.newFileURI(file).spec
@@ -169,9 +201,9 @@ function onPluginsLoaded(e){
 	InstantFox.onPluginsLoaded()
 }
 
-function getPluginFile(){
-	var file = Services.dirsvc.get("ProfD", Ci.nsIFile);
-	file.append('instantFoxPlugins.js')
+function getUserFile(name, dir){
+	var file = Services.dirsvc.get(dir||"ProfD", Ci.nsIFile);
+	file.append(name)
 	return file
 }
 
@@ -188,41 +220,17 @@ function writeToFile(file, text){
 /*************************************************************************
  *    load default plugins from locale file
  ***************/
-preprocessPlugins = function(){
-	var localeRe=/%l(?:s|l|d)/g,
-		domainRe = /:\/\/([^#?]*)/;
-	function replacer(m) InstantFox.localeMap[m]
 
-	for(var key in InstantFox.Shortcuts){
-		var i = InstantFox.Shortcuts[key]
-		var p = InstantFox.Plugins[i]
-		if(!p)
-			continue
-
-		if(p.url){
-			p.url = p.url.replace(localeRe, replacer)
-			p.domain = p.url.match(domainRe)[1]
-			p.key = key
-			p.name = i
-			p.id = i
-		}
-
-		if(p.json)
-			p.json = p.json.replace(localeRe, replacer)
-		else
-			p.json = false
-		
-		p.type = 'default.' + InstantFox.localeMap.ll
-	}
-}
 
 onRawPluginsLoaded=function(e){
 	e.target.onload=null
 	var js = e.target.responseText
 	eval(js)
-	preprocessPlugins()
+	preprocessPlugins(rawPluginData)
 	InstantFox.onPluginsLoaded()
 }
+
+
 
 /*************************************************************************
  *    search component
@@ -328,19 +336,15 @@ InstantFoxSearch.prototype = {
 		var key = q.plugin.key
 		
 		if(q.plugin.json.indexOf('http://maps.google') == 0)
-			var results = parseMapsJson(json, key, q.splitSpace)
+			q.results = parseMapsJson(json, key, q.splitSpace)
 		else
-			var results = parseSimpleJson(json, key, q.splitSpace)
+			q.results = parseSimpleJson(json, key, q.splitSpace)
 
-		if(results && results[0])
-			q.shaddow = results[0].title
-
-		var newResult = new SimpleAutoCompleteResult(results, q.value);
+		var newResult = new SimpleAutoCompleteResult(q.results, q.value);
 
 		this.listener.onSearchResult(this, newResult);
 		this.listener = null;
 		
-		q.results = results;
 		q.onSearchReady()
 	},
 
@@ -358,7 +362,7 @@ InstantFoxSearch.prototype = {
 		this._req.send(null);
 	}
 };
-dump('****')
+
 /*******************************************************
  *  json handlers
  *************/

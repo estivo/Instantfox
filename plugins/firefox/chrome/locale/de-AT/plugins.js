@@ -2,7 +2,7 @@
     ga:   'googleApi',
     c:    'calculator',
     f:    'weather',
-    g:    'googleFrame',
+    g:    'google',
     i:    'googleImages',
     m:    'googleMaps',
     w:    'wikipedia',
@@ -13,16 +13,16 @@
     t:    'twitter',
     a:    'amazon',
     e:    'ebay',
-    gg:		'googleluck',
+    gg:	  'googleluck',
     wa:   'wolframalpha'
   };
   
-  InstantFox.Plugins.extend({
+  InstantFox.Plugins = {
     weather: {
       url: 'http://weather.instantfox.net/%q',
       json: 'http://maps.google.de/maps/suggest?q=%q&cp=999&gl=at&gl=at&v=2&json=b'
     },
-    googleFrame: {
+    google: {
       url: 'http://www.google.%ld/#hl=%ls&q=%q&fp=1&cad=b',
       json: 'http://suggestqueries.google.com/complete/search?json&q=%q&hl=at'
     },
@@ -74,4 +74,6 @@
       url: 'http://www.wolframalpha.com/input/?i=%q',
       json: false
     }
-  });
+  };
+  
+  InstantFox.localeMap = {'%ls': 'de', '%ll': 'de-AT', '%ld': 'at'}

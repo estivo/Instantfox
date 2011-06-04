@@ -69,6 +69,8 @@ var __instantFoxDevel__ = {
 	
 	doReload: function(){
 		//this.reloadComponent()
+		instantFoxUnload()
+		
 		var i = this.loadedScriptsCount = 0		
 		this.loadScript(this.sourceList[i], i)
 		

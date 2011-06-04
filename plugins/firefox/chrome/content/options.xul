@@ -36,6 +36,9 @@ textbox{
 richlistitem[selected="true"]>hbox>textbox{
 	background: white;
 }
+splitter {
+	-moz-appearance:none;
+}
 /*textbox[type=name]{
 	position:absolute;	
 	margin-top:-12px;
@@ -119,7 +122,7 @@ img{
 
 <vbox id="vbox1" flex='1'>
   <!-- for development -->
-  <shadiaglue/>
+  <shadiaglue buttons='' id='status-bar'/>
   
   <!--<iframe src='chrome://instantfox/locale/index.html' width='500px' height='350px'/>-->
   <vbox class='externalContainer' flex='1'>
@@ -131,24 +134,19 @@ img{
 				<menupopup/>
 			</menulist>
 		</hbox>
-		<richlistbox id='standard-shortcuts' flex='1' seltype='multiple' context='context'>
-		  
-		</richlistbox>
-	</vbox>
-	<vbox flex='1'>
-		<hbox>
+		<richlistbox id='standard-shortcuts' flex='1' seltype='multiple' context='context'/>
+
+		<splitter>
 			<label value="your shortcuts"></label>
 			<spacer flex="1"></spacer>
 			<toolbarbutton id="add" label='add +'/>
-		</hbox>
-		<richlistbox id='user-shortcuts' flex='1' seltype='multiple' context='context'>
-		  
-		</richlistbox>
+		</splitter>
+		<richlistbox id='user-shortcuts' flex='1' seltype='multiple' context='context'/>
 	</vbox>
     <vbox id='head'></vbox>
     <vbox id='container8'/>
   </vbox>
-  <hbox id='status-bar'>
+  <hbox>
 	<toolbarbutton id='' label='add plugin' type='menu' oncommand='clearPrefs();updatePrefButtonVisibility()'>
 		<menupopup>
 		</menupopup>
@@ -162,6 +160,21 @@ img{
 	<menuitem label='instant' type='checkbox'/>
 	<menuitem label='enabled' type='checkbox'/>
 </menupopup>
+<panel id="edit-box" ignorekeys='true'>
+	<hbox>
+		<label value='name:'/>
+		<textbox type='name' flex='1'/>
+	</hbox>
+	<hbox>
+		<label value='url:'/>
+		<textbox type='url' flex='1'/>
+	</hbox>
+	<hbox>
+		<checkbox label='instant' type='instant'/>
+		<checkbox label='contextMenu' type='context'/>
+		<checkbox></checkbox>
+	</hbox>
+</panel>
   <script type="text/javascript" src="__devel__.js"></script>
 
 
@@ -234,7 +247,8 @@ function getFavicon(url){
 }
 
 //************* dom utils
-function $(x)document.getElementById(x)
+function $(id)document.getElementById(id)
+function $t(el, type)el.getElementsByAttribute('type', type)[0]
 
 function appendXML(element, xml){
 	var range = document.createRange()
@@ -263,7 +277,7 @@ xmlFragment =
 		</hbox>
 		<label value="$name$"/>
 		<spacer flex='1' />
-		<label class='link' value='edit'/>
+		<label class='link' value='edit' onmousedown='openEditLigthbox(event)'/>
 		<hbox align="center" class='key'>
 			<textbox class='key' type='key' value='$key$'/>
 		</hbox>
@@ -308,7 +322,7 @@ function pluginFromNsiSearch(bp){
 		url:url,
 		iconURI:iconURI,
 		name:name,
-		id:name,
+		id:name.toLowerCase(),
 		disabled:true
 	}	
 }
@@ -326,6 +340,26 @@ if (target.getAttribute("class").indexOf("addengine-item") != -1) {
 							target.getAttribute("src"), false);
 }
 */
+var gPlugin
+openEditLigthbox = function(e){
+	var panel = $('edit-box')
+	
+	//document.getElementById("standard-shortcuts")._currentItem.id
+	
+	var item = e.target.parentNode
+	gPlugin = InstantFoxModule.Plugins[item.id]
+	
+	$t(panel, 'context').checked = !gPlugin.hideFromContextMenu
+	$t(panel, 'instant').checked = !gPlugin.disableInstant
+	$t(panel, 'name').value = gPlugin.name
+	$t(panel, 'url').value = gPlugin.url
+	
+	var popupBoxObject = panel.popupBoxObject;
+	popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
+	/*el.showPopup(anchorElement, -1, -1, "popup", "bottomleft", "topleft");*/
+	var r = item.getBoundingClientRect()
+	panel.openPopup(null, "after_start", r.left, r.bottom)
+}
 ]]></script>
 
 
