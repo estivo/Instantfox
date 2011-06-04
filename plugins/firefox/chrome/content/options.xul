@@ -183,45 +183,22 @@ var Cc = Components.classes
 var Ci = Components.interfaces
 
 Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import('chrome://instantFox/content/instantFoxModule.js')
+ibp = Components.utils.import('chrome://instantFox/content/instantFoxModule.js')
 
 var faviconService = Cc["@mozilla.org/browser/favicon-service;1"].getService(Ci.nsIFaviconService);
 var tldService = Cc["@mozilla.org/network/effective-tld-service;1"].getService(Ci.nsIEffectiveTLDService);
-var gChromeReg = Cc["@mozilla.org/chrome/chrome-registry;1"].getService(Ci.nsIXULChromeRegistry);
 
 //************** find all avaliable locales
-function getFileUri(mPath) {
-    var uri = Services.io.newURI(mPath, null, null), file;
-    while (uri.schemeIs("chrome")) {
-        uri = gChromeReg.convertChromeURL(uri);
-    }
-	return uri.spec
-}
 
-function makeReqAsync(href,callback){
-    var req = new XMLHttpRequest();
-    req.open('GET', href, true);
-	req.overrideMimeType('text/plain')
 
-    req.onload = function() {
-		callback(req.responseText);
-	}
-
-    req.send(null);
-}
-
-InstantFoxModule.selectedLocale='en-US'
-
-var upre=/\/[^\/]*$/
-var href = getFileUri('chrome://instantfox/locale/plugins.js').replace(upre,'').replace(upre,'')
-makeReqAsync(href, function(t){
-	var locales = t.match(/201\: [^ ]* /g).map(function(x)x.slice(5,-1))
+ibp.pluginLoader.getAvaliableLocales(function(locales){
 	var menulist = $('locale')
 	appendXML(menulist.firstChild,
 		'<menuitem label="' + locales.join('"/><menuitem label="') + '"/>'
 	)
 	menulist.selectedIndex = locales.indexOf(InstantFoxModule.selectedLocale)
 })
+
 
 //************** favicon utils
 function makeURI(aURL, aOriginCharset, aBaseURI) {
@@ -277,7 +254,7 @@ xmlFragment =
 		</hbox>
 		<label value="$name$"/>
 		<spacer flex='1' />
-		<label class='link' value='edit' onmousedown='openEditLigthbox(event)'/>
+		<label class='link' value='edit' onclick='openEditLigthbox(event)'/>
 		<hbox align="center" class='key'>
 			<textbox class='key' type='key' value='$key$'/>
 		</hbox>
@@ -289,43 +266,13 @@ var xml=[], userxml = []
 var activePlugins = InstantFoxModule.Plugins
 for each(var p in activePlugins){
 	if(p.url){
-		p.iconURI = p.iconURI || getFavicon(p.url)
-		xml.push(formatString(xmlFragment,p))
-	}
-}
-var browserPlugins = Services.search.getEngines().map(pluginFromNsiSearch)
-for each(var p in browserPlugins){
-	if(!activePlugins[p.id]){
-		userxml.push(formatString(xmlFragment,p))
+		p.iconURI = p.iconURI || getFavicon(p.url);
+		(p.type=='default'?xml:userxml).push(formatString(xmlFragment,p))
 	}
 }
 appendXML($("standard-shortcuts"), xml.join(''))
 appendXML($("user-shortcuts"), userxml.join(''))
 
-
-function pluginFromNsiSearch(bp){
-	var url = bp.getSubmission('%qqq',"text/html")
-	if(!url)
-		return
-	url = url.uri.spec.replace('%25qqq','%q')
-	
-	var json = bp.getSubmission('%qqq',"application/x-suggestions+json")
-	if(json)
-		json = json.uri.spec.replace('%25qqq','%q')
-	else
-		json = false
-	
-	var name = bp.name
-	var iconURI = bp.iconURI && bp.iconURI.spec
-	return {
-		json:json,
-		url:url,
-		iconURI:iconURI,
-		name:name,
-		id:name.toLowerCase(),
-		disabled:true
-	}	
-}
 
 /*
 gBrowser.mCurrentBrowser.engines[0].uri
@@ -354,11 +301,17 @@ openEditLigthbox = function(e){
 	$t(panel, 'name').value = gPlugin.name
 	$t(panel, 'url').value = gPlugin.url
 	
-	var popupBoxObject = panel.popupBoxObject;
-	popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
-	/*el.showPopup(anchorElement, -1, -1, "popup", "bottomleft", "topleft");*/
-	var r = item.getBoundingClientRect()
-	panel.openPopup(null, "after_start", r.left, r.bottom)
+	if(panel.state=='open'){
+		var r = item.boxObject
+		dump(r.screenX, r.screenY+r.width)
+		panel.moveTo(r.screenX, r.screenY+r.width)
+	}else{
+		var r = item.getBoundingClientRect()
+		var popupBoxObject = panel.popupBoxObject;
+		popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
+		/*el.showPopup(anchorElement, -1, -1, "popup", "bottomleft", "topleft");*/
+		panel.openPopup(null, "after_start", r.left, r.bottom)
+	}
 }
 ]]></script>
 

@@ -205,7 +205,8 @@ InstantFox = HH = {
 			oldQ = {
 				browserText: nsContextMenu.prototype.getSelectedText().substr(0, 50),
 				tabId: gBrowser.mCurrentTab.linkedPanel,
-				onSearchReady: this.onSearchReady
+				onSearchReady: this.onSearchReady,
+				shaddow: ''
 			}
 		}
 		oldQ.plugin = plugin

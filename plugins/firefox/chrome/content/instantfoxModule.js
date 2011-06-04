@@ -52,9 +52,9 @@ InstantFoxModule = {
 		}
 
 		var match=false;
-		for(var key in InstantFox.Shortcuts){
-			var i = InstantFox.Shortcuts[key]
-			var p = InstantFox.Plugins[i]
+		for(var key in this.Shortcuts){
+			var i = this.Shortcuts[key]
+			var p = this.Plugins[i]
 			if(p && p.url){
 				if(url.indexOf(p.domain)!=-1){
 					match=true;
@@ -65,10 +65,10 @@ InstantFoxModule = {
 		if(!match){
 			if(url.indexOf('.wikipedia.') > 0){
 				var regexp=/\/([^\/#]*)(?:#|$)/
-				p = InstantFox.Plugins.wikipedia
+				p = this.Plugins.wikipedia
 			}else if(url.indexOf('weather.instantfox.net') > 0){
 				var regexp=/\/([^\/#]*)(?:#|$)/
-				p = InstantFox.Plugins.weather
+				p = this.Plugins.weather
 			}else
 				return null;
 		}
@@ -86,22 +86,7 @@ InstantFoxModule = {
 		return p.key + ' ' + decodeURIComponent(queryString);
 	},
 	URLFromQuery: function(q) {
-		var q			= gURLBar.value;
-		var parsed    = this.parse(q.trimLeft());
-		var shortcut  = InstantFox.Shortcuts[parsed.key];
-
-		if (parsed.key && parsed.query && shortcut) {
-			var resource = InstantFox.Plugins[shortcut];
-
-			if(resource.json){
-				var json	 = resource.json.replace('%q', encodeURIComponent(parsed.query));
-			}
-			var gotourl = false;
-			if(resource.url){
-				var gotourl = resource.url.replace('%q', parsed.query);
-			}
-			return {'query': parsed.query, 'key':parsed.key, 'json':json, 'gotourl':gotourl};
-		}else return false;
+		//todo
 	},
 	parse: function(q) {
 		// We assume that the sting before the space indicates a InstantFox-Plugin
@@ -113,18 +98,11 @@ InstantFoxModule = {
 			keylength: q.length
 		};
     },
-
-
-}
-
-InstantFox={
 	Plugins:{},
 	Shortcuts:{},
-	onPluginsLoaded:function(){
-		InstantFoxModule.Plugins=this.Plugins
-		InstantFoxModule.Shortcuts=this.Shortcuts
-	}
+
 }
+
 
 /*************************************************************************
  *    load and save customized plugins
@@ -154,51 +132,103 @@ var pluginLoader = {
 			else
 				p.json = false
 			
-			p.type = 'default.' + InstantFox.localeMap.ll
+			p.type = 'default'
 		}
 		return pluginData
 	},
+	addPlugins: function(pluginData){
+		InstantFoxModule.selectedLocale = pluginData.localeMap['%ll']
+		for each(var p in pluginData.plugins){
+			var id = p.id
+			var mP = InstantFoxModule.Plugins[id]
+			if(mP && mP.key)
+				p.key = mP.key
+			InstantFoxModule.Plugins[id] = p;
+		}
+	},
+	initShortcuts: function(){
+		InstantFoxModule.Shortcuts = {}
+		
+		for each(var  p in InstantFoxModule.Plugins){
+			if(p.url && p.key)
+				InstantFoxModule.Shortcuts[p.key] = p.id
+		}
+	},
+	
+	onRawPluginsLoaded: function(e){
+		e.target.onload=null
+		var js = e.target.responseText
+		eval(js)
+		this.preprocessRawData(rawPluginData)
+		this.addPlugins(rawPluginData)
+		// add data from browser searches
+		var browserPlugins = Services.search.getEngines().map(pluginFromNsiSearch)
+		for each(var p in browserPlugins){
+			if(!InstantFoxModule.Plugins[p.id])
+				InstantFoxModule.Plugins[p.id] = p
+			else if(p.key)
+				InstantFoxModule.Plugins[p.id].key = p.key
+		}
+		this.initShortcuts()
+	},	
+	onPluginsLoaded: function(e){
+		e.target.onload=null
+		var js = e.target.responseText
+		var pluginData = JSON.parse(js)
+		InstantFoxModule.selectedLocale = pluginData.selectedLocale
+		for each(var p in pluginData.plugins){
+			var id = p.id
+			var mP = InstantFoxModule.Plugins[id]
+			if(mP && mP.key)
+				p.key = mP.key
+			InstantFoxModule.Plugins[id] = p;
+		}
+		this.initShortcuts()
+	},
+	savePlugins: function(){
+		var ob={}
+		for each(var i in InstantFoxModule.Plugins)
+			if(i.url)
+				ob[i.id]=i
+				
+		var pluginData = {
+			selectedLocale: InstantFoxModule.selectedLocale,
+			plugins: ob
+		}
+
+		var js = JSON.stringify(pluginData).replace(',','\n,','g')
+
+		writeToFile(HH.getUserFile('instantFoxPlugins.js'), js)
+	},	
+	getAvaliableLocales: function(callback){
+		var upre=/\/[^\/]*$/
+		var href = getFileUri('chrome://instantfox/locale/plugins.js').replace(upre,'').replace(upre,'')
+		makeReqAsync(href, function(t){
+			callback(t.match(/201\: [^ ]* /g).map(function(x)x.slice(5,-1)))			
+		})
+	}
 
 }
  
-function savePlugins(){
-	var ob={}
-	for each(var i in InstantFoxModule.Plugins)
-		if(i.url)
-			ob[i.name]=i
-
-	var js = JSON.stringify(ob).replace(',','\n,','g')
-
-	writeToFile(HH.getUserFile('instantFoxPlugins.js'),js)
+function getFileUri(mPath) {
+    var uri = Services.io.newURI(mPath, null, null), file;
+	var gChromeReg = Cc["@mozilla.org/chrome/chrome-registry;1"].getService(Ci.nsIXULChromeRegistry);
+    while (uri.schemeIs("chrome")) {
+        uri = gChromeReg.convertChromeURL(uri);
+    }
+	return uri.spec
 }
 
-function loadCustomizedPlugins(){
-	var file = getUserFile('instantFoxPlugins.js')
-	var req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
-	if(file.exists()){
-		var spec = Services.io.newFileURI(file).spec
-		req.onload=onPluginsLoaded
-	}else{
-		spec = 'chrome://instantfox/locale/plugins.js'
-		req.onload=onRawPluginsLoaded
+function makeReqAsync(href,callback){
+    var req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
+    req.open('GET', href, true);
+	req.overrideMimeType('text/plain')
+
+    req.onload = function() {
+		callback(req.responseText);
 	}
-	req.overrideMimeType("text/plain");
-	req.open("GET", spec, true);
-	req.send(null)
-}
 
-function onPluginsLoaded(e){
-	e.target.onload=null
-	var js = e.target.responseText
-	var plugins = JSON.parse(js)
-	InstantFox.Shortcuts={}
-	InstantFox.Plugins={}
-	for each (var i in plugins)
-		if(i.key){
-			InstantFox.Shortcuts[i.key] = i.name
-			InstantFox.Plugins[i.name] = i
-		}
-	InstantFox.onPluginsLoaded()
+    req.send(null);
 }
 
 function getUserFile(name, dir){
@@ -218,18 +248,49 @@ function writeToFile(file, text){
 }
 
 /*************************************************************************
- *    load default plugins from locale file
+ *    search component
  ***************/
-
-
-onRawPluginsLoaded=function(e){
-	e.target.onload=null
-	var js = e.target.responseText
-	eval(js)
-	preprocessPlugins(rawPluginData)
-	InstantFox.onPluginsLoaded()
+function pluginFromNsiSearch(bp){
+	var url = bp.getSubmission('%qqq',"text/html")
+	if(!url)
+		return
+	url = url.uri.spec.replace('%25qqq','%q')
+	
+	var json = bp.getSubmission('%qqq',"application/x-suggestions+json")
+	if(json)
+		json = json.uri.spec.replace('%25qqq','%q')
+	else
+		json = false
+	
+	var name = bp.name
+	var iconURI = bp.iconURI && bp.iconURI.spec
+	return {
+		json:json,
+		url:url,
+		iconURI:iconURI,
+		name:name,
+		id:name.toLowerCase(),
+		disabled:true,
+		key: bp.alias,
+		type:'browserSearch'
+	}	
 }
 
+
+function loadCustomizedPlugins(){
+	var file = getUserFile('instantFoxPlugins.js')
+	var req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
+	if(file.exists()){
+		var spec = Services.io.newFileURI(file).spec
+		req.onload=pluginLoader.onPluginsLoaded.bind(pluginLoader)
+	}else{
+		spec = 'chrome://instantfox/locale/plugins.js'
+		req.onload=pluginLoader.onRawPluginsLoaded.bind(pluginLoader)
+	}
+	req.overrideMimeType("text/plain");
+	req.open("GET", spec, true);
+	req.send(null)
+}
 
 
 /*************************************************************************
@@ -313,7 +374,6 @@ InstantFoxSearch.prototype = {
 		if(!api.json){
 			var newResult = new SimpleAutoCompleteResult(null, searchString);
 			listener.onSearchResult(self, newResult);
-			//InstantFox_Comp.Wnd.InstantFox.HH._url.seralw = true;
 			return true;
 		}
 
