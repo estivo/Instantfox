@@ -1,4 +1,6 @@
 content   instantfox chrome/content/
+resource  instantfox modules/
+
 
 style     chrome://browser/content/browser.xul   chrome://instantfox/content/skin/instantfox.css
 overlay   chrome://browser/content/browser.xul   chrome://instantfox/content/instantfox.xul
