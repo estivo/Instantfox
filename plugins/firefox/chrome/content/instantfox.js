@@ -348,8 +348,9 @@ HH.openOptionsPopup = function(p){
 	i.setAttribute('src','chrome://instantfox/content/options.xul')
 	p.appendChild(i)
 	i.contentWindow.close=HH.closeOptionsPopup
-	i.width=250
-	i.height=500
+	var h = screen.availHeight*3/4
+	i.width=2/5*h
+	i.height=h
 }
 
 HH.closeOptionsPopup = function(p){

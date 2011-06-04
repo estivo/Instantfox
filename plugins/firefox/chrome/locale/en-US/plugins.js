@@ -32,7 +32,7 @@ rawPluginData.plugins = {
 	},
     twitter: {
 		key: 't',
-		url: 'http://search.twitter.com/search?q=%q',
+		url: 'http://twitter.com/#!/search/%q',
     },
     amazon: {
 		key: 'a',
@@ -56,13 +56,24 @@ rawPluginData.plugins = {
     },
     wikipedia: {
 		key: 'w',
-		url: 'http://en.wikipedia.org/w/index.php?search=%q',
-		json: 'http://en.wikipedia.org/w/api.php?action=opensearch&search=%q'
+		url: 'http://%ls.wikipedia.org/wiki/%q',
+		json: 'http://%ls.wikipedia.org/w/api.php?action=opensearch&search=%q'
     },
     'Wolfram|Alpha': {
 		key: 'wa',
 		url: 'http://www.wolframalpha.com/input/?i=%q'
-    }	
+    },
+    imdb: {
+        key: 'imdb',
+        url: 'http://www.imdb.com/find?s=all&q=%q',
+        json: 'http://sg.media-imdb.com/suggests/%fq/%q.json', // fq = first letter of query
+		hideFromContextMenu: true
+    },
+	calculator: {
+		key: 'c',
+		url: 'resource://instantfox/calculator.html#%q',
+		hideFromContextMenu: true
+	}
 };
 
 rawPluginData.localeMap = {'%ls': 'en', '%ll': 'en-US', '%ld': 'com'}

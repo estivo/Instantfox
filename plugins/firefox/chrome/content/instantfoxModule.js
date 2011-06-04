@@ -78,7 +78,6 @@ InstantFoxModule = {
 			regexp = escapeRegexp(m[1])
 			regexp = RegExp('[&?#]'+regexp+'([^&]*)')
 		}
-		dump(regexp, p.url)
 		var queryString = (url.match(regexp)||{})[1]
 		if(!queryString)
 			return null;
@@ -248,7 +247,7 @@ function writeToFile(file, text){
 }
 
 /*************************************************************************
- *    search component
+ *    search service
  ***************/
 function pluginFromNsiSearch(bp){
 	var url = bp.getSubmission('%qqq',"text/html")
@@ -374,6 +373,7 @@ InstantFoxSearch.prototype = {
 		if(!api.json){
 			var newResult = new SimpleAutoCompleteResult(null, searchString);
 			listener.onSearchResult(self, newResult);
+			InstantFoxModule.currentQuery.onSearchReady()
 			return true;
 		}
 

@@ -18,6 +18,7 @@
 }
 richlistbox {
 	overflow-y:auto;
+	min-height:5ch;
 }
 richlistitem:nth-child(odd) {
 	background-color: #FBFBFB;
@@ -206,7 +207,7 @@ function makeURI(aURL, aOriginCharset, aBaseURI) {
 }
 
 function getFavicon(url){
-	//try{
+	try{
 		var host = url.match(/:\/\/([^\/#?]*)/)[1];
 		var icon = faviconService.getFaviconImageForPage(makeURI('http://'+host)).spec
 		if(icon != faviconService.defaultFavicon.spec)
@@ -218,9 +219,9 @@ function getFavicon(url){
 		var icon = faviconService.getFaviconImageForPage(makeURI('http://www.'+baseDomain)).spec
 		if(icon != faviconService.defaultFavicon.spec)
 			return icon
+	}catch(e){Components.utils.reportError(e)}	
 		
-		return 'http://g.etfv.co/http://'+host
-	//}catch(e){}	
+	return 'http://g.etfv.co/http://'+host
 }
 
 //************* dom utils
@@ -312,6 +313,12 @@ openEditLigthbox = function(e){
 		/*el.showPopup(anchorElement, -1, -1, "popup", "bottomleft", "topleft");*/
 		panel.openPopup(null, "after_start", r.left, r.bottom)
 	}
+}
+onTextboxEnter = function(){
+	
+}
+onTextboxEscape = function(){
+	
 }
 ]]></script>
 
