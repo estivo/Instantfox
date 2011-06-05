@@ -185,20 +185,29 @@ InstantFox = HH = {
 	get _ctabID() gBrowser.mCurrentTab.linkedPanel,
 	get _url() InstantFoxModule.currentQuery,
 	
-	getQuery: function(val, oldQ){
-		if(val[0]=='`'){
-			
-			
-		}
-			
+	getQuery: function(val, oldQ){		
+		var plugin
 		var i = val.indexOf(' ');
-		if (i == -1)
-			return false
-
-		var plugin = InstantFoxModule.Shortcuts[val.substr(0, i)]
-		if (!plugin)
-			return
-		plugin = InstantFoxModule.Plugins[plugin]
+		if(val[0]=='`'){
+			if (i == -1)
+				i = val.length
+			if(gURLBar.selectionStart<=i)
+				plugin = {
+					suggestPlugins: true,
+					key: val.substring(1, i),
+					tail: val.substr(i),
+					disableInstant: true
+				}
+			else
+				plugin = InstantFoxModule.getBestPluginMatch(val.substring(1, i))
+		}else{
+			if (i == -1)
+				return false
+			var id = InstantFoxModule.Shortcuts[val.substr(0, i)]
+			if (!id)
+				return
+			plugin = InstantFoxModule.Plugins[id]
+		}
 		
 		var j = val.substr(i).match(/^\s*/)[0].length
 		if (!oldQ) {
@@ -248,7 +257,7 @@ InstantFox = HH = {
 			this.rightShaddow = ''
 			return
 		}
-		var key = q.plugin.key;
+		var key = q.plugin.key+q.splitSpace.replace(' ', '\u00a0', 'g');
 		var l = 1
 		var s = {
 			key: key,

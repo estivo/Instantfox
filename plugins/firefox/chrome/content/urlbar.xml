@@ -238,6 +238,12 @@
         <body>
           <![CDATA[
           let search = aSearch.toLowerCase();
+		  if(search[0]=='`'){
+			//InstantFoxModule.currentQuery.plugin.key
+		    var i = search.indexOf(' ')
+			if(i==-1)i=search.length
+		    return [search.slice(1, i)]
+		  }
 		  search = search.split(/\s+/)
 		  search.shift()
           return search;
@@ -292,8 +298,10 @@
       <method name="_adjustAcItem">
         <body>
           <![CDATA[
-         // var url = this.getAttribute("url");
           var title = this.getAttribute("title");
+
+          var url = this.getAttribute("url");
+		  if (url)
 
 		  this._setUpDescription(this._title, title);
 		  return;

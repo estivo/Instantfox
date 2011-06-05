@@ -42,6 +42,7 @@ function dump() {
  *    plugin={
  *        hideFromContextMenu:
  *        disableInstant:
+ *        disabled:
  *        key:
  *        url:
  *        json:
@@ -52,6 +53,35 @@ function dump() {
  *        id:
  *    } 
  ***************/
+function fixupPlugin(p){
+	domainRe = /:\/\/([^#?]*)/;
+	if(p.url){
+		var match = p.url.match(domainRe)
+		p.domain = match?match[1]:''
+		p.name = p.name||p.id
+		p.id = p.id.toLowerCase()
+		p.iconURI = p.iconURI || getFavicon(p.url);
+	}
+	if(!p.json)
+		p.json = InstantFoxModule.Plugins.google.json
+}
+function cleanCopyPlugin(p){
+	var p1 = {}
+	p1.url = p.url;
+	p1.json = p.json;
+	p1.domain = p.domain;
+	//
+	p1.iconURI = p.iconURI;
+	p1.type = p.type;
+	p1.name = p.name;
+	p1.id = p.id;
+	p1.key = p.key
+	//
+	p.disabled &&(p1.disabled = true)
+	p.disableInstant &&(p1.disableInstant = true)
+	p.hideFromContextMenu &&(p1.hideFromContextMenu = true)
+	return p1
+}
 var pluginLoader = {
 	preprocessRawData: function (pluginData){
 		var localeRe=/%l(?:s|l|d)/g,
@@ -94,15 +124,18 @@ var pluginLoader = {
 					p.hideFromContextMenu = mP.hideFromContextMenu;
 				if('disableInstant' in mP)
 					p.disableInstant = mP.disableInstant;
+				if('disabled' in mP)
+					p.disabled = mP.disabled;
 			}
 			InstantFoxModule.Plugins[id] = p;
 		}
+		InstantFoxModule.defaultPlugin = InstantFoxModule.defaultPlugin||'google'
 	},
 	initShortcuts: function(){
 		InstantFoxModule.Shortcuts = {}
 		var conflicts={}
 		
-		for each(var  p in InstantFoxModule.Plugins){			
+		for each(var  p in InstantFoxModule.Plugins){
 			if(p.url && p.key && !p.disabled) {
 				if(InstantFoxModule.Shortcuts[p.key])
 					conflicts[InstantFoxModule.Plugins[InstantFoxModule.Shortcuts[p.key]].id] =
@@ -110,6 +143,10 @@ var pluginLoader = {
 					
 				InstantFoxModule.Shortcuts[p.key] = p.id
 			}
+		}
+		for each(var  p in InstantFoxModule.Plugins){
+			if(p.disabled && InstantFoxModule.Shortcuts[p.key])
+					conflicts[p.id] = 'maybe'
 		}
 		InstantFoxModule.ShortcutConflicts = conflicts
 	},
@@ -133,8 +170,14 @@ var pluginLoader = {
 	onPluginsLoaded: function(e){
 		e.target.onload=null
 		var js = e.target.responseText
-		var pluginData = JSON.parse(js)
+		try{
+			var pluginData = JSON.parse(js)
+		}catch(e){
+			this.loadPlugins(true)
+			return
+		}
 		InstantFoxModule.selectedLocale = pluginData.selectedLocale
+		InstantFoxModule.defaultPlugin = pluginData.defaultPlugin
 		for each(var p in pluginData.plugins){
 			var id = p.id
 			var mP = InstantFoxModule.Plugins[id]
@@ -144,28 +187,62 @@ var pluginLoader = {
 		}
 		this.initShortcuts()
 	},
+	
 	savePlugins: function(){
 		var ob={}
-		for each(var i in InstantFoxModule.Plugins)
-			if(i.url)
-				ob[i.id]=i
+		for each(var p in InstantFoxModule.Plugins)
+			if(p.url)
+				ob[p.id]=cleanCopyPlugin(p)
 				
 		var pluginData = {
 			selectedLocale: InstantFoxModule.selectedLocale,
+			defaultPlugin: InstantFoxModule.defaultPlugin,
 			plugins: ob
 		}
 
-		var js = JSON.stringify(pluginData).replace(',','\n,','g')
+		var js = JSON.stringify(pluginData)//.replace(',','\n,','g')
 
-		writeToFile(HH.getUserFile('instantFoxPlugins.js'), js)
-	},	
+		writeToFile(getUserFile('instantFoxPlugins.js'), js)
+	},
+	loadPlugins: function(locale, callback){
+		if(this.req)
+			this.req.abort()
+		else
+			this.req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
+
+		var file = getUserFile('instantFoxPlugins.js')
+		if(!locale && file.exists()){
+			var spec = Services.io.newFileURI(file).spec
+			var onload = this.onPluginsLoaded.bind(this)
+		}else{
+			spec = 'chrome://instantfox/locale/plugins.js'
+			if(typeof locale == 'string'){
+				var upre=/\/[^\/]*$/
+				spec = getFileUri('chrome://instantfox/locale/plugins.js').replace(upre,'').replace(upre,'')
+				spec += '/'+ locale + '/plugins.js';
+				dump(spec)
+			}
+			var onload = this.onRawPluginsLoaded.bind(this)
+		}
+		var self = this
+		this.req.onload=function(e){
+			this.onload = null;
+			onload(e)
+			callback&&callback()
+		}
+		callback
+		this.req.overrideMimeType("text/plain");
+		this.req.open("GET", spec, true);
+		this.req.send(null)
+	},
+	
 	getAvaliableLocales: function(callback){
 		var upre=/\/[^\/]*$/
 		var href = getFileUri('chrome://instantfox/locale/plugins.js').replace(upre,'').replace(upre,'')
 		makeReqAsync(href, function(t){
 			callback(t.match(/201\: [^ ]* /g).map(function(x)x.slice(5,-1)))			
 		})
-	}
+	},
 
 }
  
@@ -264,29 +341,13 @@ function pluginFromNsiSearch(bp){
 }
 
 
-function loadCustomizedPlugins(){
-	var file = getUserFile('instantFoxPlugins.js')
-	var req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
-	if(file.exists()){
-		var spec = Services.io.newFileURI(file).spec
-		req.onload=pluginLoader.onPluginsLoaded.bind(pluginLoader)
-	}else{
-		spec = 'chrome://instantfox/locale/plugins.js'
-		req.onload=pluginLoader.onRawPluginsLoaded.bind(pluginLoader)
-	}
-	req.overrideMimeType("text/plain");
-	req.open("GET", spec, true);
-	req.send(null)
-}
-
-
 /*****************************************************
  * main object
  ***********/
 InstantFoxModule = {
     _version: '1.0.3',
 	initialize: function(){
-		loadCustomizedPlugins()
+		this.pluginLoader.loadPlugins()
 		this.initialize=function(){}
 	},
 	queryFromURL: function(url){
@@ -342,10 +403,118 @@ InstantFoxModule = {
     },
 	Plugins: {},
 	Shortcuts: {},
-	pluginLoader: pluginLoader
+	pluginLoader: pluginLoader,
+	
+	getBestPluginMatch: function(key){
+		if(!key)
+			return this.Plugins[this.defaultPlugin]
+		return filter(InstantFoxModule.Plugins, key)[0]||this.Plugins[this.defaultPlugin]
+	}
+}
+
+/*******************************************************
+ *  json handlers
+ *************/
+var parseSimpleJson = function(json, key, splitSpace){
+	try{
+		var xhrReturn = JSON.parse(json)[1];
+	}catch(e){
+		return
+	}
+	if(!xhrReturn)
+		return
+
+	var results=[]
+	for(var i = 0; i < xhrReturn.length; i++){
+		var result = xhrReturn[i];
+		results.push({
+			icon: '',
+			title: result,
+			url: key + splitSpace + result
+		})
+	}
+	return results
+}
+var parseMapsJson = function(json, key, splitSpace){
+	var xhrReturn = json.match(/query:"[^"]*/g);
+	if(!xhrReturn.length)
+		return
+
+	var results=[];
+	for(var i = 0; i < xhrReturn.length; i++){
+		var result = xhrReturn[i].substr(7);
+		results.push({
+			icon: '',
+			title: result,
+			url: key + splitSpace + result
+		})
+	}
+	return results
+}
+var getMatchingPlugins = function(key, tail){
+	var results=[];
+	var plugins = filter(InstantFoxModule.Plugins, key)
+	for each(var p in plugins){
+		if(p.disabled)
+			continue
+		results.push({
+			icon: p.iconURI,
+			title: p.name,
+			url: '`' + p.name + tail
+		})
+	}
+	return results
 }
 
 
+function filter(data, text) {
+	var table = [];
+	if (!text) {
+		for each(var p in data)
+			table.push(p);
+		return table;
+	}
+	var filterText = text.toLowerCase();
+	var filterTextCase = text;
+
+	//*******/
+	function computeSpringyIndex(val) {
+		var lowName = val.name.toLowerCase();
+		var priority = 0;
+		var lastI = 0;
+		var ind1 = 0;
+		if (val.name.indexOf(filterTextCase) === 0) {
+			val.priority = -2;
+			table.push(val);
+			return;//exact match
+		}
+		for(var j = 0, ftLen = filterText.length; j < ftLen; j++) {
+			lastI = lowName.indexOf(filterText[j],ind1);
+			if (lastI === -1)
+				break; //doesn't match
+			priority += lastI - ind1;
+			ind1 = lastI+1;
+		}
+		if (lastI != -1) {
+			val.priority = priority;
+			table.push(val);
+		}
+	}
+	var sortVals = ["priority", "name"];
+
+	for each(var p in data)
+		computeSpringyIndex(p);
+	table.sort(function (a, b) {
+		for each(var i in sortVals) {
+		  if (a[i] < b[i])
+			  return -1;
+		  if (a[i] > b[i])
+			  return 1;
+		}
+		return 0;
+	});
+	return table;
+}
 /*************************************************************************
  *    search component
  ***************/
@@ -382,7 +551,7 @@ SimpleAutoCompleteResult.prototype = {
 
 	getCommentAt: function(index) this.list[index].title,//displayed in popup
 	getValueAt: function(index) this.list[index].url,//displayed in urlbar
-	getImageAt: function(index) this.list[index].url,
+	getImageAt: function(index) this.list[index].icon,
 	getLabelAt: function(index) this.list[index].url,
 	getStyleAt: function(index) "InstantFoxSuggest",
 
@@ -405,7 +574,6 @@ InstantFoxSearch.prototype = {
 	QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIAutoCompleteSearch]),
 
 	startSearch: function(searchString, searchParam, previousResult, listener) {
-		dump(searchString, 'InstantFoxSearch-**-')
 		//win = Services.wm.getMostRecentWindow("navigator:browser");
 		var self = this
 		if(!InstantFoxModule.currentQuery){
@@ -422,8 +590,17 @@ InstantFoxSearch.prototype = {
 			return
 		} else if(this.$searchingHistory)
 			this.historyAutoComplete.stopSearch()
-
 		var api = InstantFoxModule.currentQuery.plugin
+dump(api.suggestPlugins)
+		if (api.suggestPlugins) {
+			var plugins = getMatchingPlugins(api.key, api.tail)
+			dump(plugins)
+			var newResult = new SimpleAutoCompleteResult(plugins, searchString);
+			listener.onSearchResult(self, newResult);
+			//InstantFoxModule.currentQuery.onSearchReady()
+			return true;
+		}
+
 		if(!api.json){
 			var newResult = new SimpleAutoCompleteResult(null, searchString);
 			listener.onSearchResult(self, newResult);
@@ -478,46 +655,7 @@ InstantFoxSearch.prototype = {
 };
 
 /*******************************************************
- *  json handlers
- *************/
-var parseSimpleJson = function(json, key, splitSpace){
-	try{
-		var xhrReturn = JSON.parse(json)[1];
-	}catch(e){
-		return
-	}
-	if(!xhrReturn)
-		return
-
-	var results=[]
-	for(var i = 0; i < xhrReturn.length; i++){
-		var result = xhrReturn[i];
-		results.push({
-			icon: '',
-			title: result,
-			url: key + splitSpace + result
-		})
-	}
-	return results
-}
-var parseMapsJson = function(json, key, splitSpace){
-	var xhrReturn = json.match(/query:"[^"]*/g);
-	if(!xhrReturn.length)
-		return
-
-	var results=[];
-	for(var i = 0; i < xhrReturn.length; i++){
-		var result = xhrReturn[i].substr(7);
-		results.push({
-			icon: '',
-			title: result,
-			url: key + splitSpace + result
-		})
-	}
-	return results
-}
-/*******************************************************
- *  register component
+ *  component registration
  *************/
 
 ;(function(component){
