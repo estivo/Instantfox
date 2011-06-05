@@ -264,14 +264,15 @@ InstantFox = HH = {
 		gURLBar.showTip('hello')
 	},
 	
-	doPreload: function(q){
+	doPreload: function(q, force){
 		if(this.timeout)
 			this._timeout = clearTimeout(this._timeout)
 
-		if(!q.query)
-			return
+		if(!q.query&&!force)
+			return ''
+
 		var url2go = q.plugin.url;
-		url2go = url2go.replace('%q', q.shaddow || q.query);
+		url2go = url2go.replace('%q', q.shaddow || q.query || q.domain || '');
 		
 		if(url2go == q.preloadURL)
 			return url2go
@@ -320,7 +321,7 @@ InstantFox = HH = {
 	onEnter: function(value){
 		InstantFoxModule.previousQuery = InstantFoxModule.currentQuery	
 
-		var tmp = this.doPreload(InstantFoxModule.currentQuery)
+		var tmp = this.doPreload(InstantFoxModule.currentQuery, true)
 		gURLBar.value = tmp;
 		gBrowser.userTypedValue = null;
 
@@ -449,14 +450,18 @@ nsContextMenu.prototype.fillSearchSubmenu=function(popup){
 	var menu
 	while(menu = popup.firstChild)
 		popup.removeChild(menu)
-	Services.search.getVisibleEngines().forEach(function(engine){
+
+	for each (engine in InstantFoxModule.Plugins){
+		if(engine.disabled||engine.hideFromContextMenu)
+			continue
+
 		menu = document.createElement('menuitem')
 		menu.setAttribute('name', engine.name)
 		menu.setAttribute('label', engine.name)
-		menu.setAttribute('image', engine.iconURI.spec)
+		menu.setAttribute('image', engine.iconURI)
 		menu.setAttribute('class', "menuitem-iconic")
 		popup.appendChild(menu)
-	})
+	}
 }
 nsContextMenu.prototype.doSearch=function(e){
 	var name = e.originalTarget.getAttribute('name')

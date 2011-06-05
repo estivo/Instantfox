@@ -6,7 +6,7 @@ rawPluginData.plugins = {
 		json: 'http://maps.google.com/maps/suggest?q=%q&cp=999&hl=%ls&gl=%ls&v=2&json=b',
 		hideFromContextMenu: true
     },
-    google: {
+    Google: {
 		key: 'g',
 		url: 'http://www.google.%ld/#hl=%ls&q=%q&fp=1&cad=b',
 		json: 'http://suggestqueries.google.com/complete/search?json&q=%q&hl=en-us'
@@ -26,35 +26,36 @@ rawPluginData.plugins = {
 		url: 'http://www.youtube.com/results?search_query=%q',
 		json: 'http://suggestqueries.google.com/complete/search?json&ds=yt&q=%q'
     },
-    googleluck: {
+    googleLuck: {
 		key: 'gg',
-		url: 'http://www.google.com/search?hl=%ls&q=%q&btnI=Auf+gut+Gl%C3%BCck!'
+		url: 'http://www.google.com/search?hl=%ls&q=%q&btnI=Auf+gut+Gl%C3%BCck!',
+		hideFromContextMenu: true
 	},
     twitter: {
 		key: 't',
 		url: 'http://twitter.com/#!/search/%q',
     },
-    amazon: {
+    Amazon: {
 		key: 'a',
 		url: 'http://www.amazon.com/gp/search?ie=UTF8&keywords=%q&tag=406-20&index=aps&linkCode=ur2&camp=1789&creative=9325',
 		json: 'http://completion.amazon.co.uk/search/complete?method=completion&q=%q&search-alias=aps&mkt=4'
     },
-    ebay: {
+    eBay: {
 		key: 'e',
 		url: 'http://shop.ebay.%ld/?_nkw=%q',
 		json: 'http://anywhere.ebay.com/services/suggest/?s=0&q=%q'
     },
-    yahoo: {
+    Yahoo: {
 		key: 'yh',
 		url: 'http://search.yahoo.com/search?p=%q&ei=UTF-8',
 		json: 'http://ff.search.yahoo.com/gossip?output=fxjson&command=%q'
     },
-    bing: {
+    Bing: {
 		key: 'b',
 		url: 'http://www.bing.com/search?q=%q&form=QBLH',
 		json: 'http://api.bing.com/osjson.aspx?query=%q&form=OSDJAS'
     },
-    wikipedia: {
+    Wikipedia: {
 		key: 'w',
 		url: 'http://%ls.wikipedia.org/wiki/%q',
 		json: 'http://%ls.wikipedia.org/w/api.php?action=opensearch&search=%q'

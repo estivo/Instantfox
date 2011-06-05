@@ -37,74 +37,20 @@ function dump() {
     consoleService.logStringMessage("" + aMessage);
 }
 
-/*****************************************************
- * main object
- ***********/
-InstantFoxModule = {
-    _version: '1.0.3',
-	initialize: function(){
-		loadCustomizedPlugins()
-		this.initialize=function(){}
-	},
-	queryFromURL: function(url){
-		function escapeRegexp(text) {
-			return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
-		}
-
-		var match=false;
-		for(var key in this.Shortcuts){
-			var i = this.Shortcuts[key]
-			var p = this.Plugins[i]
-			if(p && p.url){
-				if(url.indexOf(p.domain)!=-1){
-					match=true;
-					break;
-				}
-			}
-		}
-		if(!match){
-			if(url.indexOf('.wikipedia.') > 0){
-				var regexp=/\/([^\/#]*)(?:#|$)/
-				p = this.Plugins.wikipedia
-			}else if(url.indexOf('weather.instantfox.net') > 0){
-				var regexp=/\/([^\/#]*)(?:#|$)/
-				p = this.Plugins.weather
-			}else
-				return null;
-		}
-
-		if(!regexp){
-			var m = p.url.match(/.([^&?#]*)%q(.?)/)
-			regexp = escapeRegexp(m[1])
-			regexp = RegExp('[&?#]'+regexp+'([^&]*)')
-		}
-		var queryString = (url.match(regexp)||{})[1]
-		if(!queryString)
-			return null;
-
-		return p.key + ' ' + decodeURIComponent(queryString);
-	},
-	URLFromQuery: function(q) {
-		//todo
-	},
-	parse: function(q) {
-		// We assume that the sting before the space indicates a InstantFox-Plugin
-		var index = q.indexOf(' ');
-		return {
-			key: q.substr(0, index),
-			query: q.substr(index+1, q.length),
-			keyindex: index,
-			keylength: q.length
-		};
-    },
-	Plugins:{},
-	Shortcuts:{},
-
-}
-
-
 /*************************************************************************
  *    load and save customized plugins
+ *    plugin={
+ *        hideFromContextMenu:
+ *        disableInstant:
+ *        key:
+ *        url:
+ *        json:
+ *        domain:
+ *        iconURI:
+ *        type:
+ *        name:
+ *        id:
+ *    } 
  ***************/
 var pluginLoader = {
 	preprocessRawData: function (pluginData){
@@ -116,14 +62,13 @@ var pluginLoader = {
 			var p = pluginData.plugins[i];
 			if(!p)
 				continue
-			var key = p.key
 
 			if(p.url){
 				p.url = p.url.replace(localeRe, replacer)
 				p.domain = p.url.match(domainRe)[1]
-				p.key = key
-				p.name = i
+				p.name = p.name||i
 				p.id = i.toLowerCase()
+				p.iconURI = p.iconURI || getFavicon(p.url);
 			}
 
 			if(p.json)
@@ -132,6 +77,7 @@ var pluginLoader = {
 				p.json = false
 			
 			p.type = 'default'
+
 		}
 		return pluginData
 	},
@@ -140,18 +86,32 @@ var pluginLoader = {
 		for each(var p in pluginData.plugins){
 			var id = p.id
 			var mP = InstantFoxModule.Plugins[id]
-			if(mP && mP.key)
-				p.key = mP.key
+			//copy user modified values
+			if(mP){
+				if('key' in mP)
+					p.key = mP.key
+				if('hideFromContextMenu' in mP)
+					p.hideFromContextMenu = mP.hideFromContextMenu;
+				if('disableInstant' in mP)
+					p.disableInstant = mP.disableInstant;
+			}
 			InstantFoxModule.Plugins[id] = p;
 		}
 	},
 	initShortcuts: function(){
 		InstantFoxModule.Shortcuts = {}
+		var conflicts={}
 		
-		for each(var  p in InstantFoxModule.Plugins){
-			if(p.url && p.key)
+		for each(var  p in InstantFoxModule.Plugins){			
+			if(p.url && p.key && !p.disabled) {
+				if(InstantFoxModule.Shortcuts[p.key])
+					conflicts[InstantFoxModule.Plugins[InstantFoxModule.Shortcuts[p.key]].id] =
+						conflicts[p.id] = true
+					
 				InstantFoxModule.Shortcuts[p.key] = p.id
+			}
 		}
+		InstantFoxModule.ShortcutConflicts = conflicts
 	},
 	
 	onRawPluginsLoaded: function(e){
@@ -246,11 +206,38 @@ function writeToFile(file, text){
 	converter.close();
 }
 
+//************** favicon utils
+var faviconService;
+var tldService;
+function makeURI(aURL, aOriginCharset, aBaseURI) {
+    return Services.io.newURI(aURL, aOriginCharset, aBaseURI);
+}
+
+function getFavicon(url){
+	faviconService = faviconService || Cc["@mozilla.org/browser/favicon-service;1"].getService(Ci.nsIFaviconService);
+	tldService = tldService || Cc["@mozilla.org/network/effective-tld-service;1"].getService(Ci.nsIEffectiveTLDService);
+	try{
+		var host = url.match(/:\/\/([^\/#?]*)/)[1];
+		var icon = faviconService.getFaviconImageForPage(makeURI('http://'+host)).spec
+		if(icon != faviconService.defaultFavicon.spec)
+			return icon
+		var baseDomain = tldService.getBaseDomainFromHost(host)
+		var icon = faviconService.getFaviconImageForPage(makeURI('http://'+baseDomain)).spec
+		if(icon != faviconService.defaultFavicon.spec)
+			return icon
+		var icon = faviconService.getFaviconImageForPage(makeURI('http://www.'+baseDomain)).spec
+		if(icon != faviconService.defaultFavicon.spec)
+			return icon
+	}catch(e){Components.utils.reportError(e)}	
+		
+	return 'http://g.etfv.co/http://'+host
+}
 /*************************************************************************
  *    search service
  ***************/
 function pluginFromNsiSearch(bp){
 	var url = bp.getSubmission('%qqq',"text/html")
+	var domainRe = /:\/\/([^#?]*)/;
 	if(!url)
 		return
 	url = url.uri.spec.replace('%25qqq','%q')
@@ -269,6 +256,7 @@ function pluginFromNsiSearch(bp){
 		iconURI:iconURI,
 		name:name,
 		id:name.toLowerCase(),
+		domain: url.match(domainRe)[1],
 		disabled:true,
 		key: bp.alias,
 		type:'browserSearch'
@@ -289,6 +277,72 @@ function loadCustomizedPlugins(){
 	req.overrideMimeType("text/plain");
 	req.open("GET", spec, true);
 	req.send(null)
+}
+
+
+/*****************************************************
+ * main object
+ ***********/
+InstantFoxModule = {
+    _version: '1.0.3',
+	initialize: function(){
+		loadCustomizedPlugins()
+		this.initialize=function(){}
+	},
+	queryFromURL: function(url){
+		function escapeRegexp(text) {
+			return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+		}
+
+		var match=false;
+		for(var key in this.Shortcuts){
+			var i = this.Shortcuts[key]
+			var p = this.Plugins[i]
+			if(p && p.url){
+				if(url.indexOf(p.domain)!=-1){
+					match=true;
+					break;
+				}
+			}
+		}
+		if(!match){
+			if(url.indexOf('.wikipedia.') > 0){
+				var regexp=/\/([^\/#]*)(?:#|$)/
+				p = this.Plugins.wikipedia
+			}else if(url.indexOf('weather.instantfox.net') > 0){
+				var regexp=/\/([^\/#]*)(?:#|$)/
+				p = this.Plugins.weather
+			}else
+				return null;
+		}
+
+		if(!regexp){
+			var m = p.url.match(/.([^&?#]*)%q(.?)/)
+			regexp = escapeRegexp(m[1])
+			regexp = RegExp('[&?#]'+regexp+'([^&]*)')
+		}
+		var queryString = (url.match(regexp)||{})[1]
+		if(!queryString)
+			return null;
+
+		return p.key + ' ' + decodeURIComponent(queryString);
+	},
+	URLFromQuery: function(q) {
+		//todo
+	},
+	parse: function(q) {
+		// We assume that the sting before the space indicates a InstantFox-Plugin
+		var index = q.indexOf(' ');
+		return {
+			key: q.substr(0, index),
+			query: q.substr(index+1, q.length),
+			keyindex: index,
+			keylength: q.length
+		};
+    },
+	Plugins: {},
+	Shortcuts: {},
+	pluginLoader: pluginLoader
 }
 
 

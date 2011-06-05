@@ -34,6 +34,13 @@ textbox{
 	color:#777;
 	width:5ch
 }
+textbox[conflict=true]{
+	color:darkred!important;
+	text-shadow: -1px -1px 2px #FFFFFF, 0pt -1px 6px red;
+}
+richlistitem[disabled="true"]>label{
+	color: graytext;
+}
 richlistitem[selected="true"]>hbox>textbox{
 	background: white;
 }
@@ -123,7 +130,7 @@ img{
 
 <vbox id="vbox1" flex='1'>
   <!-- for development -->
-  <shadiaglue buttons='' id='status-bar'/>
+  <shadiaglue id='status-bar'/>
   
   <!--<iframe src='chrome://instantfox/locale/index.html' width='500px' height='350px'/>-->
   <vbox class='externalContainer' flex='1'>
@@ -161,10 +168,13 @@ img{
 	<menuitem label='instant' type='checkbox'/>
 	<menuitem label='enabled' type='checkbox'/>
 </menupopup>
-<panel id="edit-box" ignorekeys='true'>
+<panel id="edit-box" ignorekeys='true' type="arrow" orient='vertical' onpopuphiding='editPopupSave(this)'>
 	<hbox>
 		<label value='name:'/>
 		<textbox type='name' flex='1'/>
+		<hbox align="center" class='image'>
+			<image type='image'/>
+		</hbox>
 	</hbox>
 	<hbox>
 		<label value='url:'/>
@@ -173,10 +183,15 @@ img{
 	<hbox>
 		<checkbox label='instant' type='instant'/>
 		<checkbox label='contextMenu' type='context'/>
-		<checkbox></checkbox>
+		<checkbox label='disabled' type='disabled'/>
+	</hbox>
+	<hbox>
+		<toolbarbutton label='more'/>
+		<spacer flex='1'/>
+		<toolbarbutton label='ok' onclick="$('edit-box').hidePopup()"/>
 	</hbox>
 </panel>
-  <script type="text/javascript" src="__devel__.js"></script>
+  <!-- <script type="text/javascript" src="__devel__.js"></script> -->
 
 
 <script type="application/x-javascript" ><![CDATA[
@@ -185,9 +200,6 @@ var Ci = Components.interfaces
 
 Components.utils.import("resource://gre/modules/Services.jsm");
 ibp = Components.utils.import('chrome://instantFox/content/instantFoxModule.js')
-
-var faviconService = Cc["@mozilla.org/browser/favicon-service;1"].getService(Ci.nsIFaviconService);
-var tldService = Cc["@mozilla.org/network/effective-tld-service;1"].getService(Ci.nsIEffectiveTLDService);
 
 //************** find all avaliable locales
 
@@ -201,32 +213,16 @@ ibp.pluginLoader.getAvaliableLocales(function(locales){
 })
 
 
-//************** favicon utils
-function makeURI(aURL, aOriginCharset, aBaseURI) {
-    return Services.io.newURI(aURL, aOriginCharset, aBaseURI);
-}
-
-function getFavicon(url){
-	try{
-		var host = url.match(/:\/\/([^\/#?]*)/)[1];
-		var icon = faviconService.getFaviconImageForPage(makeURI('http://'+host)).spec
-		if(icon != faviconService.defaultFavicon.spec)
-			return icon
-		var baseDomain = tldService.getBaseDomainFromHost(host)
-		var icon = faviconService.getFaviconImageForPage(makeURI('http://'+baseDomain)).spec
-		if(icon != faviconService.defaultFavicon.spec)
-			return icon
-		var icon = faviconService.getFaviconImageForPage(makeURI('http://www.'+baseDomain)).spec
-		if(icon != faviconService.defaultFavicon.spec)
-			return icon
-	}catch(e){Components.utils.reportError(e)}	
-		
-	return 'http://g.etfv.co/http://'+host
-}
-
 //************* dom utils
 function $(id)document.getElementById(id)
 function $t(el, type)el.getElementsByAttribute('type', type)[0]
+function $parent(el){
+	while(el){
+		if(el.id)
+			return el
+		el=el.parentNode
+	}
+}
 
 function appendXML(element, xml){
 	var range = document.createRange()
@@ -234,13 +230,22 @@ function appendXML(element, xml){
 	range.collapse(true)
 	var fragment = range.createContextualFragment(xml)
 
-	element.appendChild(fragment)
+	return element.appendChild(fragment)
+}
+function replaceXML(element, xml){
+	var range = document.createRange()
+	range.selectNode(element)	
+	var fragment = range.createContextualFragment(xml)
+
+	return element.parentNode.replaceChild(fragment, element)
 }
 function formatString(string, options){	
 	return string.replace(/\$[^\$]*\$/g, function(x){
 		var x = x.slice(1,-1)
 		if(x[0]=='!')
 			return options[x.substr(1)]?'false':'true'
+		if(typeof options[x]!='string')
+			return options[x]?options[x].toString():''
 		return escapeHTML(options[x]||'')
 	})
 }
@@ -249,17 +254,17 @@ var escapeMap = { "&": "amp", '"': "quot", "<": "lt", ">": "gt" }
 
 
 xmlFragment = 
-	  <richlistitem align="center" id='$id$'>
+	  <richlistitem align="center" id='$id$' disabled="$disabled$">
 		<hbox align="center" class='image'>
 			<image src="$iconURI$" />
 		</hbox>
 		<label value="$name$"/>
 		<spacer flex='1' />
-		<label class='link' value='edit' onclick='openEditLigthbox(event)'/>
+		<label class='link' value='edit' onmouseup='openEditLigthbox(event)'/>
 		<hbox align="center" class='key'>
-			<textbox class='key' type='key' value='$key$'/>
+			<textbox class='key' type='key' value='$key$' onblur='onTextboxEnter(this)'/>
 		</hbox>
-	  </richlistitem>.toXMLString()
+	  </richlistitem>.toXMLString().replace(/>\s*</,'><')
 
 
 
@@ -267,14 +272,13 @@ var xml=[], userxml = []
 var activePlugins = InstantFoxModule.Plugins
 for each(var p in activePlugins){
 	if(p.url){
-		p.iconURI = p.iconURI || getFavicon(p.url);
 		(p.type=='default'?xml:userxml).push(formatString(xmlFragment,p))
 	}
 }
 appendXML($("standard-shortcuts"), xml.join(''))
 appendXML($("user-shortcuts"), userxml.join(''))
 
-
+markConflicts()
 /*
 gBrowser.mCurrentBrowser.engines[0].uri
 
@@ -294,32 +298,99 @@ openEditLigthbox = function(e){
 	
 	//document.getElementById("standard-shortcuts")._currentItem.id
 	
-	var item = e.target.parentNode
+	var item = $parent(e.target)
 	gPlugin = InstantFoxModule.Plugins[item.id]
 	
+	$t(panel, 'disabled').checked = gPlugin.disabled
 	$t(panel, 'context').checked = !gPlugin.hideFromContextMenu
 	$t(panel, 'instant').checked = !gPlugin.disableInstant
 	$t(panel, 'name').value = gPlugin.name
 	$t(panel, 'url').value = gPlugin.url
+	$t(panel, 'image').src = gPlugin.iconURI
 	
 	if(panel.state=='open'){
 		var r = item.boxObject
 		dump(r.screenX, r.screenY+r.width)
 		panel.moveTo(r.screenX, r.screenY+r.width)
 	}else{
-		var r = item.getBoundingClientRect()
+		/*var r = item.getBoundingClientRect()
 		var popupBoxObject = panel.popupBoxObject;
 		popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
-		/*el.showPopup(anchorElement, -1, -1, "popup", "bottomleft", "topleft");*/
-		panel.openPopup(null, "after_start", r.left, r.bottom)
+		el.showPopup(anchorElement, -1, -1, "popup", "bottomleft", "topleft");
+		panel.openPopup(null, "after_start", r.left, r.bottom)*/
+		var popupBoxObject = panel.popupBoxObject;
+		popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
+		panel.openPopup(item.firstElementChild,'before_start',0,0,false,true)
 	}
 }
-onTextboxEnter = function(){
+editPopupSave = function(panel){
+	gPlugin.hideFromContextMenu =!$t(panel, 'context').checked
+	gPlugin.disableInstant = !$t(panel, 'instant').checked
+	gPlugin.disabled = $t(panel, 'disabled').checked
+	// smaller json file
+	if(!gPlugin.disabled)
+		delete gPlugin.disabled
+	if(!gPlugin.disableInstant)
+		delete gPlugin.disableInstant
+	if(!gPlugin.hideFromContextMenu)
+		delete gPlugin.hideFromContextMenu
+
+	gPlugin.name = $t(panel, 'name').value
+	gPlugin.url = $t(panel, 'url').value
+	//gPlugin.iconURI = $t(panel, 'image').src
+	
+	var el = $(gPlugin.id)
+	var container = el.parentNode
+	var si = container.selectedIndex
+	replaceXML(el, formatString(xmlFragment,gPlugin))
+	container.selectedIndex =si
+	ibp.pluginLoader.initShortcuts()
+	markConflicts()
+}
+function markConflicts(){
+	if(!InstantFoxModule.ShortcutConflicts) 
+		InstantFoxModule.ShortcutConflicts = {}
+
+	for (var id in InstantFoxModule.Plugins){
+		var key = $t($(id), 'key')
+		dump(key)
+		if(InstantFoxModule.ShortcutConflicts[id])
+			key.setAttribute('conflict', true)
+		else
+			key.removeAttribute('conflict')
+	}
+}
+onTextboxEnter = function(el){
+	var id = $parent(el).id
+	InstantFoxModule.Plugins[id].key = el.value
+	ibp.pluginLoader.initShortcuts()
+	markConflicts()
+}
+onTextboxEscape = function(el){
+	var id = $parent(el).id
+	el.value = InstantFoxModule.Plugins[id][el.className]
+	el.blur()
+}
+window.addEventListener('keydown', function(e){
+	var el = e.target
+	if(el.className == 'key'){
+		dump(e.keyCode)
+		if(e.keyCode=='27'){
+			onTextboxEscape(el)
+		}
+		if(e.keyCode=='13'){
+			el.blur()
+			$parent(el).parentNode.focus()
+		}
+	}
+	
+
+}, false)
+
+savePlugin = function(id){
 	
 }
-onTextboxEscape = function(){
-	
-}
+
 ]]></script>
 
 
