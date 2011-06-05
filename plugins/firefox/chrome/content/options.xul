@@ -139,13 +139,17 @@ img{
 
 </html:style>
 
-<vbox id="vbox1" flex='1'>
+
   <!-- for development -->
   <shadiaglue id='status-bar'/>
   
-  <!--<iframe src='chrome://instantfox/locale/index.html' width='500px' height='350px'/>-->
-  <vbox class='externalContainer' flex='1'>
-	<vbox flex='1'>
+<tabbox flex='1'>
+  <tabs>
+	<tab label='engines'/>
+	<tab label='appearance'/>
+  </tabs>
+  <tabpanels  flex='1'>
+	<tabpanel orient='vertical'  flex='1'>
 		<hbox>
 			<label value="standard shortcuts"></label>
 			<spacer flex="1"></spacer>
@@ -163,10 +167,13 @@ img{
 		</splitter>
 		<richlistbox id='user-shortcuts' flex='1'
 			seltype='multiple' context='context'  onselect='onSelect(this)'/>
-	</vbox>
-    <vbox id='head'></vbox>
-    <vbox id='container8'/>
-  </vbox>
+	</tabpanel>
+	<tabpanel orient='vertical'  flex='1'>
+	   <label value='fontsize'/>
+	   <label value='opacity'/>
+	</tabpanel>
+  </tabpanels>
+</tabbox>
   <hbox>
 	<toolbarbutton id='' label='add plugin' type='menu' oncommand='' hidden='true'>
 		<menupopup>
@@ -176,7 +183,7 @@ img{
 	<spacer flex='1'/>
 	<button label='ok' oncommand='resultOK=true;close()'/>
   </hbox>
-</vbox>
+
 <menupopup id="context">
 	<menuitem label='instant' type='checkbox'/>
 	<menuitem label='enabled' type='checkbox'/>
