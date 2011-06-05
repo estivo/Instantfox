@@ -285,7 +285,9 @@ openEditLigthbox = function(e){
 	$t(panel, 'context').checked = !gPlugin.hideFromContextMenu
 	$t(panel, 'instant').checked = !gPlugin.disableInstant
 	$t(panel, 'name').value = gPlugin.name
-	$t(panel, 'url').value = gPlugin.url
+	var urlBox = $t(panel, 'url')
+	urlBox.value = gPlugin.url
+	urlBox.readOnly = gPlugin.type=='default'
 	$t(panel, 'image').src = gPlugin.iconURI
 	$t(panel, 'remove').hidden = gPlugin.type!='user'
 	
@@ -347,7 +349,9 @@ addPlugin=function(e){
 	$t(panel, 'context').checked =false
 	$t(panel, 'instant').checked = false
 	$t(panel, 'name').value = ''
-	$t(panel, 'url').value = ''
+	var urlBox = $t(panel, 'url')
+	urlBox.value = ''
+	urlBox.readOnly = false
 	$t(panel, 'image').src = ''	
 	$t(panel, 'remove').hidden = true
 
