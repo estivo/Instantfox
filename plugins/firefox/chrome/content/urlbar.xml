@@ -17,7 +17,7 @@
 			<xul:hbox class="instantfox-box" align='center'>
 			  <xul:hbox anonid="instantFoxKey" class="instantfox-key"><html:div/></xul:hbox>
 			  <xul:hbox anonid="instantFoxSpacer" class="instantfox-spacer"><html:div/></xul:hbox>
-			  <xul:hbox anonid="instantFoxShaddow" class="instantfox-shaddow"><html:div/></xul:hbox>
+			  <xul:hbox anonid="instantFoxShadow" class="instantfox-shadow"><html:div/></xul:hbox>
 			</xul:hbox>
 			<xul:hbox class='instantfox-tip' right='0' align='center'><html:div/></xul:hbox>
 
@@ -44,7 +44,7 @@
 
     <implementation implements="nsIDOMEventListener, nsIObserver">
 	  <constructor><![CDATA[  //nsIDOMEventListener,
-		setTimeout(this.InsertShaddowStyle, 1000)
+		setTimeout(this.InsertShadowStyle, 1000)
 	  ]]></constructor>
 
       <field name="uri"/>
@@ -60,8 +60,8 @@
         document.getAnonymousElementByAttribute(this, "anonid", "textbox-input-box-inner");
       </field>
 
-	  <field name="instantFoxShaddowNode">
-        document.getAnonymousElementByAttribute(this, "anonid", "instantFoxShaddow").firstChild;
+	  <field name="instantFoxShadowNode">
+        document.getAnonymousElementByAttribute(this, "anonid", "instantFoxShadow").firstChild;
       </field>
 	  <field name="instantFoxSpacerNode">
         document.getAnonymousElementByAttribute(this, "anonid", "instantFoxSpacer").firstChild;
@@ -81,11 +81,11 @@
         ]]></body>
       </method>
 
-	  <method name="InsertShaddowLink">
+	  <method name="InsertShadowLink">
         <parameter name="aURL"/>
         <body><![CDATA[
 			//if(aURL){
-			this.instantFoxShaddowNode.textContent = aURL;
+			this.instantFoxShadowNode.textContent = aURL;
 			//}
         ]]></body>
       </method>
@@ -99,7 +99,7 @@
 
         ]]></body>
       </method>
-	  <method name="InsertShaddowStyle">
+	  <method name="InsertShadowStyle">
         <body><![CDATA[
 			var boxStyle = document.getAnonymousElementByAttribute(gURLBar, "class", "instantfox-box").style;
 			var compStyle = getComputedStyle(gURLBar.inputBox,'')

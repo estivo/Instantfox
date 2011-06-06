@@ -69,18 +69,17 @@ var __instantFoxDevel__ = {
 	
 	doReload: function(){
 		//this.reloadComponent()
-		instantFoxUnload()
+		try{HH.destroy()}catch(e){}
 		
 		var i = this.loadedScriptsCount = 0		
 		this.loadScript(this.sourceList[i], i)
-		
-		this.m = this.reloadModule(this.moduleHref)		
 	},
 	onLoad: function(e, script){
 		this.loadedScriptsCount++;
 		if(this.loadedScriptsCount == this.sourceList.length){
+			this.m = this.reloadModule(this.moduleHref)	
 			// simulate document load event
-			instantFoxLoad()
+			HH.initialize()
 		}else{
 			//load next script
 			var i = this.loadedScriptsCount
