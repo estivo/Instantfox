@@ -47,11 +47,6 @@
 		setTimeout(this.InsertShadowStyle, 1000)
 	  ]]></constructor>
 
-      <field name="uri"/>
-      <field name="_focused"/>
-      <field name="_mouseover"/>
-      <field name="_iconWasHovered"/>
-      <field name="_tooltipTimer"/>
 
       <field name="inputBox">
         document.getAnonymousElementByAttribute(this, "anonid", "textbox-input-box");
@@ -69,36 +64,18 @@
 	  <field name="instantFoxKeyNode">
         document.getAnonymousElementByAttribute(this, "anonid", "instantFoxKey").firstChild;
       </field>
-	  <field name="tip">
+	  <field name="instantFoxTipNode">
         document.getAnonymousElementByAttribute(this, "class", "instantfox-tip");
       </field>
 
 	  <method name="showTip">
         <parameter name="aURL"/>
         <body><![CDATA[
-			this.tip.hidden=false
-			this.tip.firstChild.textContent = aURL;
+			this.instantFoxTipNode.parentNode.hidden=false
+			this.instantFoxTipNode.textContent = aURL;
         ]]></body>
       </method>
 
-	  <method name="InsertShadowLink">
-        <parameter name="aURL"/>
-        <body><![CDATA[
-			//if(aURL){
-			this.instantFoxShadowNode.textContent = aURL;
-			//}
-        ]]></body>
-      </method>
-	  <method name="InsertSpacerLink">
-        <parameter name="aURL"/>
-        <body><![CDATA[
-			if(!aURL){aURL='';this.tip.hidden=true}
-			var i = aURL.indexOf(' ')
-			this.instantFoxKeyNode.textContent = aURL.substring(0,i)
-			this.instantFoxSpacerNode.textContent = aURL.substr(i);
-
-        ]]></body>
-      </method>
 	  <method name="InsertShadowStyle">
         <body><![CDATA[
 			var boxStyle = document.getAnonymousElementByAttribute(gURLBar, "class", "instantfox-box").style;

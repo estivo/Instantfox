@@ -17,6 +17,9 @@ var HH = {
 		gURLBar.addEventListener('blur', HH.onblur, false);
 		
 		dump('instantFox initialized')
+		HH.checkURLBarBinding()
+		HH.updateUserStyle()
+		// apply user modified styles
 	},
 	destroy: function(event) {
 		//dump('---***---',arguments.callee.caller)
@@ -24,6 +27,56 @@ var HH = {
 		gURLBar.removeEventListener('input', _input, false);
 	},
 	
+	checkURLBarBinding: function() {
+		if(gURLBar.instantFoxKeyNode)
+			return
+		// our binding was overriden by some other addon
+		// we can recover if it placed mInputField into stack
+		var s = gURLBar.mInputField
+		while (s&&s.nodeName!='xul:stack')
+			s = s.parentNode;
+		
+		if(!s) {
+			// todo: add !important to our bindings rule
+		}
+
+		function hbox(name, div){
+			var hb=document.createElement('hbox')
+			hb.align='center'
+			hb.className="instantfox-"+name
+			if(div){
+				hb.appendChild(document.createElementNS('http://www.w3.org/1999/xhtml','div'))
+				
+				gURLBar["instantFox" + name[0].toUpperCase() + name.substr(1) + "Node"] = hb.firstChild;
+			}
+			return hb
+		}
+		
+		var b2=hbox('tip',true)
+		b2.setAttribute('right',0)
+		b2.setAttribute('align','center')
+		s.insertBefore(b2, s.firstChild)
+
+		var b1=hbox('box')
+		b1.appendChild(hbox('key',true))
+		b1.appendChild(hbox('spacer',true))
+		b1.appendChild(hbox('shadow',true))
+		s.insertBefore(b1, s.firstChild)
+	
+	},
+	updateUserStyle: function() {
+		var ss=document.styleSheets
+		for(var i=ss.length; i--; ){
+			var s=ss[i]
+			if(s.href=="chrome://instantfox/content/skin/instantfox.css"){
+				if(InFoxPrefs.prefHasUserValue('fontsize'))
+					s.cssRules[3].style.fontSize=InFoxPrefs.getCharPref('fontsize')
+				if(InFoxPrefs.prefHasUserValue('opacity'))
+					s.cssRules[2].style.opacity=InFoxPrefs.getCharPref('opacity')
+				break
+			}
+		}
+	},
 	// ****** event handlers ****************************************
 	onKeydown: function(event) {
 		var key = event.keyCode ? event.keyCode : event.which,
@@ -186,7 +239,7 @@ var HH = {
 			gURLBar.instantFoxKeyNode.textContent =
 			gURLBar.instantFoxSpacerNode.textContent =
 			gURLBar.instantFoxShadowNode.textContent = '';
-			gURLBar.tip.hidden=true;
+			gURLBar.instantFoxTipNode.parentNode.hidden=true;
 			this.rightShadow = ''
 			return
 		}
@@ -202,8 +255,8 @@ var HH = {
 		gURLBar.instantFoxShadowNode.textContent = s.shadow;
 		gURLBar.currentShadow = s
 		this.rightShadow = s.shadow // fixme
-		gURLBar.tip.hidden = false;
-		gURLBar.showTip('hello')
+		gURLBar.instantFoxTipNode.parentNode.hidden = false;
+		gURLBar.instantFoxTipNode.textContent = 'hello';
 	},
 	
 	// ****** instant preview ****************************************
