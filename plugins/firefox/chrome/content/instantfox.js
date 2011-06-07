@@ -69,10 +69,10 @@ var HH = {
 		for(var i=ss.length; i--; ){
 			var s=ss[i]
 			if(s.href=="chrome://instantfox/content/skin/instantfox.css"){
-				if(InFoxPrefs.prefHasUserValue('fontsize'))
-					s.cssRules[3].style.fontSize=InFoxPrefs.getCharPref('fontsize')
-				if(InFoxPrefs.prefHasUserValue('opacity'))
-					s.cssRules[2].style.opacity=InFoxPrefs.getCharPref('opacity')
+				if(InFoxPrefs.prefHasUserValue('extensions.InstantFox.fontsize'))
+					s.cssRules[3].style.fontSize=InFoxPrefs.getCharPref('extensions.InstantFox.fontsize')
+				if(InFoxPrefs.prefHasUserValue('extensions.InstantFox.opacity'))
+					s.cssRules[2].style.opacity=InFoxPrefs.getCharPref('extensions.InstantFox.opacity')
 				break
 			}
 		}
@@ -98,7 +98,7 @@ var HH = {
 				}
 			} else if (key == 13 && !meta && !ctrl) { // 13 == ENTER
 				if(!alt)
-					HH.onEnter(gURLBar.value)
+					HH.onEnter()
 				else {
 					HH.openLoadedPageInNewTab()
 				}
@@ -260,16 +260,16 @@ var HH = {
 	},
 	
 	// ****** instant preview ****************************************
-	doPreload: function(q, force, ignoreShadow){
+	doPreload: function(q, qVal){
 		if(this.timeout)
 			this._timeout = clearTimeout(this._timeout)
 
-		if(!q.query && !force)
+		if(!q.query && !qVal)
 			return ''
 
 		var url2go = q.plugin.url;
-		if(ignoreShadow){
-			var query = q.query || q.domain || ''
+		if(qVal){
+			var query = qVal || q.query || q.domain || ''
 		}else
 			var query = q.shadow || q.query || q.domain || ''
 
@@ -310,7 +310,7 @@ var HH = {
 	onEnter: function(value){
 		InstantFoxModule.previousQuery = InstantFoxModule.currentQuery
 
-		var tmp = this.doPreload(InstantFoxModule.currentQuery, true, true)
+		var tmp = this.doPreload(InstantFoxModule.currentQuery, value)
 		gURLBar.value = tmp;
 		gBrowser.userTypedValue = null;
 

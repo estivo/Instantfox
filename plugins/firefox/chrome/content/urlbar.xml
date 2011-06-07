@@ -82,20 +82,11 @@
 			var compStyle = getComputedStyle(gURLBar.inputBox,'')
 			boxStyle.marginLeft = compStyle.marginLeft
 			boxStyle.marginRight = compStyle.marginRight
-			dump(boxStyle.marginRight, compStyle.marginRight)
 			// 1px is from getComputedStyle(gURLBar.mInputField.editor.rootElement).paddingLeft
-			// is this platform independant?
+			// this is platform independant.
 			boxStyle.paddingLeft = '1px'
 			boxStyle.paddingRight = '1px'
-			/*// very very hacky
-			var ss=document.styleSheets
-			for(var i=ss.length;i--;){
-				var s=ss[i]
-				if(s.href=="chrome://instantfox/content/skin/instantfox.css"){
-					s.cssRules[3].style.fontSize=parseInt(compStyle.fontSize)-2 + 'px'
-					break
-				}
-			}*/
+			/**/
         ]]></body>
       </method>
     </implementation>
@@ -291,9 +282,8 @@
 	<handlers>
       <handler event="mouseup">
         <![CDATA[
-		// todo: find why key is stripped from url and gURLBar.controller.getValueAt(gURLBar.popup.selectedIndex);
-		var q=InstantFoxModule.currentQuery		
-		var search = q.plugin.key + q.splitSpace + this.getAttribute("url")
+		// var q=InstantFoxModule.currentQuery		
+		var search = this.getAttribute("title")
 
 		HH.onEnter(search)
         event.preventDefault()
@@ -324,8 +314,6 @@
                 this.item.classList.add("menuitem-iconic-tooltip");
                 this.item.classList.add("menuitem-iconic");
             }
-            // workaround for 3.6 bug
-            this.item.classList.add("split-menuitem-item");
       ]]></constructor>
 	  <!-- <property name="value"
                 onget="return (this.hasAttribute('isempty') || this.hasAttribute('empty')) ? '' : this.inputField.value;"> -->

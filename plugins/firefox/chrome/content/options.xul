@@ -169,8 +169,26 @@ img{
 			seltype='multiple' context='context'  onselect='onSelect(this)'/>
 	</tabpanel>
 	<tabpanel orient='vertical'  flex='1'>
-	   <label value='fontsize'/>
-	   <label value='opacity'/>
+	  <prefpane align='center'>
+	    <preferences>
+          <preference id="keyword-URL" name="keyword.URL" type="string" />
+          <preference id="fontsize" name="extensions.InstantFox.fontsize" type="string" />
+          <preference id="opacity" name="extensions.InstantFox.opacity" type="string" />
+        </preferences>
+	    <label value='fontsize'/>
+	    <textbox preference="fontsize"/>
+	    <label value='opacity'/>
+	    <textbox preference="opacity"/>
+	   
+	    <label value='keyword.URL'/>
+	    <menulist editable="true" preference="keyword-URL">
+		  <menupopup >
+		    <menuitem label="http://www.google.com/search?q="/>
+		    <menuitem label="http://www.bing.com/search?q="/>
+		    <menuitem label=""/>
+		  </menupopup>
+	    </menulist>
+	  </prefpane>
 	</tabpanel>
   </tabpanels>
 </tabbox>
@@ -444,6 +462,8 @@ savePlugin = function(id){
 
 //************* 
 function onclose(){
+	document.getElementsByTagName('prefpane')[0].writePreferences(false)
+	
 	if(!gPluginsChanged)
 		return
 	if(resultOK)
