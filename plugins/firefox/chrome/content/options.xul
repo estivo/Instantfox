@@ -464,6 +464,10 @@ savePlugin = function(id){
 function onclose(){
 	document.getElementsByTagName('prefpane')[0].writePreferences(false)
 	
+	var em = Services.wm.getEnumerator('navigator:browser')
+	while(em.hasMoreElements())
+		em.getNext().HH.updateUserStyle()
+
 	if(!gPluginsChanged)
 		return
 	if(resultOK)

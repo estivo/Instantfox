@@ -466,6 +466,48 @@ var getMatchingPlugins = function(key, tail){
 	return results
 }
 
+var imdbJsonUrl = function(q2tidy, jsonUrl) {
+	if (q2tidy.length > 20)
+		q2tidy = q2tidy.substr(0, 20);
+	q2tidy = q2tidy.replace(/^\s*/, "")
+				.replace(/[ ]+/g, "_")
+				.replace(/[\u00e0\u00c0\u00e1\u00c1\u00e2\u00c2\u00e3\u00c3\u00e4\u00c4\u00e5\u00c5\u00e6\u00c6]/g, "a")
+				.replace(/[\u00e7\u00c7]/g, "c")
+				.replace(/[\u00e8\u00c8\u00e9\u00c9\u00ea\u00ca\u00eb\u00cb]/g, "e")
+				.replace(/[\u00ec\u00cd\u00ed\u00cd\u00ee\u00ce\u00ef\u00cf]/g, "i")
+				.replace(/[\u00f0\u00d0]/g, "d")
+				.replace(/[\u00f1\u00d1]/g, "n")
+				.replace(/[\u00f2\u00d2\u00f3\u00d3\u00f4\u00d4\u00f5\u00d5\u00f6\u00d6\u00f8\u00d8]/g, "o")
+				.replace(/[\u00f9\u00d9\u00fa\u00da\u00fb\u00db\u00fc\u00dc]/g, "u")
+				.replace(/[\u00fd\u00dd\u00ff]/g, "y")
+				.replace(/[\u00fe\u00de]/g, "t")
+				.replace(/[\u00df]/g, "ss")
+				.replace(/[\W]/g, "")
+				.toLowerCase()
+	jsonUrl.replace('%q', q2tidy).replace('%fq', q2tidy[0]);
+}
+var parseImdbJson = function(json, key, splitSpace){
+	try{
+		json = json.substring(json.indexOf('{'), json.lastIndexOf('}')+1)
+		var xhrReturn = JSON.parse(json).d;
+	}catch(e){
+		return InstantFoxModule.currentQuery.results
+	}
+	if(!xhrReturn)
+		return
+
+	var results=[]
+	for(var i = 0; i < xhrReturn.length; i++){
+		var result = xhrReturn[i];
+		results.push({
+			icon: '',
+			title: result.l,
+			url: key + splitSpace + result.l,
+			comment: result.s
+		})
+	}
+	return results
+}
 
 function filter(data, text) {
 	var table = [];
@@ -549,10 +591,10 @@ SimpleAutoCompleteResult.prototype = {
 	get errorDescription() this._errorDescription,
 	get matchCount() this.list.length,
 
-	getCommentAt: function(index) this.list[index].title,//displayed in popup
+	getCommentAt: function(index) this.list[index].title,//title attribute on richlistitem in popup
+	getLabelAt: function(index) this.list[index].url,//url attribute on richlistitem in popup
 	getValueAt: function(index) this.list[index].url,//displayed in urlbar
 	getImageAt: function(index) this.list[index].icon,
-	getLabelAt: function(index) this.list[index].url,
 	getStyleAt: function(index) "InstantFoxSuggest",
 
 	removeValueAt: function(index, removeFromDb) {

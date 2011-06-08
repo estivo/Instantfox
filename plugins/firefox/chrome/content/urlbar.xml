@@ -65,7 +65,7 @@
         document.getAnonymousElementByAttribute(this, "anonid", "instantFoxKey").firstChild;
       </field>
 	  <field name="instantFoxTipNode">
-        document.getAnonymousElementByAttribute(this, "class", "instantfox-tip");
+        document.getAnonymousElementByAttribute(this, "class", "instantfox-tip").firstChild;
       </field>
 
 	  <method name="showTip">
