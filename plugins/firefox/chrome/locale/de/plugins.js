@@ -35,7 +35,7 @@ rawPluginData.plugins = {
 		key: 't',
 		url: 'http://search.twitter.com/search?q=%q',
     },
-    amazon: {
+    Amazon: {
 		key: 'a',
 		url: 'http://www.amazon.com/gp/search?ie=UTF8&keywords=%q&tag=406-20&index=aps&linkCode=ur2&camp=1789&creative=9325',
 		json: 'http://completion.amazon.co.uk/search/complete?method=completion&q=%q&search-alias=aps&mkt=4'
