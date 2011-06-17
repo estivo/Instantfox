@@ -237,7 +237,7 @@ var HH = {
 				q.shadow = i.title
 				break
 			}
-			if (!q.shadow && i.title.indexOf(q.query)==0)
+			if (!q.shadow && i.title.toLowerCase().indexOf(q.query)==0)
 				q.shadow = i.title
 		}
 
