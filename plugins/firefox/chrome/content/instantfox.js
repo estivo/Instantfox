@@ -110,7 +110,7 @@ var HH = {
 				}
 			} else if (key == 13 && !meta && !ctrl) { // 13 == ENTER
 				if(!alt)
-					HH.onEnter()
+					HH.onEnter(InstantFoxModule.currentQuery.query)
 				else {
 					HH.openLoadedPageInNewTab()
 				}
