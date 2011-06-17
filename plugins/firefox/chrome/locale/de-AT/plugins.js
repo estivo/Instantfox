@@ -3,7 +3,7 @@ rawPluginData.plugins = {
     weather: {
 		key: 'f',
 		url: 'http://weather.instantfox.net/%q',
-		json: 'http://maps.google.de/maps/suggest?q=%q&cp=999&gl=at&gl=at&v=2&json=b'
+		json: 'http://maps.google.de/maps/suggest?q=%q&cp=999&gl=at&gl=at&v=2&json=b',
 		hideFromContextMenu: true
     },
     google: {
