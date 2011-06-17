@@ -69,10 +69,22 @@ var HH = {
 		for(var i=ss.length; i--; ){
 			var s=ss[i]
 			if(s.href=="chrome://instantfox/content/skin/instantfox.css"){
-				if(InFoxPrefs.prefHasUserValue('extensions.InstantFox.fontsize'))
+				if(InFoxPrefs.prefHasUserValue('extensions.InstantFox.fontsize')){
+					var pref = parseInt(InFoxPrefs.getIntPref('extensions.InstantFox.opacity'))
+					if(pref.isNaN())
+						pref = '';
+					else if(pref<2)
+						pref+='em';
+					else
+						pref+='px';
 					s.cssRules[3].style.fontSize=InFoxPrefs.getCharPref('extensions.InstantFox.fontsize')
-				if(InFoxPrefs.prefHasUserValue('extensions.InstantFox.opacity'))
-					s.cssRules[2].style.opacity=InFoxPrefs.getCharPref('extensions.InstantFox.opacity')
+				}
+				if(InFoxPrefs.prefHasUserValue('extensions.InstantFox.opacity')){
+					var pref = parseInt(InFoxPrefs.getCharPref('extensions.InstantFox.opacity')) / 100
+					if(pref.isNaN() || pref<0.1)
+						pref = 1
+					s.cssRules[2].style.opacity = pref;
+				}
 				break
 			}
 		}
@@ -139,7 +151,7 @@ var HH = {
 
 		if(simulateInput){
 			gURLBar.controller.handleText(true)
-			_input()
+			HH.onInput()
 			event.preventDefault();
 		}
 	},

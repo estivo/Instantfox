@@ -87,6 +87,8 @@ var pluginLoader = {
 		var localeRe=/%l(?:s|l|d)/g,
 			domainRe = /:\/\/([^#?]*)/;
 		function replacer(m) pluginData.localeMap[m]
+		
+		var newPlugins = {}
 
 		for(var i in pluginData.plugins){
 			var p = pluginData.plugins[i];
@@ -107,8 +109,10 @@ var pluginLoader = {
 				p.json = false
 			
 			p.type = 'default'
-
+			
+			newPlugins[p.id] = p
 		}
+		pluginData.plugins = newPlugins
 		return pluginData
 	},
 	addPlugins: function(pluginData){
@@ -128,6 +132,13 @@ var pluginLoader = {
 					p.disabled = mP.disabled;
 			}
 			InstantFoxModule.Plugins[id] = p;
+		}
+		// remove default plugins from other locale
+		for (var pn in InstantFoxModule.Plugins){
+			var p = InstantFoxModule.Plugins[pn]
+			dump(pn,p.type ,pluginData.plugins[pn])
+			if (p.type == 'default' && !pluginData.plugins[pn])
+				delete InstantFoxModule.Plugins[pn]
 		}
 		InstantFoxModule.defaultPlugin = InstantFoxModule.defaultPlugin||'google'
 	},
@@ -154,7 +165,13 @@ var pluginLoader = {
 	onRawPluginsLoaded: function(e){
 		e.target.onload=null
 		var js = e.target.responseText
-		eval(js)
+		try{
+			eval(js)
+		}catch(e){
+			Cu.reportError('malformed locale')
+			Cu.reportError(e)
+			return
+		}
 		this.preprocessRawData(rawPluginData)
 		this.addPlugins(rawPluginData)
 		// add data from browser searches
@@ -633,7 +650,7 @@ InstantFoxSearch.prototype = {
 		} else if(this.$searchingHistory)
 			this.historyAutoComplete.stopSearch()
 		var api = InstantFoxModule.currentQuery.plugin
-dump(api.suggestPlugins)
+
 		if (api.suggestPlugins) {
 			var plugins = getMatchingPlugins(api.key, api.tail)
 			dump(plugins)

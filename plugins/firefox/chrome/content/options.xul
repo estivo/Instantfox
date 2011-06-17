@@ -144,7 +144,8 @@ img{
   <shadiaglue id='status-bar'/>
   
 <tabbox flex='1'>
-  <tabs>
+  <tabs onselect="if(this.selectedIndex==1){this.removeAttribute('onselect');
+		this.parentNode.selectedPanel.firstChild.hidden=false;gPrefChanged=true;}">
 	<tab label='engines'/>
 	<tab label='appearance'/>
   </tabs>
@@ -153,7 +154,7 @@ img{
 		<hbox>
 			<label value="standard shortcuts"></label>
 			<spacer flex="1"></spacer>
-			<menulist id="locale" oncommand = 'InstantFoxModule.pluginLoader.loadPlugins(event.target.label, rebuld)'>
+			<menulist id="locale" oncommand = 'InstantFoxModule.pluginLoader.loadPlugins(event.target.label, rebuild)'>
 				<menupopup/>
 			</menulist>
 		</hbox>
@@ -168,17 +169,21 @@ img{
 		<richlistbox id='user-shortcuts' flex='1'
 			seltype='multiple' context='context'  onselect='onSelect(this)'/>
 	</tabpanel>
-	<tabpanel orient='vertical'  flex='1'>
-	  <prefpane align='center'>
+	<tabpanel orient='vertical'  flex='1' >
+	  <prefpane align='center' hidden='true'>
 	    <preferences>
           <preference id="keyword-URL" name="keyword.URL" type="string" />
           <preference id="fontsize" name="extensions.InstantFox.fontsize" type="string" />
-          <preference id="opacity" name="extensions.InstantFox.opacity" type="string" />
+          <preference id="opacity" name="extensions.InstantFox.opacity" type="int" />
         </preferences>
 	    <label value='fontsize'/>
 	    <textbox preference="fontsize"/>
 	    <label value='opacity'/>
-	    <textbox preference="opacity"/>
+		<hbox pack='center' align='center'>
+			<scale preference="opacity" min='10' max='100' flex='1'/>
+			<textbox preference="opacity"/>
+			<label value='%'/>
+		</hbox>
 	   
 	    <label value='keyword.URL'/>
 	    <menulist editable="true" preference="keyword-URL">
@@ -248,7 +253,11 @@ ibp.pluginLoader.getAvaliableLocales(function(locales){
 	appendXML(menulist.firstChild,
 		'<menuitem label="' + locales.join('"/><menuitem label="') + '"/>'
 	)
-	menulist.selectedIndex = locales.indexOf(InstantFoxModule.selectedLocale)
+	var sl = InstantFoxModule.selectedLocale
+	var si = locales.indexOf(sl)
+	if(si<0)
+		si = locales.indexOf(sl.substring(0, sl.indexOf('-')))
+	menulist.selectedIndex = si
 })
 
 
@@ -297,7 +306,7 @@ function escapeHTML(str) str.replace(/[&"<>]/g, function(m)"&"+escapeMap[m]+";")
 var escapeMap = { "&": "amp", '"': "quot", "<": "lt", ">": "gt" }
 
 //******************* 
-var gPlugin, gPluginsChanged, resultOK=true;
+var gPlugin, gPluginsChanged, gPrefChanged, resultOK=true;
 openEditLigthbox = function(e){
 	var panel = $('edit-box')
 	
@@ -462,7 +471,8 @@ savePlugin = function(id){
 
 //************* 
 function onclose(){
-	document.getElementsByTagName('prefpane')[0].writePreferences(false)
+	if(gPrefChanged)
+		document.getElementsByTagName('prefpane')[0].writePreferences(false)
 	
 	var em = Services.wm.getEnumerator('navigator:browser')
 	while(em.hasMoreElements())
@@ -490,7 +500,7 @@ xmlFragment =
 	  </richlistitem>.toXMLString().replace(/>\s*</,'><')
 
 
-rebuld = function(){
+rebuild = function(all){
 	var xml=[], userxml = []
 	var activePlugins = InstantFoxModule.Plugins
 	for each(var p in activePlugins){
@@ -501,14 +511,15 @@ rebuld = function(){
 	el = $("standard-shortcuts");
 	clean(el)
 	appendXML(el, xml.join(''))
-	el = $("user-shortcuts");
-	clean(el)
-	appendXML(el, userxml.join(''))
-
+	if (all) {
+		el = $("user-shortcuts");
+		clean(el)
+		appendXML(el, userxml.join(''))
+	}
 	markConflicts()
 }
 
-rebuld()
+rebuild(true)
 /*
 gBrowser.mCurrentBrowser.engines[0].uri
 
