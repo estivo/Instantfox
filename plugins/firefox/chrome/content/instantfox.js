@@ -70,18 +70,18 @@ var HH = {
 			var s=ss[i]
 			if(s.href=="chrome://instantfox/content/skin/instantfox.css"){
 				if(InFoxPrefs.prefHasUserValue('extensions.InstantFox.fontsize')){
-					var pref = parseInt(InFoxPrefs.getIntPref('extensions.InstantFox.opacity'))
-					if(pref.isNaN())
+					var pref =  parseInt(InFoxPrefs.getCharPref('extensions.InstantFox.fontsize'))
+					if(isNaN(pref))
 						pref = '';
-					else if(pref<2)
+					else if(pref < 2)
 						pref+='em';
 					else
 						pref+='px';
-					s.cssRules[3].style.fontSize=InFoxPrefs.getCharPref('extensions.InstantFox.fontsize')
+					s.cssRules[3].style.fontSize = pref;
 				}
 				if(InFoxPrefs.prefHasUserValue('extensions.InstantFox.opacity')){
-					var pref = parseInt(InFoxPrefs.getCharPref('extensions.InstantFox.opacity')) / 100
-					if(pref.isNaN() || pref<0.1)
+					var pref = parseInt(InFoxPrefs.getIntPref('extensions.InstantFox.opacity')) / 100
+					if(isNaN(pref) || pref < 0.1)
 						pref = 1
 					s.cssRules[2].style.opacity = pref;
 				}
@@ -128,7 +128,7 @@ var HH = {
 			var keyIndex = origVal.indexOf(' ')
 			var key=origVal.substring(0,keyIndex)
 
-			if(key in InstantFoxModule.Shortcuts){
+			if(key in InstantFoxModule.Shortcuts || key[0] == '`'){
 			//gURLBar.value = '`'+origVal
 				if (gURLBar.selectionStart<=keyIndex) {
 					gURLBar.selectionStart = keyIndex+1
@@ -255,7 +255,8 @@ var HH = {
 			this.rightShadow = ''
 			return
 		}
-		var key = q.plugin.key+q.splitSpace.replace(' ', '\u00a0', 'g');
+		var i = q.value.indexOf(' ')
+		var key = q.value.slice(0, i)+q.splitSpace.replace(' ', '\u00a0', 'g');
 		var l = 1
 		var s = {
 			key: key,
@@ -294,10 +295,10 @@ var HH = {
 
 		// see load_flags at http://mxr.mozilla.org/mozilla-central/source/docshell/base/nsIWebNavigation.idl#149
 		if(HH._isOwnQuery){
-			getWebNavigation().loadURI(url2go, (nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY | nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY), null, null, null);
+			getWebNavigation().loadURI(url2go, nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE, null, null, null);
 			//content.location.replace(url2go);
 		}else{
-			getWebNavigation().loadURI(url2go, (nsIWebNavigation.LOAD_FLAGS_NONE), null, null, null);
+			getWebNavigation().loadURI(url2go, nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE, null, null, null);
 			//content.location.assign(url2go);
 			HH._isOwnQuery = true;
 		}
@@ -336,6 +337,7 @@ var HH = {
 		var tab=gBrowser.mCurrentTab;
 		var newTab = Cc['@mozilla.org/browser/sessionstore;1'].getService(Ci.nsISessionStore).duplicateTab(window, tab, -1);
 		gBrowser.moveTabTo(tab,tab._tPos+1)
+		this.onEnter(InstantFoxModule.currentQuery.query)
 	},
 }
 
