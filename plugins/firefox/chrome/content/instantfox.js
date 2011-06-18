@@ -70,13 +70,17 @@ var HH = {
 			var s=ss[i]
 			if(s.href=="chrome://instantfox/content/skin/instantfox.css"){
 				if(InFoxPrefs.prefHasUserValue('extensions.InstantFox.fontsize')){
-					var pref =  parseInt(InFoxPrefs.getCharPref('extensions.InstantFox.fontsize'))
-					if(isNaN(pref))
-						pref = '';
-					else if(pref < 2)
-						pref+='em';
-					else
-						pref+='px';
+					var pref = InFoxPrefs.getCharPref('extensions.InstantFox.fontsize')
+					if (!/^\d+.?\d*((px)|(em))$/.test(pref)){
+						pref = parseFloat(pref)
+
+						if (isNaN(pref) || pref < 0.5)
+							pref = '';
+						else if (pref < 2)
+							pref+='em';
+						else
+							pref+='px';
+					}
 					s.cssRules[3].style.fontSize = pref;
 				}
 				if(InFoxPrefs.prefHasUserValue('extensions.InstantFox.opacity')){
@@ -94,7 +98,7 @@ var HH = {
 		var key = event.keyCode ? event.keyCode : event.which,
 			alt = event.altKey, meta = event.metaKey,
 			ctrl = event.ctrlKey, shift = event.shiftKey,
-			simulateInput;
+			simulateInput, i;
 
 		if (InstantFoxModule.currentQuery) {
 			if (key == 9 || (!ctrl && !shift && key == 39)) { // 9 == Tab
@@ -123,7 +127,7 @@ var HH = {
 			}
 		}
 
-		if(key == 32 && ctrl) { // 32 == SPACE
+		if (key == 32 && ctrl) { // 32 == SPACE
 			var origVal = gURLBar.value;
 			var keyIndex = origVal.indexOf(' ')
 			var key=origVal.substring(0,keyIndex)
@@ -147,6 +151,12 @@ var HH = {
 					gURLBar.selectionEnd = origVal.length
 				}
 			}
+		} else if (ctrl && [38,40,34,33].indexOf(key)!=-1){
+			var amount = key == 38 ?  10:
+						 key == 40 ? -10:
+						 key == 34 ? -200:
+					   /*key == 33 ?*/200;
+			content.scrollBy(0, -amount)
 		}
 
 		if(simulateInput){
