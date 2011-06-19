@@ -242,15 +242,16 @@ var HH = {
 	},
 	findBestShadow: function(q){
 		q.shadow = ''
+		var query = q.query.toLowerCase()
 		for each(var i in q.results) {
-			if (i.title == q.query) {
+			var title = i.title.toLowerCase()
+			if (title == query) {
 				q.shadow = i.title
 				break
 			}
-			if (!q.shadow && i.title.toLowerCase().indexOf(q.query)==0)
+			if (!q.shadow && title.indexOf(query)==0)
 				q.shadow = i.title
 		}
-
 	},
 	updateShadowLink: function(q){
 		//var q = InstantFoxModule.currentQuery;
@@ -330,6 +331,12 @@ var HH = {
 		if(this.timeout)
 			this._timeout = clearTimeout(this._timeout)
 	},
+	collapseHistory: function(index) {
+		var sh = getWebNavigation().sessionHistory.QueryInterface(Ci.nsISHistoryInternal)
+		var finalEntry = sh.getEntryAtIndex(sh.index, false)
+		sh.getEntryAtIndex(index, true)
+		sh.addEntry(finalEntry, true)
+	},
 	onEnter: function(value){
 		InstantFoxModule.previousQuery = InstantFoxModule.currentQuery
 
@@ -346,6 +353,7 @@ var HH = {
 	openLoadedPageInNewTab: function(){
 		var tab=gBrowser.mCurrentTab;
 		var newTab = Cc['@mozilla.org/browser/sessionstore;1'].getService(Ci.nsISessionStore).duplicateTab(window, tab, -1);
+		newTab.linkedBrowser.userTypedValue = null;
 		gBrowser.moveTabTo(tab,tab._tPos+1)
 		this.onEnter(InstantFoxModule.currentQuery.query)
 	},
