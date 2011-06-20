@@ -119,6 +119,7 @@ img{
 	background-image:-moz-radial-gradient(50%  bottom, rgba(250,250,100,0.3)0%,  rgba(250,250,250,0.0) 100%);
 	-moz-box-shadow:0px 0px 2px 2px rgba(250,250,100,0.8);
 }
+
 /* close button */
 .close-button {
   -moz-appearance: none;
@@ -137,6 +138,10 @@ img{
   -moz-image-region: rect(0, 48px, 16px, 32px);
 }
 
+label[control='opacity-scale']{
+	margin-top: 10px!important;
+	margin-bottom: -3px!important;
+}
 </html:style>
 
 
@@ -170,29 +175,30 @@ img{
 			seltype='multiple' context='context'  onselect='onSelect(this)'/>
 	</tabpanel>
 	<tabpanel orient='vertical'  flex='1' >
-	  <prefpane align='center' hidden='true'>
-	    <preferences>
-          <preference id="keyword-URL" name="keyword.URL" type="string" />
-          <preference id="fontsize" name="extensions.InstantFox.fontsize" type="string" />
-          <preference id="opacity" name="extensions.InstantFox.opacity" type="int" />
-        </preferences>
-	    <label value='fontsize'/>
-	    <textbox preference="fontsize"/>
-	    <label value='opacity'/>
+	  <prefpane align='center' hidden='false'>
+	    <label value='fontsize' control='fontsize-text'/>
+	    <textbox preference="fontsize"  id='fontsize-text'/>
+	    <label value='opacity' control='opacity-scale'/>
 		<hbox pack='center' align='center'>
-			<scale preference="opacity" min='10' max='100' flex='1'/>
-			<textbox preference="opacity"/>
+			<scale value='20' min='10' max='100' flex='1' id='opacity-scale' preference-editable="true" preference="opacity" />
+			<textbox preference="opacity" id='opacity-text'/>
 			<label value='%'/>
 		</hbox>
 	   
-	    <label value='keyword.URL'/>
-	    <menulist editable="true" preference="keyword-URL">
+	    <label value='keyword.URL' control='keyword-URL-menu'/>
+	    <menulist editable="true" preference="keyword-URL" id="keyword-URL-menu">
 		  <menupopup >
 		    <menuitem label="http://www.google.com/search?q="/>
 		    <menuitem label="http://www.bing.com/search?q="/>
 		    <menuitem label=""/>
 		  </menupopup>
 	    </menulist>
+		
+		<preferences>
+          <preference id="keyword-URL" name="keyword.URL" type="string" />
+          <preference id="fontsize" name="extensions.InstantFox.fontsize" type="string" />
+          <preference id="opacity" name="extensions.InstantFox.opacity" type="int" />
+        </preferences>
 	  </prefpane>
 	</tabpanel>
   </tabpanels>
