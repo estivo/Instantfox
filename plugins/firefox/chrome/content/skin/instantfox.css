@@ -44,11 +44,15 @@ html|span.InstantFoxSuggest.ac-emphasize-text{
 	right:0px;
 	background:rgb(255,246,171);
 	border-radius: 4px;
+	font-style: italic;
 }
 /** splitmenu ************************************/
-menuitem.split-menuitem-item[_moz-menuactive="true"], .split-menu-right-image[_moz-menuactive="true"] {
+menuitem.split-menuitem-item[_moz-menuactive="true"], .split-menu-right-image[_moz-menuactive="true"] {/*for xp*/
     background-color: -moz-menuhover;
     color: -moz-menuhovertext;
+}
+menuitem.split-menuitem-item{/*for mac*/
+	padding: 0!important;
 }
 .split-menu-right-image {
     -moz-appearance: menuitem;

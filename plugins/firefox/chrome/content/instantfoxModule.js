@@ -255,9 +255,9 @@ var pluginLoader = {
 	
 	getAvaliableLocales: function(callback){
 		var upre=/\/[^\/]*$/
-		var href = getFileUri('chrome://instantfox/locale/plugins.js').replace(upre,'').replace(upre,'')
+		var href = getFileUri('chrome://instantfox/locale/plugins.js').replace(upre,'').replace(upre,'') + '/'
 		makeReqAsync(href, function(t){
-			callback(t.match(/201\: [^ ]* /g).map(function(x)x.slice(5,-1)))			
+			callback(t.match(/201\: [^ ]* /g).map(function(x)x.slice(5,-1).replace(/\/$/, '')))
 		})
 	},
 

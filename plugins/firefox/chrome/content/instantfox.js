@@ -7,7 +7,7 @@ InFoxPrefs.QueryInterface(Ci.nsIPrefBranch2);
 var HH = {
 	initialize: function(event) {
 		window.removeEventListener('load', arguments.callee, true);
-		Cu.import('chrome://instantFox/content/instantFoxModule.js')
+		Cu.import('chrome://instantfox/content/instantfoxModule.js')
 
 		gURLBar.setAttribute('autocompletesearch',	'instantFoxAutoComplete');
 		gURLBar.removeAttribute('oninput');
@@ -280,7 +280,7 @@ var HH = {
 		gURLBar.currentShadow = s
 		this.rightShadow = s.shadow // fixme
 		gURLBar.instantFoxTipNode.parentNode.hidden = false;
-		gURLBar.instantFoxTipNode.textContent = 'hello';
+		gURLBar.instantFoxTipNode.textContent = "\u21B9 to complete";
 	},
 	
 	// ****** instant preview ****************************************

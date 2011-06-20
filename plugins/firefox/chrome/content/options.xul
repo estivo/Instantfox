@@ -243,7 +243,7 @@ var Cc = Components.classes
 var Ci = Components.interfaces
 
 Components.utils.import("resource://gre/modules/Services.jsm");
-ibp = Components.utils.import('chrome://instantFox/content/instantFoxModule.js')
+ibp = Components.utils.import('chrome://instantfox/content/instantfoxModule.js')
 
 //************** find all avaliable locales
 
