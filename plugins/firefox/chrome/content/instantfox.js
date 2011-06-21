@@ -165,7 +165,7 @@ var HH = {
 			event.preventDefault();
 		}
 	},
-	onInput: function(event) {dump(event)
+	onInput: function(event) {
 		var val = gURLBar.value;
 		gBrowser.userTypedValue = val;
 
@@ -280,7 +280,7 @@ var HH = {
 		gURLBar.currentShadow = s
 		this.rightShadow = s.shadow // fixme
 		gURLBar.instantFoxTipNode.parentNode.hidden = false;
-		gURLBar.instantFoxTipNode.textContent = "\u21B9 to complete";
+		gURLBar.instantFoxTipNode.textContent = "TAB to complete"; //\u21B9 \u21C4
 	},
 	
 	// ****** instant preview ****************************************
@@ -299,7 +299,8 @@ var HH = {
 
 		url2go = url2go.replace('%q', query);
 
-		if(url2go == q.preloadURL)
+		if(q.preloadURL &&
+			url2go.toLowerCase() == q.preloadURL.toLowerCase())
 			return url2go
 
 		q.preloadURL = url2go
@@ -309,7 +310,9 @@ var HH = {
 			getWebNavigation().loadURI(url2go, nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE, null, null, null);
 			//content.location.replace(url2go);
 		}else{
-			getWebNavigation().loadURI(url2go, nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE, null, null, null);
+			var webNav = getWebNavigation()
+			q.index = webNav.sessionHistory.index
+			webNav.loadURI(url2go, nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE, null, null, null);
 			//content.location.assign(url2go);
 			HH._isOwnQuery = true;
 		}
@@ -326,7 +329,10 @@ var HH = {
 	},
 	finishSearch: function() {
 		this._isOwnQuery = false
-		this.updateShadowLink(null) //
+		this.updateShadowLink(null) 
+		// todo: investigate why this crashes browser sometimes
+		//if (InstantFoxModule.currentQuery.index != null)
+		//	this.collapseHistory(InstantFoxModule.currentQuery.index)
 		InstantFoxModule.currentQuery = null;
 		if(this.timeout)
 			this._timeout = clearTimeout(this._timeout)
@@ -351,30 +357,57 @@ var HH = {
 		gBrowser.selectedBrowser.focus();
 	},
 	openLoadedPageInNewTab: function(){
-		var tab=gBrowser.mCurrentTab;
-		var newTab = Cc['@mozilla.org/browser/sessionstore;1'].getService(Ci.nsISessionStore).duplicateTab(window, tab, -1);
+		var q = InstantFoxModule.currentQuery;
+		var tab = gBrowser.mCurrentTab;
+		var historyOffset = q.index == null? 0 : q.index - getWebNavigation().sessionHistory.index;
+		var newTab = Cc['@mozilla.org/browser/sessionstore;1'].getService(Ci.nsISessionStore).duplicateTab(window, tab, historyOffset);
 		newTab.linkedBrowser.userTypedValue = null;
 		gBrowser.moveTabTo(tab,tab._tPos+1)
-		this.onEnter(InstantFoxModule.currentQuery.query)
+		this.onEnter(q.query)
 	},
 }
 
 //************************************************************************
 // experimental options popup
-HH.openOptionsPopup = function(p){
-	while(p.hasChildNodes())
-		p.removeChild(p.firstChild)
+HH.openOptionsPopup = function(p) {
+	if (p.hasChildNodes())
+		return;
+	//while(p.hasChildNodes())
+	//	p.removeChild(p.firstChild)
 	var i = document.createElement('iframe')
 	i.setAttribute('src','chrome://instantfox/content/options.xul')
 	p.appendChild(i)
-	i.contentWindow.close=HH.closeOptionsPopup
+	i.contentWindow.close = HH.closeOptionsPopup
+	i.contentWindow.addEventListener('load', HH.updatePopupSize, false)
 	var h = screen.availHeight*3/4
-	i.width=2/5*h
+	//i.width=2/5*h
 	i.height=h
 }
-
-HH.closeOptionsPopup = function(p){
-	p =p || document.getElementById('instantFox-options').firstChild
+HH.updatePopupSize = function(e) {
+	var doc = e.target
+	doc.defaultView.removeEventListener('load', HH.updatePopupSize, false)
+	document.getElementById('instantFox-options').firstChild.width =
+							doc.getElementsByTagName('tabbox')[0].clientWidth + 50
+	var tb = doc.createElement('toolbarbutton')
+	doc.documentElement.appendChild(tb)
+	tb.id = 'pin'
+	tb.label = 'pin'
+	tb.type = 'checkbox'
+	tb.setAttribute('oncommand', 'window.top.HH.pinPopup()')
+}
+HH.pinPopup = function() {
+	var b = document.getElementById('instantFox-options')
+	var p = b.firstChild
+	if (p.hasAttribute('noautohide')){
+		p.removeAttribute('noautohide')
+	} else 
+		p.setAttribute('noautohide', true)
+	p.hidePopup()
+	p.openPopup(b, "after_start", 0, 0, false, false)
+	//noautofocus ignorekeys 
+}
+HH.closeOptionsPopup = function(p) {
+	p = p || document.getElementById('instantFox-options').firstChild
 	p.hidePopup()
 }
 

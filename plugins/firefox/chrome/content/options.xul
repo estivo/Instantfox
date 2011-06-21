@@ -142,11 +142,16 @@ label[control='opacity-scale']{
 	margin-top: 10px!important;
 	margin-bottom: -3px!important;
 }
+#pin{
+	position:fixed;
+	top:0;
+	right:0;
+}
 </html:style>
 
 
   <!-- for development -->
-  <shadiaglue id='status-bar'/>
+  <!-- <shadiaglue id='status-bar'/> -->
   
 <tabbox flex='1'>
   <tabs onselect="if(this.selectedIndex==1){this.removeAttribute('onselect');
