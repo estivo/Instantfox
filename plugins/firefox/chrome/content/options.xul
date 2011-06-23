@@ -154,6 +154,9 @@ label[control='opacity-scale']{
   <!-- <shadiaglue id='status-bar'/> -->
   
 <tabbox flex='1'>
+  <hbox id='pin' hidden='true'>
+	<toolbarbutton type='checkbox' label='pin' oncommand='window.top.HH.pinPopup()'/>
+  </hbox>
   <tabs onselect="if(this.selectedIndex==1){this.removeAttribute('onselect');
 		this.parentNode.selectedPanel.firstChild.hidden=false;gPrefChanged=true;}">
 	<tab label='engines'/>
@@ -162,14 +165,19 @@ label[control='opacity-scale']{
   <tabpanels  flex='1'>
 	<tabpanel orient='vertical'  flex='1'>
 		<hbox>
-			<label value="standard shortcuts"></label>
-			<spacer flex="1"></spacer>
-			<menulist id="locale" oncommand = 'InstantFoxModule.pluginLoader.loadPlugins(event.target.label, rebuild)'>
-				<menupopup/>
-			</menulist>
+			<vbox>
+				<label value="choose language"></label>
+				<menulist id="locale" oncommand = 'InstantFoxModule.pluginLoader.loadPlugins(event.target.label, rebuild)'>
+					<menupopup/>
+				</menulist>
+				<spacer flex='1'/>
+				<label value="standard shortcuts"></label>
+			</vbox>
+			<spacer flex='1'/>
+			<image src='skin/logo.png'/>
 		</hbox>
 		<richlistbox id='standard-shortcuts' flex='1'
-			seltype='multiple' context='context' onselect='onSelect(this)'/>
+			seltype='multiple' context='context' onselect='onSelect(this)' onmouseup='openEditLigthbox(event)'/>
 
 		<splitter>
 			<label value="your shortcuts"></label>
@@ -177,7 +185,7 @@ label[control='opacity-scale']{
 			<toolbarbutton id="add" label='add +' oncommand='addPlugin(event)'/>
 		</splitter>
 		<richlistbox id='user-shortcuts' flex='1'
-			seltype='multiple' context='context'  onselect='onSelect(this)'/>
+			seltype='multiple' context='context'  onselect='onSelect(this)' onmouseup='openEditLigthbox(event)'/>
 	</tabpanel>
 	<tabpanel orient='vertical'  flex='1' >
 	  <prefpane align='center' hidden='false'>
@@ -319,8 +327,11 @@ var escapeMap = { "&": "amp", '"': "quot", "<": "lt", ">": "gt" }
 //******************* 
 var gPlugin, gPluginsChanged, gPrefChanged, resultOK=true;
 openEditLigthbox = function(e){
-	var panel = $('edit-box')
-	
+	var item = e.target;
+	if (item.getAttribute('type')!='edit-link')
+		return;
+
+	var panel = $('edit-box')	
 	//document.getElementById("standard-shortcuts")._currentItem.id
 	
 	var item = $parent(e.target)
@@ -504,10 +515,10 @@ xmlFragment =
 		</hbox>
 		<label value="$name$"/>
 		<spacer flex='1' />
-		<label class='link' value='edit' onmouseup='openEditLigthbox(event)'/>
 		<hbox align="center" class='key'>
 			<textbox class='key' type='key' value='$key$' onblur='onTextboxEnter(this)' oninput='onTextboxInput(this)'/>
 		</hbox>
+		<label class='link' value='edit' type='edit-link'/>
 	  </richlistitem>.toXMLString().replace(/>\s*</,'><')
 
 

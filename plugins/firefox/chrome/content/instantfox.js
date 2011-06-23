@@ -40,11 +40,11 @@ var HH = {
 			// todo: add !important to our bindings rule
 		}
 
-		function hbox(name, div){
-			var hb=document.createElement('hbox')
-			hb.align='center'
-			hb.className="instantfox-"+name
-			if(div){
+		function hbox(name, addChildDiv){
+			var hb = document.createElement('hbox')
+			hb.align = 'center'
+			hb.className = "instantfox-"+name
+			if(addChildDiv){
 				hb.appendChild(document.createElementNS('http://www.w3.org/1999/xhtml','div'))
 				
 				gURLBar["instantFox" + name[0].toUpperCase() + name.substr(1) + "Node"] = hb.firstChild;
@@ -52,17 +52,26 @@ var HH = {
 			return hb
 		}
 		
-		var b2=hbox('tip',true)
-		b2.setAttribute('right',0)
-		b2.setAttribute('align','center')
-		s.insertBefore(b2, s.firstChild)
+ 		var b2 = hbox('box')
+		b2.setAttribute('right', 0)
+		b2.setAttribute('onclick','HH.openHelp()')		
+		b2.appendChild(hbox('tip', true))
+		s.appendChild(b2)
 
-		var b1=hbox('box')
+		var b1 = hbox('box')
 		b1.appendChild(hbox('key',true))
 		b1.appendChild(hbox('spacer',true))
 		b1.appendChild(hbox('shadow',true))
 		s.insertBefore(b1, s.firstChild)
-	
+
+		var l1 = gURLBar.editor.rootElement.getBoundingClientRect().left
+		var l2 = b1.getBoundingClientRect().left
+		var boxStyle = b1.style;
+		boxStyle.marginLeft = l1 - l2 + 'px'
+		// 1px is from getComputedStyle(gURLBar.mInputField.editor.rootElement).paddingLeft
+		// this is platform independant.
+		boxStyle.paddingLeft = '1px'
+		boxStyle.paddingRight = '1px'
 	},
 	updateUserStyle: function() {
 		var ss=document.styleSheets
@@ -181,7 +190,7 @@ var HH = {
 	onblur: function(e) {
 		// Return power to Site if urlbar really lost focus
         if (HH._isOwnQuery && !gURLBar.mIgnoreFocus && e.originalTarget == gURLBar.mInputField) {
-			gURLBar.value = content.document.location;
+			gURLBar.value = content.document.location.href;
 			gBrowser.userTypedValue = null;
 			HH.finishSearch();
         }
@@ -307,13 +316,13 @@ var HH = {
 
 		// see load_flags at http://mxr.mozilla.org/mozilla-central/source/docshell/base/nsIWebNavigation.idl#149
 		if(HH._isOwnQuery){
-			getWebNavigation().loadURI(url2go, nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE, null, null, null);
-			//content.location.replace(url2go);
+			//getWebNavigation().loadURI(url2go, nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE, null, null, null);
+			content.location.replace(url2go);
 		}else{
 			var webNav = getWebNavigation()
 			q.index = webNav.sessionHistory.index
-			webNav.loadURI(url2go, nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE, null, null, null);
-			//content.location.assign(url2go);
+			//webNav.loadURI(url2go, nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE, null, null, null);
+			content.location.assign(url2go);
 			HH._isOwnQuery = true;
 		}
 		return url2go
@@ -379,8 +388,7 @@ HH.openOptionsPopup = function(p) {
 	p.appendChild(i)
 	i.contentWindow.close = HH.closeOptionsPopup
 	i.contentWindow.addEventListener('load', HH.updatePopupSize, false)
-	var h = screen.availHeight*3/4
-	//i.width=2/5*h
+	var h = screen.availHeight * 4/5
 	i.height=h
 }
 HH.updatePopupSize = function(e) {
@@ -388,12 +396,8 @@ HH.updatePopupSize = function(e) {
 	doc.defaultView.removeEventListener('load', HH.updatePopupSize, false)
 	document.getElementById('instantFox-options').firstChild.width =
 							doc.getElementsByTagName('tabbox')[0].clientWidth + 50
-	var tb = doc.createElement('toolbarbutton')
-	doc.documentElement.appendChild(tb)
-	tb.id = 'pin'
-	tb.label = 'pin'
-	tb.type = 'checkbox'
-	tb.setAttribute('oncommand', 'window.top.HH.pinPopup()')
+	var tb = doc.getElementById('pin')
+	tb.hidden = false
 }
 HH.pinPopup = function() {
 	var b = document.getElementById('instantFox-options')
@@ -411,6 +415,10 @@ HH.closeOptionsPopup = function(p) {
 	p.hidePopup()
 }
 
+HH.openHelp = function() {
+	var url = 'i.am.a.helpful.url'
+	gBrowser.loadOneTab(url, {inBackground: false, relatedToCurrent: true});
+}
 //************************************************************************
 window.addEventListener('load', HH.initialize, true);
 

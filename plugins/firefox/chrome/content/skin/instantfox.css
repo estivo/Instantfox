@@ -46,6 +46,11 @@ html|span.InstantFoxSuggest.ac-emphasize-text{
 	border-radius: 4px;
 	padding: 0px 2px;
 	font-style: italic;
+	pointer-events:auto;
+	cursor:pointer;
+}
+.instantfox-box{
+	pointer-events: none
 }
 /** splitmenu ************************************/
 menuitem.split-menuitem-item[_moz-menuactive="true"], .split-menu-right-image[_moz-menuactive="true"] {/*for xp*/

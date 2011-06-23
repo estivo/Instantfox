@@ -18,11 +18,7 @@
 			  <xul:hbox anonid="instantFoxKey" class="instantfox-key"><html:div/></xul:hbox>
 			  <xul:hbox anonid="instantFoxSpacer" class="instantfox-spacer"><html:div/></xul:hbox>
 			  <xul:hbox anonid="instantFoxShadow" class="instantfox-shadow"><html:div/></xul:hbox>
-			</xul:hbox>			
-			<xul:hbox class='instantfox-tipbox' right='0' align='center'>
-				<xul:hbox class='instantfox-tip'><html:div/></xul:hbox>
 			</xul:hbox>
-
 			<xul:hbox anonid="textbox-input-box"
 					  class="textbox-input-box urlbar-input-box"
 					  flex="1" xbl:inherits="tooltiptext=inputtooltiptext">
@@ -31,6 +27,9 @@
 						  class="autocomplete-textbox urlbar-input textbox-input uri-element-right-align"
 						  allowevents="true"
 						  xbl:inherits="tooltiptext=inputtooltiptext,onfocus,onblur,value,type,maxlength,disabled,size,readonly,placeholder,tabindex,accesskey"/>
+			</xul:hbox>
+			<xul:hbox class='instantfox-box' right='0' align='center' onclick='HH.openHelp()'>
+				<xul:hbox class='instantfox-tip'><html:div/></xul:hbox>
 			</xul:hbox>
 		</xul:stack>
         <children includes="hbox"/>

@@ -311,7 +311,7 @@ function getFavicon(url){
 	faviconService = faviconService || Cc["@mozilla.org/browser/favicon-service;1"].getService(Ci.nsIFaviconService);
 	tldService = tldService || Cc["@mozilla.org/network/effective-tld-service;1"].getService(Ci.nsIEffectiveTLDService);
 	try{
-		var host = url.match(/:\/\/([^\/#?]*)/)[1];
+		var host = url.match(/^[a-z]*:\/\/([^\/#?]*)/)[1];
 		var icon = faviconService.getFaviconImageForPage(makeURI('http://'+host)).spec
 		if(icon != faviconService.defaultFavicon.spec)
 			return icon
