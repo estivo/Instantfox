@@ -133,6 +133,11 @@ var HH = {
 					HH.schedulePreload()
 					InstantFoxModule.currentQuery.shadow = '';
 				}
+			} else if (key == 27) { // 27 == ESCAPE
+				gBrowser.webNavigation.gotoIndex(0)
+				HH.finishSearch(InstantFoxModule.currentQuery.index)
+				event.preventDefault();
+				gURLBar.blur()
 			}
 		}
 
