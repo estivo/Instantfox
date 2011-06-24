@@ -58,68 +58,6 @@ richlistbox[seltype="multiple"]:focus > richlistitem[current="true"]{
 splitter {
 	-moz-appearance:none;
 }
-/*textbox[type=name]{
-	position:absolute;	
-	margin-top:-12px;
-	border-top:2px solid #9ED1E9!important;
-	border-left:2px solid #9ED1E9!important;
-	border-radius:15px;
-	width:20ch
-}
-.plugin{
-	position:relative;
-}
-input:focus{	
-	color:#666;
-	background: #EFFAFF;
-	-moz-box-shadow:0px 0px 2px #777;
-}
-#container{
-	background: #d8f2ff;
-	margin:20px;
-	box-shadow: 0pt 0pt 1px #37A0D3;
-}
-window,#head{
-	color: #FFFFFF;
-	background-color: #9ED1E9;
-}
-.externalContainer{
-	background: #d8f2ff;
-	overflow-y:auto;
-	position:relative;
-	width:500px;
-	height:400px;
-}
-.image{
-	width:44px;
-    -moz-box-align: center;
-    -moz-box-pack: center;	
-}
-img{
-	display:-moz-box;
-}
-.bigger{
-	font-size: 14px;
-}
-.bold{
-	font-weight: bold;
-}
-.center{
-	text-align: center;
-} 
-.key,.urls,.image{
-	border: 1px solid #E8F0FC;
-	font-family: "Lucida Sans Unicode","Lucida Grande",Sans-Serif;
-	font-size: 12px;
-	text-align: left;
-	padding: 3px;
-	background-color: #EEF9FF;
-}
-.plugin:hover{
-	background-image:-moz-radial-gradient(50%  bottom, rgba(250,250,100,0.3)0%,  rgba(250,250,250,0.0) 100%);
-	-moz-box-shadow:0px 0px 2px 2px rgba(250,250,100,0.8);
-}
-
 /* close button */
 .close-button {
   -moz-appearance: none;
@@ -128,7 +66,6 @@ img{
   padding: 0px;
   list-style-image: url("chrome://global/skin/icons/close.png");
 }
-
 
 .tab-close-button:hover {
   -moz-image-region: rect(0, 32px, 16px, 16px);
@@ -147,11 +84,12 @@ label[control='opacity-scale']{
 	top:0;
 	right:0;
 }
+
 </html:style>
 
 
   <!-- for development -->
-  <!-- <shadiaglue id='status-bar'/> -->
+  <!-- --> <shadiaglue id='status-bar'/> 
   
 <tabbox flex='1'>
   <hbox id='pin' hidden='true'>
@@ -226,29 +164,30 @@ label[control='opacity-scale']{
 	<button label='ok' oncommand='resultOK=true;close()'/>
   </hbox>
 
-<menupopup id="context">
-	<menuitem label='instant' type='checkbox'/>
-	<menuitem label='enabled' type='checkbox'/>
+<menupopup id="context" onpopupshowing='initContextMenu(this)' oncommand='onContextMenuCommand(event)'>
+	<menuitem label='instant' type='checkbox' aID='disableInstant'/>
+	<menuitem label='enabled' type='checkbox' aID='disabled'/>
+	<menuitem label='show on context' type='checkbox' aID='hideFromContextMenu'/>
 </menupopup>
 <panel id="edit-box" ignorekeys='true' type="arrow" orient='vertical' onpopuphiding='editPopupSave(this)'>
 	<hbox>
 		<label value='name:'/>
-		<textbox type='name' flex='1'/>
+		<textbox aID='name' flex='1'/>
 		<hbox align="center" class='image'>
-			<image type='image'/>
+			<image aID='image'/>
 		</hbox>
 	</hbox>
 	<hbox>
 		<label value='url:'/>
-		<textbox type='url' flex='1'/>
+		<textbox type='url' aID='url' flex='1'/>
 	</hbox>
 	<hbox>
-		<checkbox label='instant' type='instant'/>
-		<checkbox label='contextMenu' type='context'/>
-		<checkbox label='disabled' type='disabled'/>
+		<checkbox label='instant' aID='instant'/>
+		<checkbox label='contextMenu' aID='context'/>
+		<checkbox label='disabled' aID='disabled'/>
 	</hbox>
 	<hbox>
-		<toolbarbutton label='remove' type='remove' hidden='true' oncommand="$('edit-box').hidePopup();removePlugin(gPlugin)"/>
+		<toolbarbutton label='remove' aID='remove' hidden='true' oncommand="$('edit-box').hidePopup();removePlugin(gPlugin)"/>
 		<toolbarbutton label='more' hidden='true'/>
 		<spacer flex='1'/>
 		<toolbarbutton label='ok' onclick="$('edit-box').hidePopup()"/>
@@ -282,7 +221,7 @@ ibp.pluginLoader.getAvaliableLocales(function(locales){
 
 //************* dom utils
 function $(id)document.getElementById(id)
-function $t(el, type)el.getElementsByAttribute('type', type)[0]
+function $t(el, aID)el.getElementsByAttribute('aID', aID)[0]
 function $parent(el){
 	while(el){
 		if(el.id)
@@ -324,11 +263,40 @@ function formatString(string, options){
 function escapeHTML(str) str.replace(/[&"<>]/g, function(m)"&"+escapeMap[m]+";");
 var escapeMap = { "&": "amp", '"': "quot", "<": "lt", ">": "gt" }
 
-//******************* 
+//************************
+initContextMenu = function(popup){
+	var item = document.popupNode	
+	item = $parent(item)
+	var selectedItems = item.parentNode.selectedItems
+
+	$t(popup, 'disableInstant').setAttribute('checked', !selectedItems.some(function(x){
+		return InstantFoxModule.Plugins[x.id].disableInstant
+	}))
+	$t(popup, 'disabled').setAttribute('checked', !selectedItems.some(function(x){
+		return InstantFoxModule.Plugins[x.id].disabled
+	}))
+	$t(popup, 'hideFromContextMenu').setAttribute('checked', !selectedItems.some(function(x){
+		return InstantFoxModule.Plugins[x.id].hideFromContextMenu
+	}))
+}
+onContextMenuCommand = function(e){
+	var item = document.popupNode	
+	item = $parent(item)
+	var selectedItems = item.parentNode.selectedItems
+	
+	item = e.target
+	var name = item.getAttribute('aID')
+	var value = item.getAttribute('checked')!='true'
+	selectedItems.forEach(function(x){
+		x.setAttribute(name, value)
+		InstantFoxModule.Plugins[x.id][name] = value
+	})
+}
+//************************ 
 var gPlugin, gPluginsChanged, gPrefChanged, resultOK=true;
 openEditLigthbox = function(e){
 	var item = e.target;
-	if (item.getAttribute('type')!='edit-link')
+	if (item.getAttribute('aID')!='edit-link')
 		return;
 
 	var panel = $('edit-box')	
@@ -517,10 +485,10 @@ xmlFragment =
 		<label value="$name$"/>
 		<spacer flex='1' />
 		<hbox align="center" class='key'>
-			<textbox class='key' type='key' value='$key$' tooltiptext='edit plugin key'
+			<textbox class='key' aID='key' value='$key$' tooltiptext='edit plugin key'
 				onblur='onTextboxEnter(this)' oninput='onTextboxInput(this)'/>
 		</hbox>
-		<label class='link' value='edit' type='edit-link'/>
+		<label class='link' value='edit' aID='edit-link'/>
 	  </richlistitem>.toXMLString().replace(/>\s*</,'><')
 
 
