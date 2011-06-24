@@ -436,7 +436,7 @@ HH.closeOptionsPopup = function(p) {
 }
 
 HH.openHelp = function() {
-	var url = 'i.am.a.helpful.url'
+	var url = InstantFoxModule.helpURL
 	gBrowser.loadOneTab(url, {inBackground: false, relatedToCurrent: true});
 }
 //************************************************************************

@@ -112,7 +112,7 @@ label[control='opacity-scale']{
 				<label value="standard shortcuts"></label>
 			</vbox>
 			<spacer flex='1'/>
-			<image src='skin/logo.png'/>
+			<image src='skin/logo.png' onclick='open(InstantFoxModule.helpURL)' class='link' tooltiptext='open help'/>
 		</hbox>
 		<richlistbox id='standard-shortcuts' flex='1'
 			seltype='multiple' context='context' onselect='onSelect(this)' onmouseup='openEditLigthbox(event)'/>
@@ -299,7 +299,8 @@ openEditLigthbox = function(e){
 	if (item.getAttribute('aID')!='edit-link')
 		return;
 
-	var panel = $('edit-box')	
+	var panel = $('edit-box')
+	panel.hidePopup()
 	//document.getElementById("standard-shortcuts")._currentItem.id
 	
 	var item = $parent(e.target)

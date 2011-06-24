@@ -363,6 +363,8 @@ function pluginFromNsiSearch(bp){
  ***********/
 InstantFoxModule = {
     _version: '1.0.3',
+	helpURL: 'i.am.a.helpful.url',
+
 	initialize: function(){
 		this.pluginLoader.loadPlugins()
 		this.initialize=function(){}
