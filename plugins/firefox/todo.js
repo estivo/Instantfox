@@ -45,14 +45,23 @@ makeReqAsync(url, processRequest)
 
 
 
-/*var b = document.createElementNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul", "browser");
-b.setAttribute("type", "content-targetable");
-gBrowser.mPanelContainer.appendChild(b);
-b.id='sidebar'
-b.flex=1
-s=document.getElementById("sidebar")
-s.parentNode.replaceChild(b,s)
-*/
+function addPrerenderBrowser() {
+	var s=document.getElementById("sidebar")
+	var b = document.createElementNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul", "browser");
+	b.setAttribute("type", "content");
+	s.parentNode.appendChild(b)
+	b.id='prerender-browser'
+	b.flex=1
+
+	b.docShell.useGlobalHistory=false
+	b.docShell.isOffScreenBrowser=true
+	b.docShell.isActive=false
+	return b
+}
+
+//b=addPrerenderBrowser()
+
+b.webNavigation.loadURI('about:config',null,null,null,null)
 	
 
 //b._webNavigation
