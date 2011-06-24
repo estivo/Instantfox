@@ -71,6 +71,10 @@ var __instantFoxDevel__ = {
 		//this.reloadComponent()
 		try{HH.destroy()}catch(e){}
 		
+		var p = document.getElementById('instantFox-options').firstChild
+		while(p.hasChildNodes())
+			p.removeChild(p.firstChild)
+		
 		var i = this.loadedScriptsCount = 0		
 		this.loadScript(this.sourceList[i], i)
 	},

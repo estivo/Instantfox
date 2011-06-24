@@ -383,7 +383,7 @@ var HH = {
 
 //************************************************************************
 // experimental options popup
-HH.openOptionsPopup = function(p) {
+HH.onPopupShowing = function(p) {
 	if (p.hasChildNodes())
 		return;
 	//while(p.hasChildNodes())
@@ -395,6 +395,10 @@ HH.openOptionsPopup = function(p) {
 	i.contentWindow.addEventListener('load', HH.updatePopupSize, false)
 	var h = screen.availHeight * 4/5
 	i.height=h
+}
+HH.onPopupHiding = function(p) {
+	var i = document.getElementById('instantFox-options').firstChild.firstChild
+	i.contentWindow.savePlugins()
 }
 HH.updatePopupSize = function(e) {
 	var doc = e.target

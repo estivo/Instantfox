@@ -217,7 +217,7 @@ var pluginLoader = {
 			plugins: ob
 		}
 
-		var js = JSON.stringify(pluginData)//.replace(',','\n,','g')
+		var js = JSON.stringify(pluginData, null, 1)
 
 		writeToFile(getUserFile('instantFoxPlugins.js'), js)
 	},

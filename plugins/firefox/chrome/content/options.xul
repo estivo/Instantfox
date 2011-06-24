@@ -6,7 +6,7 @@
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	title="instantfox options"
-	resizable='yes' onunload='onclose()'>
+	resizable='yes' onunload='savePlugins()'>
 
 <html:style>
 .link {
@@ -167,7 +167,7 @@ label[control='opacity-scale']{
 		<hbox>
 			<vbox>
 				<label value="choose language"></label>
-				<menulist id="locale" oncommand = 'InstantFoxModule.pluginLoader.loadPlugins(event.target.label, rebuild)'>
+				<menulist id="locale" oncommand = 'gPluginsChanged=true;InstantFoxModule.pluginLoader.loadPlugins(event.target.label, rebuild)'>
 					<menupopup/>
 				</menulist>
 				<spacer flex='1'/>
@@ -188,7 +188,7 @@ label[control='opacity-scale']{
 			seltype='multiple' context='context'  onselect='onSelect(this)' onmouseup='openEditLigthbox(event)'/>
 	</tabpanel>
 	<tabpanel orient='vertical'  flex='1' >
-	  <prefpane align='center' hidden='false'>
+	  <prefpane align='center' hidden='true'>
 	    <label value='fontsize' control='fontsize-text'/>
 	    <textbox preference="fontsize"  id='fontsize-text'/>
 	    <label value='opacity' control='opacity-scale'/>
@@ -492,10 +492,10 @@ savePlugin = function(id){
 }
 
 //************* 
-function onclose(){
+function savePlugins(){
 	if(gPrefChanged)
 		document.getElementsByTagName('prefpane')[0].writePreferences(false)
-	
+
 	var em = Services.wm.getEnumerator('navigator:browser')
 	while(em.hasMoreElements())
 		em.getNext().HH.updateUserStyle()
@@ -506,6 +506,7 @@ function onclose(){
 		InstantFoxModule.pluginLoader.savePlugins()
 	else
 		InstantFoxModule.pluginLoader.loadPlugins()
+	gPluginsChanged = false
 }
 //************* 
 xmlFragment = 
@@ -516,7 +517,8 @@ xmlFragment =
 		<label value="$name$"/>
 		<spacer flex='1' />
 		<hbox align="center" class='key'>
-			<textbox class='key' type='key' value='$key$' onblur='onTextboxEnter(this)' oninput='onTextboxInput(this)'/>
+			<textbox class='key' type='key' value='$key$' tooltiptext='edit plugin key'
+				onblur='onTextboxEnter(this)' oninput='onTextboxInput(this)'/>
 		</hbox>
 		<label class='link' value='edit' type='edit-link'/>
 	  </richlistitem>.toXMLString().replace(/>\s*</,'><')
