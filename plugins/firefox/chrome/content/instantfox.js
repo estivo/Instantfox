@@ -349,11 +349,13 @@ var HH = {
 		var q = InstantFoxModule.currentQuery, br
 		if (q.tabId == HH._ctabID)
 			br = gBrowser
-		else
-			br = document.getElementById(InstantFoxModule.currentQuery.tabId).getElementsByTagName("browser")[0]
+		else {
+			br = document.getElementById(InstantFoxModule.currentQuery.tabId)
+			br = br || br.getElementsByTagName("xul:browser")[0]
+		}
+			
 		if (br)
 			br.docShell.useGlobalHistory = true
-		dump(br.docShell.useGlobalHistory)
 
 		// todo: investigate why this crashes browser sometimes
 		//if (InstantFoxModule.currentQuery.index != null)

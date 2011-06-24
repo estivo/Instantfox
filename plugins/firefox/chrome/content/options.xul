@@ -301,7 +301,6 @@ openEditLigthbox = function(e){
 
 	var panel = $('edit-box')
 	panel.hidePopup()
-	//document.getElementById("standard-shortcuts")._currentItem.id
 	
 	var item = $parent(e.target)
 	gPlugin = InstantFoxModule.Plugins[item.id]
