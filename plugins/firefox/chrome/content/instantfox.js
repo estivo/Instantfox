@@ -326,6 +326,7 @@ var HH = {
 		}else{
 			var webNav = getWebNavigation()
 			q.index = webNav.sessionHistory.index
+			gBrowser.docShell.useGlobalHistory = false
 			//webNav.loadURI(url2go, nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE, null, null, null);
 			content.location.assign(url2go);
 			HH._isOwnQuery = true;
@@ -344,6 +345,16 @@ var HH = {
 	finishSearch: function() {
 		this._isOwnQuery = false
 		this.updateShadowLink(null) 
+
+		var q = InstantFoxModule.currentQuery, br
+		if (q.tabId == HH._ctabID)
+			br = gBrowser
+		else
+			br = document.getElementById(InstantFoxModule.currentQuery.tabId).getElementsByTagName("browser")[0]
+		if (br)
+			br.docShell.useGlobalHistory = true
+		dump(br.docShell.useGlobalHistory)
+
 		// todo: investigate why this crashes browser sometimes
 		//if (InstantFoxModule.currentQuery.index != null)
 		//	this.collapseHistory(InstantFoxModule.currentQuery.index)
