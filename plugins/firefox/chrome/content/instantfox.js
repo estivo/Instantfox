@@ -78,6 +78,7 @@ var HH = {
 		for(var i=ss.length; i--; ){
 			var s=ss[i]
 			if(s.href=="chrome://instantfox/content/skin/instantfox.css"){
+				// caution: this depends on the order of css rules in instantfox.css
 				if(InFoxPrefs.prefHasUserValue('extensions.InstantFox.fontsize')){
 					var pref = InFoxPrefs.getCharPref('extensions.InstantFox.fontsize')
 					if (!/^\d+.?\d*((px)|(em))$/.test(pref)){
@@ -253,6 +254,20 @@ var HH = {
 		HH.updateShadowLink(q)
 		if(!q.plugin.disableInstant)
 			q.shadow ? HH.doPreload(q):HH.schedulePreload(100)
+
+		// show logo if it fits into popup
+		HH.updateLogo(true, q)
+	},
+	updateLogo: function(show, q) {
+		show = show && q.results.length >= 4
+		if (this.logoAdded == show)
+			return;
+		this.logoAdded = show;
+		
+		if(show)
+			gURLBar.popup.richlistbox.setAttribute('type', 'InstantFoxSuggest')
+		else
+			gURLBar.popup.richlistbox.removeAttribute('type')
 	},
 	findBestShadow: function(q){
 		q.shadow = ''
@@ -363,6 +378,8 @@ var HH = {
 		InstantFoxModule.currentQuery = null;
 		if(this.timeout)
 			this._timeout = clearTimeout(this._timeout)
+		//
+		HH.updateLogo(false)
 	},
 	collapseHistory: function(index) {
 		var sh = getWebNavigation().sessionHistory.QueryInterface(Ci.nsISHistoryInternal)
@@ -440,6 +457,27 @@ HH.closeOptionsPopup = function(p) {
 HH.openHelp = function() {
 	var url = InstantFoxModule.helpURL
 	gBrowser.loadOneTab(url, {inBackground: false, relatedToCurrent: true});
+}
+
+// todo: call this after window load on first install releted to FS#32
+HH.addOptionsButton = function() {
+	var myId    = "instantFox-options";
+	var afterId = "urlbar-container";
+	var navBar  = document.getElementById("nav-bar");
+	var curSet  = navBar.currentSet.split(",");
+
+	if (curSet.indexOf(myId) == -1) {
+		var pos = curSet.indexOf(afterId) + 1 || curSet.length;
+		var set = curSet.slice(0, pos).concat(myId).concat(curSet.slice(pos));
+
+		navBar.setAttribute("currentset", set.join(","));
+		navBar.currentSet = set.join(",");
+		document.persist(navBar.id, "currentset");
+		try {
+			BrowserToolboxCustomizeDone(true);
+		}
+		catch (e) {}
+	}
 }
 //************************************************************************
 window.addEventListener('load', HH.initialize, true);

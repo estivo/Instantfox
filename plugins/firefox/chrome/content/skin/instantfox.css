@@ -5,7 +5,7 @@
 	opacity: 0.9;
 }
 
-richlistitem[type ~= 'InstantFoxSuggest'] {
+richlistitem[type='InstantFoxSuggest'] {
 	-moz-binding: url(chrome://instantfox/content/urlbar.xml#autocomplete-richlistitem) !important;
 	-moz-appearance: none;
 	border: none !important;
@@ -17,6 +17,15 @@ html|span.InstantFoxSuggest.ac-emphasize-text{
 	text-decoration:none !important;
 	font-weight:normal !important;
 	/color:#000 !important;
+}
+richlistbox[type='InstantFoxSuggest'] {
+	background-image:url(chrome://instantfox/content/skin/logo.png)!important;
+	background-repeat:no-repeat;
+	background-position: 95% bottom;
+}
+#instantFox-options{
+	list-style-image: url(chrome://instantfox/content/skin/button-logo.png)!important;
+	-moz-box-orient: horizontal!important;
 }
 /** urlbar ***************************************/
 #urlbar {

@@ -83,22 +83,24 @@ label[control='opacity-scale']{
 	position:fixed;
 	top:0;
 	right:0;
+	list-style-image: url(chrome://instantfox/content/skin/pin-icon.png)!important;
 }
 
 </html:style>
 
 
   <!-- for development -->
-  <!-- --> <shadiaglue id='status-bar'/> 
+  <!-- <shadiaglue id='status-bar'/>  -->
   
 <tabbox flex='1'>
   <hbox id='pin' hidden='true'>
-	<toolbarbutton type='checkbox' label='pin' oncommand='window.top.HH.pinPopup()'/>
+	<toolbarbutton type='checkbox' tooltiptext='pin' oncommand='window.top.HH.pinPopup()'/>
   </hbox>
   <tabs onselect="if(this.selectedIndex==1){this.removeAttribute('onselect');
 		this.parentNode.selectedPanel.firstChild.hidden=false;gPrefChanged=true;}">
 	<tab label='engines'/>
 	<tab label='appearance'/>
+	<tab label='about'/>
   </tabs>
   <tabpanels  flex='1'>
 	<tabpanel orient='vertical'  flex='1'>
@@ -151,6 +153,9 @@ label[control='opacity-scale']{
           <preference id="opacity" name="extensions.InstantFox.opacity" type="int" />
         </preferences>
 	  </prefpane>
+	</tabpanel>
+	<tabpanel orient='vertical'  flex='1'>
+		about panel
 	</tabpanel>
   </tabpanels>
 </tabbox>
@@ -526,7 +531,11 @@ if (target.getAttribute("class").indexOf("addengine-item") != -1) {
 }
 */
 
-
+/* window.addEventListener('load', function(){
+	window.removeEventListener('load', arguments.callee, false)
+	window.innerWidth = document.getElementsByTagName('tabbox')[0].clientWidth + 50
+}, false) 
+sizeToContent()*/
 ]]></script>
 
 
