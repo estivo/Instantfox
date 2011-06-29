@@ -43,7 +43,15 @@ textbox{
 	border:none;
 	background: #EEF9FF;
 	color:#777;
-	width:5ch
+	width:5ch;
+	border:1px solid gray;
+}
+textbox.key{
+	padding:1px;
+}
+.key.hidden{
+	opacity: 0;
+	pointer-events:none;
 }
 textbox[conflict=true]{
 	color:darkred!important;
@@ -194,25 +202,30 @@ label[control='opacity-scale']{
 	<menuitem label='show on context' type='checkbox' aID='hideFromContextMenu'/>
 </menupopup>
 <panel id="edit-box" ignorekeys='true' type="arrow" orient='vertical' onpopuphiding='editPopupSave(this)'>
-	<hbox>
+	<hbox align='center'>
 		<label value='name:'/>
 		<textbox aID='name' flex='1'/>
 		<hbox align="center" class='image'>
 			<image aID='image'/>
 		</hbox>
 	</hbox>
-	<hbox>
+	<hbox align='center'>
 		<label value='url:'/>
 		<textbox type='url' aID='url' flex='1'/>
+	</hbox>
+	<hbox align='center'>
+		<label value='key:'/>
+		<textbox aID='key'/>
 	</hbox>
 	<hbox>
 		<checkbox label='instant' aID='instant'/>
 		<checkbox label='contextMenu' aID='context'/>
 		<checkbox label='disabled' aID='disabled'/>
 	</hbox>
-	<hbox>
+	<hbox align='end'>
 		<toolbarbutton label='remove' aID='remove' hidden='true' oncommand="$('edit-box').hidePopup();removePlugin(gPlugin)"/>
 		<toolbarbutton label='more' hidden='true'/>
+		<label class='link' value='?' onclick='open(InstantFoxModule.helpURL)'/>
 		<spacer flex='1'/>
 		<toolbarbutton label='ok' onclick="$('edit-box').hidePopup()"/>
 	</hbox>
@@ -343,6 +356,7 @@ openEditLigthbox = function(e){
 	$t(panel, 'context').checked = !gPlugin.hideFromContextMenu
 	$t(panel, 'instant').checked = !gPlugin.disableInstant
 	$t(panel, 'name').value = gPlugin.name
+	$t(panel, 'key').value = gPlugin.key
 	var urlBox = $t(panel, 'url')
 	urlBox.value = gPlugin.url
 	urlBox.readOnly = gPlugin.type=='default'
@@ -368,6 +382,7 @@ editPopupSave = function(panel){
 
 	gPlugin.name = $t(panel, 'name').value
 	gPlugin.url = $t(panel, 'url').value
+	gPlugin.key = $t(panel, 'key').value
 	//gPlugin.iconURI = $t(panel, 'image').src
 	
 	saveGPlugin(createNew)
@@ -532,7 +547,7 @@ xmlFragmentDis =
 		</hbox>
 		<label value="$name$"/>
 		<spacer flex='1' />
-		<textbox class='key' aID='key' width='0'/>
+		<textbox class='key hidden' aID='key'/>
 		<label class='link' value='enable' aID='enable-link'/>
 	  </richlistitem>.toXMLString().replace(/>\s*</,'><')
 
