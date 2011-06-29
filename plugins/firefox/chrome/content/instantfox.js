@@ -1,9 +1,4 @@
-var InFoxPrefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService);
-
-InFoxPrefs.QueryInterface(Ci.nsIPrefBranch2);
-
 //var currentTab = getWebNavigation().sessionHistory;.getEntryAtIndex(currentTab.count-1, false).URI.spec
-
 var HH = {
 	initialize: function(event) {
 		window.removeEventListener('load', arguments.callee, true);
@@ -79,8 +74,9 @@ var HH = {
 			var s=ss[i]
 			if(s.href=="chrome://instantfox/content/skin/instantfox.css"){
 				// caution: this depends on the order of css rules in instantfox.css
-				if(InFoxPrefs.prefHasUserValue('extensions.InstantFox.fontsize')){
-					var pref = InFoxPrefs.getCharPref('extensions.InstantFox.fontsize')
+				var prefs = Services.prefs
+				if(prefs.prefHasUserValue('extensions.InstantFox.fontsize')){
+					var pref = prefs.getCharPref('extensions.InstantFox.fontsize')
 					if (!/^\d+.?\d*((px)|(em))$/.test(pref)){
 						pref = parseFloat(pref)
 
@@ -93,8 +89,8 @@ var HH = {
 					}
 					s.cssRules[3].style.fontSize = pref;
 				}
-				if(InFoxPrefs.prefHasUserValue('extensions.InstantFox.opacity')){
-					var pref = parseInt(InFoxPrefs.getIntPref('extensions.InstantFox.opacity')) / 100
+				if(prefs.prefHasUserValue('extensions.InstantFox.opacity')){
+					var pref = parseInt(prefs.getIntPref('extensions.InstantFox.opacity')) / 100
 					if(isNaN(pref) || pref < 0.1)
 						pref = 1
 					s.cssRules[2].style.opacity = pref;
