@@ -155,10 +155,7 @@ var pluginLoader = {
 				InstantFoxModule.Shortcuts[p.key] = p.id
 			}
 		}
-		for each(var  p in InstantFoxModule.Plugins){
-			if(p.disabled && InstantFoxModule.Shortcuts[p.key])
-					conflicts[p.id] = 'maybe'
-		}
+
 		InstantFoxModule.ShortcutConflicts = conflicts
 	},
 	
