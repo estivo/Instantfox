@@ -1,9 +1,4 @@
-var InFoxPrefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService);
-
-InFoxPrefs.QueryInterface(Ci.nsIPrefBranch2);
-
 //var currentTab = getWebNavigation().sessionHistory;.getEntryAtIndex(currentTab.count-1, false).URI.spec
-
 var HH = {
 	initialize: function(event) {
 		window.removeEventListener('load', arguments.callee, true);
@@ -79,8 +74,9 @@ var HH = {
 			var s=ss[i]
 			if(s.href=="chrome://instantfox/content/skin/instantfox.css"){
 				// caution: this depends on the order of css rules in instantfox.css
-				if(InFoxPrefs.prefHasUserValue('extensions.InstantFox.fontsize')){
-					var pref = InFoxPrefs.getCharPref('extensions.InstantFox.fontsize')
+				var prefs = Services.prefs
+				if(prefs.prefHasUserValue('extensions.InstantFox.fontsize')){
+					var pref = prefs.getCharPref('extensions.InstantFox.fontsize')
 					if (!/^\d+.?\d*((px)|(em))$/.test(pref)){
 						pref = parseFloat(pref)
 
@@ -93,8 +89,8 @@ var HH = {
 					}
 					s.cssRules[3].style.fontSize = pref;
 				}
-				if(InFoxPrefs.prefHasUserValue('extensions.InstantFox.opacity')){
-					var pref = parseInt(InFoxPrefs.getIntPref('extensions.InstantFox.opacity')) / 100
+				if(prefs.prefHasUserValue('extensions.InstantFox.opacity')){
+					var pref = parseInt(prefs.getIntPref('extensions.InstantFox.opacity')) / 100
 					if(isNaN(pref) || pref < 0.1)
 						pref = 1
 					s.cssRules[2].style.opacity = pref;
@@ -313,12 +309,15 @@ var HH = {
 	},
 	
 	// ****** instant preview ****************************************
-	doPreload: function(q, qVal){
+	minLoadTime: 50,
+	maxLoadTime: 200,
+	doPreload: function(q, qVal) {
 		if(this.timeout)
 			this._timeout = clearTimeout(this._timeout)
 
 		if(!q.query && !qVal)
 			return ''
+		
 
 		var url2go = q.plugin.url;
 		if(qVal){
@@ -333,10 +332,15 @@ var HH = {
 			return url2go
 
 		q.preloadURL = url2go
-
-		// see load_flags at http://mxr.mozilla.org/mozilla-central/source/docshell/base/nsIWebNavigation.idl#149
-		if(HH._isOwnQuery){
-			//getWebNavigation().loadURI(url2go, nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE, null, null, null);
+		
+		var now = Date.now()
+dump(now - this.loadTime, gBrowser.docShell.isLoadingDocument, url2go)
+		if(this._isOwnQuery){
+			// gBrowser.docShell.isLoadingDocument
+			if(now - this.loadTime < this.minLoadTime){
+				this.schedulePreload(this.minLoadTime)
+				return
+			}
 			content.location.replace(url2go);
 		}else{
 			var webNav = getWebNavigation()
@@ -344,11 +348,14 @@ var HH = {
 			gBrowser.docShell.useGlobalHistory = false
 			//webNav.loadURI(url2go, nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE, null, null, null);
 			content.location.assign(url2go);
-			HH._isOwnQuery = true;
+			this._isOwnQuery = true;
 		}
+		this.loadTime = q.loadTime = now
 		return url2go
+		// see load_flags at http://mxr.mozilla.org/mozilla-central/source/docshell/base/nsIWebNavigation.idl#149
+		//getWebNavigation().loadURI(url2go, nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE, null, null, null);
 	},
-	schedulePreload: function(delay){
+	schedulePreload: function(delay) {
 		if (this._timeout)
 			return
 
@@ -356,6 +363,9 @@ var HH = {
 			self._timeout = null
 			self.doPreload(InstantFoxModule.currentQuery)
 		}, delay||200, this)
+	},
+	onPageLoad: function(spec){
+		dump(spec)
 	},
 	finishSearch: function() {
 		this._isOwnQuery = false
@@ -487,6 +497,7 @@ function URLBarSetURI(aURI) {
 	// auri is null if URLBarSetURI is called from urlbar.handleRevert
 	if (HH._isOwnQuery) {
 		if (InstantFoxModule.currentQuery.tabId == HH._ctabID){
+			HH.onPageLoad(aURI.spec)
 			return;
 		} else { //hide shadow if user switched tabs
 			HH.finishSearch();
