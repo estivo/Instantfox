@@ -532,9 +532,10 @@ xmlFragmentDis =
 		</hbox>
 		<label value="$name$"/>
 		<spacer flex='1' />
-		<textbox class='key' width='0'/>
+		<textbox class='key' aID='key' width='0'/>
 		<label class='link' value='enable' aID='enable-link'/>
 	  </richlistitem>.toXMLString().replace(/>\s*</,'><')
+
 function plugin2XML(p){
 	return formatString(p.disabled?xmlFragmentDis:xmlFragment, p)
 }

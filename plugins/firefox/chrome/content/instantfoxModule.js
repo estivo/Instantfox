@@ -136,7 +136,6 @@ var pluginLoader = {
 		// remove default plugins from other locale
 		for (var pn in InstantFoxModule.Plugins){
 			var p = InstantFoxModule.Plugins[pn]
-			dump(pn,p.type ,pluginData.plugins[pn])
 			if (p.type == 'default' && !pluginData.plugins[pn])
 				delete InstantFoxModule.Plugins[pn]
 		}
@@ -234,7 +233,6 @@ var pluginLoader = {
 				var upre=/\/[^\/]*$/
 				spec = getFileUri('chrome://instantfox/locale/plugins.js').replace(upre,'').replace(upre,'')
 				spec += '/'+ locale + '/plugins.js';
-				dump(spec)
 			}
 			var onload = this.onRawPluginsLoaded.bind(this)
 		}
@@ -652,7 +650,6 @@ InstantFoxSearch.prototype = {
 
 		if (api.suggestPlugins) {
 			var plugins = getMatchingPlugins(api.key, api.tail)
-			dump(plugins)
 			var newResult = new SimpleAutoCompleteResult(plugins, searchString);
 			listener.onSearchResult(self, newResult);
 			//InstantFoxModule.currentQuery.onSearchReady()
@@ -667,7 +664,6 @@ InstantFoxSearch.prototype = {
 		}
 
 		this.listener = listener;
-		dump(api['json'])
 		this.startReq()
 	},
 
@@ -679,7 +675,7 @@ InstantFoxSearch.prototype = {
 		this.listener = null;
 	},
 
-	onSearchReady: function(e){dump(e)
+	onSearchReady: function(e){
 		var json = e.target.responseText;
 		var q = InstantFoxModule.currentQuery
 		var key = q.plugin.key
