@@ -5,9 +5,20 @@
 
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:html="http://www.w3.org/1999/xhtml"
+	xmlns:svg='http://www.w3.org/2000/svg'
 	title="instantfox options"
 	resizable='yes' onunload='savePlugins()'>
 
+
+<svg:svg height="0">
+    <svg:filter id="gray">
+      <svg:feColorMatrix values="0.3333 0.3333 0.3333 0 0 
+                                 0.3333 0.3333 0.3333 0 0 
+                                 0.3333 0.3333 0.3333 0 0 
+                                 0      0      0      1 0"/>
+    </svg:filter>
+</svg:svg>	
+	
 <html:style>
 .link {
 	color:blue;
@@ -42,8 +53,12 @@ textbox[conflict=maybe]{
 	color:darkred!important;
 	text-shadow: 0pt -1px 3px gold;//#ffd700;
 }
-richlistitem[disabled="true"]>label{
+richlistitem[disabled="true"]>label:not(.link){
 	color: graytext;
+	text-decoration: line-through;
+}
+richlistitem[disabled="true"]>hbox>image{
+	filter: url("#gray");
 }
 richlistitem[selected="true"]>hbox>textbox{
 	background: white;
@@ -60,19 +75,19 @@ splitter {
 }
 /* close button */
 .close-button {
-  -moz-appearance: none;
-  -moz-image-region: rect(0, 64px, 16px, 48px);
-  border: none;
-  padding: 0px;
-  list-style-image: url("chrome://global/skin/icons/close.png");
+	-moz-appearance: none;
+	-moz-image-region: rect(0, 64px, 16px, 48px);
+	border: none;
+	padding: 0px;
+	list-style-image: url("chrome://global/skin/icons/close.png");
 }
 
 .tab-close-button:hover {
-  -moz-image-region: rect(0, 32px, 16px, 16px);
+	-moz-image-region: rect(0, 32px, 16px, 16px);
 }
 
 .tab-close-button:hover:active {
-  -moz-image-region: rect(0, 48px, 16px, 32px);
+	-moz-image-region: rect(0, 48px, 16px, 32px);
 }
 
 label[control='opacity-scale']{
@@ -81,7 +96,7 @@ label[control='opacity-scale']{
 }
 
 #add {
-  cursor:pointer;
+	cursor:pointer;
 }
 #pin{
 	position:fixed;
@@ -94,7 +109,7 @@ label[control='opacity-scale']{
 
 
   <!-- for development -->
-  <!-- <shadiaglue id='status-bar'/>  -->
+  <!--   --><shadiaglue id='status-bar'/>
   
 <tabbox flex='1'>
   <hbox id='pin' hidden='true'>
@@ -305,7 +320,17 @@ onContextMenuCommand = function(e){
 var gPlugin, gPluginsChanged, gPrefChanged, resultOK=true;
 openEditLigthbox = function(e){
 	var item = e.target;
-	if (item.getAttribute('aID')!='edit-link')
+	var aID = item.getAttribute('aID')
+	//**********
+	if (aID == 'enable-link') {
+		var item = $parent(e.target)
+		gPlugin = InstantFoxModule.Plugins[item.id]
+		gPlugin.disabled = false
+		saveGPlugin()
+		return
+	}
+	//**********
+	if (aID!='edit-link')
 		return;
 
 	var panel = $('edit-box')
@@ -345,18 +370,21 @@ editPopupSave = function(panel){
 	gPlugin.url = $t(panel, 'url').value
 	//gPlugin.iconURI = $t(panel, 'image').src
 	
+	saveGPlugin(createNew)
+}
+saveGPlugin = function(createNew){
 	if(createNew){
 		ibp.fixupPlugin(gPlugin)
 		if(!gPlugin.url)
 			return
 		InstantFoxModule.Plugins[gPlugin.id] = gPlugin;
-		appendXML($("user-shortcuts"), formatString(xmlFragment,gPlugin))
+		appendXML($("user-shortcuts"), plugin2XML(gPlugin))
 	}else{
 		var el = $(gPlugin.id)
 		var container = el.parentNode
 		var si = container.selectedIndex
-		replaceXML(el, formatString(xmlFragment,gPlugin))
-		container.selectedIndex =si
+		replaceXML(el, plugin2XML(gPlugin))
+		container.selectedIndex = si
 	}
 	ibp.pluginLoader.initShortcuts()
 	markConflicts()
@@ -464,9 +492,7 @@ onSelect=function(rbox){
 	}
 }
 
-savePlugin = function(id){
-	
-}
+
 
 //************* 
 function savePlugins(){
@@ -487,7 +513,7 @@ function savePlugins(){
 }
 //************* 
 xmlFragment = 
-	  <richlistitem align="center" id='$id$' disabled="$disabled$">
+	  <richlistitem align="center" id='$id$'>
 		<hbox align="center" class='image'>
 			<image src="$iconURI$" />
 		</hbox>
@@ -499,14 +525,26 @@ xmlFragment =
 		</hbox>
 		<label class='link' value='edit' aID='edit-link'/>
 	  </richlistitem>.toXMLString().replace(/>\s*</,'><')
-
+xmlFragmentDis = 
+	  <richlistitem align="center" id='$id$' disabled="true">
+		<hbox align="center" class='image'>
+			<image src="$iconURI$" />
+		</hbox>
+		<label value="$name$"/>
+		<spacer flex='1' />
+		<textbox class='key' width='0'/>
+		<label class='link' value='enable' aID='enable-link'/>
+	  </richlistitem>.toXMLString().replace(/>\s*</,'><')
+function plugin2XML(p){
+	return formatString(p.disabled?xmlFragmentDis:xmlFragment, p)
+}
 
 rebuild = function(all){
 	var xml=[], userxml = []
 	var activePlugins = InstantFoxModule.Plugins
 	for each(var p in activePlugins){
 		if(p.url){
-			(p.type=='default'?xml:userxml).push(formatString(xmlFragment,p))
+			(p.type=='default'?xml:userxml).push(plugin2XML(p))
 		}
 	}
 	el = $("standard-shortcuts");
