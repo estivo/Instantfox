@@ -79,6 +79,10 @@ label[control='opacity-scale']{
 	margin-top: 10px!important;
 	margin-bottom: -3px!important;
 }
+
+#add {
+  cursor:pointer;
+}
 #pin{
 	position:fixed;
 	top:0;
