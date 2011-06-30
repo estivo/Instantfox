@@ -498,7 +498,7 @@ var imdbJsonUrl = function(q2tidy, jsonUrl) {
 				.replace(/[\u00df]/g, "ss")
 				.replace(/[\W]/g, "")
 				.toLowerCase()
-	jsonUrl.replace('%q', q2tidy).replace('%fq', q2tidy[0]);
+	return jsonUrl.replace('%q', q2tidy).replace('%fq', q2tidy[0]);
 }
 var parseImdbJson = function(json, key, splitSpace){
 	try{
@@ -680,7 +680,9 @@ InstantFoxSearch.prototype = {
 		var q = InstantFoxModule.currentQuery
 		var key = q.plugin.key
 		
-		if(q.plugin.json.indexOf('http://maps.google') == 0)
+		if(q.plugin.id == 'imdb')
+			q.results = parseImdbJson(json, key, q.splitSpace)
+		else if(q.plugin.json.indexOf('http://maps.google') == 0)
 			q.results = parseMapsJson(json, key, q.splitSpace)
 		else
 			q.results = parseSimpleJson(json, key, q.splitSpace)
@@ -701,7 +703,11 @@ InstantFoxSearch.prototype = {
 			this._req.onload = this.onSearchReady.bind(this)
 		}
 		var q = InstantFoxModule.currentQuery
-		var url = q.plugin.json.replace('%q', q.query)
+		
+		if (q.plugin.id == 'imdb')
+			var url = imdbJsonUrl(q.query, q.plugin.json)
+		else
+			var url = q.plugin.json.replace('%q', q.query)
 		this._req.open("GET", url, true);
 
 		this._req.send(null);
