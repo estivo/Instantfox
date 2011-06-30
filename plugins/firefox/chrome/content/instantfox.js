@@ -376,7 +376,7 @@ dump(now - this.loadTime, gBrowser.docShell.isLoadingDocument, url2go)
 			br = gBrowser
 		else {
 			br = document.getElementById(InstantFoxModule.currentQuery.tabId)
-			br = br || br.getElementsByTagName("xul:browser")[0]
+			br = br && br.getElementsByTagName("xul:browser")[0]
 		}
 			
 		if (br)
