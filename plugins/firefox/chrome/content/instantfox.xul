@@ -15,7 +15,8 @@
   <toolbarpalette id="BrowserToolbarPalette">
 	<toolbarbutton type="menu" id='instantFox-options' class='toolbarbutton-1 chromeclass-toolbar-additional'
 	style='list-style-image:none'>
-		<panel onpopupshowing="if(event.target==this)HH.onPopupShowing(this)"  onpopuphiding="if(event.target==this)HH.onPopupHiding(this)"/>
+		<panel onpopupshowing="if(event.target==this)HH.onPopupShowing(this)"  onpopuphiding="if(event.target==this)HH.onPopupHiding(this)"
+			noautohide='true'/>
 	</toolbarbutton>
   </toolbarpalette>
   

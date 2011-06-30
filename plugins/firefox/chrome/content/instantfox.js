@@ -423,7 +423,24 @@ dump(now - this.loadTime, gBrowser.docShell.isLoadingDocument, url2go)
 
 //************************************************************************
 // experimental options popup
+HH.popupCloser = function(e) {
+	if (e.target.id == 'instantFox-options') {
+		window.removeEventListener('mousedown', HH.popupCloser, false)
+		e.target.firstChild.hidePopup()
+		HH.stopEvent(e)
+		return
+	}
+	if (HH.popupPinned == true)
+		return
+	window.removeEventListener('mousedown', HH.popupCloser, false)
+	document.getElementById('instantFox-options').firstChild.hidePopup()
+}
 HH.onPopupShowing = function(p) {
+	if (p.parentNode.id != 'instantFox-options')
+		return
+
+	window.addEventListener('mousedown', HH.popupCloser, false)
+	
 	if (p.hasChildNodes())
 		return;
 	//while(p.hasChildNodes())
@@ -439,6 +456,7 @@ HH.onPopupShowing = function(p) {
 HH.onPopupHiding = function(p) {
 	var i = document.getElementById('instantFox-options').firstChild.firstChild
 	i.contentWindow.savePlugins()
+	window.removeEventListener('mousedown', HH.popupCloser, false)
 }
 HH.updatePopupSize = function(e) {
 	var doc = e.target
@@ -447,17 +465,15 @@ HH.updatePopupSize = function(e) {
 							doc.getElementsByTagName('tabbox')[0].clientWidth + 50
 	var tb = doc.getElementById('pin')
 	tb.hidden = false
+	// don't let clicks inside options window to close popup
+	doc.defaultView.addEventListener('mousedown', HH.stopEvent, false)
+}
+HH.stopEvent = function(e) {
+	e.stopPropagation()
+	e.preventDefault()
 }
 HH.pinPopup = function() {
-	var b = document.getElementById('instantFox-options')
-	var p = b.firstChild
-	if (p.hasAttribute('noautohide')){
-		p.removeAttribute('noautohide')
-	} else 
-		p.setAttribute('noautohide', true)
-	p.hidePopup()
-	p.openPopup(b, "after_start", 0, 0, false, false)
-	//noautofocus ignorekeys 
+	HH.popupPinned = !HH.popupPinned
 }
 HH.closeOptionsPopup = function(p) {
 	p = p || document.getElementById('instantFox-options').firstChild
