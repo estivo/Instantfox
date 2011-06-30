@@ -30,6 +30,7 @@
 richlistbox {
 	overflow-y:auto;
 	min-height:5ch;
+	width:35ch;
 }
 richlistitem:nth-child(odd) {
 	background-color: #FBFBFB;
@@ -42,19 +43,20 @@ textbox{
 	-moz-appearance:none;
 	border:none;
 	background: #EEF9FF;
-	color:#777;
-	width:5ch;
-	border:1px solid gray;
+	color: #777;
+	width: 5ch;
+	box-shadow: 0pt 0pt 1.5px 1px gray;
 }
 textbox.key{
-	padding:1px;
+	padding: 1px 1px 2px 1px;
+	border: none;
 }
 .key.hidden{
 	opacity: 0;
-	pointer-events:none;
+	pointer-events: none;
 }
 textbox[conflict=true]{
-	color:darkred!important;
+	color: darkred!important;
 	text-shadow: -1px -1px 2px #FFFFFF, 0pt -1px 6px red;
 }
 textbox[conflict=maybe]{
@@ -218,12 +220,11 @@ label[control='opacity-scale']{
 		<textbox aID='key'/>
 	</hbox>
 	<hbox>
-		<checkbox label='instant' aID='instant'/>
-		<checkbox label='contextMenu' aID='context'/>
-		<checkbox label='disabled' aID='disabled'/>
+		<checkbox label='load page instantly' aID='instant'/>
+		<checkbox label='show on contextMenu' aID='context'/>
 	</hbox>
 	<hbox align='end'>
-		<toolbarbutton label='remove' aID='remove' hidden='true' oncommand="$('edit-box').hidePopup();removePlugin(gPlugin)"/>
+		<toolbarbutton label='remove' aID='remove' oncommand="removePlugin(gPlugin);$('edit-box').hidePopup();"/>
 		<toolbarbutton label='more' hidden='true'/>
 		<label class='link' value='?' onclick='open(InstantFoxModule.helpURL)'/>
 		<spacer flex='1'/>
@@ -352,7 +353,6 @@ openEditLigthbox = function(e){
 	var item = $parent(e.target)
 	gPlugin = InstantFoxModule.Plugins[item.id]
 	
-	$t(panel, 'disabled').checked = gPlugin.disabled
 	$t(panel, 'context').checked = !gPlugin.hideFromContextMenu
 	$t(panel, 'instant').checked = !gPlugin.disableInstant
 	$t(panel, 'name').value = gPlugin.name
@@ -361,7 +361,7 @@ openEditLigthbox = function(e){
 	urlBox.value = gPlugin.url
 	urlBox.readOnly = gPlugin.type=='default'
 	$t(panel, 'image').src = gPlugin.iconURI
-	$t(panel, 'remove').hidden = gPlugin.type!='user'
+	$t(panel, 'remove').label = gPlugin.type == 'user' ? 'remove': 'disable';
 	
 
 	var popupBoxObject = panel.popupBoxObject;
@@ -378,7 +378,6 @@ editPopupSave = function(panel){
 	}
 	gPlugin.hideFromContextMenu =!$t(panel, 'context').checked
 	gPlugin.disableInstant = !$t(panel, 'instant').checked
-	gPlugin.disabled = $t(panel, 'disabled').checked
 
 	gPlugin.name = $t(panel, 'name').value
 	gPlugin.url = $t(panel, 'url').value
@@ -388,13 +387,13 @@ editPopupSave = function(panel){
 	saveGPlugin(createNew)
 }
 saveGPlugin = function(createNew){
-	if(createNew){
+	if (createNew) {
 		ibp.fixupPlugin(gPlugin)
 		if(!gPlugin.url)
 			return
 		InstantFoxModule.Plugins[gPlugin.id] = gPlugin;
 		appendXML($("user-shortcuts"), plugin2XML(gPlugin))
-	}else{
+	} else {
 		var el = $(gPlugin.id)
 		var container = el.parentNode
 		var si = container.selectedIndex
@@ -436,12 +435,17 @@ addPlugin=function(e){
 	panel.openPopup(item,'before_start',0,0,false,true)
 }
 removePlugin=function(p){
-	delete InstantFoxModule.Plugins[p.id];
-	ibp.pluginLoader.initShortcuts()
-	markConflicts()
-	
-	var item = $(p.id)
-	item.parentNode.removeChild(item)
+	if (p.type != 'user' ) {
+		p.disabled = true
+		
+	} else {	
+		delete InstantFoxModule.Plugins[p.id];
+		ibp.pluginLoader.initShortcuts()
+		markConflicts()
+		
+		var item = $(p.id)
+		item.parentNode.removeChild(item)
+	}
 	
 	gPluginsChanged = true
 }
