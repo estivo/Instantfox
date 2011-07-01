@@ -42,6 +42,7 @@ function dump() {
  *    plugin={
  *        hideFromContextMenu:
  *        disableInstant:
+ *        disableSuggest:
  *        disabled:
  *        key:
  *        url:
@@ -57,7 +58,7 @@ function fixupPlugin(p){
 	domainRe = /:\/\/([^#?]*)/;
 	if(p.url){
 		var match = p.url.match(domainRe)
-		p.domain = match?match[1]:''
+		p.domain = match ?match[1] :''
 		p.name = p.name||p.id
 		p.id = p.id.toLowerCase()
 		p.iconURI = p.iconURI || getFavicon(p.url);
@@ -77,9 +78,10 @@ function cleanCopyPlugin(p){
 	p1.id = p.id;
 	p1.key = p.key
 	//
-	p.disabled &&(p1.disabled = true)
-	p.disableInstant &&(p1.disableInstant = true)
-	p.hideFromContextMenu &&(p1.hideFromContextMenu = true)
+	p.disabled && (p1.disabled = true)
+	p.disableInstant && (p1.disableInstant = true)
+	p.disableSuggest && (p1.disableSuggest = true)
+	p.hideFromContextMenu && (p1.hideFromContextMenu = true)
 	return p1
 }
 var pluginLoader = {
@@ -128,6 +130,8 @@ var pluginLoader = {
 					p.hideFromContextMenu = mP.hideFromContextMenu;
 				if('disableInstant' in mP)
 					p.disableInstant = mP.disableInstant;
+				if('disableSuggest' in mP)
+					p.disableSuggest = mP.disableSuggest;
 				if('disabled' in mP)
 					p.disabled = mP.disabled;
 			}
@@ -656,7 +660,7 @@ InstantFoxSearch.prototype = {
 			return true;
 		}
 
-		if(!api.json){
+		if(!api.json || api.disableSuggest){
 			var newResult = new SimpleAutoCompleteResult(null, searchString);
 			listener.onSearchResult(self, newResult);
 			InstantFoxModule.currentQuery.onSearchReady()

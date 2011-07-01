@@ -221,7 +221,7 @@ label[control='opacity-scale']{
 	</hbox>
 	<hbox>
 		<checkbox label='load page instantly' aID='instant'/>
-		<checkbox label='show on contextMenu' aID='context'/>
+		<checkbox label='suggest' aID='suggest'/>
 	</hbox>
 	<hbox align='end'>
 		<toolbarbutton label='remove' aID='remove' oncommand="removePlugin(gPlugin);$('edit-box').hidePopup();"/>
@@ -353,7 +353,7 @@ openEditLigthbox = function(e){
 	var item = $parent(e.target)
 	gPlugin = InstantFoxModule.Plugins[item.id]
 	
-	$t(panel, 'context').checked = !gPlugin.hideFromContextMenu
+	$t(panel, 'suggest').checked = !gPlugin.disableSuggest
 	$t(panel, 'instant').checked = !gPlugin.disableInstant
 	$t(panel, 'name').value = gPlugin.name
 	$t(panel, 'key').value = gPlugin.key
@@ -361,7 +361,9 @@ openEditLigthbox = function(e){
 	urlBox.value = gPlugin.url
 	urlBox.readOnly = gPlugin.type=='default'
 	$t(panel, 'image').src = gPlugin.iconURI
-	$t(panel, 'remove').label = gPlugin.type == 'user' ? 'remove': 'disable';
+	var rem =  $t(panel, 'remove')
+	rem.label = gPlugin.type == 'user' ? 'remove': 'disable';
+	rem.hidden = false;
 	
 
 	var popupBoxObject = panel.popupBoxObject;
@@ -376,7 +378,7 @@ editPopupSave = function(panel){
 		var createNew = true
 		gPlugin = createEmptyPlugin()
 	}
-	gPlugin.hideFromContextMenu =!$t(panel, 'context').checked
+	gPlugin.disableSuggest = !$t(panel, 'suggest').checked
 	gPlugin.disableInstant = !$t(panel, 'instant').checked
 
 	gPlugin.name = $t(panel, 'name').value
@@ -420,8 +422,7 @@ addPlugin=function(e){
 	var item = $parent(e.target)
 	gPlugin = 'createNew'
 	
-	$t(panel, 'disabled').checked = false
-	$t(panel, 'context').checked =false
+	$t(panel, 'suggest').checked = true
 	$t(panel, 'instant').checked = false
 	$t(panel, 'name').value = ''
 	var urlBox = $t(panel, 'url')
@@ -543,7 +544,7 @@ xmlFragment =
 				onblur='onTextboxEnter(this)' oninput='onTextboxInput(this)'/>
 		</hbox>
 		<label class='link' value='edit' aID='edit-link'/>
-	  </richlistitem>.toXMLString().replace(/>\s*</,'><')
+	  </richlistitem>.toXMLString().replace(/>\s*</g,'><')
 xmlFragmentDis = 
 	  <richlistitem align="center" id='$id$' disabled="true">
 		<hbox align="center" class='image'>
@@ -553,7 +554,7 @@ xmlFragmentDis =
 		<spacer flex='1' />
 		<textbox class='key hidden' aID='key'/>
 		<label class='link' value='enable' aID='enable-link'/>
-	  </richlistitem>.toXMLString().replace(/>\s*</,'><')
+	  </richlistitem>.toXMLString().replace(/>\s*</g,'><')
 
 function plugin2XML(p){
 	return formatString(p.disabled?xmlFragmentDis:xmlFragment, p)
@@ -576,9 +577,21 @@ rebuild = function(all){
 		appendXML(el, userxml.join(''))
 	}
 	markConflicts()
+
+	return userxml.length
 }
 
-rebuild(true)
+var l = rebuild(true)
+
+// if box is too short scrollbar can't be shown
+if (l < 4)
+	window.addEventListener('load', function() {
+		window.removeEventListener('load', arguments.callee, false)
+
+		var el = $("user-shortcuts")
+		var h = el.firstChild.getBoundingClientRect().height 
+		el.style.height = el.style.minHeight = (l || 1) * h + 5 + 'px'
+	}, false)
 /*
 gBrowser.mCurrentBrowser.engines[0].uri
 
