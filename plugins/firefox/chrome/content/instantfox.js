@@ -599,10 +599,12 @@ nsContextMenu.prototype.fillSearchSubmenu=function(popup){
 			continue
 
 		menu = document.createElement('menuitem')
-		menu.setAttribute('name', engine.name)
+		menu.setAttribute('name', engine.id)
 		menu.setAttribute('label', engine.name)
 		menu.setAttribute('image', engine.iconURI)
 		menu.setAttribute('class', "menuitem-iconic")
+		//todo: main search must be instantfox search too
+		menu.setAttribute('type', "instantFox")
 		popup.appendChild(menu)
 	}
 }
@@ -613,11 +615,19 @@ nsContextMenu.prototype.doSearch=function(e){
 	var selectedText = this.getSelectedText()
 	if(name == 'open as link')
 		openLinkIn(selectedText, e.button!=0?"current":"tab", {relatedToCurrent: true});
-    var engine = Services.search.getEngineByName(name);
-    var submission = engine.getSubmission(selectedText);
-    if (!submission) {
-        return;
-    }
-    openLinkIn(submission.uri.spec, e.button!=0?"current":"tab", {postData: submission.postData, relatedToCurrent: true});
+	
+	var type = e.originalTarget.getAttribute('type')
+	if (type = "instantFox") {
+		href  = InstantFoxModule.Plugins[name].url.replace('%q', selectedText)
+	} else {
+		var engine = Services.search.getEngineByName(name);
+		var submission = engine.getSubmission(selectedText);
+		if (!submission) {
+			return;
+		}
+		var href = submission.uri.spec
+		var postData = submission.postData
+	}
+    openLinkIn(href, e.button!=0?"current":"tab", {postData: postData, relatedToCurrent: true});
 }
 
