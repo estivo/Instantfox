@@ -108,7 +108,7 @@ label[control='opacity-scale']{
 #add {
 	cursor:pointer;
 }
-#pin{
+#pinbox{
 	position:fixed;
 	top:0;
 	right:0;
@@ -122,8 +122,8 @@ label[control='opacity-scale']{
   <!--   --><shadiaglue id='status-bar'/>
   
 <tabbox flex='1'>
-  <hbox id='pin' hidden='true'>
-	<toolbarbutton type='checkbox' tooltiptext='pin' oncommand='window.top.HH.pinPopup()'/>
+  <hbox id='pinbox' hidden='true'>
+	<toolbarbutton type='checkbox' tooltiptext='pin' oncommand='var HH=window.top.HH; HH.popupPinned=!HH.popupPinned'/>
   </hbox>
   <tabs onselect="if(this.selectedIndex==1){this.removeAttribute('onselect');
 		this.parentNode.selectedPanel.firstChild.hidden=false;gPrefChanged=true;}">
@@ -251,7 +251,7 @@ ibp.pluginLoader.getAvaliableLocales(function(locales){
 	)
 	var sl = InstantFoxModule.selectedLocale
 	var si = locales.indexOf(sl)
-	if(si<0)
+	if(si == -1)
 		si = locales.indexOf(sl.substring(0, sl.indexOf('-')))
 	menulist.selectedIndex = si
 })
@@ -583,15 +583,27 @@ rebuild = function(all){
 
 var l = rebuild(true)
 
-// if box is too short scrollbar can't be shown
-if (l < 4)
-	window.addEventListener('load', function() {
-		window.removeEventListener('load', arguments.callee, false)
-
+window.addEventListener('load', function() {
+	window.removeEventListener('load', arguments.callee, false)
+	// if box is too short scrollbar can't be shown
+	if (l < 4) {
 		var el = $("user-shortcuts")
 		var h = el.firstChild.getBoundingClientRect().height 
 		el.style.height = el.style.minHeight = (l || 1) * h + 5 + 'px'
-	}, false)
+	}
+	// check if we are inside popup
+	var HH = top.HH
+	if (HH) {
+		window.close = HH.closeOptionsPopup
+		var el = document.getElementById('pinbox')
+		el.hidden = false
+		el.firstChild.setAttribute('checked', !!HH.popupPinned)
+
+		HH.updatePopupSize(document)
+	}
+
+}, false)
+
 /*
 gBrowser.mCurrentBrowser.engines[0].uri
 
@@ -606,11 +618,7 @@ if (target.getAttribute("class").indexOf("addengine-item") != -1) {
 }
 */
 
-/* window.addEventListener('load', function(){
-	window.removeEventListener('load', arguments.callee, false)
-	window.innerWidth = document.getElementsByTagName('tabbox')[0].clientWidth + 50
-}, false) 
-sizeToContent()*/
+
 ]]></script>
 
 

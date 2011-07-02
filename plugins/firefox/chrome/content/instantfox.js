@@ -446,34 +446,27 @@ HH.onPopupShowing = function(p) {
 	//while(p.hasChildNodes())
 	//	p.removeChild(p.firstChild)
 	var i = document.createElement('iframe')
-	i.setAttribute('src','chrome://instantfox/content/options.xul')
-	p.appendChild(i)
-	i.contentWindow.close = HH.closeOptionsPopup
-	i.contentWindow.addEventListener('load', HH.updatePopupSize, false)
-	var h = screen.availHeight * 4/5
-	i.height=h
+	i.setAttribute('src', 'chrome://instantfox/content/options.xul')
+	i.setAttribute('flex', '1')
+	p.appendChild(i)	
+	p.height = screen.availHeight * 4/5
 }
 HH.onPopupHiding = function(p) {
 	var i = document.getElementById('instantFox-options').firstChild.firstChild
 	i.contentWindow.savePlugins()
 	window.removeEventListener('mousedown', HH.popupCloser, false)
 }
-HH.updatePopupSize = function(e) {
-	var doc = e.target
-	doc.defaultView.removeEventListener('load', HH.updatePopupSize, false)
-	document.getElementById('instantFox-options').firstChild.width =
-							doc.getElementsByTagName('tabbox')[0].clientWidth + 50
-	var tb = doc.getElementById('pin')
-	tb.hidden = false
+HH.updatePopupSize = function(popupDoc) {
+	var p = document.getElementById('instantFox-options').firstChild
+	if (!p.width) 
+		p.width = popupDoc.getElementsByTagName('tabbox')[0].clientWidth + 50;
+
 	// don't let clicks inside options window to close popup
-	doc.defaultView.addEventListener('mousedown', HH.stopEvent, false)
+	popupDoc.defaultView.addEventListener('mousedown', HH.stopEvent, false)
 }
 HH.stopEvent = function(e) {
 	e.stopPropagation()
 	e.preventDefault()
-}
-HH.pinPopup = function() {
-	HH.popupPinned = !HH.popupPinned
 }
 HH.closeOptionsPopup = function(p) {
 	p = p || document.getElementById('instantFox-options').firstChild
