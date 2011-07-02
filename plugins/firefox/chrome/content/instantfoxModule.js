@@ -321,7 +321,7 @@ function getFavicon(url){
 		var icon = faviconService.getFaviconImageForPage(makeURI('http://www.'+baseDomain)).spec
 		if(icon != faviconService.defaultFavicon.spec)
 			return icon
-	}catch(e){Components.utils.reportError(e)}	
+	}catch(e){}	
 		
 	return 'http://g.etfv.co/http://'+host
 }

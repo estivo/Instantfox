@@ -136,7 +136,8 @@ label[control='opacity-scale']{
 		<hbox>
 			<vbox>
 				<label value="choose language"></label>
-				<menulist id="locale" oncommand = 'gPluginsChanged=true;InstantFoxModule.pluginLoader.loadPlugins(event.target.label, rebuild)'>
+				<menulist id="locale" sizetopopup='none'
+					oncommand = 'gPluginsChanged=true;InstantFoxModule.pluginLoader.loadPlugins(event.target.label, rebuild)'>
 					<menupopup/>
 				</menulist>
 				<spacer flex='1'/>
@@ -243,19 +244,59 @@ ibp = Components.utils.import('chrome://instantfox/content/instantfoxModule.js')
 
 //************** find all avaliable locales
 
+getAvaliableLocales = function() {
+	var sbs = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService);
+	var langNames = sbs.createBundle("chrome://global/locale/languageNames.properties");
+	var regNames  = sbs.createBundle("chrome://global/locale/regionNames.properties");
 
-ibp.pluginLoader.getAvaliableLocales(function(locales){
+	var cr = Cc["@mozilla.org/chrome/chrome-registry;1"].getService(Ci.nsIToolkitChromeRegistry);
+	var locales = cr.getLocalesForPackage("instantfox");
+	
+	var ans = []
+	while (locales.hasMore()) {
+		var locale = locales.getNext(); 
+		var parts = locale.split(/-/); 
+		var displayName;
+		try {
+			displayName = langNames.GetStringFromName(parts[0]);
+			try {
+				displayName += " (" + regNames.GetStringFromName((parts[1]||parts[0]).toLowerCase()) + ")";
+			}catch (e) {
+				displayName += " (" + parts[1] + ")";
+			}
+			displayName += ':  ' + locale
+		} catch (e) {
+			displayName = locale;
+		}
+		ans.push({displayName: displayName, locale: locale})
+	}
+
+	return ans
+}
+updateLocaleList = function() {
+	var locales = getAvaliableLocales()
 	var menulist = $('locale')
-	appendXML(menulist.firstChild,
-		'<menuitem label="' + locales.join('"/><menuitem label="') + '"/>'
-	)
+	
+	var xml = []
 	var sl = InstantFoxModule.selectedLocale
-	var si = locales.indexOf(sl)
-	if(si == -1)
-		si = locales.indexOf(sl.substring(0, sl.indexOf('-')))
-	menulist.selectedIndex = si
-})
+	var slPartial = sl.substring(0, sl.indexOf('-'))
+	var si = -1, siPartial = -1
+	
+	for (var i in locales) {
+		var l = locales[i]
+		if (l.locale ==  sl)
+			si = i
+		else if (l.locale ==  slPartial)
+			siPartial = i
 
+		xml.push('<menuitem label="', l.locale, '">', l.displayName, '"</menuitem>')
+	}
+	appendXML(menulist.firstChild, xml.join(''))
+	if(si == -1)
+		si = siPartial
+	menulist.selectedIndex = si
+
+}
 
 //************* dom utils
 function $(id)document.getElementById(id)
@@ -601,6 +642,8 @@ window.addEventListener('load', function() {
 
 		HH.updatePopupSize(document)
 	}
+	// ---
+	updateLocaleList()
 
 }, false)
 

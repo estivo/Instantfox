@@ -6,7 +6,6 @@ style     chrome://browser/content/browser.xul   chrome://instantfox/content/ski
 overlay   chrome://browser/content/browser.xul   chrome://instantfox/content/instantfox.xul
 
 
-locale    instantfox de chrome/locale/de/
 locale    instantfox de-DE chrome/locale/de/
 locale    instantfox de-AT chrome/locale/de-AT/
 locale    instantfox de-CH chrome/locale/de-CH/
@@ -19,6 +18,7 @@ locale    instantfox fr-FR chrome/locale/fr/
 locale    instantfox it chrome/locale/it/
 locale    instantfox it-IT chrome/locale/it/
 locale    instantfox pl chrome/locale/pl/
+locale    instantfox nl chrome/locale/nl/
 
 #FF4
 #component {c541b971-0729-4f5d-a5c4-1f4dadef365e} components/instantfox_search.js
