@@ -23,8 +23,8 @@ richlistbox[type='InstantFoxSuggest'] {
 	background-repeat:no-repeat;
 	background-position: 95% bottom;
 }
-#instantFox-options{
-	list-style-image: url(chrome://instantfox/content/skin/button-logo.png)!important;
+/** button ***************************************/
+#instantFox-options {
 	-moz-box-orient: horizontal!important;
 }
 /** urlbar ***************************************/
