@@ -424,13 +424,16 @@ dump(now - this.loadTime, gBrowser.docShell.isLoadingDocument, url2go)
 //************************************************************************
 // experimental options popup
 HH.popupCloser = function(e) {
+	var inPopup = HH.clickedInPopup
+	HH.clickedInPopup = false
 	if (e.target.id == 'instantFox-options') {
 		window.removeEventListener('mousedown', HH.popupCloser, false)
 		e.target.firstChild.hidePopup()
-		HH.stopEvent(e)
+		e.stopPropagation()
+		e.preventDefault()
 		return
 	}
-	if (HH.popupPinned == true)
+	if (HH.popupPinned == true || inPopup)
 		return
 	window.removeEventListener('mousedown', HH.popupCloser, false)
 	document.getElementById('instantFox-options').firstChild.hidePopup()
@@ -462,11 +465,10 @@ HH.updatePopupSize = function(popupDoc) {
 		p.width = popupDoc.getElementsByTagName('tabbox')[0].clientWidth + 50;
 
 	// don't let clicks inside options window to close popup
-	popupDoc.defaultView.addEventListener('mousedown', HH.stopEvent, false)
+	popupDoc.defaultView.addEventListener('mousedown', HH.popupClickListener, false)
 }
-HH.stopEvent = function(e) {
-	e.stopPropagation()
-	e.preventDefault()
+HH.popupClickListener = function(e) {
+	HH.clickedInPopup = true
 }
 HH.closeOptionsPopup = function(p) {
 	p = p || document.getElementById('instantFox-options').firstChild
