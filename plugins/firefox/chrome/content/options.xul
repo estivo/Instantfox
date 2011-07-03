@@ -114,6 +114,10 @@ label[control='opacity-scale']{
 	right:0;
 	list-style-image: url(chrome://instantfox/content/skin/pin-icon.png)!important;
 }
+#highlight {
+	font-weight:bold;
+	font-size: 14px;
+}
 
 </html:style>
 
@@ -135,7 +139,7 @@ label[control='opacity-scale']{
 	<tabpanel orient='vertical'  flex='1'>
 		<hbox>
 			<vbox>
-				<label value="choose language"></label>
+				<label value="Choose language:" id="highlight"></label>
 				<menulist id="locale" sizetopopup='none'
 					oncommand = 'gPluginsChanged=true;InstantFoxModule.pluginLoader.loadPlugins(event.target.label, rebuild)'>
 					<menupopup/>
@@ -159,16 +163,16 @@ label[control='opacity-scale']{
 	</tabpanel>
 	<tabpanel orient='vertical'  flex='1' >
 	  <prefpane align='center' hidden='true'>
-	    <label value='fontsize' control='fontsize-text'/>
+	    <label value='fontsize of suggest:' control='fontsize-text'/>
 	    <textbox preference="fontsize"  id='fontsize-text'/>
-	    <label value='opacity' control='opacity-scale'/>
+	    <label value='opacity of suggest dropdown:' control='opacity-scale'/>
 		<hbox pack='center' align='center'>
 			<scale value='20' min='10' max='100' flex='1' id='opacity-scale' preference-editable="true" preference="opacity" />
 			<textbox preference="opacity" id='opacity-text'/>
 			<label value='%'/>
 		</hbox>
 	   
-	    <label value='keyword.URL' control='keyword-URL-menu'/>
+	    <label value='standard search without shortcuts:' control='keyword-URL-menu'/>
 	    <menulist editable="true" preference="keyword-URL" id="keyword-URL-menu">
 		  <menupopup >
 		    <menuitem label="http://www.google.com/search?q="/>
