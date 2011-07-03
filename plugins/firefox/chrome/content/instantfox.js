@@ -183,6 +183,7 @@ var HH = {
 		var q = HH.getQuery(val, InstantFoxModule.currentQuery)
 		if (q) {
 			InstantFoxModule.currentQuery = q;
+			HH.findBestShadow(q)
 			HH.updateShadowLink(q);
 		} else if (InstantFoxModule.currentQuery) {
 			InstantFoxModule.currentQuery = null;
