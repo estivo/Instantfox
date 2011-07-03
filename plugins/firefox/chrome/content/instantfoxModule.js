@@ -363,6 +363,7 @@ function pluginFromNsiSearch(bp){
 InstantFoxModule = {
     _version: '1.0.3',
 	helpURL: 'http://www.instantfox.net/help/shortcuts.php',
+	editingHelpURL: 'http://www.instantfox.net/help/shortcuts.php',
 
 	initialize: function(){
 		this.pluginLoader.loadPlugins()

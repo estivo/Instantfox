@@ -123,7 +123,7 @@ label[control='opacity-scale']{
   
 <tabbox flex='1'>
   <hbox id='pinbox' hidden='true'>
-	<toolbarbutton type='checkbox' tooltiptext='pin' oncommand='var HH=window.top.HH; HH.popupPinned=!HH.popupPinned'/>
+	<toolbarbutton type='checkbox' tooltiptext='pin' oncommand='window.top.HH.popupPinned=this.checked'/>
   </hbox>
   <tabs onselect="if(this.selectedIndex==1){this.removeAttribute('onselect');
 		this.parentNode.selectedPanel.firstChild.hidden=false;gPrefChanged=true;}">
@@ -227,7 +227,7 @@ label[control='opacity-scale']{
 	<hbox align='end'>
 		<toolbarbutton label='remove' aID='remove' oncommand="removePlugin(gPlugin);$('edit-box').hidePopup();"/>
 		<toolbarbutton label='more' hidden='true'/>
-		<label class='link' value='?' onclick='open(InstantFoxModule.helpURL)'/>
+		<label class='link' value='?' onclick='open(InstantFoxModule.editingHelpURL)'/>
 		<spacer flex='1'/>
 		<toolbarbutton label='ok' onclick="$('edit-box').hidePopup()"/>
 	</hbox>
