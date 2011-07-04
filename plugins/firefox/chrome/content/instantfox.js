@@ -445,8 +445,11 @@ HH.onPopupShowing = function(p) {
 
 	window.addEventListener('mousedown', HH.popupCloser, false)
 	
-	if (p.hasChildNodes())
+	if (p.hasChildNodes()){
+		// rebuild in case user modified plugins by another options window instance
+		p.firstChild.contentWindow.rebuild(true)
 		return;
+	}
 	//while(p.hasChildNodes())
 	//	p.removeChild(p.firstChild)
 	var i = document.createElement('iframe')
