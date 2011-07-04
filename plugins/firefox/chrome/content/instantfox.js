@@ -357,6 +357,12 @@ var HH = {
 			var query = qVal || q.query || q.domain || ''
 		}else
 			var query = q.shadow || q.query || q.domain || ''
+			
+		// encode query
+		if (q.plugin.id == 'imdb')
+		    query = escape(query.replace(/ /g, '+'));
+		else
+			query = encodeURIComponent(query);
 
 		url2go = url2go.replace('%q', query);
 
@@ -367,7 +373,7 @@ var HH = {
 		q.preloadURL = url2go
 		
 		var now = Date.now()
-dump(now - this.loadTime, gBrowser.docShell.isLoadingDocument, url2go)
+
 		if(this._isOwnQuery){
 			// gBrowser.docShell.isLoadingDocument
 			if(now - this.loadTime < this.minLoadTime){
@@ -477,8 +483,11 @@ HH.onPopupShowing = function(p) {
 
 	window.addEventListener('mousedown', HH.popupCloser, false)
 	
-	if (p.hasChildNodes())
+	if (p.hasChildNodes()){
+		// rebuild in case user modified plugins by another options window instance
+		p.firstChild.contentWindow.rebuild(true)
 		return;
+	}
 	//while(p.hasChildNodes())
 	//	p.removeChild(p.firstChild)
 	var i = document.createElement('iframe')
