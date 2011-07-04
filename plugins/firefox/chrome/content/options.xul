@@ -573,7 +573,7 @@ function savePlugins(){
 xmlFragment = 
 	  <richlistitem align="center" id='$id$'>
 		<hbox align="center" class='image'>
-			<image src="$iconURI$" />
+			<image src="$iconURI$" width="16" height="16"/>
 		</hbox>
 		<label value="$name$"/>
 		<spacer flex='1' />
@@ -586,7 +586,7 @@ xmlFragment =
 xmlFragmentDis = 
 	  <richlistitem align="center" id='$id$' disabled="true">
 		<hbox align="center" class='image'>
-			<image src="$iconURI$" />
+			<image src="$iconURI$" width="16" height="16"/>
 		</hbox>
 		<label value="$name$"/>
 		<spacer flex='1' />
