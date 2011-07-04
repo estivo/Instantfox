@@ -364,9 +364,11 @@ onContextMenuCommand = function(e){
 	var name = item.getAttribute('aID')
 	var value = item.getAttribute('checked')!='true'
 	selectedItems.forEach(function(x){
-		x.setAttribute(name, value)
+
 		InstantFoxModule.Plugins[x.id][name] = value
 	})
+	if (name == 'disabled')
+		rebuild(true)
 }
 //************************ 
 var gPlugin, gPluginsChanged, gPrefChanged, resultOK=true;
@@ -435,6 +437,8 @@ saveGPlugin = function(createNew){
 		appendXML($("user-shortcuts"), plugin2XML(gPlugin))
 	} else {
 		var el = $(gPlugin.id)
+		if (!el)
+			return;
 		var container = el.parentNode
 		var si = container.selectedIndex
 		replaceXML(el, plugin2XML(gPlugin))
@@ -467,17 +471,20 @@ addPlugin=function(e){
 	urlBox.value = ''
 	urlBox.readOnly = false
 	$t(panel, 'image').src = ''	
-	$t(panel, 'remove').hidden = true
+	var rem =  $t(panel, 'remove')
+	rem.label = 'cancel';
+	rem.hidden = false;
 
 	var popupBoxObject = panel.popupBoxObject;
 	popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
 	panel.openPopup(item,'before_start',0,0,false,true)
 }
-removePlugin=function(p){
-	if (p.type != 'user' ) {
-		p.disabled = true
-		
-	} else {	
+removePlugin=function(p) {
+	if (p == 'createNew') {
+		gPlugin = null
+	}else if (p.type != 'user' ) {
+		p.disabled = true		
+	} else {
 		delete InstantFoxModule.Plugins[p.id];
 		ibp.pluginLoader.initShortcuts()
 		markConflicts()
@@ -625,9 +632,14 @@ window.addEventListener('load', function() {
 	window.removeEventListener('load', arguments.callee, false)
 	// if box is too short scrollbar can't be shown
 	if (l < 4) {
-		var el = $("user-shortcuts")
-		var h = el.firstChild.getBoundingClientRect().height 
-		el.style.height = (l || 1) * h + 20 + 'px'
+		var el1 = $("standard-shortcuts")
+		var el2 = $("user-shortcuts")
+		var h0 = el2.firstChild.getBoundingClientRect().height 
+		var h = (l || 1) * h0 + 5 
+		var h1 = el1.getBoundingClientRect().height 
+		var h2 = el2.getBoundingClientRect().height 
+		el2.height = h
+		el1.height = h1 + h2 - h
 	}
 	// check if we are inside popup
 	var HH = top.HH
