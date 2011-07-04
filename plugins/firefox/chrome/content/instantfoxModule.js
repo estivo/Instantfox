@@ -712,7 +712,7 @@ InstantFoxSearch.prototype = {
 		if (q.plugin.id == 'imdb')
 			var url = imdbJsonUrl(q.query, q.plugin.json)
 		else
-			var url = q.plugin.json.replace('%q', q.query)
+			var url = q.plugin.json.replace('%q', encodeURIComponent(q.query))
 		this._req.open("GET", url, true);
 
 		this._req.send(null);
