@@ -5,7 +5,6 @@ var HH = {
 	install_url: false,
 	update_url:  false,
 	checkversion: true,
-	prefserv: Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefBranch),
 	// end belong to notifyTab
 	
 	initialize: function(event) {
@@ -35,14 +34,16 @@ var HH = {
 	notifyTab: function(){
 		if(HH.checkversion){
 			HH.checkversion = false;
-			var versionfrompref = HH.prefserv.getCharPref("extensions.instantfox.version");
+			var versionfrompref = Services.prefs.getCharPref("extensions.instantfox.version");
 			if(versionfrompref == "0.0.0"){
 				HH.notifyOpenTab(HH.install_url);
-				HH.prefserv.setCharPref("extensions.instantfox.version",HH.version);
+				Services.prefs.setCharPref("extensions.instantfox.version",HH.version);
+				// add options button only on first install
+				HH.addOptionsButton()
 			}else{
 				if(versionfrompref != HH.version){
 					HH.notifyOpenTab(HH.update_url);
-					HH.prefserv.setCharPref("extensions.instantfox.version",HH.version);
+					Services.prefs.setCharPref("extensions.instantfox.version",HH.version);
 				}
 			}		
 		}
@@ -525,12 +526,13 @@ HH.openHelp = function() {
 // todo: call this after window load on first install releted to FS#32
 HH.addOptionsButton = function() {
 	var myId    = "instantFox-options";
-	var afterId = "urlbar-container";
+	var afterId1 = "search-container";
+	var afterId2 = "urlbar-container";
 	var navBar  = document.getElementById("nav-bar");
 	var curSet  = navBar.currentSet.split(",");
 
 	if (curSet.indexOf(myId) == -1) {
-		var pos = curSet.indexOf(afterId) + 1 || curSet.length;
+		var pos = curSet.indexOf(afterId1) + 1 || curSet.indexOf(afterId2) + 1 || curSet.length;
 		var set = curSet.slice(0, pos).concat(myId).concat(curSet.slice(pos));
 
 		navBar.setAttribute("currentset", set.join(","));
