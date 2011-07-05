@@ -219,6 +219,8 @@ label[control='opacity-scale']{
 	<menuitem label='instant' type='checkbox' aID='disableInstant'/>
 	<menuitem label='enabled' type='checkbox' aID='disabled'/>
 	<menuitem label='show on context' type='checkbox' aID='hideFromContextMenu'/>
+	<menuseparator/>
+	<menuitem label='edit' aID='edit'/>
 </menupopup>
 <panel id="edit-box" ignorekeys='true' type="arrow" orient='vertical' onpopuphiding='editPopupSave(this)'>
 	<hbox align='center'>
@@ -356,15 +358,22 @@ initContextMenu = function(popup){
 	$t(popup, 'hideFromContextMenu').setAttribute('checked', !selectedItems.some(function(x){
 		return InstantFoxModule.Plugins[x.id].hideFromContextMenu
 	}))
+	var editItem = $t(popup, 'edit')
+	var visible = selectedItems.length == 1 && !InstantFoxModule.Plugins[selectedItems[0].id].disabled
+	editItem.hidden = editItem.previousSibling.hidden = !visible
 }
 onContextMenuCommand = function(e){
+	var menu = e.target
+	var name = menu.getAttribute('aID')
 	var item = document.popupNode	
 	item = $parent(item)
-	var selectedItems = item.parentNode.selectedItems
+	if (name=='edit'){
+		openEditLigthbox({target: item.lastChild})
+		return
+	}
 	
-	item = e.target
-	var name = item.getAttribute('aID')
-	var value = item.getAttribute('checked')!='true'
+	var selectedItems = item.parentNode.selectedItems	
+	var value = menu.getAttribute('checked')!='true'
 	selectedItems.forEach(function(x){
 
 		InstantFoxModule.Plugins[x.id][name] = value
@@ -649,7 +658,7 @@ window.addEventListener('load', function() {
 		window.close = HH.closeOptionsPopup
 		var el = document.getElementById('pinbox')
 		el.hidden = false
-		el.firstChild.setAttribute('checked', !!HH.popupPinned)
+		el.firstChild.checked = !!HH.popupPinned
 
 		HH.updatePopupSize(document)
 	}
