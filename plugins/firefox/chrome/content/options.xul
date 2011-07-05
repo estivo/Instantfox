@@ -118,7 +118,9 @@ label[control='opacity-scale']{
 	font-weight:bold;
 	font-size: 14px;
 }
-
+#standard-shortcuts,#user-shortcuts{
+	text-align:center;
+}
 </html:style>
 
 

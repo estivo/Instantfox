@@ -1,9 +1,9 @@
 //var currentTab = getWebNavigation().sessionHistory;.getEntryAtIndex(currentTab.count-1, false).URI.spec
 var HH = {
 	// belong to notifyTab
-	version:"1.6.3",
-	install_url: false,
-	update_url:  false,
+	version: "2.0.0",
+	install_url: "http://www.instantfox.net/welcome.html",
+	update_url:  "http://www.instantfox.net/update.html",
 	checkversion: true,
 	// end belong to notifyTab
 	
