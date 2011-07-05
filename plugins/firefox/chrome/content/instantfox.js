@@ -5,7 +5,6 @@ var HH = {
 	install_url: false,
 	update_url:  false,
 	checkversion: true,
-	prefserv: Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefBranch),
 	// end belong to notifyTab
 	
 	initialize: function(event) {
@@ -35,14 +34,14 @@ var HH = {
 	notifyTab: function(){
 		if(HH.checkversion){
 			HH.checkversion = false;
-			var versionfrompref = HH.prefserv.getCharPref("extensions.instantfox.version");
+			var versionfrompref = Services.prefs.getCharPref("extensions.instantfox.version");
 			if(versionfrompref == "0.0.0"){
 				HH.notifyOpenTab(HH.install_url);
-				HH.prefserv.setCharPref("extensions.instantfox.version",HH.version);
+				Services.prefs.setCharPref("extensions.instantfox.version",HH.version);
 			}else{
 				if(versionfrompref != HH.version){
 					HH.notifyOpenTab(HH.update_url);
-					HH.prefserv.setCharPref("extensions.instantfox.version",HH.version);
+					Services.prefs.setCharPref("extensions.instantfox.version",HH.version);
 				}
 			}		
 		}
