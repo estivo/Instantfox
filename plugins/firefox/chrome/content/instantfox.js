@@ -2,8 +2,8 @@
 var HH = {
 	// belong to notifyTab
 	version: "2.0.0",
-	install_url: "http://www.instantfox.net/welcome.html",
-	update_url:  "http://www.instantfox.net/update.html",
+	install_url: "http://www.instantfox.net/welcome.php",
+	update_url:  "http://www.instantfox.net/update.php",
 	checkversion: true,
 	// end belong to notifyTab
 	
