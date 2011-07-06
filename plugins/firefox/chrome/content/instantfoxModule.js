@@ -427,7 +427,7 @@ InstantFoxModule = {
 	getBestPluginMatch: function(key){
 		if(!key)
 			return this.Plugins[this.defaultPlugin]
-		return filter(InstantFoxModule.Plugins, key)[0]||this.Plugins[this.defaultPlugin]
+		return filter(InstantFoxModule.Plugins, key.replace('\xB7', ' ', 'g'))[0]||this.Plugins[this.defaultPlugin]
 	}
 }
 
@@ -480,7 +480,7 @@ var getMatchingPlugins = function(key, tail){
 		results.push({
 			icon: p.iconURI,
 			title: p.name,
-			url: '`' + p.name.replace(' ', '\u00a0', 'g') + tail
+			url: '`' + p.name.replace(' ', '\xB7', 'g') + tail
 		})
 	}
 	return results

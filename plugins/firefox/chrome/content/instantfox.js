@@ -5,7 +5,6 @@ var HH = {
 	install_url: "http://www.instantfox.net/welcome.php",
 	update_url:  "http://www.instantfox.net/update.php",
 	checkversion: true,
-	installNotificationText: 'hello lucky user',
 	// end belong to notifyTab
 	
 	initialize: function(event) {
@@ -52,19 +51,33 @@ var HH = {
 		}
 	},
 	showInstallNotification: function(){
-		PopupNotifications.show(
-			gBrowser.mCurrentBrowser,
-			'instant-fox-installed',
-			HH.installNotificationText,
-			"",
-			{
-				label:'ok',
-				accessKey:'s',
-				callback:function(){}
-			},
-			[],
-			{timeout: Date.now() + 10000, persistWhileVisible: false}
-		);
+		let n = {
+			id: 'instant-fox-installed',
+			anchor: "instantFox-options",
+			label: "NEW! Your Instantfox configuration menu & shortcuts!",
+			onHide: 'document.getBindingParent(this).parentNode.hidePopup()',
+			mainAction: 'ok'
+		}
+
+		let doc = document;
+		let p = doc.createElement('panel')
+		p.setAttribute('type', 'arrow')
+		doc.getElementById("mainPopupSet").appendChild(p)
+
+
+		let popupnotification = doc.createElement("popupnotification");
+		popupnotification.setAttribute("label", n.label);
+		popupnotification.setAttribute("popupid", n.id);
+		popupnotification.setAttribute("closebuttoncommand", n.onHide);
+
+		popupnotification.setAttribute("buttonlabel", n.mainAction);
+		popupnotification.setAttribute("buttoncommand", n.onHide);
+		popupnotification.setAttribute("menucommand", n.onHide);
+		popupnotification.setAttribute("closeitemcommand", n.onHide);
+
+		// popupnotification.notification = n; 
+		p.appendChild(popupnotification);
+		p.openPopup(doc.getElementById(n.anchor), "bottomcenter topleft");
 	},
 	
 	destroy: function(event) {
