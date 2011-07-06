@@ -80,3 +80,8 @@ menu[type=splitmenu] {
     color: menutext;
     background-color: transparent !important;
 }
+/** notification ************************************/
+.popup-notification-icon[popupid="instant-fox-installed"] {
+	list-style-image: url("chrome://instantfox/content/skin/logo.png");
+}
+

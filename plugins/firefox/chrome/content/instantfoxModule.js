@@ -476,10 +476,11 @@ var getMatchingPlugins = function(key, tail){
 	for each(var p in plugins){
 		if(p.disabled)
 			continue
+		// todo: always use unbreakable space in plugin names?
 		results.push({
 			icon: p.iconURI,
 			title: p.name,
-			url: '`' + p.name + tail
+			url: '`' + p.name.replace(' ', '\u00a0', 'g') + tail
 		})
 	}
 	return results

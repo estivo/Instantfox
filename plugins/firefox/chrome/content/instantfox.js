@@ -5,6 +5,7 @@ var HH = {
 	install_url: "http://www.instantfox.net/welcome.php",
 	update_url:  "http://www.instantfox.net/update.php",
 	checkversion: true,
+	installNotificationText: 'hello lucky user',
 	// end belong to notifyTab
 	
 	initialize: function(event) {
@@ -38,15 +39,32 @@ var HH = {
 			if(versionfrompref == "0.0.0"){
 				HH.notifyOpenTab(HH.install_url);
 				Services.prefs.setCharPref("extensions.instantfox.version",HH.version);
+				HH.showInstallNotification();
 				// add options button only on first install
-				HH.addOptionsButton()
+				HH.addOptionsButton();
 			}else{
 				if(versionfrompref != HH.version){
 					HH.notifyOpenTab(HH.update_url);
 					Services.prefs.setCharPref("extensions.instantfox.version",HH.version);
+					HH.showInstallNotification();
 				}
 			}		
 		}
+	},
+	showInstallNotification: function(){
+		PopupNotifications.show(
+			gBrowser.mCurrentBrowser,
+			'instant-fox-installed',
+			HH.installNotificationText,
+			"",
+			{
+				label:'ok',
+				accessKey:'s',
+				callback:function(){}
+			},
+			[],
+			{timeout: Date.now() + 10000, persistWhileVisible: false}
+		);
 	},
 	
 	destroy: function(event) {
@@ -496,6 +514,8 @@ HH.onPopupShowing = function(p) {
 	i.setAttribute('flex', '1')
 	p.appendChild(i)	
 	p.height = screen.availHeight * 4/5
+	p.width = 250 // approximate width 
+	p.wrongSize = true
 }
 HH.onPopupHiding = function(p) {
 	var i = document.getElementById('instantFox-options').firstChild.firstChild
@@ -504,8 +524,11 @@ HH.onPopupHiding = function(p) {
 }
 HH.updatePopupSize = function(popupDoc) {
 	var p = document.getElementById('instantFox-options').firstChild
-	if (!p.width) 
+	
+	if (p.wrongSize){
+		delete p.wrongSize
 		p.width = popupDoc.getElementsByTagName('tabbox')[0].clientWidth + 50;
+	}
 
 	// don't let clicks inside options window to close popup
 	popupDoc.defaultView.addEventListener('mousedown', HH.popupClickListener, false)

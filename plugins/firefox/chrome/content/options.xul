@@ -40,8 +40,8 @@ richlistitem[selected="true"] {
 	color:#0500A0
 } 
 textbox{
-	-moz-appearance:none;
-	border:none;
+	-moz-appearance: none;
+	border: none;
 	background: #EEF9FF;
 	color: #777;
 	width: 5ch;
@@ -81,7 +81,7 @@ richlistbox[seltype="multiple"]:focus > richlistitem[current="true"]{
 	outline-offset: -2px!important;
 } 
 splitter {
-	-moz-appearance:none;
+	-moz-appearance: none;
 }
 /* close button */
 .close-button {
@@ -100,16 +100,20 @@ splitter {
 	-moz-image-region: rect(0, 48px, 16px, 32px);
 }
 
-toolbarbutton.btn,toolbarbutton#add {
+slickbutton {
+  -moz-binding: url("chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton");
   background: -moz-linear-gradient(#F3F3ED, #CECEC3);
   color: #000000;
   box-shadow: 0 0 2px #CECEC3;
   border: solid 1px #ACA899;
   -moz-border-radius: 8px;
-  padding:0px;
-  margin:5px;
+  padding:1px;
+  margin:4px;
 }
-toolbarbutton.btn:hover:active,toolbarbutton#add:hover:active {
+slickbutton:hover {
+  background: -moz-linear-gradient(#F3F3ED, #DEDED3);
+}
+slickbutton:hover:active {
   background: -moz-linear-gradient(#ACA899, #FFFFFF);
 }
 
@@ -182,7 +186,7 @@ label[control='opacity-scale']{
 		<splitter>
 			<label value="your shortcuts"></label>
 			<spacer flex="1"></spacer>
-			<toolbarbutton id="add" label='add +' oncommand='addPlugin(event)'/>
+			<slickbutton id="add" label='add +' oncommand='addPlugin(event)'/>
 		</splitter>
 		<richlistbox id='user-shortcuts' flex='1'
 			seltype='multiple' context='context'  onselect='onSelect(this)' onmouseup='openEditLigthbox(event)'/>
@@ -255,12 +259,12 @@ label[control='opacity-scale']{
 		<checkbox label='load page instantly' aID='instant'/>
 		<checkbox label='suggest' aID='suggest'/>
 	</hbox>
-	<hbox align='end'>
-		<toolbarbutton class='btn' label='remove' aID='remove' oncommand="removePlugin(gPlugin);$('edit-box').hidePopup();"/>
+	<hbox align='center'>
+		<slickbutton label='remove' aID='remove' oncommand="removePlugin(gPlugin);$('edit-box').hidePopup();"/>
 		<toolbarbutton label='more' hidden='true'/>
-		<label class='link' value='Help?' onclick='open(InstantFoxModule.editingHelpURL)'/>
+		<description class='link' value='Help?' onclick='open(InstantFoxModule.editingHelpURL)'/>
 		<spacer flex='1'/>
-		<toolbarbutton class="btn" label='ok' onclick="$('edit-box').hidePopup()"/>
+		<slickbutton label='ok' onclick="$('edit-box').hidePopup()"/>
 	</hbox>
 </panel>
   <!-- <script type="text/javascript" src="__devel__.js"></script> -->
@@ -491,6 +495,8 @@ addPlugin=function(e){
 	$t(panel, 'suggest').checked = true
 	$t(panel, 'instant').checked = false
 	$t(panel, 'name').value = ''
+	$t(panel, 'key').value = ''
+	
 	var urlBox = $t(panel, 'url')
 	urlBox.value = ''
 	urlBox.readOnly = false
