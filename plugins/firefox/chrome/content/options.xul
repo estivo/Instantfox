@@ -100,6 +100,19 @@ splitter {
 	-moz-image-region: rect(0, 48px, 16px, 32px);
 }
 
+toolbarbutton.btn,toolbarbutton#add {
+  background: -moz-linear-gradient(#F3F3ED, #CECEC3);
+  color: #000000;
+  box-shadow: 0 0 2px #CECEC3;
+  border: solid 1px #ACA899;
+  -moz-border-radius: 8px;
+  padding:0px;
+  margin:5px;
+}
+toolbarbutton.btn:hover:active,toolbarbutton#add:hover:active {
+  background: -moz-linear-gradient(#ACA899, #FFFFFF);
+}
+
 label[control='opacity-scale']{
 	margin-top: 10px!important;
 	margin-bottom: -3px!important;
@@ -243,11 +256,11 @@ label[control='opacity-scale']{
 		<checkbox label='suggest' aID='suggest'/>
 	</hbox>
 	<hbox align='end'>
-		<toolbarbutton label='remove' aID='remove' oncommand="removePlugin(gPlugin);$('edit-box').hidePopup();"/>
+		<toolbarbutton class='btn' label='remove' aID='remove' oncommand="removePlugin(gPlugin);$('edit-box').hidePopup();"/>
 		<toolbarbutton label='more' hidden='true'/>
-		<label class='link' value='?' onclick='open(InstantFoxModule.editingHelpURL)'/>
+		<label class='link' value='Help?' onclick='open(InstantFoxModule.editingHelpURL)'/>
 		<spacer flex='1'/>
-		<toolbarbutton label='ok' onclick="$('edit-box').hidePopup()"/>
+		<toolbarbutton class="btn" label='ok' onclick="$('edit-box').hidePopup()"/>
 	</hbox>
 </panel>
   <!-- <script type="text/javascript" src="__devel__.js"></script> -->
