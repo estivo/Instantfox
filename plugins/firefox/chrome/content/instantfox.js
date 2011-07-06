@@ -5,7 +5,7 @@ var HH = {
 	install_url: "http://www.instantfox.net/welcome.php",
 	update_url:  "http://www.instantfox.net/update.php",
 	checkversion: true,
-	installNotificationText: 'hello lucky user',
+	installNotificationText: 'NEW! Your Instantfox configuration menu & shortcuts!',
 	// end belong to notifyTab
 	
 	initialize: function(event) {

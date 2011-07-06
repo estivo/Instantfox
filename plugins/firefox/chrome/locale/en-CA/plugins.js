@@ -56,7 +56,7 @@ rawPluginData.plugins = {
     },
     'Wikipedia': {
 		key: 'w',
-		url: 'http://en.wikipedia.org/w/index.php?search=%q',
+		url: 'http://en.wikipedia.org/wiki/%q',
 		json: 'http://en.wikipedia.org/w/api.php?action=opensearch&search=%q'
     },
     'Wolfram|Alpha': {

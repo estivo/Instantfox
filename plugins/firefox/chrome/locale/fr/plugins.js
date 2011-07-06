@@ -62,7 +62,7 @@ rawPluginData.plugins = {
     },
     'Wikipedia': {
 		key: 'w',
-		url: 'http://de.wikipedia.org/w/index.php?search=%q',
+		url: 'http://de.wikipedia.org/wiki/%q',
 		json: 'http://de.wikipedia.org/w/api.php?action=opensearch&search=%q'
     },
     'Wolfram|Alpha': {
@@ -70,12 +70,12 @@ rawPluginData.plugins = {
 		url: 'http://www.wolframalpha.com/input/?i=%q'
     },
     'IMDb': {
-        key: 'imdb',
-        url: 'http://www.imdb.com/find?s=all&q=%q',
-        json: 'http://sg.media-imdb.com/suggests/%fq/%q.json', // fq = first letter of query
+		key: 'imdb',
+		url: 'http://www.imdb.com/find?s=all&q=%q',
+		json: 'http://sg.media-imdb.com/suggests/%fq/%q.json', // fq = first letter of query
 		hideFromContextMenu: true
     },
-	'Calculator': {
+		'Calculator': {
 		key: 'c',
 		url: 'resource://instantfox/calculator.html#%q',
 		hideFromContextMenu: true
