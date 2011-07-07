@@ -301,28 +301,18 @@ function writeToFile(file, text){
 
 //************** favicon utils
 var faviconService;
-var tldService;
 function makeURI(aURL, aOriginCharset, aBaseURI) {
     return Services.io.newURI(aURL, aOriginCharset, aBaseURI);
 }
 
 function getFavicon(url){
 	faviconService = faviconService || Cc["@mozilla.org/browser/favicon-service;1"].getService(Ci.nsIFaviconService);
-	tldService = tldService || Cc["@mozilla.org/network/effective-tld-service;1"].getService(Ci.nsIEffectiveTLDService);
 	try{
 		var host = url.match(/^[a-z]*:\/\/([^\/#?]*)/)[1];
 		var icon = faviconService.getFaviconImageForPage(makeURI('http://'+host)).spec
 		if(icon != faviconService.defaultFavicon.spec)
-			return icon
-		var baseDomain = tldService.getBaseDomainFromHost(host)
-		var icon = faviconService.getFaviconImageForPage(makeURI('http://'+baseDomain)).spec
-		if(icon != faviconService.defaultFavicon.spec)
-			return icon
-		var icon = faviconService.getFaviconImageForPage(makeURI('http://www.'+baseDomain)).spec
-		if(icon != faviconService.defaultFavicon.spec)
-			return icon
-	}catch(e){}	
-		
+			return icon		
+	}catch(e){}
 	return 'http://g.etfv.co/http://'+host
 }
 /*************************************************************************
