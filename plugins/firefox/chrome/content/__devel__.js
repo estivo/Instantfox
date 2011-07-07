@@ -65,7 +65,7 @@ var __instantFoxDevel__ = {
 		//"chrome://instantfox/locale/plugins.js",
 		"chrome://instantfox/content/instantfox.js"
 	],
-	moduleHref: 'chrome://instantFox/content/instantFoxModule.js',
+	moduleHref: 'chrome://instantfox/content/instantfoxModule.js',
 	
 	doReload: function(b){
 		if (b==2)try{

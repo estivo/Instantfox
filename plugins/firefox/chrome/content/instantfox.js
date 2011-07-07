@@ -36,14 +36,14 @@ var HH = {
 			HH.checkversion = false;
 			var versionfrompref = Services.prefs.getCharPref("extensions.instantfox.version");
 			if(versionfrompref == "0.0.0"){
-				HH.notifyOpenTab(HH.install_url);
+				setTimeout(HH.notifyOpenTab, 500, HH.install_url);
 				Services.prefs.setCharPref("extensions.instantfox.version",HH.version);
 				// add options button only on first install
 				HH.updateOptionsButton();
 				setTimeout(HH.showInstallNotification, 10);
 			}else{
 				if(versionfrompref != HH.version){
-					HH.notifyOpenTab(HH.update_url);
+					setTimeout(HH.notifyOpenTab, 500, HH.update_url);
 					Services.prefs.setCharPref("extensions.instantfox.version",HH.version);
 					setTimeout(HH.showInstallNotification, 10);
 				}
@@ -575,14 +575,17 @@ HH.openHelp = function() {
 // todo: call this after window load on first install releted to FS#32
 HH.updateOptionsButton = function(remove) {	
 	var myId = "instantFox-options";
-	var afterId1 = "search-container";
-	var afterId2 = "urlbar-container";
 	var navBar = document.getElementById("nav-bar");
 	var curSet = navBar.currentSet.split(",");
 	var i = curSet.indexOf(myId)
 
 	if (i == -1 && !remove) {
-		var pos = curSet.indexOf(afterId1) + 1 || curSet.indexOf(afterId2) + 1 || curSet.length;
+		var pos = curSet.indexOf("urlbar-container") + 1;
+		if (pos) {
+			while ('reload-button,stop-button'.indexOf(curSet[pos]) != -1)
+				pos++
+		} else
+			pos = curSet.length;
 		curSet.splice(pos, 0, myId)
 	} else if (i != -1 && remove) {
 		curSet.splice(i, 1)	
