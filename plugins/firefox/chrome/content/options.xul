@@ -279,43 +279,43 @@ ibp = Components.utils.import('chrome://instantfox/content/instantfoxModule.js')
 
 //************** find all avaliable locales
 
-
-ibp.pluginLoader.getAvaliableLocales(function(locales)  {
-	var sbs = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService);
-	var langNames = sbs.createBundle("chrome://global/locale/languageNames.properties");
-	var regNames  = sbs.createBundle("chrome://global/locale/regionNames.properties");
-	
-	function getDisplayName(locale) {
-		var parts = locale.split(/-/); 
-		var displayName;
-		try {
-			displayName = langNames.GetStringFromName(parts[0]);
+function updateLocaleList(){
+	ibp.pluginLoader.getAvaliableLocales(function(locales)  {
+		var sbs = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService);
+		var langNames = sbs.createBundle("chrome://global/locale/languageNames.properties");
+		var regNames  = sbs.createBundle("chrome://global/locale/regionNames.properties");
+		
+		function getDisplayName(locale) {
+			var parts = locale.split(/-/); 
+			var displayName;
 			try {
-				displayName += " (" + regNames.GetStringFromName((parts[1]||parts[0]).toLowerCase()) + ")";
-			} catch (e) {}
-		} catch (e) {
-			displayName = '';
+				displayName = langNames.GetStringFromName(parts[0]);
+				try {
+					displayName += " (" + regNames.GetStringFromName((parts[1]||parts[0]).toLowerCase()) + ")";
+				} catch (e) {}
+			} catch (e) {
+				displayName = '';
+			}
+			return displayName
 		}
-		return displayName
-	}
-	
-	var xml = []
-	for each(var i in locales)
-		xml.push('<menuitem label="', i, '">',
-			'<label value="', getDisplayName(i), '"/><hbox flex="1"/><label value="', i, '"/>',
-		'</menuitem>')
-	
-	var menulist = $('locale')
-	appendXML(menulist.firstChild, xml.join(''))
-	
-	var sl = InstantFoxModule.selectedLocale
-	var si = locales.indexOf(sl)
-	if(si == -1)
-		si = locales.indexOf(sl.substring(0, sl.indexOf('-')))
+		
+		var xml = []
+		for each(var i in locales)
+			xml.push('<menuitem label="', i, '">',
+				'<label value="', getDisplayName(i), '"/><hbox flex="1"/><label value="', i, '"/>',
+			'</menuitem>')
+		
+		var menulist = $('locale')
+		appendXML(menulist.firstChild, xml.join(''))
+		
+		var sl = InstantFoxModule.selectedLocale
+		var si = locales.indexOf(sl)
+		if(si == -1)
+			si = locales.indexOf(sl.substring(0, sl.indexOf('-')))
 
-	menulist.selectedIndex = si
-})
-
+		menulist.selectedIndex = si
+	})
+}
 //************* dom utils
 function $(id)document.getElementById(id)
 function $t(el, aID)el.getElementsByAttribute('aID', aID)[0]
@@ -660,6 +660,8 @@ var l = rebuild(true)
 
 window.addEventListener('load', function() {
 	window.removeEventListener('load', arguments.callee, false)
+	// this must be called after menulists' binding is loaded 
+	updateLocaleList()
 	// if box is too short scrollbar can't be shown
 	if (l < 4) {
 		var el1 = $("standard-shortcuts")
