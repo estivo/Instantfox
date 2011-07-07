@@ -67,13 +67,20 @@ var __instantFoxDevel__ = {
 	],
 	moduleHref: 'chrome://instantFox/content/instantFoxModule.js',
 	
-	doReload: function(){
+	doReload: function(b){
+		if (b==2)try{
+			// debug initialization
+			Services.prefs.clearUserPref("extensions.instantfox.version")
+			HH.updateOptionsButton(true)
+		}catch(e){}
 		//this.reloadComponent()
 		try{HH.destroy()}catch(e){}
 		
-		var p = document.getElementById('instantFox-options').firstChild
-		while(p.hasChildNodes())
-			p.removeChild(p.firstChild)
+		try{
+			var p = document.getElementById('instantFox-options').firstChild
+			while(p.hasChildNodes())
+				p.removeChild(p.firstChild)
+		}catch(e){}
 		
 		var i = this.loadedScriptsCount = 0		
 		this.loadScript(this.sourceList[i], i)
@@ -97,7 +104,7 @@ window.addEventListener('load', function(){
 	window.removeEventListener('load', arguments.callee, false)
 	if(!document.getElementById('__instantFoxDevel__')){
 		let t=document.createElement('toolbarbutton')
-		t.setAttribute('oncommand','__instantFoxDevel__.doReload()')
+		t.setAttribute('onclick','__instantFoxDevel__.doReload(event.button)')
 		t.setAttribute('id', '__instantFoxDevel__')
 		t.setAttribute('label', 'instantFoxDevel')
 		t.textContent = 'instantFoxDevel'

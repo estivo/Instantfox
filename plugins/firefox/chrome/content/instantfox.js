@@ -38,14 +38,14 @@ var HH = {
 			if(versionfrompref == "0.0.0"){
 				HH.notifyOpenTab(HH.install_url);
 				Services.prefs.setCharPref("extensions.instantfox.version",HH.version);
-				HH.showInstallNotification();
 				// add options button only on first install
-				HH.addOptionsButton();
+				HH.updateOptionsButton();
+				setTimeout(HH.showInstallNotification, 10);
 			}else{
 				if(versionfrompref != HH.version){
 					HH.notifyOpenTab(HH.update_url);
 					Services.prefs.setCharPref("extensions.instantfox.version",HH.version);
-					HH.showInstallNotification();
+					setTimeout(HH.showInstallNotification, 10);
 				}
 			}		
 		}
@@ -55,8 +55,13 @@ var HH = {
 			id: 'instant-fox-installed',
 			anchor: "instantFox-options",
 			label: "NEW! Your Instantfox configuration menu & shortcuts!",
-			onHide: 'document.getBindingParent(this).parentNode.hidePopup()',
-			mainAction: 'ok'
+			hide: 'document.getBindingParent(this).parentNode.hidePopup();',
+			mainActionLabel: 'ok',
+			action: 'document.getElementById("instantFox-options").open=true;',
+			a: {
+				label: 'remove this button',
+				action: 'HH.updateOptionsButton(true)'
+			}
 		}
 
 		let doc = document;
@@ -68,12 +73,20 @@ var HH = {
 		let popupnotification = doc.createElement("popupnotification");
 		popupnotification.setAttribute("label", n.label);
 		popupnotification.setAttribute("popupid", n.id);
-		popupnotification.setAttribute("closebuttoncommand", n.onHide);
+		popupnotification.setAttribute("closebuttoncommand", n.hide);
 
-		popupnotification.setAttribute("buttonlabel", n.mainAction);
-		popupnotification.setAttribute("buttoncommand", n.onHide);
-		popupnotification.setAttribute("menucommand", n.onHide);
-		popupnotification.setAttribute("closeitemcommand", n.onHide);
+		popupnotification.setAttribute("buttonlabel", n.mainActionLabel);
+		popupnotification.setAttribute("buttoncommand", n.hide + n.action);
+		popupnotification.setAttribute("menucommand", "event.target.action?" + n.a.action + ':' + n.hide);
+		popupnotification.setAttribute("closeitemcommand", n.hide);
+		
+		//secondary actions
+		let item = doc.createElement("menuitem");
+        item.setAttribute("label", n.a.label);
+        item.action = true;
+        popupnotification.appendChild(item);
+		let closeItemSeparator = doc.createElement("menuseparator");
+        popupnotification.appendChild(closeItemSeparator);
 
 		// popupnotification.notification = n; 
 		p.appendChild(popupnotification);
@@ -560,24 +573,30 @@ HH.openHelp = function() {
 }
 
 // todo: call this after window load on first install releted to FS#32
-HH.addOptionsButton = function() {
-	var myId    = "instantFox-options";
+HH.updateOptionsButton = function(remove) {	
+	var myId = "instantFox-options";
 	var afterId1 = "search-container";
 	var afterId2 = "urlbar-container";
-	var navBar  = document.getElementById("nav-bar");
-	var curSet  = navBar.currentSet.split(",");
+	var navBar = document.getElementById("nav-bar");
+	var curSet = navBar.currentSet.split(",");
+	var i = curSet.indexOf(myId)
 
-	if (curSet.indexOf(myId) == -1) {
+	if (i == -1 && !remove) {
 		var pos = curSet.indexOf(afterId1) + 1 || curSet.indexOf(afterId2) + 1 || curSet.length;
-		var set = curSet.slice(0, pos).concat(myId).concat(curSet.slice(pos));
-
-		navBar.setAttribute("currentset", set.join(","));
-		navBar.currentSet = set.join(",");
+		curSet.splice(pos, 0, myId)
+	} else if (i != -1 && remove) {
+		curSet.splice(i, 1)	
+	} else {
+		curSet = null
+	}
+	
+	if (curSet){
+		navBar.setAttribute("currentset", curSet.join(","));
+		navBar.currentSet = curSet.join(",");
 		document.persist(navBar.id, "currentset");
 		try {
 			BrowserToolboxCustomizeDone(true);
-		}
-		catch (e) {}
+		}catch (e) {}
 	}
 }
 //************************************************************************
