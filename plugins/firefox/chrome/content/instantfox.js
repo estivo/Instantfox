@@ -54,7 +54,7 @@ var HH = {
 		let n = {
 			id: 'instant-fox-installed',
 			anchor: "instantFox-options",
-			label: "NEW! Your Instantfox configuration menu & shortcuts!",
+			label: "NEW!\nYour Instantfox configuration menu & shortcuts!\nEdit your language settings and add your own search-plugins!",
 			hide: 'document.getBindingParent(this).parentNode.hidePopup();',
 			mainActionLabel: 'ok',
 			action: 'document.getElementById("instantFox-options").open=true;',

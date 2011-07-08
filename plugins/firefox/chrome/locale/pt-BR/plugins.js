@@ -27,13 +27,8 @@ rawPluginData.plugins = {
     },
     'Amazon': {
 		key: 'a',
-		url: 'http://www.amazon.ca/gp/search?ie=UTF8&keywords=%q&tag=609-20&index=aps&linkCode=ur2&camp=15121&creative=330641',
+		url: 'http://www.amazon.com/gp/search?ie=UTF8&keywords=%q&tag=406-20&index=aps&linkCode=ur2&camp=1789&creative=9325',
 		json: 'http://completion.amazon.co.uk/search/complete?method=completion&q=%q&search-alias=aps&mkt=4'
-    },
-    'eBay': {
-		key: 'e',
-		url: 'http://shop.ebay.%ld/?_nkw=%q',
-		json: 'http://anywhere.ebay.com/services/suggest/?s=0&q=%q'
     },
     'Twitter': {
 		key: 't',
@@ -78,4 +73,4 @@ rawPluginData.plugins = {
 	}
 };
 
-rawPluginData.localeMap = {'%ls': 'en', '%ll': 'en-CA', '%ld': 'ca'}
+rawPluginData.localeMap = {'%ls': 'pt', '%ll': 'pt-BR', '%ld': 'com.br'}

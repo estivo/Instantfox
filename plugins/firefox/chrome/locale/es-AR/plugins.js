@@ -5,7 +5,7 @@ rawPluginData.plugins = {
 		url: 'http://www.google.%ld/#hl=%ls&q=%q&fp=1&cad=b',
 		json: 'http://suggestqueries.google.com/complete/search?json&q=%q&hl=%ls'
     },
-    'Google Images': {
+    'Google Im‡genes': {
 		key: 'i',
 		url: 'http://www.google.%ld/images?q=%q',
 		json: 'http://suggestqueries.google.com/complete/search?json&ds=i&q=%q'
@@ -27,20 +27,15 @@ rawPluginData.plugins = {
     },
     'Amazon': {
 		key: 'a',
-		url: 'http://www.amazon.ca/gp/search?ie=UTF8&keywords=%q&tag=609-20&index=aps&linkCode=ur2&camp=15121&creative=330641',
+		url: 'http://www.amazon.com/gp/search?ie=UTF8&keywords=%q&tag=406-20&index=aps&linkCode=ur2&camp=1789&creative=9325',
 		json: 'http://completion.amazon.co.uk/search/complete?method=completion&q=%q&search-alias=aps&mkt=4'
-    },
-    'eBay': {
-		key: 'e',
-		url: 'http://shop.ebay.%ld/?_nkw=%q',
-		json: 'http://anywhere.ebay.com/services/suggest/?s=0&q=%q'
     },
     'Twitter': {
 		key: 't',
 		url: 'http://twitter.com/#!/search/%q',
     },
-    'Weather': {
-		key: 'wt',
+    'Tiempo': {
+		key: 'to',
 		url: 'http://weather.instantfox.net/%q',
 		json: 'http://maps.google.com/maps/suggest?q=%q&cp=999&hl=%ls&gl=%ls&v=2&json=b',
 		hideFromContextMenu: true
@@ -65,17 +60,17 @@ rawPluginData.plugins = {
 		url: 'http://www.bing.com/search?q=%q&form=QBLH',
 		json: 'http://api.bing.com/osjson.aspx?query=%q&form=OSDJAS'
     },
-    'Google Luck': {
-		key: 'gg',
+    'Google Suerte': {
+		key: 'gs',
 		url: 'http://www.google.com/search?q=%q&btnI=1',
 		json: 'http://suggestqueries.google.com/complete/search?json&q=%q&hl=%ls',
 		hideFromContextMenu: true
 		},
-		'Calculator': {
+		'Calculadora': {
 		key: 'c',
 		url: 'resource://instantfox/calculator.html#%q',
 		hideFromContextMenu: true
 	}
 };
 
-rawPluginData.localeMap = {'%ls': 'en', '%ll': 'en-CA', '%ld': 'ca'}
+rawPluginData.localeMap = {'%ls': 'es', '%ll': 'es-AR', '%ld': 'com.ar'}

@@ -1,39 +1,29 @@
 rawPluginData = {}
 rawPluginData.plugins = {
-    'Weather': {
-		key: 'f',
-		url: 'http://weather.instantfox.net/%q',
-		json: 'http://maps.google.de/maps/suggest?q=%q&cp=999&gl=fr&gl=fr&v=2&json=b',
-		hideFromContextMenu: true
-    },
     'Google': {
 		key: 'g',
 		url: 'http://www.google.%ld/#hl=%ls&q=%q&fp=1&cad=b',
-		json: 'http://suggestqueries.google.com/complete/search?json&q=%q&hl=fr'
+		json: 'http://suggestqueries.google.com/complete/search?json&q=%q&hl=%ls'
     },
     'Google Images': {
 		key: 'i',
-		url: 'http://www.google.%ld/images?q=%q&hl=%ls',
+		url: 'http://www.google.%ld/images?q=%q',
 		json: 'http://suggestqueries.google.com/complete/search?json&ds=i&q=%q'
     },
     'Google Maps': {
 		key: 'm',
-		url: 'http://maps.google.com/maps?q=%q',
-		json: 'http://maps.google.de/maps/suggest?q=%q&cp=999&gl=fr&gl=fr&v=2&json=b'
+		url: 'http://maps.google.com/maps?q=%q&hl=%ls',
+		json: 'http://maps.google.%ld/maps/suggest?q=%q&cp=999&hl=%ll&gl=%ll&v=2&json=b'
+    },
+    'Wikipedia': {
+		key: 'w',
+		url: 'http://%ls.wikipedia.org/wiki/%q',
+		json: 'http://%ls.wikipedia.org/w/api.php?action=opensearch&search=%q'
     },
     'Youtube': {
 		key: 'y',
 		url: 'http://www.youtube.com/results?search_query=%q',
 		json: 'http://suggestqueries.google.com/complete/search?json&ds=yt&q=%q'
-    },
-    'Google Luck': {
-		key: 'gg',
-		url: 'http://www.google.com/search?hl=%ls&q=%q&btnI=Auf+gut+Gl%C3%BCck!',
-		hideFromContextMenu: true
-    },
-    'Twitter': {
-		key: 't',
-		url: 'http://twitter.com/#!/search/%q',
     },
     'Amazon': {
 		key: 'a',
@@ -43,31 +33,17 @@ rawPluginData.plugins = {
     'eBay': {
 		key: 'e',
 		url: 'http://shop.ebay.%ld/?_nkw=%q',
-		json: 'http://anywhere.ebay.com/services/suggest/?s=0&q=%q' // from firefoxes searchservice
+		json: 'http://anywhere.ebay.com/services/suggest/?s=0&q=%q'
     },
-    'Yahoo': {
-		key: 'yh',
-		url: 'http://%ld.search.yahoo.com/search?p=%q&ei=UTF-8',
-		json: false
+    'Twitter': {
+		key: 't',
+		url: 'http://twitter.com/#!/search/%q',
     },
-    'Bing': {
-		key: 'b',
-		url: 'http://www.bing.com/search?q=%q&form=QBLH',
-		json: 'http://api.bing.com/osjson.aspx?query=%q&form=OSDJAS'
-    },
-    leo: {
-		key: 'l',
-		url: 'http://dict.leo.org/?search=%q',
-		json: false
-    },
-    'Wikipedia': {
-		key: 'w',
-		url: 'http://de.wikipedia.org/wiki/%q',
-		json: 'http://de.wikipedia.org/w/api.php?action=opensearch&search=%q'
-    },
-    'Wolfram|Alpha': {
-		key: 'wa',
-		url: 'http://www.wolframalpha.com/input/?i=%q'
+    'Tempo': {
+		key: 'to',
+		url: 'http://weather.instantfox.net/%q',
+		json: 'http://maps.google.com/maps/suggest?q=%q&cp=999&hl=%ls&gl=%ls&v=2&json=b',
+		hideFromContextMenu: true
     },
     'IMDb': {
 		key: 'imdb',
@@ -75,7 +51,27 @@ rawPluginData.plugins = {
 		json: 'http://sg.media-imdb.com/suggests/%fq/%q.json', // fq = first letter of query
 		hideFromContextMenu: true
     },
-		'Calculator': {
+    'Wolfram|Alpha': {
+		key: 'wa',
+		url: 'http://www.wolframalpha.com/input/?i=%q'
+    },
+    'Yahoo': {
+		key: 'yh',
+		url: 'http://%ld.search.yahoo.com/search?p=%q&ei=UTF-8',
+		json: 'http://ff.search.yahoo.com/gossip?output=fxjson&command=%q'
+    },
+    'Bing': {
+		key: 'b',
+		url: 'http://www.bing.com/search?q=%q&form=QBLH',
+		json: 'http://api.bing.com/osjson.aspx?query=%q&form=OSDJAS'
+    },
+    'Google Chance': {
+		key: 'gg',
+		url: 'http://www.google.com/search?q=%q&btnI=1',
+		json: 'http://suggestqueries.google.com/complete/search?json&q=%q&hl=%ls',
+		hideFromContextMenu: true
+		},
+		'calculateur ': {
 		key: 'c',
 		url: 'resource://instantfox/calculator.html#%q',
 		hideFromContextMenu: true
