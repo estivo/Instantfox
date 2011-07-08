@@ -1,10 +1,21 @@
 <?xml version="1.0"?>
 
 <overlay id="instantfox-browser-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-  <!-- development helper. remove in release builds -->
+  <!-- devel__( -->
   <script type="text/javascript" src="__devel__.js"></script>
-  <!-- Load Browser-Specific Execution -->
-  <script type="text/javascript" src="chrome://instantfox/content/instantfox.js"></script>
+  <statusbar id="status-bar" ordinal="1000" hideresizer="true">
+  <toolbarbutton class="bookmark-item"  style="list-style-image:url(chrome://instantfox/content/skin/button-logo.png)"
+	context='' action="reload" onclick="instantFoxDevel.onClick(event)"
+	type="menu-button" label="instantFoxDevel">
+    <menupopup>
+      <menuitem action="build" label="build"/>
+       <!--<menuitem action="build-d" label="build-debug"/>-->
+      <menuitem action="test-first-run" label="test first run"/>
+      <menuitem action="show-folder" label="show folder"/>
+    </menupopup>
+  </toolbarbutton>
+</statusbar>
+
   
   <!-- @TODO: Add Autocomplete Feature -->
   <!-- autocomplete-richlistbox -->
@@ -12,6 +23,10 @@
     <panel id="InstantFoxList" ignorekeys="true" level="top" type="autocomplete-richlistbox" noautofocus="true">
     </panel>
   </popupset> -->
+
+  <!-- devel__) -->
+  <script type="text/javascript" src="chrome://instantfox/content/instantfox.js"></script>
+
   <toolbarpalette id="BrowserToolbarPalette">
 	<toolbarbutton type="menu" id='instantFox-options' class='toolbarbutton-1 chromeclass-toolbar-additional'
 	style='list-style-image:url(chrome://instantfox/content/skin/button-logo.png)' label='InstantFox'>

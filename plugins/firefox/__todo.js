@@ -1,3 +1,4 @@
+/** devel__( */
 function makeReqAsync(href, callback) {
     req = new XMLHttpRequest;
     req.open("GET", href, true);

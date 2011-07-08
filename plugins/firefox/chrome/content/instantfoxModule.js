@@ -7,9 +7,7 @@ Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 EXPORTED_SYMBOLS = ['InstantFoxModule'];
 
-/*****************************************************
- * debugging
- ***********/
+/**devel__(*********************************************/
 function debug(aMessage) {
 	try {
 		var objects = [];
@@ -36,7 +34,7 @@ function dump() {
     var consoleService = Components.classes['@mozilla.org/consoleservice;1'].getService(Components.interfaces.nsIConsoleService);
     consoleService.logStringMessage("" + aMessage);
 }
-
+/** devel__) **/
 /*************************************************************************
  *    load and save customized plugins
  *    plugin={
