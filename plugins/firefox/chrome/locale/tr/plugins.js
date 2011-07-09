@@ -20,6 +20,7 @@ rawPluginData.plugins = {
 		url: 'http://%ls.wikipedia.org/wiki/%q',
 		json: 'http://%ls.wikipedia.org/w/api.php?action=opensearch&search=%q'
     },
+    /* Youtube is blocked in Turkey ... */
     'Twitter': {
 		key: 't',
 		url: 'http://twitter.com/#!/search/%q',
@@ -31,7 +32,7 @@ rawPluginData.plugins = {
 		hideFromContextMenu: true
     },
     'IMDb': {
-		key: 'imdb',
+		key: 'im',
 		url: 'http://www.imdb.com/find?s=all&q=%q',
 		json: 'http://sg.media-imdb.com/suggests/%fq/%q.json', // fq = first letter of query
 		hideFromContextMenu: true
