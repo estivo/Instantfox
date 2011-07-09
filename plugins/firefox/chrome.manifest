@@ -6,19 +6,24 @@ style     chrome://browser/content/browser.xul   chrome://instantfox/content/ski
 overlay   chrome://browser/content/browser.xul   chrome://instantfox/content/instantfox.xul
 
 
-locale    instantfox de-DE chrome/locale/de/
-locale    instantfox de-AT chrome/locale/de-AT/
-locale    instantfox de-CH chrome/locale/de-CH/
-locale    instantfox en-CA chrome/locale/en-CA/
-locale    instantfox en-GB chrome/locale/en-GB/
-locale    instantfox en-US chrome/locale/en-US/
-locale    instantfox es-ES chrome/locale/es-ES/
-locale    instantfox fr chrome/locale/fr/
-locale    instantfox fr-FR chrome/locale/fr/
-locale    instantfox it chrome/locale/it/
-locale    instantfox it-IT chrome/locale/it/
-locale    instantfox pl chrome/locale/pl/
-locale    instantfox nl chrome/locale/nl/
+locale    instantfox de       chrome/locale/de/
+locale    instantfox de-AT    chrome/locale/de-AT/
+locale    instantfox de-CH    chrome/locale/de-CH/
+locale    instantfox en-AU    chrome/locale/en-AU/
+locale    instantfox en-CA    chrome/locale/en-CA/
+locale    instantfox en-GB    chrome/locale/en-GB/
+locale    instantfox en-US    chrome/locale/en-US/
+locale    instantfox es-AR    chrome/locale/es-AR/
+locale    instantfox es-ES    chrome/locale/es-ES/
+locale    instantfox es-MX    chrome/locale/es-MX/
+locale    instantfox fr       chrome/locale/fr/
+locale    instantfox it       chrome/locale/it/
+locale    instantfox nl       chrome/locale/nl/
+locale    instantfox pl       chrome/locale/pl/
+locale    instantfox pt       chrome/locale/pt/
+locale    instantfox pt-BR    chrome/locale/pt-BR/
+locale    instantfox ru       chrome/locale/ru/
+locale    instantfox tr       chrome/locale/tr/
 
 #FF4
 #component {c541b971-0729-4f5d-a5c4-1f4dadef365e} components/instantfox_search.js

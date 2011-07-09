@@ -120,13 +120,55 @@ var instantFoxDevel = {
 				break
 			case 'build-d':
 				break
+			case 'copyLocaleManifest':
+				this.copyLocaleManifest()
+				break
 		}
 	},
 	// file utils
 	getContainingFolder: function(){
 		return getLocalFile('chrome://instantfox/content').parent.parent.parent.QueryInterface(Ci.nsILocalFile)
 	},
+	copyLocaleManifest: function(){
+		InstantFoxModule.pluginLoader.getAvaliableLocales(function(locales)  {
+			var decl = 'locale    instantfox %n%s chrome/locale/%n/'
+			var ans = locales.map(function(x){
+				return decl.replace('%n', x, 'g').replace('%s', Array(9-x.length).join(' '), 'g')
+			}).join('\n')
+			//alert(ans)
+			gClipboardHelper.copyString(ans)
+		})		
+	}
+	
 }
+
+var gClipboardHelper = {
+    copyString: function(str) {
+        if (str)
+            this.cbHelperService.copyString(str);
+    },
+    getData: function() {
+        try{
+            var pastetext,
+                clip = Cc["@mozilla.org/widget/clipboard;1"].getService(Ci.nsIClipboard),
+                trans = Cc["@mozilla.org/widget/transferable;1"].createInstance(Ci.nsITransferable),
+                str={},
+                strLength={};
+
+            trans.addDataFlavor("text/unicode");
+            clip.getData(trans,1);
+            trans.getTransferData("text/unicode",str,strLength);
+            str = str.value.QueryInterface(Components.interfaces.nsISupportsString);
+            pastetext = str.data.substring(0, strLength.value/2) || "";
+            return pastetext;
+        } catch(e) {
+            Components.utils.reportError(e);
+            return "";
+        }
+    }
+};
+XPCOMUtils.defineLazyServiceGetter(gClipboardHelper, 'cbHelperService',
+					"@mozilla.org/widget/clipboardhelper;1", "nsIClipboardHelper")
 
 getLocalFile=function getLocalFile(mPath){
 	var uri = Services.io.newURI(mPath, null, null),file;
