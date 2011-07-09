@@ -287,7 +287,7 @@ function updateLocaleList(){
 		var langNames = sbs.createBundle("chrome://global/locale/languageNames.properties");
 		var regNames  = sbs.createBundle("chrome://global/locale/regionNames.properties");
 		
-		function getDisplayName(locale) {
+		function addDisplayName(locale) {
 			var parts = locale.split(/-/); 
 			var displayName;
 			try {
@@ -298,22 +298,38 @@ function updateLocaleList(){
 			} catch (e) {
 				displayName = '';
 			}
-			return displayName
+			return {displayName: displayName, id: locale}
 		}
+		
+		var locales = locales.map(addDisplayName)
+		
+		locales.sort(function(x, y)x.displayName > y.displayName)
 		
 		var xml = []
 		for each(var i in locales)
-			xml.push('<menuitem label="', i, '">',
-				'<label value="', getDisplayName(i), '"/><hbox flex="1"/><label value="', i, '"/>',
+			xml.push('<menuitem label="', i.id, '">',
+				'<label value="', i.displayName, '"/><hbox flex="1"/><label value="', i.id, '"/>',
 			'</menuitem>')
 		
 		var menulist = $('locale')
 		appendXML(menulist.firstChild, xml.join(''))
 		
+		// find selected index
 		var sl = InstantFoxModule.selectedLocale
-		var si = locales.indexOf(sl)
+		var slPart = sl.substring(0, sl.indexOf('-'))
+		var si = -1, siPart = -1;
+		for (var i in locales){
+			var loc = locales[i]
+			if(loc.id == sl){
+				si = i
+				break
+			}
+			if(loc.id == slPart){
+				siPart = i
+			}
+		}
 		if(si == -1)
-			si = locales.indexOf(sl.substring(0, sl.indexOf('-')))
+			si = siPart
 
 		menulist.selectedIndex = si
 	})
