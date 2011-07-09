@@ -3,7 +3,7 @@ rawPluginData.plugins = {
     'Яндекс': {
 		key: 'y',
 		url: 'http://yandex.ru/yandsearch?text=%q&lr=99',
-		json: 'http://suggestqueries.google.com/complete/search?json&q=%q&hl=%ls'
+		json: 'http://suggest.yandex.net/suggest-ff.cgi?part=%q'
     },
     'Google': {
 		key: 'g',
