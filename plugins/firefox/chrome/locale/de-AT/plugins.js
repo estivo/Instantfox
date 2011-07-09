@@ -56,10 +56,6 @@ rawPluginData.plugins = {
 		json: 'http://sg.media-imdb.com/suggests/%fq/%q.json', // fq = first letter of query
 		hideFromContextMenu: true
     },
-    'Wolfram|Alpha': {
-		key: 'wa',
-		url: 'http://www.wolframalpha.com/input/?i=%q'
-    },
     'Yahoo': {
 		key: 'yh',
 		url: 'http://%ld.search.yahoo.com/search?p=%q&ei=UTF-8',

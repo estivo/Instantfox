@@ -1,6 +1,6 @@
 rawPluginData = {}
 rawPluginData.plugins = {
-    'Yandex': {
+    'Яндекс': {
 		key: 'y',
 		url: 'http://yandex.ru/yandsearch?text=%q&lr=99',
 		json: 'http://suggestqueries.google.com/complete/search?json&q=%q&hl=%ls'
@@ -46,14 +46,10 @@ rawPluginData.plugins = {
 		hideFromContextMenu: true
     },
     'IMDb': {
-		key: 'imdb',
+		key: 'im',
 		url: 'http://www.imdb.com/find?s=all&q=%q',
 		json: 'http://sg.media-imdb.com/suggests/%fq/%q.json', // fq = first letter of query
 		hideFromContextMenu: true
-    },
-    'Wolfram|Alpha': {
-		key: 'wa',
-		url: 'http://www.wolframalpha.com/input/?i=%q'
     },
     'Yahoo': {
 		key: 'yh',
