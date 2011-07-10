@@ -56,16 +56,6 @@ rawPluginData.plugins = {
 		json: 'http://sg.media-imdb.com/suggests/%fq/%q.json', // fq = first letter of query
 		hideFromContextMenu: true
     },
-    'Yahoo': {
-		key: 'yh',
-		url: 'http://%ld.search.yahoo.com/search?p=%q&ei=UTF-8',
-		json: 'http://ff.search.yahoo.com/gossip?output=fxjson&command=%q'
-    },
-    'Bing': {
-		key: 'b',
-		url: 'http://www.bing.com/search?q=%q&form=QBLH',
-		json: 'http://api.bing.com/osjson.aspx?query=%q&form=OSDJAS'
-    },
     'Google Glück': {
 		key: 'gg',
 		url: 'http://www.google.%ld/search?hl=%ls&q=%q&btnI=1',
