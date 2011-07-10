@@ -5,14 +5,14 @@
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>searchy@searchy</em:id>
-    <em:version>1.6.3</em:version>
+    <em:version>2.0.0</em:version>
     <em:type>2</em:type>
    
     <em:targetApplication>
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-        <em:minVersion>1.5</em:minVersion>
-        <em:maxVersion>6.0a1</em:maxVersion>
+        <em:minVersion>4.0b1</em:minVersion>
+        <em:maxVersion>8.0</em:maxVersion>
       </Description>
     </em:targetApplication>
 
@@ -20,6 +20,7 @@
     <em:description>Search via your addressbar with shortcuts at your fingertips. Use g for Google, m for Maps, e for eBay, y for Youtube, w for Wikipedia, c for Calculator, f for Weather Forecast and many more.</em:description>
     <em:creator>instantfox.net</em:creator>
     <em:iconURL>chrome://instantfox/content/skin/logo.png</em:iconURL>
+    <em:optionsURL>chrome://instantfox/content/options.xul</em:optionsURL>
     <em:homepageURL>http://www.instantfox.net/</em:homepageURL>
   </Description>      
 </RDF>

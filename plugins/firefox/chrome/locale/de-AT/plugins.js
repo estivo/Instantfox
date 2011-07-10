@@ -1,77 +1,82 @@
-  InstantFox.Shortcuts = { 
-    ga:   'googleApi',
-    c:    'calculator',
-    f:    'weather',
-    g:    'googleFrame',
-    i:    'googleImages',
-    m:    'googleMaps',
-    w:    'wikipedia',
-    y:    'youTube',
-    yh:   'yahoo',
-    b:    'bing',
-    l:    'leo',
-    t:    'twitter',
-    a:    'amazon',
-    e:    'ebay',
-    gg:		'googleluck',
-    wa:   'wolframalpha'
-  };
-  
-  InstantFox.Plugins.extend({
-    weather: {
-      url: 'http://weather.instantfox.net/%q',
-      json: 'http://maps.google.de/maps/suggest?q=%q&cp=999&gl=at&gl=at&v=2&json=b'
+rawPluginData = {}
+rawPluginData.plugins = {
+    'Google': {
+		key: 'g',
+		url: 'http://www.google.%ld/#hl=%ls&q=%q&fp=1&cad=b',
+		json: 'http://suggestqueries.google.com/complete/search?json&q=%q&hl=%ls'
     },
-    googleFrame: {
-      url: 'http://www.google.%ld/#hl=%ls&q=%q&fp=1&cad=b',
-      json: 'http://suggestqueries.google.com/complete/search?json&q=%q&hl=at'
+    'Google Images': {
+		key: 'i',
+		url: 'http://www.google.%ld/images?q=%q&hl=%ls',
+		json: 'http://suggestqueries.google.com/complete/search?json&ds=i&hl=%ls&q=%q'
     },
-    googleImages: {
-      url: 'http://www.google.%ld/images?q=%q&hl=%ls',
-      json: 'http://suggestqueries.google.com/complete/search?json&ds=i&q=%q'
+    'Google Maps': {
+		key: 'm',
+		url: 'http://maps.google.com/maps?q=%q',
+		json: 'http://maps.google.%ld/maps/suggest?q=%q&cp=999&hl=%ll&gl=%ll&v=2&json=b'
     },
-    googleMaps: {
-      url: 'http://maps.google.com/maps?q=%q',
-      json: 'http://maps.google.de/maps/suggest?q=%q&cp=999&gl=at&gl=at&v=2&json=b'
+    'Wikipedia': {
+		key: 'w',
+		url: 'http://%ls.wikipedia.org/wiki/%q',
+		json: 'http://%ls.wikipedia.org/w/api.php?action=opensearch&search=%q'
     },
-    youTube: {
-      url: 'http://www.youtube.com/results?search_query=%q',
-      json: 'http://suggestqueries.google.com/complete/search?json&ds=yt&q=%q'
+    'Youtube': {
+		key: 'y',
+		url: 'http://www.youtube.com/results?search_query=%q',
+		json: 'http://suggestqueries.google.com/complete/search?json&hl=%ls&ds=yt&q=%q'
     },
-    googleluck: {
-      url: 'http://www.google.de/search?hl=de&q=%q&btnI=Auf+gut+Gl%C3%BCck!',
-  	  json: false
+    'Amazon': {
+		key: 'a',
+		url: 'http://www.amazon.de/gp/search?ie=UTF8&keywords=%q&tag=324-21&index=aps&linkCode=ur2&camp=1638&creative=6742',
+		json: 'http://completion.amazon.co.uk/search/complete?method=completion&q=%q&search-alias=aps&mkt=4'
+    }, 
+    'eBay': {
+		key: 'e',
+		url: 'http://shop.ebay.%ld/?_nkw=%q',
+		json: 'http://anywhere.ebay.com/services/suggest/?s=0&q=%q'
     },
-    twitter: {
-      url: 'http://twitter.com/#!/search/%q',
-   	  json: false
+    'Twitter': {
+		key: 't',
+		url: 'http://twitter.com/#!/search/%q',
+    },   
+    'Wetter': {
+		key: 'wt',
+		url: 'http://weather.instantfox.net/%q',
+		json: 'http://maps.google.com/maps/suggest?q=%q&cp=999&hl=%ls&gl=%ls&v=2&json=b',
+		hideFromContextMenu: true
     },
-    amazon: {
-      url: 'http://www.amazon.de/gp/search?ie=UTF8&keywords=%q&tag=324-21&index=aps&linkCode=ur2&camp=1638&creative=6742',
-      json: 'http://completion.amazon.co.uk/search/complete?method=completion&q=%q&search-alias=aps&mkt=4'
+    'LEO Eng-Deu Dictionary': {
+		key: 'd',
+		url: 'http://dict.leo.org/?search=%q',
+		json: false
     },
-    ebay: {
-      url: 'http://shop.ebay.%ld/?_nkw=%q',
-      json: 'http://anywhere.ebay.de/services/suggest/?s=0&q=%q'
+    'Int. Movie Db': {
+		key: 'im',
+		url: 'http://www.imdb.com/find?s=all&q=%q',
+		json: 'http://sg.media-imdb.com/suggests/%fq/%q.json', // fq = first letter of query
+		hideFromContextMenu: true
     },
-    yahoo: {
-      url: 'http://%ld.search.yahoo.com/search?p=%q&ei=UTF-8',
-      json: false
+    'Yahoo': {
+		key: 'yh',
+		url: 'http://%ld.search.yahoo.com/search?p=%q&ei=UTF-8',
+		json: 'http://ff.search.yahoo.com/gossip?output=fxjson&command=%q'
     },
-    bing: {
-      url: 'http://www.bing.com/search?q=%q&form=QBLH',
-      json: 'http://api.bing.com/osjson.aspx?query=%q&form=OSDJAS'
+    'Bing': {
+		key: 'b',
+		url: 'http://www.bing.com/search?q=%q&form=QBLH',
+		json: 'http://api.bing.com/osjson.aspx?query=%q&form=OSDJAS'
     },
-    leo: {
-      url: 'http://dict.leo.org/?search=%q',
-      json: false
-    },
-    wikipedia: {
-      url: 'http://de.wikipedia.org/w/index.php?search=%q',
-      json: 'http://de.wikipedia.org/w/api.php?action=opensearch&search=%q'
-    },
-    wolframalpha: {
-      url: 'http://www.wolframalpha.com/input/?i=%q',
-      json: false
-    }
-  });
+    'Google Glück': {
+		key: 'gg',
+		url: 'http://www.google.%ld/search?hl=%ls&q=%q&btnI=1',
+		json: 'http://suggestqueries.google.com/complete/search?json&q=%q&hl=%ls',
+		hideFromContextMenu: true
+		},
+		'Calculator': {
+		key: 'c',
+		url: 'resource://instantfox/calculator.html#%q',
+		hideFromContextMenu: true
+		}
+};
+
+rawPluginData.localeMap = {'%ls': 'de', '%ll': 'de-AT', '%ld': 'at'}

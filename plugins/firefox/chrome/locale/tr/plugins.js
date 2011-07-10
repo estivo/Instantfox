@@ -20,21 +20,7 @@ rawPluginData.plugins = {
 		url: 'http://%ls.wikipedia.org/wiki/%q',
 		json: 'http://%ls.wikipedia.org/w/api.php?action=opensearch&search=%q'
     },
-    'Youtube': {
-		key: 'y',
-		url: 'http://www.youtube.com/results?search_query=%q',
-		json: 'http://suggestqueries.google.com/complete/search?json&ds=yt&q=%q'
-    },
-    'Amazon': {
-		key: 'a',
-		url: 'http://www.amazon.ca/gp/search?ie=UTF8&keywords=%q&tag=609-20&index=aps&linkCode=ur2&camp=15121&creative=330641',
-		json: 'http://completion.amazon.co.uk/search/complete?method=completion&q=%q&search-alias=aps&mkt=4'
-    },
-    'eBay': {
-		key: 'e',
-		url: 'http://shop.ebay.%ld/?_nkw=%q',
-		json: 'http://anywhere.ebay.com/services/suggest/?s=0&q=%q'
-    },
+    /* Youtube is blocked in Turkey ... */
     'Twitter': {
 		key: 't',
 		url: 'http://twitter.com/#!/search/%q',
@@ -61,12 +47,6 @@ rawPluginData.plugins = {
 		url: 'http://www.bing.com/search?q=%q&form=QBLH',
 		json: 'http://api.bing.com/osjson.aspx?query=%q&form=OSDJAS'
     },
-    'Google Luck': {
-		key: 'gg',
-		url: 'http://www.google.com/search?q=%q&btnI=1',
-		json: 'http://suggestqueries.google.com/complete/search?json&q=%q&hl=%ls',
-		hideFromContextMenu: true
-		},
 		'Calculator': {
 		key: 'c',
 		url: 'resource://instantfox/calculator.html#%q',
@@ -74,4 +54,4 @@ rawPluginData.plugins = {
 	}
 };
 
-rawPluginData.localeMap = {'%ls': 'en', '%ll': 'en-CA', '%ld': 'ca'}
+rawPluginData.localeMap = {'%ls': 'tr', '%ll': 'tr', '%ld': 'com.tr'}

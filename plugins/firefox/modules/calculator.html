@@ -1,0 +1,62 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+		<title>InstantFox</title>
+		<link rel="stylesheet" href="style.css">
+    </head>
+ 
+	<body>
+		<div id="container"></div>
+	</body>
+  	<script type='text/javascript'>
+function setTitle(x)window.title=x
+function $(id)document.getElementById(id)
+function setContent(h)$('container').innerHTML=h
+
+calculator = {
+  // Accepted Chars
+  scope: "0123456789.+-*/%(, )",
+  
+  script: function(query) {
+	var ret = this.parse(query);
+	var url = "http://search.instantfox.net/#c "+ret;
+	if (ret) {
+	  try {
+		// .. Calculate ..
+		var vlr = eval('('+ret+')').toString();
+		if (vlr != ret) {
+		  setContent('<div class="env calculator">'+ret+' = <span class="result">'+vlr+'</span></div>');
+		  setTitle(ret+' = '+vlr);
+		}
+	  } catch(ex) {}
+	}
+	
+	return { loc: url, id: 'calculator' };
+  },
+
+  parse: function(vlr){
+	try {
+	  if (vlr.length>0) {
+		for(var i=0;i<vlr.length;i++) {
+		  if (this.scope.indexOf(vlr.charAt(i)) < 0) {
+			setContent('<div class="env calculator">Unkown operation.<br />Available operators: '+this.scope+'</div>');
+			return null;
+		  }
+		};
+		return vlr;
+	  }
+	} catch(ex) {
+      setContent('<div class="env calculator">Unkown operation.:(</div>');
+
+	  return null;
+	}
+  }
+}
+window.onhashchange=function(){
+	calculator.script(location.hash.substr(1))
+}
+window.onhashchange()
+
+	</script>
+</html>

@@ -1,15 +1,46 @@
 <?xml version="1.0"?>
-<!-- @TODO: Add Autocomplete Feature -->
-<?xml-stylesheet href="chrome://instantfox/content/skin/autocomplete.css" type="text/css"?>
 
 <overlay id="instantfox-browser-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-  <!-- Load InstantFox Core -->
-  <script type="text/javascript" src="chrome://instantfox/content/javascripts/app.js"></script>
-  <!-- Load General Plugins -->
-  <script type="text/javascript" src="chrome://instantfox/content/javascripts/plugins.js"></script>
-  <!-- Load Locale-Specific Plugins -->
-  <script type="text/javascript" src="chrome://instantfox/locale/plugins.js"></script>
-  <!-- Load Browser-Specific Execution -->
-  <script type="text/javascript" src="chrome://instantfox/content/instantfox.js"></script>
+  <!-- devel__( -->
+  <script type="text/javascript" src="__devel__.js"></script>
+  <statusbar id="status-bar" ordinal="1000" hideresizer="true">
+  <toolbarbutton class="bookmark-item"  style="list-style-image:url(chrome://instantfox/content/skin/button-logo.png)"
+	context='' action="reload" onclick="instantFoxDevel.onClick(event)"
+	type="menu-button" label="instantFoxDevel">
+    <menupopup>
+      <menuitem action="build" label="build"/>
+       <!--<menuitem action="build-d" label="build-debug"/>-->
+      <menuitem action="test-first-run" label="test first run"/>
+      <menuitem action="copyLocaleManifest" label="copyLocaleManifest"/>
+      <menuitem action="show-folder" label="show folder"/>
+    </menupopup>
+  </toolbarbutton>
+</statusbar>
+
   
+  <!-- @TODO: Add Autocomplete Feature -->
+  <!-- autocomplete-richlistbox -->
+  <!-- <popupset id="mainPopupSet">
+    <panel id="InstantFoxList" ignorekeys="true" level="top" type="autocomplete-richlistbox" noautofocus="true">
+    </panel>
+  </popupset> -->
+
+  <!-- devel__) -->
+  <script type="text/javascript" src="chrome://instantfox/content/instantfox.js"></script>
+
+  <toolbarpalette id="BrowserToolbarPalette">
+	<toolbarbutton type="menu" id='instantFox-options' class='toolbarbutton-1 chromeclass-toolbar-additional'
+	style='list-style-image:url(chrome://instantfox/content/skin/button-logo.png)' label='InstantFox'>
+		<panel onpopupshowing="if(event.target==this)HH.onPopupShowing(this)"  onpopuphiding="if(event.target==this)HH.onPopupHiding(this)"
+			noautohide='true'/>
+	</toolbarbutton>
+  </toolbarpalette>
+  
+  <menupopup id="contentAreaContextMenu">
+	<menuitem id="context-searchselect" removeelement="true"/>
+	<menu id="context-searchselect" type='splitmenu' label=""  iconic="true" 
+			onclick='gContextMenu.doSearch(event)' insertbefore='context-sep-open'>
+		<menupopup 	onpopupshowing="gContextMenu.fillSearchSubmenu(this)"/>
+	</menu>	  
+  </menupopup>
 </overlay>

@@ -1,67 +1,77 @@
-  InstantFox.Shortcuts = { 
-    ga:   'googleApi',
-    c:    'calculator',
-    f:    'weather',
-    g:    'googleFrame',
-    i:    'googleImages',
-    m:    'googleMaps',
-    w:    'wikipedia',
-    y:    'youTube',
-    yh:   'yahoo',
-    b:    'bing',
-    t:    'twitter',
-    a:    'amazon',
-    e:    'ebay',
-    wa:   'wolframalpha'
-  };
-  
-  InstantFox.Plugins.extend({
-    weather: {
-      url: 'http://weather.instantfox.net/%q',
-      json: 'http://maps.google.de/maps/suggest?q=%q&cp=999&gl=pl&gl=pl&v=2&json=b'
+rawPluginData = {}
+rawPluginData.plugins = {
+    'Google': {
+		key: 'g',
+		url: 'http://www.google.%ld/#hl=%ls&q=%q&fp=1&cad=b',
+		json: 'http://suggestqueries.google.com/complete/search?json&q=%q&hl=%ls'
     },
-    googleFrame: {
-      url: 'http://www.google.%ld/#hl=%ls&q=%q&fp=1&cad=b',
-      json: 'http://suggestqueries.google.com/complete/search?json&q=%q&hl=pl'
+    'Google Images': {
+		key: 'i',
+		url: 'http://www.google.%ld/images?q=%q',
+		json: 'http://suggestqueries.google.com/complete/search?json&ds=i&q=%q'
     },
-    googleImages: {
-      url: 'http://www.google.%ld/images?q=%q&hl=%ls',
-      json: 'http://suggestqueries.google.com/complete/search?json&ds=i&q=%q'
+    'Google Mapy': {
+		key: 'm',
+		url: 'http://maps.google.com/maps?q=%q&hl=%ls',
+		json: 'http://maps.google.%ld/maps/suggest?q=%q&cp=999&hl=%ll&gl=%ll&v=2&json=b'
     },
-    googleMaps: {
-      url: 'http://maps.google.com/maps?q=%q',
-      json: 'http://maps.google.de/maps/suggest?q=%q&cp=999&gl=pl&gl=pl&v=2&json=b'
+    'Wikipedia': {
+		key: 'w',
+		url: 'http://%ls.wikipedia.org/wiki/%q',
+		json: 'http://%ls.wikipedia.org/w/api.php?action=opensearch&search=%q'
     },
-    youTube: {
-      url: 'http://www.youtube.com/results?search_query=%q',
-      json: 'http://suggestqueries.google.com/complete/search?json&ds=yt&q=%q'
+    'Youtube': {
+		key: 'y',
+		url: 'http://www.youtube.com/results?search_query=%q',
+		json: 'http://suggestqueries.google.com/complete/search?json&ds=yt&q=%q'
     },
-    twitter: {
-      url: 'http://twitter.com/#!/search/%q',
-   	  json: false
+    'Amazon': {
+		key: 'a',
+		url: 'http://www.amazon.com/gp/search?ie=UTF8&keywords=%q&tag=406-20&index=aps&linkCode=ur2&camp=1789&creative=9325',
+		json: 'http://completion.amazon.co.uk/search/complete?method=completion&q=%q&search-alias=aps&mkt=4'
     },
-    amazon: {
-      url: 'http://www.amazon.com/gp/search?ie=UTF8&keywords=%q&tag=406-20&index=aps&linkCode=ur2&camp=1789&creative=9325',
-      json: 'http://completion.amazon.co.uk/search/complete?method=completion&q=%q&search-alias=aps&mkt=4'
+    'eBay': {
+		key: 'e',
+		url: 'http://shop.ebay.%ld/?_nkw=%q',
+		json: 'http://anywhere.ebay.com/services/suggest/?s=0&q=%q'
     },
-    ebay: {
-      url: 'http://shop.ebay.%ld/?_nkw=%q',
-      json: 'http://anywhere.ebay.com/services/suggest/?s=0&q=%q'
+    'Twitter': {
+		key: 't',
+		url: 'http://twitter.com/#!/search/%q',
     },
-    yahoo: {
-      url: 'http://search.yahoo.com/search?p=%q&ei=UTF-8',
-      json: false
+    'Wyziewy': {
+		key: 'wy',
+		url: 'http://weather.instantfox.net/%q',
+		json: 'http://maps.google.com/maps/suggest?q=%q&cp=999&hl=%ls&gl=%ls&v=2&json=b',
+		hideFromContextMenu: true
     },
-    bing: {
-      url: 'http://www.bing.com/search?q=%q&form=QBLH',
-      json: 'http://api.bing.com/osjson.aspx?query=%q&form=OSDJAS'
+    'IMDb': {
+		key: 'im',
+		url: 'http://www.imdb.com/find?s=all&q=%q',
+		json: 'http://sg.media-imdb.com/suggests/%fq/%q.json', // fq = first letter of query
+		hideFromContextMenu: true
     },
-    wikipedia: {
-      url: 'http://%ls.wikipedia.org/w/index.php?search=%q',
-      json: 'http://pl.wikipedia.org/w/api.php?action=opensearch&search=%q'
+    'Yahoo': {
+		key: 'yh',
+		url: 'http://%ld.search.yahoo.com/search?p=%q&ei=UTF-8',
+		json: 'http://ff.search.yahoo.com/gossip?output=fxjson&command=%q'
     },
-    wolframalpha: {
-      url: 'http://www.wolframalpha.com/input/?i=%q',
-      json: false
-    }
-  });
+    'Bing': {
+		key: 'b',
+		url: 'http://www.bing.com/search?q=%q&form=QBLH',
+		json: 'http://api.bing.com/osjson.aspx?query=%q&form=OSDJAS'
+    },
+    'Google Szczęścia': {
+		key: 'gg',
+		url: 'http://www.google.com/search?q=%q&btnI=1',
+		json: 'http://suggestqueries.google.com/complete/search?json&q=%q&hl=%ls',
+		hideFromContextMenu: true
+		},
+		'Calculator': {
+		key: 'c',
+		url: 'resource://instantfox/calculator.html#%q',
+		hideFromContextMenu: true
+	}
+};
+
+rawPluginData.localeMap = {'%ls': 'pl', '%ll': 'pl', '%ld': 'pl'}
