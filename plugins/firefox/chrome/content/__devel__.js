@@ -269,7 +269,7 @@ function packXPI(folder, callback){
 		Components.utils.reportError(e)
 	}
 }
- 
+
 /**
 * function to add the contents of a folder recursively
 * zipW a nsIZipWriter object
@@ -298,7 +298,7 @@ function addFolderContentsToZip(zipW, folder, root){
 		if (entry.isDirectory()) {			
 			zipW.addEntryFile(jarName, Ci.nsIZipWriter.COMPRESSION_DEFAULT, entry, true);
 			addFolderContentsToZip(zipW, entry, root + entry.leafName + "/");
-		} else if (!/\.(xml|xul|jsm|css?)$/.test(jarName)) {
+		} else if (!/\.(xml|xul|jsm?|css)$/.test(jarName)) {
 			zipW.addEntryFile(jarName, Ci.nsIZipWriter.COMPRESSION_DEFAULT, entry, true);
 		} else
 			addTrimmedFileContentsToJAR(zipW, jarName, entry)
