@@ -177,7 +177,7 @@ label[control='opacity-scale']{
 					<menupopup/>
 				</menulist>
 				<spacer flex='1'/>
-				<label value="standard shortcuts"></label>
+				<label value="standard search-plugins"></label>
 			</vbox>
 			<spacer flex='1'/>
 			<image src='skin/logo.png' onclick='open(InstantFoxModule.helpURL)' class='link' tooltiptext='open help'/>
@@ -186,7 +186,7 @@ label[control='opacity-scale']{
 			seltype='multiple' context='context' onselect='onSelect(this)' onmouseup='openEditLigthbox(event)'/>
 
 		<splitter>
-			<label value="your shortcuts"></label>
+			<label value="your search-plugins"></label>
 			<spacer flex="1"></spacer>
 			<slickbutton id="add" label='add +' oncommand='addPlugin(event)'/>
 		</splitter>
