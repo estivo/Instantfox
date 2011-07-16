@@ -150,19 +150,7 @@ label[control='opacity-scale']{
   <hbox id='pinbox' hidden='true'>
 	<toolbarbutton type='checkbox' tooltiptext='pin' oncommand='window.top.HH.popupPinned=this.checked'/>
   </hbox>
-  <tabs onselect="if(!this.pane1Ready &amp;&amp; this.selectedIndex==1){
-			this.pane1Ready=true;
-			this.parentNode.selectedPanel.firstChild.hidden=false;gPrefChanged=true;
-		}else if(!this.pane2Ready &amp;&amp; this.selectedIndex==2){
-			this.pane2Ready=true;
-			var iframe = document.createElement('iframe');
-			iframe.setAttribute('type', 'content');
-			iframe.setAttribute('src', 'resource://instantfox/about.html');
-			iframe.setAttribute('flex', '1');
-			this.parentNode.selectedPanel.appendChild(iframe);
-		}
-		if(this.pane1Ready &amp;&amp; this.pane2Ready)
-			this.removeAttribute('onselect');">
+  <tabs onselect="onTabSelect.call(this)">
 	<tab label='engines'/>
 	<tab label='appearance'/>
 	<tab label='about'/>
@@ -207,7 +195,8 @@ label[control='opacity-scale']{
 	    <label value='standard search without shortcuts:' control='keyword-URL-menu'/>
 	    <menulist editable="true" preference="keyword-URL" id="keyword-URL-menu">
 		  <menupopup >
-		    <menuitem label="http://www.google.com/search?q="/>
+		    <menuitem label=""/>
+		    <menuitem label="http://www.google.com/#fp=1&amp;cad=b&amp;q="/>
 		    <menuitem label="http://www.bing.com/search?q="/>
 		    <menuitem label=""/>
 		  </menupopup>
@@ -718,7 +707,24 @@ if (target.getAttribute("class").indexOf("addengine-item") != -1) {
 }
 */
 
-
+function onTabSelect(){
+dump(this.selectedIndex,this)
+	if(!this.pane1Ready && this.selectedIndex==1){
+		this.pane1Ready=true;
+		this.parentNode.selectedPanel.firstChild.hidden=false;gPrefChanged=true;
+		$('keyword-URL-menu').firstChild.firstChild.label = 
+			InstantFoxModule.Plugins.google.url.replace('q=%q&','')+'&q=%q';
+	}else if(!this.pane2Ready && this.selectedIndex==2){
+		this.pane2Ready=true;
+		var iframe = document.createElement('iframe');
+		iframe.setAttribute('type', 'content');
+		iframe.setAttribute('src', 'resource://instantfox/about.html');
+		iframe.setAttribute('flex', '1');
+		this.parentNode.selectedPanel.appendChild(iframe);
+	}
+	if(this.pane1Ready && this.pane2Ready)
+		this.removeAttribute('onselect');
+}
 ]]></script>
 
 
