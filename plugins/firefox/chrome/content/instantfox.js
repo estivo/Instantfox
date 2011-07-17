@@ -419,25 +419,25 @@ var InstantFox = {
 		
 		var now = Date.now()
 
+		var char_change = nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE
+		var webNav = getWebNavigation()
 		if(this._isOwnQuery){
 			// gBrowser.docShell.isLoadingDocument
 			if(now - this.loadTime < this.minLoadTime){
 				this.schedulePreload(this.minLoadTime)
 				return
 			}
-			content.location.replace(url2go);
+			//content.location.replace(url2go);			
 		}else{
-			var webNav = getWebNavigation()
 			q.index = webNav.sessionHistory.index
 			gBrowser.docShell.useGlobalHistory = false
-			//webNav.loadURI(url2go, nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE, null, null, null);
-			content.location.assign(url2go);
+			//content.location.assign(url2go);
 			this._isOwnQuery = true;
 		}
+
+		webNav.loadURI(url2go, char_change, null, null, null);
 		this.loadTime = q.loadTime = now
 		return url2go
-		// see load_flags at http://mxr.mozilla.org/mozilla-central/source/docshell/base/nsIWebNavigation.idl#149
-		//getWebNavigation().loadURI(url2go, nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE, null, null, null);
 	},
 	schedulePreload: function(delay) {
 		if (this._timeout)
@@ -467,8 +467,8 @@ var InstantFox = {
 			br.docShell.useGlobalHistory = true
 
 		// todo: investigate why this crashes browser sometimes
-		//if (InstantFoxModule.currentQuery.index != null)
-		//	this.collapseHistory(InstantFoxModule.currentQuery.index)
+		if (InstantFoxModule.currentQuery.index != null)
+			this.collapseHistory(InstantFoxModule.currentQuery.index)
 		InstantFoxModule.currentQuery = null;
 		if(this.timeout)
 			this._timeout = clearTimeout(this._timeout)
@@ -476,10 +476,18 @@ var InstantFox = {
 		InstantFox.updateLogo(false)
 	},
 	collapseHistory: function(index) {
-		var sh = getWebNavigation().sessionHistory.QueryInterface(Ci.nsISHistoryInternal)
-		var finalEntry = sh.getEntryAtIndex(sh.index, false)
-		sh.getEntryAtIndex(index, true)
-		sh.addEntry(finalEntry, true)
+		var history = gBrowser.selectedBrowser.sessionHistory.QueryInterface(Ci.nsISHistoryInternal);
+		var entries=[];
+		
+		for (var i = 0; i < index; i++)
+			entries.push(history.getEntryAtIndex(i, false));
+		// last entry
+		entries.push(history.getEntryAtIndex(history.index, false));
+		//
+		history.PurgeHistory(history.count);
+
+		for each (var entry in entries) 
+			history.addEntry(entry, true);
 	},
 	onEnter: function(value){
 		InstantFoxModule.previousQuery = InstantFoxModule.currentQuery
