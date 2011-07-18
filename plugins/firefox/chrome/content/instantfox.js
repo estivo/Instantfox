@@ -714,7 +714,7 @@ nsContextMenu.prototype.doSearch=function(e){
 		openLinkIn(selectedText, e.button!=0?"current":"tab", {relatedToCurrent: true});
 	
 	var type = e.originalTarget.getAttribute('type')
-	if (type = "instantFox") {
+	if (type == "instantFox") {
 		href  = InstantFoxModule.Plugins[name].url.replace('%q', selectedText)
 	} else {
 		var engine = Services.search.getEngineByName(name);
