@@ -165,21 +165,13 @@ label[control='opacity-scale']{
 					<menupopup/>
 				</menulist>
 				<spacer flex='1'/>
-				<label value="standard search-plugins"></label>
+				<label value="search-plugins"></label>
 			</vbox>
 			<spacer flex='1'/>
 			<image src='skin/logo.png' onclick='open(InstantFoxModule.helpURL)' class='link' tooltiptext='open help'/>
 		</hbox>
-		<richlistbox id='standard-shortcuts' flex='1'
-			seltype='multiple' context='context' onselect='onSelect(this)' onmouseup='openEditLigthbox(event)'/>
-
-		<splitter>
-			<label value="your search-plugins"></label>
-			<spacer flex="1"></spacer>
-			<slickbutton id="add" label='add +' oncommand='addPlugin(event)'/>
-		</splitter>
-		<richlistbox id='user-shortcuts' flex='1'
-			seltype='multiple' context='context'  onselect='onSelect(this)' onmouseup='openEditLigthbox(event)'/>
+		<richlistbox id='shortcuts' flex='1'
+			seltype='multiple' context='context' onselect='onSelect(this)' onmouseup='openEditLigthbox(event)'/>		
 	</tabpanel>
 	<tabpanel orient='vertical'  flex='1' >
 	  <prefpane align='center' hidden='true'>
@@ -214,13 +206,15 @@ label[control='opacity-scale']{
   </tabpanels>
 </tabbox>
   <hbox>
+	<slickbutton id="add" label='add +' oncommand='addPlugin(event)'/>
+
 	<toolbarbutton id='' label='add plugin' type='menu' oncommand='' hidden='true'>
 		<menupopup>
 		</menupopup>
 	</toolbarbutton>
 
 	<spacer flex='1'/>
-	<button label='ok' oncommand='resultOK=true;close()'/>
+	<slickbutton label='ok' oncommand='resultOK=true;close()'/>
   </hbox>
 
 <menupopup id="context" onpopupshowing='initContextMenu(this)' oncommand='onContextMenuCommand(event)'>
@@ -469,7 +463,7 @@ saveGPlugin = function(createNew){
 		if(!gPlugin.url)
 			return
 		InstantFoxModule.Plugins[gPlugin.id] = gPlugin;
-		appendXML($("user-shortcuts"), plugin2XML(gPlugin))
+		appendXML($("shortcuts"), plugin2XML(gPlugin))
 	} else {
 		var el = $(gPlugin.id)
 		if (!el)
@@ -642,7 +636,7 @@ function plugin2XML(p){
 	return formatString(p.disabled?xmlFragmentDis:xmlFragment, p)
 }
 
-rebuild = function(all){
+rebuild = function(){
 	var xml=[], userxml = []
 	var activePlugins = InstantFoxModule.Plugins
 	for each(var p in activePlugins){
@@ -650,36 +644,19 @@ rebuild = function(all){
 			(p.type=='default'?xml:userxml).push(plugin2XML(p))
 		}
 	}
-	el = $("standard-shortcuts");
+	el = $("shortcuts");
 	clean(el)
-	appendXML(el, xml.join(''))
-	if (all) {
-		el = $("user-shortcuts");
-		clean(el)
-		appendXML(el, userxml.join(''))
-	}
+	appendXML(el, xml.join('') + "<separator class='groove'/>" + userxml.join(''))
+	
 	markConflicts()
-
-	return userxml.length
 }
 
-var l = rebuild(true)
+rebuild()
 
 window.addEventListener('load', function() {
 	window.removeEventListener('load', arguments.callee, false)
 	// this must be called after menulists' binding is loaded 
 	updateLocaleList()
-	// if box is too short scrollbar can't be shown
-	if (l < 4) {
-		var el1 = $("standard-shortcuts")
-		var el2 = $("user-shortcuts")
-		var h0 = el2.firstChild.getBoundingClientRect().height 
-		var h = (l || 1) * h0 + 5 
-		var h1 = el1.getBoundingClientRect().height 
-		var h2 = el2.getBoundingClientRect().height 
-		el2.height = h
-		el1.height = h1 + h2 - h
-	}
 	// check if we are inside popup
 	var InstantFox = top.InstantFox
 	if (InstantFox) {
@@ -722,8 +699,7 @@ dump(this.selectedIndex,this)
 		iframe.setAttribute('flex', '1');
 		this.parentNode.selectedPanel.appendChild(iframe);
 	}
-	if(this.pane1Ready && this.pane2Ready)
-		this.removeAttribute('onselect');
+	$("add").hidden = this.selectedIndex != 0
 }
 ]]></script>
 
