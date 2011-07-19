@@ -163,9 +163,11 @@ var pluginLoader = {
 	onRawPluginsLoaded: function(e){
 		e.target.onload=null
 		var js = e.target.responseText
-		try{
-			eval(js)
-		}catch(e){
+		try {
+			// eval(js)
+			var href = e.target.channel.originalURI.spec
+			Services.scriptloader.loadSubScript(href+'?'+Date.now());
+		} catch(e) {
 			Cu.reportError('malformed locale')
 			Cu.reportError(e)
 			return
@@ -231,7 +233,7 @@ var pluginLoader = {
 			var onload = this.onPluginsLoaded.bind(this)
 		}else{
 			spec = 'chrome://instantfox/locale/plugins.js'
-			if(typeof locale == 'string'){
+			if (typeof locale == 'string') {
 				var upre=/\/[^\/]*$/
 				spec = getFileUri('chrome://instantfox/locale/plugins.js').replace(upre,'').replace(upre,'')
 				spec += '/'+ locale + '/plugins.js';
@@ -239,12 +241,12 @@ var pluginLoader = {
 			var onload = this.onRawPluginsLoaded.bind(this)
 		}
 		var self = this
-		this.req.onload=function(e){
+		this.req.onload=function(e) {
 			this.onload = null;
 			onload(e)
 			callback&&callback()
 		}
-		callback
+		
 		this.req.overrideMimeType("text/plain");
 		this.req.open("GET", spec, true);
 		this.req.send(null)
