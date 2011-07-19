@@ -1,5 +1,5 @@
 //var currentTab = getWebNavigation().sessionHistory;.getEntryAtIndex(currentTab.count-1, false).URI.spec
-var HH = {
+var InstantFox = {
 	// belong to notifyTab
 	version: "2.0.0",
 	install_url: "http://www.instantfox.net/welcome.php",
@@ -14,14 +14,14 @@ var HH = {
 		gURLBar.setAttribute('autocompletesearch',	'instantFoxAutoComplete');
 		gURLBar.removeAttribute('oninput');
 
-		gURLBar.addEventListener('keydown', HH.onKeydown, false);
-		gURLBar.addEventListener('input', HH.onInput, false);
-		gURLBar.addEventListener('blur', HH.onblur, false);
+		gURLBar.addEventListener('keydown', InstantFox.onKeydown, false);
+		gURLBar.addEventListener('input', InstantFox.onInput, false);
+		gURLBar.addEventListener('blur', InstantFox.onblur, false);
 		
 		dump('instantFox initialized')
-		HH.notifyTab()
-		HH.checkURLBarBinding()
-		HH.updateUserStyle()
+		InstantFox.notifyTab()
+		InstantFox.checkURLBarBinding()
+		InstantFox.updateUserStyle()
 		// apply user modified styles
 	},
 	
@@ -32,20 +32,20 @@ var HH = {
 		}
 	},
 	notifyTab: function(){
-		if(HH.checkversion){
-			HH.checkversion = false;
+		if(InstantFox.checkversion){
+			InstantFox.checkversion = false;
 			var versionfrompref = Services.prefs.getCharPref("extensions.instantfox.version");
 			if(versionfrompref == "0.0.0"){
-				setTimeout(HH.notifyOpenTab, 500, HH.install_url);
-				Services.prefs.setCharPref("extensions.instantfox.version",HH.version);
+				setTimeout(InstantFox.notifyOpenTab, 500, InstantFox.install_url);
+				Services.prefs.setCharPref("extensions.instantfox.version",InstantFox.version);
 				// add options button only on first install
-				HH.updateOptionsButton();
-				setTimeout(HH.showInstallNotification, 10);
+				InstantFox.updateOptionsButton();
+				setTimeout(InstantFox.showInstallNotification, 10);
 			}else{
-				if(versionfrompref != HH.version){
-					setTimeout(HH.notifyOpenTab, 500, HH.update_url);
-					Services.prefs.setCharPref("extensions.instantfox.version",HH.version);
-					setTimeout(HH.showInstallNotification, 10);
+				if(versionfrompref != InstantFox.version){
+					setTimeout(InstantFox.notifyOpenTab, 500, InstantFox.update_url);
+					Services.prefs.setCharPref("extensions.instantfox.version",InstantFox.version);
+					setTimeout(InstantFox.showInstallNotification, 10);
 				}
 			}		
 		}
@@ -60,7 +60,7 @@ var HH = {
 			action: 'document.getElementById("instantFox-options").open=true;',
 			a: {
 				label: 'remove this button',
-				action: 'HH.updateOptionsButton(true)'
+				action: 'InstantFox.updateOptionsButton(true)'
 			}
 		}
 
@@ -126,7 +126,7 @@ var HH = {
 		
  		var b2 = hbox('box')
 		b2.setAttribute('right', 0)
-		b2.setAttribute('onclick','HH.openHelp()')		
+		b2.setAttribute('onclick','InstantFox.openHelp()')		
 		b2.appendChild(hbox('tip', true))
 		s.appendChild(b2)
 
@@ -185,31 +185,31 @@ var HH = {
 
 		if (InstantFoxModule.currentQuery) {
 			if (key == 9 || (!ctrl && !shift && key == 39)) { // 9 == Tab
-				if (HH.rightShadow != '') {
-					gURLBar.value += HH.rightShadow;
-					HH.rightShadow = '';
+				if (InstantFox.rightShadow != '') {
+					gURLBar.value += InstantFox.rightShadow;
+					InstantFox.rightShadow = '';
 					simulateInput = true;
 				}
 			} else if (key == 39 && ctrl && !shift) { // 39 == RIGHT
-				if (HH.rightShadow != '' && gURLBar.selectionEnd == gURLBar.value.length) {
-					gURLBar.value += HH.rightShadow[0]
+				if (InstantFox.rightShadow != '' && gURLBar.selectionEnd == gURLBar.value.length) {
+					gURLBar.value += InstantFox.rightShadow[0]
 					simulateInput = true;
 				}
 			} else if (key == 13 && !meta && !ctrl) { // 13 == ENTER
 				if(!alt)
-					HH.onEnter(InstantFoxModule.currentQuery.query)
+					InstantFox.onEnter(InstantFoxModule.currentQuery.query)
 				else {
-					HH.openLoadedPageInNewTab()
+					InstantFox.openLoadedPageInNewTab()
 				}
 				event.preventDefault();
 			} else if (!alt && !meta && !ctrl && [38,40,34,33].indexOf(key)!=-1) {//UP,DOWN,PAGE_UP,PAGE_DOWN
 				if(!InstantFoxModule.currentQuery.plugin.disableInstant) {
-					HH.schedulePreload()
+					InstantFox.schedulePreload()
 					InstantFoxModule.currentQuery.shadow = '';
 				}
 			} else if (key == 27) { // 27 == ESCAPE
 				gBrowser.webNavigation.gotoIndex(0)
-				HH.finishSearch(InstantFoxModule.currentQuery.index)
+				InstantFox.finishSearch(InstantFoxModule.currentQuery.index)
 				event.preventDefault();
 				gURLBar.blur()
 			}
@@ -249,7 +249,7 @@ var HH = {
 
 		if(simulateInput){
 			gURLBar.controller.handleText(true)
-			HH.onInput()
+			InstantFox.onInput()
 			event.preventDefault();
 		}
 	},
@@ -257,22 +257,22 @@ var HH = {
 		var val = gURLBar.value;
 		gBrowser.userTypedValue = val;
 
-		var q = HH.getQuery(val, InstantFoxModule.currentQuery)
+		var q = InstantFox.getQuery(val, InstantFoxModule.currentQuery)
 		if (q) {
 			InstantFoxModule.currentQuery = q;
-			HH.findBestShadow(q)
-			HH.updateShadowLink(q);
+			InstantFox.findBestShadow(q)
+			InstantFox.updateShadowLink(q);
 		} else if (InstantFoxModule.currentQuery) {
 			InstantFoxModule.currentQuery = null;
-			HH.updateShadowLink(q);
+			InstantFox.updateShadowLink(q);
 		}
 	},
 	onblur: function(e) {
 		// Return power to Site if urlbar really lost focus
-        if (HH._isOwnQuery && !gURLBar.mIgnoreFocus && e.originalTarget == gURLBar.mInputField) {
+        if (InstantFox._isOwnQuery && !gURLBar.mIgnoreFocus && e.originalTarget == gURLBar.mInputField) {
 			gURLBar.value = content.document.location.href;
 			gBrowser.userTypedValue = null;
-			HH.finishSearch();
+			InstantFox.finishSearch();
         }
     },
 	
@@ -324,13 +324,13 @@ var HH = {
 	onSearchReady: function(){
 		var q = this;//
 		//XULBrowserWindow.InsertShadowLink(q.shadow||"", q.value||"");
-		HH.findBestShadow(q)
-		HH.updateShadowLink(q)
+		InstantFox.findBestShadow(q)
+		InstantFox.updateShadowLink(q)
 		if(!q.plugin.disableInstant)
-			q.shadow ? HH.doPreload(q):HH.schedulePreload(100)
+			q.shadow ? InstantFox.doPreload(q):InstantFox.schedulePreload(100)
 
 		// show logo if it fits into popup
-		HH.updateLogo(true, q)
+		InstantFox.updateLogo(true, q)
 	},
 	updateLogo: function(show, q) {
 		show = show && q.results.length >= 4
@@ -456,7 +456,7 @@ var HH = {
 		this.updateShadowLink(null) 
 
 		var q = InstantFoxModule.currentQuery, br
-		if (q.tabId == HH._ctabID)
+		if (q.tabId == InstantFox._ctabID)
 			br = gBrowser
 		else {
 			br = document.getElementById(InstantFoxModule.currentQuery.tabId)
@@ -473,7 +473,7 @@ var HH = {
 		if(this.timeout)
 			this._timeout = clearTimeout(this._timeout)
 		//
-		HH.updateLogo(false)
+		InstantFox.updateLogo(false)
 	},
 	collapseHistory: function(index) {
 		var sh = getWebNavigation().sessionHistory.QueryInterface(Ci.nsISHistoryInternal)
@@ -507,26 +507,26 @@ var HH = {
 
 //************************************************************************
 // experimental options popup
-HH.popupCloser = function(e) {
-	var inPopup = HH.clickedInPopup
-	HH.clickedInPopup = false
+InstantFox.popupCloser = function(e) {
+	var inPopup = InstantFox.clickedInPopup
+	InstantFox.clickedInPopup = false
 	if (e.target.id == 'instantFox-options') {
-		window.removeEventListener('mousedown', HH.popupCloser, false)
+		window.removeEventListener('mousedown', InstantFox.popupCloser, false)
 		e.target.firstChild.hidePopup()
 		e.stopPropagation()
 		e.preventDefault()
 		return
 	}
-	if (HH.popupPinned == true || inPopup)
+	if (InstantFox.popupPinned == true || inPopup)
 		return
-	window.removeEventListener('mousedown', HH.popupCloser, false)
+	window.removeEventListener('mousedown', InstantFox.popupCloser, false)
 	document.getElementById('instantFox-options').firstChild.hidePopup()
 }
-HH.onPopupShowing = function(p) {
+InstantFox.onPopupShowing = function(p) {
 	if (p.parentNode.id != 'instantFox-options')
 		return
 
-	window.addEventListener('mousedown', HH.popupCloser, false)
+	window.addEventListener('mousedown', InstantFox.popupCloser, false)
 	
 	if (p.hasChildNodes()){
 		// rebuild in case user modified plugins by another options window instance
@@ -543,12 +543,12 @@ HH.onPopupShowing = function(p) {
 	p.width = 250 // approximate width 
 	p.wrongSize = true
 }
-HH.onPopupHiding = function(p) {
+InstantFox.onPopupHiding = function(p) {
 	var i = document.getElementById('instantFox-options').firstChild.firstChild
 	i.contentWindow.savePlugins()
-	window.removeEventListener('mousedown', HH.popupCloser, false)
+	window.removeEventListener('mousedown', InstantFox.popupCloser, false)
 }
-HH.updatePopupSize = function(popupDoc) {
+InstantFox.updatePopupSize = function(popupDoc) {
 	var p = document.getElementById('instantFox-options').firstChild
 	
 	if (p.wrongSize){
@@ -557,23 +557,23 @@ HH.updatePopupSize = function(popupDoc) {
 	}
 
 	// don't let clicks inside options window to close popup
-	popupDoc.defaultView.addEventListener('mousedown', HH.popupClickListener, false)
+	popupDoc.defaultView.addEventListener('mousedown', InstantFox.popupClickListener, false)
 }
-HH.popupClickListener = function(e) {
-	HH.clickedInPopup = true
+InstantFox.popupClickListener = function(e) {
+	InstantFox.clickedInPopup = true
 }
-HH.closeOptionsPopup = function(p) {
+InstantFox.closeOptionsPopup = function(p) {
 	p = p || document.getElementById('instantFox-options').firstChild
 	p.hidePopup()
 }
 
-HH.openHelp = function() {
+InstantFox.openHelp = function() {
 	var url = InstantFoxModule.helpURL
 	gBrowser.loadOneTab(url, {inBackground: false, relatedToCurrent: true});
 }
 
 // todo: call this after window load on first install releted to FS#32
-HH.updateOptionsButton = function(remove) {	
+InstantFox.updateOptionsButton = function(remove) {	
 	var myId = "instantFox-options";
 	var navBar = document.getElementById("nav-bar");
 	var curSet = navBar.currentSet.split(",");
@@ -603,17 +603,17 @@ HH.updateOptionsButton = function(remove) {
 	}
 }
 //************************************************************************
-window.addEventListener('load', HH.initialize, true);
+window.addEventListener('load', InstantFox.initialize, true);
 
 // modify URLBarSetURI defined in browser.js
 function URLBarSetURI(aURI) {
 	// auri is null if URLBarSetURI is called from urlbar.handleRevert
-	if (HH._isOwnQuery) {
-		if (InstantFoxModule.currentQuery.tabId == HH._ctabID){
-			HH.onPageLoad(aURI.spec)
+	if (InstantFox._isOwnQuery) {
+		if (InstantFoxModule.currentQuery.tabId == InstantFox._ctabID){
+			InstantFox.onPageLoad(aURI.spec)
 			return;
 		} else { //hide shadow if user switched tabs
-			HH.finishSearch();
+			InstantFox.finishSearch();
 		}
 	}
     var value = gBrowser.userTypedValue;

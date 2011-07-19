@@ -148,7 +148,7 @@ label[control='opacity-scale']{
 
 <tabbox flex='1'>
   <hbox id='pinbox' hidden='true'>
-	<toolbarbutton type='checkbox' tooltiptext='pin' oncommand='window.top.HH.popupPinned=this.checked'/>
+	<toolbarbutton type='checkbox' tooltiptext='pin' oncommand='window.top.InstantFox.popupPinned=this.checked'/>
   </hbox>
   <tabs onselect="onTabSelect.call(this)">
 	<tab label='engines'/>
@@ -603,7 +603,7 @@ function savePlugins(){
 
 	var em = Services.wm.getEnumerator('navigator:browser')
 	while(em.hasMoreElements())
-		em.getNext().HH.updateUserStyle()
+		em.getNext().InstantFox.updateUserStyle()
 
 	if(!gPluginsChanged)
 		return
@@ -681,14 +681,14 @@ window.addEventListener('load', function() {
 		el1.height = h1 + h2 - h
 	}
 	// check if we are inside popup
-	var HH = top.HH
-	if (HH) {
-		window.close = HH.closeOptionsPopup
+	var InstantFox = top.InstantFox
+	if (InstantFox) {
+		window.close = InstantFox.closeOptionsPopup
 		var el = document.getElementById('pinbox')
 		el.hidden = false
-		el.firstChild.checked = !!HH.popupPinned
+		el.firstChild.checked = !!InstantFox.popupPinned
 
-		HH.updatePopupSize(document)
+		InstantFox.updatePopupSize(document)
 	}
 
 }, false)

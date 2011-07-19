@@ -69,10 +69,10 @@ var instantFoxDevel = {
 		if (firstRun)try{
 			// debug initialization
 			Services.prefs.clearUserPref("extensions.instantfox.version")
-			HH.updateOptionsButton(true)
+			InstantFox.updateOptionsButton(true)
 		}catch(e){}
 		//this.reloadComponent()
-		try{HH.destroy()}catch(e){}
+		try{InstantFox.destroy()}catch(e){}
 		
 		try{
 			var p = document.getElementById('instantFox-options').firstChild
@@ -88,7 +88,7 @@ var instantFoxDevel = {
 		if(this.loadedScriptsCount == this.sourceList.length){
 			this.m = this.reloadModule(this.moduleHref)	
 			// simulate document load event
-			HH.initialize()
+			InstantFox.initialize()
 		}else{
 			//load next script
 			var i = this.loadedScriptsCount
