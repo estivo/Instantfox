@@ -1,7 +1,6 @@
 /** devel__( */
 function makeReq(href) {
 	var req = new XMLHttpRequest;
-	req.overrideMimeType("text/plain");
 	req.open("GET", href, false);
 	try {
 		req.send(null);
@@ -47,7 +46,8 @@ var instantFoxDevel = {
 		//return Cu.import(href)
 		//Cc["@mozilla.org/moz/jssubscript-loader;1"].getService(Ci.mozIJSSubScriptLoader) 
 		var bp = Cu.import(href)
-		Services.scriptloader.loadSubScript(href, bp);
+		// query needed to confuse startupcache in ff 8.0+ 
+		Services.scriptloader.loadSubScript(href+'?'+Date.now(), bp);
 		return bp
 	},
 
@@ -123,14 +123,58 @@ var instantFoxDevel = {
 			case 'copyLocaleManifest':
 				this.copyLocaleManifest()
 				break
+			case 'delete-plugin-file':
+				this.deletePluginFile()
+				break
+			case 'jsonify-plugins':
+				this.jsonifyPlugins()
+				break
 		}
-	},
+	},	
 	// file utils
 	getContainingFolder: function(){
 		return getLocalFile('chrome://instantfox/content').parent.parent.parent.QueryInterface(Ci.nsILocalFile)
 	},
+	deletePluginFile: function(){
+		var file = Cu.import(this.moduleHref).getUserFile('instantFoxPlugins.js')
+		if(!file) {
+			alert('already removed')
+			return
+		}
+		file.QueryInterface(Ci.nsILocalFile).remove(false)
+	},
+	jsonifyPlugins: function(){
+		// override makeReq from foximirror to properly handle encodings
+		function makeReq(href) {
+			var req = new XMLHttpRequest;
+			req.open("GET", href, false);
+			try {
+				req.send(null);
+			} catch (e) {
+			}
+			return req.responseText;
+		}
+		
+		function jsonify(locale){
+			var spec = InstantFoxModule.pluginLoader.getPluginFileSpec(locale)
+
+			var t = makeReq(spec)
+			if(t.match(/^rawPluginData/))
+			eval(t)
+			else
+			eval('rawPluginData='+t)
+
+			var text = JSON.stringify(rawPluginData, null, 4)
+			writeToFile(getLocalFile(spec), text)
+		}
+
+		InstantFoxModule.pluginLoader.getAvaliableLocales(function(locales) {
+			locales.forEach(jsonify)
+		})
+		
+	},
 	copyLocaleManifest: function(){
-		InstantFoxModule.pluginLoader.getAvaliableLocales(function(locales)  {
+		InstantFoxModule.pluginLoader.getAvaliableLocales(function(locales) {
 			var decl = 'locale    instantfox %n%s chrome/locale/%n/'
 			var ans = locales.map(function(x){
 				return decl.replace('%n', x, 'g').replace('%s', Array(9-x.length).join(' '), 'g')

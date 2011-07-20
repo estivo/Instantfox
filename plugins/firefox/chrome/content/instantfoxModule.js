@@ -165,8 +165,7 @@ var pluginLoader = {
 		var js = e.target.responseText
 		try {
 			// eval(js)
-			var href = e.target.channel.originalURI.spec
-			Services.scriptloader.loadSubScript(href+'?'+Date.now());
+			var rawPluginData = JSON.parse(js)
 		} catch(e) {
 			Cu.reportError('malformed locale')
 			Cu.reportError(e)
@@ -232,12 +231,7 @@ var pluginLoader = {
 			var spec = Services.io.newFileURI(file).spec
 			var onload = this.onPluginsLoaded.bind(this)
 		}else{
-			spec = 'chrome://instantfox/locale/plugins.js'
-			if (typeof locale == 'string') {
-				var upre=/\/[^\/]*$/
-				spec = getFileUri('chrome://instantfox/locale/plugins.js').replace(upre,'').replace(upre,'')
-				spec += '/'+ locale + '/plugins.js';
-			}
+			spec = this.getPluginFileSpec(locale)
 			var onload = this.onRawPluginsLoaded.bind(this)
 		}
 		var self = this
@@ -259,6 +253,15 @@ var pluginLoader = {
 			callback(t.match(/201\: [^ ]* /g).map(function(x)x.slice(5,-1).replace(/\/$/, '')))
 		})
 	},
+	getPluginFileSpec: function(locale){
+		var spec = 'chrome://instantfox/locale/plugins.js'
+		if (typeof locale == 'string') {
+			var upre=/\/[^\/]*$/
+			spec = getFileUri(spec).replace(upre,'').replace(upre,'')
+			spec += '/'+ locale + '/plugins.js';
+		}
+		return spec
+	}
 
 }
  
