@@ -355,8 +355,13 @@ addTrimmedFileContentsToJAR = function(zipW, entryPath, file){
 	if (data.length < 10)
 		return
 	
-	var istream = Cc["@mozilla.org/io/string-input-stream;1"].createInstance(Ci.nsIStringInputStream);	
-	istream.setData(data, data.length);
+	//var istream = Cc["@mozilla.org/io/string-input-stream;1"].createInstance(Ci.nsIStringInputStream);	
+	//istream.setData(data, data.length);
+	//todo: do we need to keep encoding from file instead of converting everything to UTF-8
+	var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter);
+	converter.charset = "UTF-8";
+	var istream = converter.convertToInputStream(data)
+
 	zipW.addEntryStream(entryPath, null, Ci.nsIZipWriter.COMPRESSION_DEFAULT, istream, true)   
 }
 removeDebugCode = function(code){	
