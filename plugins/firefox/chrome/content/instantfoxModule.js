@@ -639,13 +639,20 @@ InstantFoxSearch.prototype = {
 			this.historyAutoComplete.startSearch(searchString, searchParam, previousResult, {
 				onSearchResult: function(search, result) {
 					self.$searchingHistory = false;
-					listener.onSearchResult(self, result)
+					if (result.matchCount){
+						listener.onSearchResult(self, result)					 
+					} else{
+						autoSearch.query = autoSearch.value = searchString
+						self.listener = listener;
+						self.startReq()
+					}
 				}
 			});
 			return
 		} else if(this.$searchingHistory)
 			this.historyAutoComplete.stopSearch()
-		var api = InstantFoxModule.currentQuery.plugin
+		var q = InstantFoxModule.currentQuery
+		var api = q.plugin
 
 		if (api.suggestPlugins) {
 			var plugins = getMatchingPlugins(api.key, api.tail)
@@ -661,22 +668,50 @@ InstantFoxSearch.prototype = {
 			InstantFoxModule.currentQuery.onSearchReady()
 			return true;
 		}
+/*//t=makeReq('http://geoiplookup.wikimedia.org/')
 
+t=' Geo = {"city":"Yerevan","country":"AM","lat":"40.181099","lon":"44.513599","IP":"109.75.37.129","netmask":"21"}'
+;(t.match(/"city":"(.*?)"/)||{})[1]*/	
 		this.listener = listener;
-		this.startReq()
+		// get url 
+		var q = q || autoSearch
+		if (q.plugin.id == 'imdb')
+			var url = imdbJsonUrl(q.query, q.plugin.json)
+		else if(q.query && q.plugin.json.indexOf('http://maps.google') == 0)
+			var url = 'http://geoiplookup.wikimedia.org/'
+		else
+			var url = q.plugin.json.replace('%q', encodeURIComponent(q.query))
+		
+		
+		if(url)
+			this.startReq(url)
 	},
 
 	stopSearch: function(){
-		if(this.historyAutoComplete) this.historyAutoComplete.stopSearch();
+		if(this.historyAutoComplete)
+			this.historyAutoComplete.stopSearch();
 		if(this._req)
 			this._req.abort();
 
 		this.listener = null;
 	},
 
+	startReq: function(url){
+		if(this._req)
+			this._req.abort()
+		else{
+			this._req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
+			this._req.onload = this.onSearchReady.bind(this)
+		}
+
+		this._req.open("GET", url, true);
+		this._req.send(null);
+	},
+	
 	onSearchReady: function(e){
 		var json = e.target.responseText;
-		var q = InstantFoxModule.currentQuery
+
+		var q = InstantFoxModule.currentQuery || autoSearch
 		var key = q.plugin.key
 		
 		if(q.plugin.id == 'imdb')
@@ -693,25 +728,16 @@ InstantFoxSearch.prototype = {
 		
 		q.onSearchReady()
 	},
-
-	startReq: function(){
-		if(this._req)
-			this._req.abort()
-		else{
-			this._req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
-			this._req.onload = this.onSearchReady.bind(this)
-		}
-		var q = InstantFoxModule.currentQuery
-		
-		if (q.plugin.id == 'imdb')
-			var url = imdbJsonUrl(q.query, q.plugin.json)
-		else
-			var url = q.plugin.json.replace('%q', encodeURIComponent(q.query))
-		this._req.open("GET", url, true);
-
-		this._req.send(null);
-	}
 };
+
+var autoSearch = {
+	plugin:{
+		json: 'http://clients1.google.de/complete/search?client=chrome&hl=en-US&q=%q',
+		key: '',
+	},
+	splitSpace: '',
+	onSearchReady: function(){}
+}
 
 /*******************************************************
  *  component registration
