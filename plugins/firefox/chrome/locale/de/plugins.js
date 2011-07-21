@@ -6,13 +6,13 @@
             "json": "http://suggestqueries.google.com/complete/search?json&q=%q&hl=%ls",
             "name": "Google"
         },
-        "Google Images": {
+        "GoogleImages": {
             "key": "i",
             "url": "http://www.google.%ld/images?q=%q&hl=%ls",
             "json": "http://suggestqueries.google.com/complete/search?json&ds=i&hl=%ls&q=%q",
             "name": "Google Images"
         },
-        "Google Maps": {
+        "GoogleMaps": {
             "key": "m",
             "url": "http://maps.google.com/maps?q=%q",
             "json": "http://maps.google.%ld/maps/suggest?q=%q&cp=999&hl=%ll&gl=%ll&v=2&json=b",
@@ -47,27 +47,27 @@
             "url": "http://twitter.com/#!/search/%q",
             "name": "Twitter"
         },
-        "Wetter": {
+        "Weather": {
             "key": "wt",
             "url": "http://weather.instantfox.net/%q",
             "json": "http://maps.google.com/maps/suggest?q=%q&cp=999&hl=%ls&gl=%ls&v=2&json=b",
             "hideFromContextMenu": true,
             "name": "Wetter"
         },
-        "LEO Eng-Deu Dictionary": {
+        "LEO": {
             "key": "d",
             "url": "http://dict.leo.org/?search=%q",
             "json": false,
             "name": "LEO Eng-Deu Dictionary"
         },
-        "Int. Movie Db": {
+        "IMDb": {
             "key": "im",
             "url": "http://www.imdb.com/find?s=all&q=%q",
             "json": "http://sg.media-imdb.com/suggests/%fq/%q.json",
             "hideFromContextMenu": true,
             "name": "Int. Movie Db"
         },
-        "Google Glück": {
+        "GoogleLuck": {
             "key": "gg",
             "url": "http://www.google.%ld/search?hl=%ls&q=%q&btnI=1",
             "json": "http://suggestqueries.google.com/complete/search?json&q=%q&hl=%ls",

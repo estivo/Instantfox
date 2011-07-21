@@ -6,13 +6,13 @@
             "json": "http://suggestqueries.google.com/complete/search?json&q=%q&hl=%ls",
             "name": "Google"
         },
-        "Google Images": {
+        "GoogleImages": {
             "key": "i",
             "url": "http://www.google.%ld/images?q=%q",
             "json": "http://suggestqueries.google.com/complete/search?json&ds=i&q=%q",
             "name": "Google Images"
         },
-        "Google Maps": {
+        "GoogleMaps": {
             "key": "m",
             "url": "http://maps.google.com/maps?q=%q&hl=%ls",
             "json": "http://maps.google.%ld/maps/suggest?q=%q&cp=999&hl=%ll&gl=%ll&v=2&json=b",
@@ -61,7 +61,7 @@
             "hideFromContextMenu": true,
             "name": "IMDb"
         },
-        "Google Luck": {
+        "GoogleLuck": {
             "key": "gg",
             "url": "http://www.google.com/search?q=%q&btnI=1",
             "json": "http://suggestqueries.google.com/complete/search?json&q=%q&hl=%ls",

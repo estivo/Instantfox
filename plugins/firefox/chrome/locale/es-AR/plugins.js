@@ -6,13 +6,13 @@
             "json": "http://suggestqueries.google.com/complete/search?json&q=%q&hl=%ls",
             "name": "Google"
         },
-        "Google Imágenes": {
+        "GoogleImages": {
             "key": "i",
             "url": "http://www.google.%ld/images?q=%q",
             "json": "http://suggestqueries.google.com/complete/search?json&ds=i&q=%q",
             "name": "Google Imágenes"
         },
-        "Google Maps": {
+        "GoogleMaps": {
             "key": "m",
             "url": "http://maps.google.com/maps?q=%q&hl=%ls",
             "json": "http://maps.google.%ld/maps/suggest?q=%q&cp=999&hl=%ll&gl=%ll&v=2&json=b",
@@ -41,7 +41,7 @@
             "url": "http://twitter.com/#!/search/%q",
             "name": "Twitter"
         },
-        "Tiempo": {
+        "Weather": {
             "key": "to",
             "url": "http://weather.instantfox.net/%q",
             "json": "http://maps.google.com/maps/suggest?q=%q&cp=999&hl=%ls&gl=%ls&v=2&json=b",
@@ -55,14 +55,14 @@
             "hideFromContextMenu": true,
             "name": "IMDb"
         },
-        "Google Suerte": {
+        "GoogleLuck": {
             "key": "gs",
             "url": "http://www.google.com/search?q=%q&btnI=1",
             "json": "http://suggestqueries.google.com/complete/search?json&q=%q&hl=%ls",
             "hideFromContextMenu": true,
             "name": "Google Suerte"
         },
-        "Calculadora": {
+        "Calculator": {
             "key": "c",
             "url": "resource://instantfox/calculator.html#%q",
             "hideFromContextMenu": true,
