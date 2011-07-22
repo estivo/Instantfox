@@ -286,7 +286,7 @@
 		// var q=InstantFoxModule.currentQuery		
 		var search = this.getAttribute("title")
 
-		HH.onEnter(search)
+		InstantFox.onEnter(search)
         event.preventDefault()
 		event.stopPropagation()
       ]]>
