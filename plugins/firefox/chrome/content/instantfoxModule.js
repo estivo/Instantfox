@@ -248,17 +248,17 @@ var pluginLoader = {
 	
 	getAvaliableLocales: function(callback){
 		var upre=/\/[^\/]*$/
-		var href = getFileUri('chrome://instantfox/locale/plugins.js').replace(upre,'').replace(upre,'') + '/'
+		var href = getFileUri('chrome://instantfox/locale/plugins.json').replace(upre,'').replace(upre,'') + '/'
 		makeReqAsync(href, function(t){
 			callback(t.match(/201\: [^ ]* /g).map(function(x)x.slice(5,-1).replace(/\/$/, '')))
 		})
 	},
 	getPluginFileSpec: function(locale){
-		var spec = 'chrome://instantfox/locale/plugins.js'
+		var spec = 'chrome://instantfox/locale/plugins.json'
 		if (typeof locale == 'string') {
 			var upre=/\/[^\/]*$/
 			spec = getFileUri(spec).replace(upre,'').replace(upre,'')
-			spec += '/'+ locale + '/plugins.js';
+			spec += '/'+ locale + '/plugins.json';
 		}
 		return spec
 	}

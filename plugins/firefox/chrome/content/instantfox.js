@@ -37,17 +37,17 @@ var InstantFox = {
 			var versionfrompref = Services.prefs.getCharPref("extensions.instantfox.version");
 			if(versionfrompref == "0.0.0"){
 				setTimeout(InstantFox.notifyOpenTab, 500, InstantFox.install_url);
-				Services.prefs.setCharPref("extensions.instantfox.version",InstantFox.version);
+				Services.prefs.setCharPref("extensions.instantfox.version", InstantFox.version);
 				// add options button only on first install
 				InstantFox.updateOptionsButton();
 				setTimeout(InstantFox.showInstallNotification, 10);
 			}else{
 				if(versionfrompref != InstantFox.version){
 					setTimeout(InstantFox.notifyOpenTab, 500, InstantFox.update_url);
-					Services.prefs.setCharPref("extensions.instantfox.version",InstantFox.version);
+					Services.prefs.setCharPref("extensions.instantfox.version", InstantFox.version);
 					setTimeout(InstantFox.showInstallNotification, 10);
 				}
-			}		
+			}
 		}
 	},
 	showInstallNotification: function(){
