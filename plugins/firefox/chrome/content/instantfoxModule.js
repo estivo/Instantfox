@@ -463,6 +463,19 @@ var parseMapsJson = function(json, key, splitSpace){
 	}
 	return results
 }
+var parseGeoJson = function(json, key, splitSpace){
+	var city = json.match(/"city":"(.*?)"/)
+	if (!city)				
+		return 
+	var result = city[1]
+	// side effect
+	InstantFoxModule.userLocation = result
+	return [{
+		icon: '',
+		title: result,
+		url: key + splitSpace + result
+	}]
+}
 var getMatchingPlugins = function(key, tail){
 	var results=[];
 	var plugins = filter(InstantFoxModule.Plugins, key)
@@ -611,6 +624,7 @@ SimpleAutoCompleteResult.prototype = {
 	getStyleAt: function(index) "InstantFoxSuggest",
 
 	removeValueAt: function(index, removeFromDb) {
+		dump(index, removeFromDb)
 		this.list.splice(index, 1);
 	},
 	QueryInterface: function(aIID) {
@@ -626,65 +640,80 @@ InstantFoxSearch.prototype = {
 	historyAutoComplete: null,
 	classID: Components.ID("c541b971-0729-4f5d-a5c4-1f4dadef365e"),
 	contractID: "@mozilla.org/autocomplete/search;1?name=instantFoxAutoComplete",
-	QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIAutoCompleteSearch]),
+	QueryInterface: XPCOMUtils.generateQI([Ci.nsIAutoCompleteSearch]),
 
+	// implement searchListener for historyAutoComplete
+	onSearchResult: function(search, result) {
+		this.$searchingHistory = false;
+		dump('this.$searchingHistory', this.$searchingHistory, result.matchCount)
+		if (result.matchCount){
+			this.listener.onSearchResult(this, result)	
+			dump(this, result)
+			
+		} else {
+			autoSearch.query = autoSearch.value = this.searchString
+			var url = autoSearch.plugin.json.replace('%q', encodeURIComponent(autoSearch.query))
+			this.parser = parseSimpleJson
+			this.startReq(url)
+		}
+	},
+	
+	// implement nsIAutoCompleteSearch
 	startSearch: function(searchString, searchParam, previousResult, listener) {
 		//win = Services.wm.getMostRecentWindow("navigator:browser");
-		var self = this
-		if(!InstantFoxModule.currentQuery){
+		if (!InstantFoxModule.currentQuery) {
 			//Search user's history
 			this.historyAutoComplete = this.historyAutoComplete ||
 					Cc["@mozilla.org/autocomplete/search;1?name=history"].getService(Ci.nsIAutoCompleteSearch);
 			this.$searchingHistory = true
-			this.historyAutoComplete.startSearch(searchString, searchParam, previousResult, {
-				onSearchResult: function(search, result) {
-					self.$searchingHistory = false;
-					if (result.matchCount){
-						listener.onSearchResult(self, result)					 
-					} else{
-						autoSearch.query = autoSearch.value = searchString
-						self.listener = listener;
-						self.startReq()
-					}
-				}
-			});
+			this.listener = listener;
+			this.searchString = searchString;
+			this.historyAutoComplete.startSearch(searchString, searchParam, previousResult, this);
 			return
 		} else if(this.$searchingHistory)
 			this.historyAutoComplete.stopSearch()
+
 		var q = InstantFoxModule.currentQuery
-		var api = q.plugin
-
-		if (api.suggestPlugins) {
-			var plugins = getMatchingPlugins(api.key, api.tail)
-			var newResult = new SimpleAutoCompleteResult(plugins, searchString);
-			listener.onSearchResult(self, newResult);
-			//InstantFoxModule.currentQuery.onSearchReady()
-			return true;
+		var plugin = q.plugin
+		var results, url, callOnSearchReady;
+		
+		var isMaps = plugin && plugin.json && plugin.json.indexOf('http://maps.google') == 0
+				
+		if (plugin.suggestPlugins) {
+			// handle ` searches
+			var results = getMatchingPlugins(plugin.key, plugin.tail)
+		} else if (!plugin.json || plugin.disableSuggest){
+			// suggest is dissabled
+			url = null
+		} else if(!q.query) {
+			// in some cases we can provide suggestions even before user started typing
+			if (isMaps) {
+				url = 'http://geoiplookup.wikia.com/'
+				this.parser = parseGeoJson
+			} else {
+				// nop
+			}
+		} else if (plugin.id == 'imdb') {
+			// imdb needs special handling
+			url = imdbJsonUrl(q.query, plugin.json)
+			this.parser = parseImdbJson
+		} else {
+			// **********************
+			url = plugin.json.replace('%q', encodeURIComponent(q.query))
+			this.parser = isMaps ? parseMapsJson : parseSimpleJson
 		}
-
-		if(!api.json || api.disableSuggest){
-			var newResult = new SimpleAutoCompleteResult(null, searchString);
-			listener.onSearchResult(self, newResult);
-			InstantFoxModule.currentQuery.onSearchReady()
-			return true;
-		}
-/*//t=makeReq('http://geoiplookup.wikimedia.org/')
-
-t=' Geo = {"city":"Yerevan","country":"AM","lat":"40.181099","lon":"44.513599","IP":"109.75.37.129","netmask":"21"}'
-;(t.match(/"city":"(.*?)"/)||{})[1]*/	
-		this.listener = listener;
-		// get url 
-		var q = q || autoSearch
-		if (q.plugin.id == 'imdb')
-			var url = imdbJsonUrl(q.query, q.plugin.json)
-		else if(q.query && q.plugin.json.indexOf('http://maps.google') == 0)
-			var url = 'http://geoiplookup.wikimedia.org/'
-		else
-			var url = q.plugin.json.replace('%q', encodeURIComponent(q.query))
 		
 		
-		if(url)
+		if (url) {
+			this.listener = listener;
 			this.startReq(url)
+		} else { // no need for xhr
+			var newResult = new SimpleAutoCompleteResult(results, searchString);
+			listener.onSearchResult(this, newResult);			
+			if (callOnSearchReady)
+				InstantFoxModule.currentQuery.onSearchReady()
+			return true;
+		}
 	},
 
 	stopSearch: function(){
@@ -696,6 +725,7 @@ t=' Geo = {"city":"Yerevan","country":"AM","lat":"40.181099","lon":"44.513599","
 		this.listener = null;
 	},
 
+	// handle xhr
 	startReq: function(url){
 		if(this._req)
 			this._req.abort()
@@ -714,15 +744,8 @@ t=' Geo = {"city":"Yerevan","country":"AM","lat":"40.181099","lon":"44.513599","
 		var q = InstantFoxModule.currentQuery || autoSearch
 		var key = q.plugin.key
 		
-		if(q.plugin.id == 'imdb')
-			q.results = parseImdbJson(json, key, q.splitSpace)
-		else if(q.plugin.json.indexOf('http://maps.google') == 0)
-			q.results = parseMapsJson(json, key, q.splitSpace)
-		else
-			q.results = parseSimpleJson(json, key, q.splitSpace)
-
+		q.results = this.parser(json, key, q.splitSpace)
 		var newResult = new SimpleAutoCompleteResult(q.results, q.value);
-
 		this.listener.onSearchResult(this, newResult);
 		this.listener = null;
 		
