@@ -77,7 +77,7 @@
     },
     "localeMap": {
         "%ls": "en",
-        "%ll": "en-au",
+        "%ll": "en-AU",
         "%ld": "com.au"
     }
 }

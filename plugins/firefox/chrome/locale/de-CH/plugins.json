@@ -83,7 +83,7 @@
     },
     "localeMap": {
         "%ls": "de",
-        "%ll": "de-ch",
+        "%ll": "de-CH",
         "%ld": "ch"
     }
 }

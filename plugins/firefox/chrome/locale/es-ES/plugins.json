@@ -77,7 +77,7 @@
     },
     "localeMap": {
         "%ls": "es",
-        "%ll": "es-es",
+        "%ll": "es-ES",
         "%ld": "es"
     }
 }

@@ -157,19 +157,25 @@ label[control='opacity-scale']{
   </tabs>
   <tabpanels  flex='1'>
 	<tabpanel orient='vertical'  flex='1'>
-		<hbox>
-			<vbox>
-				<label value="Choose language:" id="highlight"></label>
-				<menulist id="locale" sizetopopup='none'
-					oncommand = 'gPluginsChanged=true;InstantFoxModule.pluginLoader.loadPlugins(event.target.label, rebuild)'>
-					<menupopup/>
-				</menulist>
+		<vbox>
+			<hbox>
+				<vbox>
+					<label value="Choose language:" id="highlight"></label>
+					<menulist id="locale" sizetopopup='none'
+						oncommand = 'gPluginsChanged=true;InstantFoxModule.pluginLoader.loadPlugins(event.target.label, rebuild)'>
+						<menupopup/>
+					</menulist>
+					<spacer flex='1'/>
+			<hbox align='center'>
+				<slickbutton id="add" label='add +' oncommand='addPlugin(event)'/>
 				<spacer flex='1'/>
 				<label value="search-plugins"></label>
-			</vbox>
-			<spacer flex='1'/>
-			<image src='skin/logo.png' onclick='open(InstantFoxModule.helpURL)' class='link' tooltiptext='open help'/>
-		</hbox>
+			</hbox>
+				</vbox>
+				<spacer flex='1'/>
+				<image src='skin/logo.png' onclick='open(InstantFoxModule.helpURL)' class='link' tooltiptext='open help'/>
+			</hbox>
+		</vbox>
 		<richlistbox id='shortcuts' flex='1'
 			seltype='multiple' context='context' onselect='onSelect(this)' onmouseup='openEditLigthbox(event)'/>		
 	</tabpanel>
@@ -206,8 +212,6 @@ label[control='opacity-scale']{
   </tabpanels>
 </tabbox>
   <hbox>
-	<slickbutton id="add" label='add +' oncommand='addPlugin(event)'/>
-
 	<toolbarbutton id='' label='add plugin' type='menu' oncommand='' hidden='true'>
 		<menupopup>
 		</menupopup>
@@ -298,16 +302,16 @@ function updateLocaleList(){
 		appendXML(menulist.firstChild, xml.join(''))
 		
 		// find selected index
-		var sl = InstantFoxModule.selectedLocale
+		var sl = InstantFoxModule.selectedLocale.toLowerCase()
 		var slPart = sl.substring(0, sl.indexOf('-'))
 		var si = -1, siPart = -1;
 		for (var i in locales){
-			var loc = locales[i]
-			if(loc.id == sl){
+			var loc = locales[i].id.toLowerCase()
+			if(loc == sl){
 				si = i
 				break
 			}
-			if(loc.id == slPart){
+			if(loc == slPart){
 				siPart = i
 			}
 		}
@@ -428,7 +432,6 @@ openEditLigthbox = function(e){
 	$t(panel, 'key').value = gPlugin.key
 	var urlBox = $t(panel, 'url')
 	urlBox.value = gPlugin.url
-	urlBox.readOnly = gPlugin.type=='default'
 	$t(panel, 'image').src = gPlugin.iconURI
 	var rem =  $t(panel, 'remove')
 	rem.label = gPlugin.type == 'user' ? 'remove': 'disable';
@@ -500,7 +503,6 @@ addPlugin=function(e){
 	
 	var urlBox = $t(panel, 'url')
 	urlBox.value = ''
-	urlBox.readOnly = false
 	$t(panel, 'image').src = ''	
 	var rem =  $t(panel, 'remove')
 	rem.label = 'cancel';
@@ -651,12 +653,12 @@ rebuild = function(){
 	markConflicts()
 }
 
-rebuild()
 
 window.addEventListener('load', function() {
 	window.removeEventListener('load', arguments.callee, false)
 	// this must be called after menulists' binding is loaded 
 	updateLocaleList()
+	rebuild()
 	// check if we are inside popup
 	var InstantFox = top.InstantFox
 	if (InstantFox) {
@@ -699,7 +701,7 @@ dump(this.selectedIndex,this)
 		iframe.setAttribute('flex', '1');
 		this.parentNode.selectedPanel.appendChild(iframe);
 	}
-	$("add").hidden = this.selectedIndex != 0
+	//$("add").hidden = this.selectedIndex != 0
 }
 ]]></script>
 
