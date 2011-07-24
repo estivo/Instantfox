@@ -238,7 +238,13 @@ label[control='opacity-scale']{
 	</hbox>
 	<hbox align='center'>
 		<label value='url:'/>
-		<textbox type='url' aID='url' flex='1'/>
+		<textbox type='url' aID='url' flex='1' oninput="
+		if(this.timeout==null)
+			this.timeout=setTimeout(function(a){
+				a.timeout=null;
+				$t($('edit-box'), 'image').src='http://g.etfv.co/'+a.value
+			}, 500, this)
+		"/>
 	</hbox>
 	<hbox align='center'>
 		<label value='key:'/>
