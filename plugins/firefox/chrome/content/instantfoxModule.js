@@ -223,8 +223,8 @@ var pluginLoader = {
 	loadPlugins: function(locale, callback){
 		if(this.req)
 			this.req.abort()
-		else
-			this.req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
+		
+		this.req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
 
 		var file = getUserFile('instantFoxPlugins.js')
 		if(!locale && file.exists()){
@@ -234,7 +234,7 @@ var pluginLoader = {
 			spec = this.getPluginFileSpec(locale)
 			var onload = this.onRawPluginsLoaded.bind(this)
 		}
-		var self = this
+
 		this.req.onload=function(e) {
 			this.onload = null;
 			onload(e)
@@ -242,6 +242,7 @@ var pluginLoader = {
 		}
 		
 		this.req.overrideMimeType("text/plain");
+		dump(spec)
 		this.req.open("GET", spec, true);
 		this.req.send(null)
 	},

@@ -322,8 +322,13 @@ function updateLocaleList(){
 	})
 }
 //************* dom utils
-function $(id)document.getElementById(id)
-function $t(el, aID)el.getElementsByAttribute('aID', aID)[0]
+function $(id){
+	return document.getElementById(id)
+}
+function $t(el, aID) {
+	
+	return el && el.getElementsByAttribute('aID', aID)[0]
+}
 function $parent(el){
 	while(el){
 		if(el.id)
@@ -580,9 +585,8 @@ window.addEventListener('keydown', function(e){
 			$t($parent(el).parentNode.selectedItem,'key').focus()
 		}
 	}
-	
-
 }, false)
+
 onSelect=function(rbox){
 	var el=document.activeElement
 	if(el.localName=='input'&&el.parentNode.parentNode.className=='key'){
@@ -639,16 +643,27 @@ function plugin2XML(p){
 }
 
 rebuild = function(){
-	var xml=[], userxml = []
+	var xml=[], userxml = [], disabledxml = [];
 	var activePlugins = InstantFoxModule.Plugins
 	for each(var p in activePlugins){
 		if(p.url){
-			(p.type=='default'?xml:userxml).push(plugin2XML(p))
+			var dis = p.disabled, def = p.type=='default'
+			var px = plugin2XML(p)
+			if(dis)
+				disabledxml[p.disabled?'unshift':'push'](px)
+			else
+				(def ? xml : userxml).push(px)
 		}
 	}
+	if(userxml.length)
+		xml.push("<separator class='groove'/>")
+	
+	if(disabledxml.length)
+		userxml.push("<separator class='groove'/>")
+	
 	el = $("shortcuts");
 	clean(el)
-	appendXML(el, xml.join('') + "<separator class='groove'/>" + userxml.join(''))
+	appendXML(el, xml.join('') + userxml.join('')+ disabledxml.join('')	)
 	
 	markConflicts()
 }
