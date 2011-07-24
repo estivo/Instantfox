@@ -94,12 +94,7 @@ var instantFoxDevel = {
 	],
 	moduleHref: 'chrome://instantfox/content/instantfoxModule.js',
 	
-	doReload: function(firstRun){
-		if (firstRun)try{
-			// debug initialization
-			Services.prefs.clearUserPref("extensions.instantfox.version")
-			InstantFox.updateOptionsButton(true)
-		}catch(e){}
+	doReload: function(){
 		//this.reloadComponent()
 		try{InstantFox.destroy()}catch(e){}
 		
@@ -125,6 +120,17 @@ var instantFoxDevel = {
 			dump('next')
 		}		
 	},
+	clearFirstRunPref: function(update){
+		try{
+			// debug initialization
+			if (update)
+				Services.prefs.setCharPref("extensions.instantfox.version", 'oldVersion')
+			else
+				Services.prefs.clearUserPref("extensions.instantfox.version")
+				
+			InstantFox.updateOptionsButton(true)
+		}catch(e){}
+	},
 	onClick: function(e){
 		var action = e.target.getAttribute('action')
 		switch(action){
@@ -139,7 +145,8 @@ var instantFoxDevel = {
 					break
 				}
 			case 'test-first-run':
-				this.doReload(true)
+				this.clearFirstRunPref(e.button == 2)
+				this.doReload()
 				break
 			case 'show-folder':
 				this.getContainingFolder().reveal()

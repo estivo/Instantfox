@@ -355,7 +355,6 @@ function pluginFromNsiSearch(bp){
  * main object
  ***********/
 InstantFoxModule = {
-    _version: '1.0.3',
 	helpURL: 'http://www.instantfox.net/help/',
 	editingHelpURL: 'http://www.instantfox.net/help/#add-plugin',
 

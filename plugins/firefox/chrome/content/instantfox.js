@@ -1,29 +1,9 @@
 //var currentTab = getWebNavigation().sessionHistory;.getEntryAtIndex(currentTab.count-1, false).URI.spec
 var InstantFox = {
 	// belong to notifyTab
-	version: "2.0.0",
 	install_url: "http://www.instantfox.net/welcome.php",
 	update_url:  "http://www.instantfox.net/update.php",
 	checkversion: true,
-	// end belong to notifyTab
-	
-	initialize: function(event) {
-		window.removeEventListener('load', arguments.callee, true);
-		Cu.import('chrome://instantfox/content/instantfoxModule.js')
-
-		gURLBar.setAttribute('autocompletesearch',	'instantFoxAutoComplete');
-		gURLBar.removeAttribute('oninput');
-
-		gURLBar.addEventListener('keydown', InstantFox.onKeydown, false);
-		gURLBar.addEventListener('input', InstantFox.onInput, false);
-		gURLBar.addEventListener('blur', InstantFox.onblur, false);
-		
-		dump('instantFox initialized')
-		InstantFox.notifyTab()
-		InstantFox.checkURLBarBinding()
-		InstantFox.updateUserStyle()
-		// apply user modified styles
-	},
 	
 	notifyOpenTab: function(url){
 		if(url){
@@ -32,23 +12,29 @@ var InstantFox = {
 		}
 	},
 	notifyTab: function(){
-		if(InstantFox.checkversion){
+		if (!InstantFox.checkversion)
+			return
+
+		AddonManager.getAddonByID('searchy@searchy', function(addon){
 			InstantFox.checkversion = false;
-			var versionfrompref = Services.prefs.getCharPref("extensions.instantfox.version");
-			if(versionfrompref == "0.0.0"){
-				setTimeout(InstantFox.notifyOpenTab, 500, InstantFox.install_url);
-				Services.prefs.setCharPref("extensions.instantfox.version", InstantFox.version);
+			var prefName = "extensions.instantfox.version";
+			var oldVersion = Services.prefs.getCharPref(prefName);
+			var newVersion = addon.version;
+			if (oldVersion == newVersion)
+				return
+
+			Services.prefs.setCharPref(prefName, newVersion);
+			if(oldVersion == "0.0.0"){
+				var url = InstantFox.install_url + '?to=' + newVersion;
 				// add options button only on first install
 				InstantFox.updateOptionsButton();
-				setTimeout(InstantFox.showInstallNotification, 10);
-			}else{
-				if(versionfrompref != InstantFox.version){
-					setTimeout(InstantFox.notifyOpenTab, 500, InstantFox.update_url);
-					Services.prefs.setCharPref("extensions.instantfox.version", InstantFox.version);
-					setTimeout(InstantFox.showInstallNotification, 10);
-				}
+				setTimeout(InstantFox.showInstallNotification, 600);
+			}else{				
+				var url = InstantFox.update_url + '?to=' + newVersion + '&from=' +oldVersion
 			}
-		}
+			
+			setTimeout(InstantFox.notifyOpenTab, 500, url);
+		})
 	},
 	showInstallNotification: function(){
 		let n = {
@@ -79,7 +65,7 @@ var InstantFox = {
 		popupnotification.setAttribute("buttoncommand", n.hide + n.action);
 		popupnotification.setAttribute("menucommand", "event.target.action?" + n.a.action + ':' + n.hide);
 		popupnotification.setAttribute("closeitemcommand", n.hide);
-		
+
 		//secondary actions
 		let item = doc.createElement("menuitem");
         item.setAttribute("label", n.a.label);
@@ -88,17 +74,36 @@ var InstantFox = {
 		let closeItemSeparator = doc.createElement("menuseparator");
         popupnotification.appendChild(closeItemSeparator);
 
-		// popupnotification.notification = n; 
+		// popupnotification.notification = n;
 		p.appendChild(popupnotification);
 		p.openPopup(doc.getElementById(n.anchor), "bottomcenter topleft");
 	},
-	
+	// end belong to notifyTab
+
+	initialize: function(event) {
+		window.removeEventListener('load', arguments.callee, true);
+		Cu.import('chrome://instantfox/content/instantfoxModule.js')
+
+		gURLBar.setAttribute('autocompletesearch',	'instantFoxAutoComplete');
+		gURLBar.removeAttribute('oninput');
+
+		gURLBar.addEventListener('keydown', InstantFox.onKeydown, false);
+		gURLBar.addEventListener('input', InstantFox.onInput, false);
+		gURLBar.addEventListener('blur', InstantFox.onblur, false);
+
+		dump('instantFox initialized')
+		InstantFox.notifyTab()
+		InstantFox.checkURLBarBinding()
+		InstantFox.updateUserStyle()
+		// apply user modified styles
+	},
+
 	destroy: function(event) {
 		//dump('---***---',arguments.callee.caller)
 		gURLBar.removeEventListener('keydown', _keydown, false);
 		gURLBar.removeEventListener('input', _input, false);
 	},
-	
+
 	checkURLBarBinding: function() {
 		if(gURLBar.instantFoxKeyNode)
 			return
@@ -107,7 +112,7 @@ var InstantFox = {
 		var s = gURLBar.mInputField
 		while (s&&s.nodeName!='xul:stack')
 			s = s.parentNode;
-		
+
 		if(!s) {
 			// todo: add !important to our bindings rule
 		}
@@ -118,15 +123,15 @@ var InstantFox = {
 			hb.className = "instantfox-"+name
 			if(addChildDiv){
 				hb.appendChild(document.createElementNS('http://www.w3.org/1999/xhtml','div'))
-				
+
 				gURLBar["instantFox" + name[0].toUpperCase() + name.substr(1) + "Node"] = hb.firstChild;
 			}
 			return hb
 		}
-		
+
  		var b2 = hbox('box')
 		b2.setAttribute('pack', 'end')
-		b2.setAttribute('onclick','InstantFox.openHelp()')		
+		b2.setAttribute('onclick','InstantFox.openHelp()')
 		b2.appendChild(hbox('tip', true))
 		s.appendChild(b2)
 
@@ -152,7 +157,7 @@ var InstantFox = {
 			if(s.href=="chrome://instantfox/content/skin/instantfox.css"){
 				// caution: this depends on the order of css rules in instantfox.css
 				var prefs = Services.prefs
-				if (prefs.prefHasUserValue('extensions.InstantFox.fontsize')) {
+				if (prefs.prefHasUserValue('extensions.InstantFox.fontsize')){
 					var pref = prefs.getCharPref('extensions.InstantFox.fontsize')
 					if (!/^\d+.?\d*((px)|(em))$/.test(pref)){
 						pref = parseFloat(pref)
@@ -166,13 +171,13 @@ var InstantFox = {
 					}
 					s.cssRules[3].style.fontSize = pref;
 				}
-				if (prefs.prefHasUserValue('extensions.InstantFox.opacity')) {
+				if (prefs.prefHasUserValue('extensions.InstantFox.opacity')){
 					var pref = parseInt(prefs.getIntPref('extensions.InstantFox.opacity')) / 100
 					if(isNaN(pref) || pref < 0.1)
 						pref = 1
 					s.cssRules[2].style.opacity = pref;
 				}
-				if (document.dir == 'rtl') {
+				if (document.dir == 'rtl'){
 					s.cssRules[5].style.backgroundPosition = '5% bottom';
 				}
 				break
@@ -278,7 +283,7 @@ var InstantFox = {
 			InstantFox.finishSearch();
         }
     },
-	
+
 	// ****** ----- -------- ****************************************
 	_isOwnQuery: false,
 
@@ -340,7 +345,7 @@ var InstantFox = {
 		if (this.logoAdded == show)
 			return;
 		this.logoAdded = show;
-		
+
 		if(show)
 			gURLBar.popup.richlistbox.setAttribute('type', 'InstantFoxSuggest')
 		else
@@ -388,7 +393,7 @@ var InstantFox = {
 		gURLBar.instantFoxTipNode.parentNode.hidden = false;
 		gURLBar.instantFoxTipNode.textContent = "TAB to complete"; //\u21B9 \u21C4
 	},
-	
+
 	// ****** instant preview ****************************************
 	minLoadTime: 50,
 	maxLoadTime: 200,
@@ -398,14 +403,14 @@ var InstantFox = {
 
 		if(!q.query && !qVal)
 			return ''
-		
+
 
 		var url2go = q.plugin.url;
 		if(qVal){
 			var query = qVal || q.query || q.domain || ''
 		}else
 			var query = q.shadow || q.query || q.domain || ''
-			
+
 		// encode query
 		if (q.plugin.id == 'imdb')
 		    query = escape(query.replace(/ /g, '+'));
@@ -419,7 +424,7 @@ var InstantFox = {
 			return url2go
 
 		q.preloadURL = url2go
-		
+
 		var now = Date.now()
 
 		var char_change = nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE
@@ -430,7 +435,7 @@ var InstantFox = {
 				this.schedulePreload(this.minLoadTime)
 				return
 			}
-			//content.location.replace(url2go);			
+			//content.location.replace(url2go);
 		}else{
 			q.index = webNav.sessionHistory.index
 			gBrowser.docShell.useGlobalHistory = false
@@ -456,7 +461,7 @@ var InstantFox = {
 	},
 	finishSearch: function() {
 		this._isOwnQuery = false
-		this.updateShadowLink(null) 
+		this.updateShadowLink(null)
 
 		var q = InstantFoxModule.currentQuery, br
 		if (q.tabId == InstantFox._ctabID)
@@ -465,7 +470,7 @@ var InstantFox = {
 			br = document.getElementById(InstantFoxModule.currentQuery.tabId)
 			br = br && br.getElementsByTagName("xul:browser")[0]
 		}
-			
+
 		if (br)
 			br.docShell.useGlobalHistory = true
 
@@ -481,7 +486,7 @@ var InstantFox = {
 	collapseHistory: function(index) {
 		var history = gBrowser.selectedBrowser.sessionHistory.QueryInterface(Ci.nsISHistoryInternal);
 		var entries=[];
-		
+
 		for (var i = 0; i < index; i++)
 			entries.push(history.getEntryAtIndex(i, false));
 		// last entry
@@ -489,7 +494,7 @@ var InstantFox = {
 		//
 		history.PurgeHistory(history.count);
 
-		for each (var entry in entries) 
+		for each (var entry in entries)
 			history.addEntry(entry, true);
 	},
 	onEnter: function(value){
@@ -538,7 +543,7 @@ InstantFox.onPopupShowing = function(p) {
 		return
 
 	window.addEventListener('mousedown', InstantFox.popupCloser, false)
-	
+
 	if (p.hasChildNodes()){
 		// rebuild in case user modified plugins by another options window instance
 		p.firstChild.contentWindow.rebuild(true)
@@ -549,9 +554,9 @@ InstantFox.onPopupShowing = function(p) {
 	var i = document.createElement('iframe')
 	i.setAttribute('src', 'chrome://instantfox/content/options.xul')
 	i.setAttribute('flex', '1')
-	p.appendChild(i)	
+	p.appendChild(i)
 	p.height = screen.availHeight * 4/5
-	p.width = 250 // approximate width 
+	p.width = 250 // approximate width
 	p.wrongSize = true
 }
 InstantFox.onPopupHiding = function(p) {
@@ -561,7 +566,7 @@ InstantFox.onPopupHiding = function(p) {
 }
 InstantFox.updatePopupSize = function(popupDoc) {
 	var p = document.getElementById('instantFox-options').firstChild
-	
+
 	if (p.wrongSize){
 		delete p.wrongSize
 		p.width = popupDoc.getElementsByTagName('tabbox')[0].clientWidth + 50;
@@ -584,7 +589,7 @@ InstantFox.openHelp = function() {
 }
 
 // todo: call this after window load on first install releted to FS#32
-InstantFox.updateOptionsButton = function(remove) {	
+InstantFox.updateOptionsButton = function(remove) {
 	var myId = "instantFox-options";
 	var navBar = document.getElementById("nav-bar");
 	var curSet = navBar.currentSet.split(",");
@@ -599,11 +604,11 @@ InstantFox.updateOptionsButton = function(remove) {
 			pos = curSet.length;
 		curSet.splice(pos, 0, myId)
 	} else if (i != -1 && remove) {
-		curSet.splice(i, 1)	
+		curSet.splice(i, 1)
 	} else {
 		curSet = null
 	}
-	
+
 	if (curSet){
 		navBar.setAttribute("currentset", curSet.join(","));
 		navBar.currentSet = curSet.join(",");
@@ -723,7 +728,7 @@ nsContextMenu.prototype.doSearch=function(e){
 	var selectedText = this.getSelectedText()
 	if(name == 'open as link')
 		openLinkIn(selectedText, e.button!=0?"current":"tab", {relatedToCurrent: true});
-	
+
 	var type = e.originalTarget.getAttribute('type')
 	if (type == "instantFox") {
 		href  = InstantFoxModule.Plugins[name].url.replace('%q', selectedText)
