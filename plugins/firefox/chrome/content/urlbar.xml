@@ -28,7 +28,7 @@
 						  allowevents="true"
 						  xbl:inherits="tooltiptext=inputtooltiptext,onfocus,onblur,value,type,maxlength,disabled,size,readonly,placeholder,tabindex,accesskey"/>
 			</xul:hbox>
-			<xul:hbox class='instantfox-box' right='0' align='center' onclick='HH.openHelp()'>
+			<xul:hbox class='instantfox-box' align='center' pack='end' onclick='HH.openHelp()'>
 				<xul:hbox class='instantfox-tip'><html:div/></xul:hbox>
 			</xul:hbox>
 		</xul:stack>

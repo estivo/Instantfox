@@ -50,7 +50,6 @@ richlistbox[type='InstantFoxSuggest'] {
 }
 .instantfox-tip{
 	color:graytext;
-	right:0px;
 	background:rgb(255,246,171);
 	border-radius: 4px;
 	padding: 0px 2px;

@@ -125,7 +125,7 @@ var InstantFox = {
 		}
 		
  		var b2 = hbox('box')
-		b2.setAttribute('right', 0)
+		b2.setAttribute('pack', 'end')
 		b2.setAttribute('onclick','InstantFox.openHelp()')		
 		b2.appendChild(hbox('tip', true))
 		s.appendChild(b2)
@@ -152,7 +152,7 @@ var InstantFox = {
 			if(s.href=="chrome://instantfox/content/skin/instantfox.css"){
 				// caution: this depends on the order of css rules in instantfox.css
 				var prefs = Services.prefs
-				if(prefs.prefHasUserValue('extensions.InstantFox.fontsize')){
+				if (prefs.prefHasUserValue('extensions.InstantFox.fontsize')) {
 					var pref = prefs.getCharPref('extensions.InstantFox.fontsize')
 					if (!/^\d+.?\d*((px)|(em))$/.test(pref)){
 						pref = parseFloat(pref)
@@ -166,11 +166,14 @@ var InstantFox = {
 					}
 					s.cssRules[3].style.fontSize = pref;
 				}
-				if(prefs.prefHasUserValue('extensions.InstantFox.opacity')){
+				if (prefs.prefHasUserValue('extensions.InstantFox.opacity')) {
 					var pref = parseInt(prefs.getIntPref('extensions.InstantFox.opacity')) / 100
 					if(isNaN(pref) || pref < 0.1)
 						pref = 1
 					s.cssRules[2].style.opacity = pref;
+				}
+				if (document.dir == 'rtl') {
+					s.cssRules[5].style.backgroundPosition = '5% bottom';
 				}
 				break
 			}
