@@ -81,10 +81,10 @@ function cleanCopyPlugin(p){
 	p.disableSuggest && (p1.disableSuggest = true)
 	p.hideFromContextMenu && (p1.hideFromContextMenu = true)
 	//
-	if(p.type=='default'){
-		p.def_url != null && (p.def_url = p1.def_url)
-		p.def_key != null && (p.def_key = p1.def_key)
-		p.def_name != null && (p.def_name = p1.def_name)
+	if(p.type=='default'){	
+		p.def_url != null && (p1.def_url = p.def_url)
+		p.def_key != null && (p1.def_key = p.def_key)
+		p.def_name != null && (p1.def_name = p.def_name)
 	}
 
 	return p1
@@ -119,7 +119,7 @@ var pluginLoader = {
 			;['key','url','name'].forEach(function(propName){
 				p['def_'+propName] = p[propName]
 			})
-			
+
 			newPlugins[p.id] = p
 		}
 		pluginData.plugins = newPlugins
@@ -140,7 +140,7 @@ var pluginLoader = {
 				});
 				// add this properties if user modified them
 				['key','url','name'].forEach(function(propName){
-					if('def_'+propName in mP && mP['def_'+propName] != mP[propName])
+					if(mP['def_'+propName] != null && mP['def_'+propName] != mP[propName])
 						p[propName] = mP[propName]
 				});
 				// change iconURI to match url

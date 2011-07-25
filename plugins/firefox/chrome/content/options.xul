@@ -28,6 +28,9 @@
 .link:hover {
 	text-decoration:underline;
 }
+.link.help {
+	text-shadow: 2px 2px 6px #FFF,  -2px -2px 6px #FFF, 0pt 0px 6px #FFF;
+}
 richlistbox {
 	overflow-y:auto;
 	min-height:5ch;
@@ -261,12 +264,13 @@ label[control='opacity-scale']{
 	</hbox>
 	<hbox>
 		<checkbox label='load page instantly' aID='instant'/>
+		<spacer width='40'/>
 		<checkbox label='suggest' aID='suggest'/>
 	</hbox>
 	<hbox align='center'>
 		<slickbutton label='remove' aID='remove' oncommand="removePlugin(gPlugin);$('edit-box').hidePopup();"/>
 		<toolbarbutton label='more' hidden='true'/>
-		<description class='link' value='Help?' onclick='open(InstantFoxModule.editingHelpURL)'/>
+		<description class='help link' value='Help?' onclick='open(InstantFoxModule.editingHelpURL)'/>
 		<spacer flex='1'/>
 		<slickbutton label='ok' onclick="$('edit-box').hidePopup()"/>
 	</hbox>
