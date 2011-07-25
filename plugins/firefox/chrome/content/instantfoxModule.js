@@ -80,6 +80,13 @@ function cleanCopyPlugin(p){
 	p.disableInstant && (p1.disableInstant = true)
 	p.disableSuggest && (p1.disableSuggest = true)
 	p.hideFromContextMenu && (p1.hideFromContextMenu = true)
+	//
+	if(p.type=='default'){
+		p.def_url != null && (p.def_url = p1.def_url)
+		p.def_key != null && (p.def_key = p1.def_key)
+		p.def_name != null && (p.def_name = p1.def_name)
+	}
+
 	return p1
 }
 var pluginLoader = {
@@ -92,16 +99,14 @@ var pluginLoader = {
 
 		for(var i in pluginData.plugins){
 			var p = pluginData.plugins[i];
-			if(!p)
+			if(!p || !p.url)
 				continue
-
-			if(p.url){
-				p.url = p.url.replace(localeRe, replacer)
-				p.domain = p.url.match(domainRe)[1]
-				p.name = p.name||i
-				p.id = i.toLowerCase()
-				p.iconURI = p.iconURI || getFavicon(p.url);
-			}
+			
+			p.url = p.url.replace(localeRe, replacer)
+			p.domain = p.url.match(domainRe)[1]
+			p.name = p.name||i
+			p.id = i.toLowerCase()
+			p.iconURI = p.iconURI || getFavicon(p.url);
 
 			if(p.json)
 				p.json = p.json.replace(localeRe, replacer)
@@ -109,6 +114,11 @@ var pluginLoader = {
 				p.json = false
 			
 			p.type = 'default'
+			
+			// user modifiable props
+			;['key','url','name'].forEach(function(propName){
+				p['def_'+propName] = p[propName]
+			})
 			
 			newPlugins[p.id] = p
 		}
@@ -122,16 +132,20 @@ var pluginLoader = {
 			var mP = InstantFoxModule.Plugins[id]
 			//copy user modified values
 			if(mP){
-				if('key' in mP)
-					p.key = mP.key
-				if('hideFromContextMenu' in mP)
-					p.hideFromContextMenu = mP.hideFromContextMenu;
-				if('disableInstant' in mP)
-					p.disableInstant = mP.disableInstant;
-				if('disableSuggest' in mP)
-					p.disableSuggest = mP.disableSuggest;
-				if('disabled' in mP)
-					p.disabled = mP.disabled;
+				// add properties 
+				['hideFromContextMenu', 'disableInstant',
+					'disableSuggest', 'disabled'].forEach(function(n){
+					if(n in mP)
+						p[n] = mP[n]
+				});
+				// add this properties if user modified them
+				['key','url','name'].forEach(function(propName){
+					if('def_'+propName in mP && mP['def_'+propName] != mP[propName])
+						p[propName] = mP[propName]
+				});
+				// change iconURI to match url
+				if(p.url != p.def_url)
+					p.iconURI = getFavicon(p.url);
 			}
 			InstantFoxModule.Plugins[id] = p;
 		}
@@ -526,7 +540,7 @@ var parseImdbJson = function(json, key, splitSpace){
 	for(var i = 0; i < xhrReturn.length; i++){
 		var result = xhrReturn[i];
 		results.push({
-			icon: '',
+			icon: '',//result.i||'http://i.media-imdb.com/images/mobile/film-40x54.png',
 			title: result.l,
 			url: key + splitSpace + result.l,
 			comment: result.s

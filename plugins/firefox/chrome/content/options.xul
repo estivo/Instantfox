@@ -199,7 +199,16 @@ label[control='opacity-scale']{
 		    <menuitem label=""/>
 		  </menupopup>
 	    </menulist>
-		
+		<!-- devel__(
+		<vbox style='padding-top:5px'>
+			<label value='show suggestions from google,when there ' control='default-suggest'/>
+			<hbox >
+				<label value='are no history results:' control='default-suggest'/>
+				<checkbox preference="default-suggest-pref"  id='default-suggest'/>
+			</hbox>
+		</vbox>
+          <preference id="default-suggest-pref" name="extensions.InstantFox.defaultSuggest" type="bool" />
+		 devel__) -->
 		<preferences>
           <preference id="keyword-URL" name="keyword.URL" type="string" />
           <preference id="fontsize" name="extensions.InstantFox.fontsize" type="string" />
@@ -467,8 +476,8 @@ editPopupSave = function(panel){
 	gPlugin.name = $t(panel, 'name').value
 	gPlugin.url = $t(panel, 'url').value
 	gPlugin.key = $t(panel, 'key').value
-	//gPlugin.iconURI = $t(panel, 'image').src
-	
+	gPlugin.iconURI = $t(panel, 'image').src
+
 	saveGPlugin(createNew)
 }
 saveGPlugin = function(createNew){
