@@ -88,37 +88,46 @@ splitter {
 	-moz-appearance: none;
 }
 /* close button */
-.close-button {
+resetbutton {
 	-moz-appearance: none;
-	-moz-image-region: rect(0, 64px, 16px, 48px);
+	-moz-image-region: rect(0, 16px, 16px, 0px);
 	border: none;
-	padding: 0px;
-	list-style-image: url("chrome://global/skin/icons/close.png");
+	-moz-margin-start: -4px;
+	-moz-margin-end: 4px;
+	border-radius: 4px;
+	background: #EEF9FF;
+	box-shadow: 0pt 0pt 1.5px 1px gray;
+	
+	list-style-image: url("chrome://instantfox/content/skin/search-close.png");
+	-moz-binding: url("chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton");
+
+	width:16px;
+	height:16px;
 }
 
-.tab-close-button:hover {
+resetbutton:hover {
 	-moz-image-region: rect(0, 32px, 16px, 16px);
 }
 
-.tab-close-button:hover:active {
-	-moz-image-region: rect(0, 48px, 16px, 32px);
+resetbutton:hover:active {
+	-moz-image-region: rect(0, 32px, 16px, 16px);
 }
 
 slickbutton {
-  -moz-binding: url("chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton");
-  background: -moz-linear-gradient(#F3F3ED, #CECEC3);
-  color: #000000;
-  box-shadow: 0 0 2px #CECEC3;
-  border: solid 1px #ACA899;
-  -moz-border-radius: 8px;
-  padding:1px;
-  margin:4px;
+	-moz-binding: url("chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton");
+	background: -moz-linear-gradient(#F3F3ED, #CECEC3);
+	color: #000000;
+	box-shadow: 0 0 2px #CECEC3;
+	border: solid 1px #ACA899;
+	-moz-border-radius: 8px;
+	padding:1px;
+	margin:4px;
 }
 slickbutton:hover {
-  background: -moz-linear-gradient(#F3F3ED, #DEDED3);
+	background: -moz-linear-gradient(#F3F3ED, #DEDED3);
 }
 slickbutton:hover:active {
-  background: -moz-linear-gradient(#ACA899, #FFFFFF);
+	background: -moz-linear-gradient(#ACA899, #FFFFFF);
 }
 
 label[control='opacity-scale']{
@@ -243,7 +252,10 @@ label[control='opacity-scale']{
 <panel id="edit-box" ignorekeys='true' type="arrow" orient='vertical' onpopuphiding='editPopupSave(this)'>
 	<hbox align='center'>
 		<label value='name:'/>
-		<textbox aID='name' flex='1'/>
+		<textbox aID='name' flex='1' oninput="
+		this.nextSibling.hidden = !canResetProp(this);
+		"/>
+		<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
 		<hbox align="center" class='image'>
 			<image aID='image'/>
 		</hbox>
@@ -251,12 +263,14 @@ label[control='opacity-scale']{
 	<hbox align='center'>
 		<label value='url:'/>
 		<textbox type='url' aID='url' flex='1' oninput="
+		this.nextSibling.hidden = !canResetProp(this);
 		if(this.timeout==null)
 			this.timeout=setTimeout(function(a){
 				a.timeout=null;
-				$t($('edit-box'), 'image').src='http://g.etfv.co/'+a.value
+				$t($('edit-box'), 'image').src='http://g.etfv.co/'+a.value;
 			}, 500, this)
 		"/>
+		<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
 	</hbox>
 	<hbox align='center'>
 		<label value='key:'/>
@@ -389,7 +403,7 @@ function formatString(string, options){
 function escapeHTML(str) str.replace(/[&"<>]/g, function(m)"&"+escapeMap[m]+";");
 var escapeMap = { "&": "amp", '"': "quot", "<": "lt", ">": "gt" }
 
-//************************
+//************************ context menu
 initContextMenu = function(popup){
 	var item = document.popupNode	
 	item = $parent(item)
@@ -427,7 +441,8 @@ onContextMenuCommand = function(e){
 	if (name == 'disabled')
 		rebuild(true)
 }
-//************************ 
+
+//************************ edit popup utils
 var gPlugin, gPluginsChanged, gPrefChanged, resultOK=true;
 openEditLigthbox = function(e){
 	var item = e.target;
@@ -452,16 +467,19 @@ openEditLigthbox = function(e){
 	
 	$t(panel, 'suggest').checked = !gPlugin.disableSuggest
 	$t(panel, 'instant').checked = !gPlugin.disableInstant
-	$t(panel, 'name').value = gPlugin.name
-	$t(panel, 'key').value = gPlugin.key
-	var urlBox = $t(panel, 'url')
-	urlBox.value = gPlugin.url
 	$t(panel, 'image').src = gPlugin.iconURI
+	$t(panel, 'key').value = gPlugin.key
+	
+	for each(var i in ['url', 'name']){
+		var box = $t(panel, i)
+		box.value = gPlugin[i]
+		box.nextSibling.hidden = !canResetProp(box)
+	}
+	
 	var rem =  $t(panel, 'remove')
 	rem.label = gPlugin.type == 'user' ? 'remove': 'disable';
 	rem.hidden = false;
 	
-
 	var popupBoxObject = panel.popupBoxObject;
 	popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
 	panel.openPopup(item.firstElementChild,'before_start',0,0,false,true)
@@ -526,7 +544,11 @@ addPlugin=function(e){
 	$t(panel, 'key').value = ''
 	
 	var urlBox = $t(panel, 'url')
-	urlBox.value = ''
+	for each(var i in ['url', 'name']){
+		var box = $t(panel, i)
+		box.value = ''
+		box.nextSibling.hidden = true
+	}
 	$t(panel, 'image').src = ''	
 	var rem =  $t(panel, 'remove')
 	rem.label = 'cancel';
@@ -551,6 +573,20 @@ removePlugin=function(p) {
 	}
 	
 	gPluginsChanged = true
+}
+canResetProp = function(el){
+	var name = el.getAttribute('aID')
+	return gPlugin.type == 'default' &&
+		gPlugin['def_' + name] != null &&
+		gPlugin['def_' + name] != el.value
+}
+resetPluginProp = function(self){
+	var el = self.previousSibling
+	var name = el.getAttribute('aID')
+	el.value = gPlugin['def_'+name]
+	var e=document.createEvent('UIEvent')
+	e.initUIEvent('input',true, true, window, 1)
+	el.dispatchEvent(e)
 }
 //*************************
 
@@ -680,7 +716,7 @@ rebuild = function(){
 	if(disabledxml.length)
 		userxml.push("<separator class='groove'/>")
 	
-	el = $("shortcuts");
+	var el = $("shortcuts");
 	clean(el)
 	appendXML(el, xml.join('') + userxml.join('')+ disabledxml.join('')	)
 	
