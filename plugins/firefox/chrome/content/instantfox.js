@@ -92,7 +92,7 @@ var InstantFox = {
 		// gURLBar.addEventListener('cut', InstantFox.onInput, false);
 		// _copyCutController prevents cut event, so modify it for now 
 		// (fortunately this function is same the in 3.6-8.0a)
-		gURLBar._copyCutController.doCommand = this._urlbarCutCommand
+		gURLBar._copyCutController.doCommand = InstantFox._urlbarCutCommand
 		gURLBar.addEventListener('blur', InstantFox.onblur, false);
 
 		dump('instantFox initialized')
