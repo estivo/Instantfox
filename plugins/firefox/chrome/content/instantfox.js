@@ -677,6 +677,28 @@ InstantFox._urlbarCutCommand =  function(aCommand){
 /*********************************************************
  * contextMenu
  *******/
+nsContextMenu.prototype.createSearchItem = function(){
+	var old = document.getElementById("context-searchselect")
+	if(old)
+		old.parentNode.removeChild(old)
+	
+	var m = document.createElement('menu')
+	m.setAttribute('id', "ifox-context-searchselect")
+	m.setAttribute('type', "splitmenu")
+	m.setAttribute('iconic', "true")
+	m.setAttribute('onclick', "gContextMenu.doSearch(event)")
+	
+	var p = document.createElement('menupopup')
+	p.setAttribute('onpopupshowing', "gContextMenu.fillSearchSubmenu(this)")
+	
+	m.appendChild(p)
+	
+	var s = document.getElementById("context-sep-open")
+	
+	var c = document.getElementById("contentAreaContextMenu")
+	c.insertBefore(m, s)
+	return m
+}
 nsContextMenu.prototype.getSelectedText = function() {
 	var selectedText = getBrowserSelection();
 
@@ -697,13 +719,12 @@ nsContextMenu.prototype.getSelectedText = function() {
 	return ''
 }
 nsContextMenu.prototype.isTextSelection = function() {
-	var menu = document.getElementById("context-searchselect")
+	var menu = document.getElementById("ifox-context-searchselect") || this.createSearchItem()
 
     var selectedText = this.getSelectedText()
 
 	if (!selectedText){
-		if (menu)
-			menu.hidden = true
+		menu.hidden = true
 		return false;
 	}
 
@@ -719,6 +740,8 @@ nsContextMenu.prototype.isTextSelection = function() {
     var menuLabel = gNavigatorBundle.getFormattedString("contextMenuSearchText",
                                                         [engine.name, selectedText]);
 	if(menu){
+	dump(menu.id)
+	dump(menu.item)
 		menu.label = menuLabel;
 		menu.image = engine.iconURI.spec
 		menu.item.setAttribute('name', engine.name)
@@ -728,7 +751,7 @@ nsContextMenu.prototype.isTextSelection = function() {
 
     return true;
 }
-nsContextMenu.prototype.fillSearchSubmenu=function(popup){
+nsContextMenu.prototype.fillSearchSubmenu=function(popup) {
 	var menu
 	while(menu = popup.firstChild)
 		popup.removeChild(menu)
@@ -747,7 +770,7 @@ nsContextMenu.prototype.fillSearchSubmenu=function(popup){
 		popup.appendChild(menu)
 	}
 }
-nsContextMenu.prototype.doSearch=function(e){
+nsContextMenu.prototype.doSearch=function(e) {
 	var name = e.originalTarget.getAttribute('name')
 	if(!name)
 		return

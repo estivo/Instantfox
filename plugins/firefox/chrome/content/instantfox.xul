@@ -38,10 +38,4 @@
 	</toolbarbutton>
   </toolbarpalette>
   
-  <menupopup id="contentAreaContextMenu">
-	<menu id="context-searchselect" type='splitmenu' label=""  iconic="true" 
-			onclick='gContextMenu.doSearch(event)' insertbefore='context-sep-open'>
-		<menupopup 	onpopupshowing="gContextMenu.fillSearchSubmenu(this)"/>
-	</menu>	  
-  </menupopup>
 </overlay>
