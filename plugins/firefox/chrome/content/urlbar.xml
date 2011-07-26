@@ -13,7 +13,10 @@
         <children includes="image|deck|stack|box">
           <xul:image class="autocomplete-icon" allowevents="true"/>
         </children>
-		<xul:stack flex="1">
+		<xul:stack class="urlbar-stack" flex="1">
+			<xul:vbox class="urlbar-progress-layer" xbl:inherits="pack=pmpack" flex="1">
+			  <children includes="progressmeter"/>
+			</xul:vbox>
 			<xul:hbox class="instantfox-box" align='center'>
 			  <xul:hbox anonid="instantFoxKey" class="instantfox-key"><html:div/></xul:hbox>
 			  <xul:hbox anonid="instantFoxSpacer" class="instantfox-spacer"><html:div/></xul:hbox>

@@ -39,7 +39,6 @@
   </toolbarpalette>
   
   <menupopup id="contentAreaContextMenu">
-	<menuitem id="context-searchselect" removeelement="true"/>
 	<menu id="context-searchselect" type='splitmenu' label=""  iconic="true" 
 			onclick='gContextMenu.doSearch(event)' insertbefore='context-sep-open'>
 		<menupopup 	onpopupshowing="gContextMenu.fillSearchSubmenu(this)"/>

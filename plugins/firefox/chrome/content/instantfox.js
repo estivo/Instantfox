@@ -564,16 +564,13 @@ InstantFox.onPopupHiding = function(p) {
 	i.contentWindow.savePlugins()
 	window.removeEventListener('mousedown', InstantFox.popupCloser, false)
 }
-InstantFox.updatePopupSize = function(popupDoc) {
+InstantFox.updatePopupSize = function(size) {
 	var p = document.getElementById('instantFox-options').firstChild
 
 	if (p.wrongSize){
 		delete p.wrongSize
-		p.width = popupDoc.getElementsByTagName('tabbox')[0].clientWidth + 50;
+		p.width = size
 	}
-
-	// don't let clicks inside options window to close popup
-	popupDoc.defaultView.addEventListener('mousedown', InstantFox.popupClickListener, false)
 }
 InstantFox.popupClickListener = function(e) {
 	InstantFox.clickedInPopup = true
@@ -677,7 +674,8 @@ nsContextMenu.prototype.isTextSelection = function() {
     var selectedText = this.getSelectedText()
 
 	if (!selectedText){
-		menu.hidden = true
+		if (menu)
+			menu.hidden = true
 		return false;
 	}
 

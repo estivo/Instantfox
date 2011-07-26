@@ -486,12 +486,12 @@ var parseMapsJson = function(json, key, splitSpace){
 }
 var parseGeoJson = function(json, key, splitSpace){
 	var city = json.match(/"city":"(.*?)"/)
-	if (!city)				
+	// sometimes city can be '(null)': why?
+	if (!city || /\(?null\)?/.test())
 		return 
 	var result = city[1]
-	// side effect
-	InstantFoxModule.userLocation = result
-	return [{
+	// side effect	
+	return InstantFoxModule.geoResult = [{
 		icon: '',
 		title: result,
 		url: key + splitSpace + result
@@ -671,7 +671,7 @@ InstantFoxSearch.prototype = {
 			this.listener.onSearchResult(this, result)	
 			dump(this, result)
 			
-		} else {
+		} else if(InstantFoxModule.autosearch){
 			autoSearch.query = autoSearch.value = this.searchString
 			var url = autoSearch.plugin.json.replace('%q', encodeURIComponent(autoSearch.query))
 			this.parser = parseSimpleJson
@@ -709,8 +709,13 @@ InstantFoxSearch.prototype = {
 		} else if(!q.query) {
 			// in some cases we can provide suggestions even before user started typing
 			if (isMaps) {
-				url = 'http://geoiplookup.wikia.com/'
-				this.parser = parseGeoJson
+				if (!InstantFoxModule.geoResult){
+					url = 'http://geoiplookup.wikia.com/'
+					this.parser = parseGeoJson
+				} else {
+					url = null
+					results = InstantFoxModule.geoResult
+				}
 			} else {
 				// nop
 			}
