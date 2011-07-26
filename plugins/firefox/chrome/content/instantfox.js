@@ -89,6 +89,10 @@ var InstantFox = {
 
 		gURLBar.addEventListener('keydown', InstantFox.onKeydown, false);
 		gURLBar.addEventListener('input', InstantFox.onInput, false);
+		// gURLBar.addEventListener('cut', InstantFox.onInput, false);
+		// _copyCutController prevents cut event, so modify it for now 
+		// (fortunately this function is same the in 3.6-8.0a)
+		gURLBar._copyCutController.doCommand = this._urlbarCutCommand
 		gURLBar.addEventListener('blur', InstantFox.onblur, false);
 
 		dump('instantFox initialized')
@@ -261,7 +265,7 @@ var InstantFox = {
 			event.preventDefault();
 		}
 	},
-	onInput: function(event) {
+	onInput: function() {
 		var val = gURLBar.value;
 		gBrowser.userTypedValue = val;
 
@@ -286,6 +290,7 @@ var InstantFox = {
 
 	// ****** ----- -------- ****************************************
 	_isOwnQuery: false,
+	$urlBarModified: false,
 
 	get _ctabID() gBrowser.mCurrentTab.linkedPanel,
 	get _url() InstantFoxModule.currentQuery,
@@ -392,6 +397,7 @@ var InstantFox = {
 		this.rightShadow = s.shadow // fixme
 		gURLBar.instantFoxTipNode.parentNode.hidden = false;
 		gURLBar.instantFoxTipNode.textContent = "TAB to complete"; //\u21B9 \u21C4
+		this.$urlBarModified = true
 	},
 
 	// ****** instant preview ****************************************
@@ -460,7 +466,7 @@ var InstantFox = {
 		dump(spec)
 	},
 	finishSearch: function() {
-		this._isOwnQuery = false
+		this.$urlBarModified = this._isOwnQuery = false
 		this.updateShadowLink(null)
 
 		var q = InstantFoxModule.currentQuery, br
@@ -621,8 +627,8 @@ window.addEventListener('load', InstantFox.initialize, true);
 // modify URLBarSetURI defined in browser.js
 function URLBarSetURI(aURI) {
 	// auri is null if URLBarSetURI is called from urlbar.handleRevert
-	if (InstantFox._isOwnQuery) {
-		if (InstantFoxModule.currentQuery.tabId == InstantFox._ctabID){
+	if (InstantFox.$urlBarModified) {
+		if (aURI && InstantFoxModule.currentQuery.tabId == InstantFox._ctabID){
 			InstantFox.onPageLoad(aURI.spec)
 			return;
 		} else { //hide shadow if user switched tabs
@@ -644,6 +650,28 @@ function URLBarSetURI(aURI) {
     }
     gURLBar.value = value;
     SetPageProxyState(valid ? "valid" : "invalid");
+}
+// todo: find better way to intercept cut command
+InstantFox._urlbarCutCommand =  function(aCommand){
+	var urlbar = this.urlbar;
+	var val = urlbar._getSelectedValueForClipboard();
+	if (!val)
+		return;
+
+	if (aCommand == "cmd_cut" && this.isCommandEnabled(aCommand)) {
+		let start = urlbar.selectionStart;
+		let end = urlbar.selectionEnd;
+		// This should reset any "moz-action:" prefix.
+		urlbar.value = urlbar.inputField.value.substring(0, start) +
+							urlbar.inputField.value.substring(end);
+		urlbar.selectionStart = urlbar.selectionEnd = start;
+		SetPageProxyState("invalid");
+		InstantFox.onInput()
+	}
+
+	Cc["@mozilla.org/widget/clipboardhelper;1"]
+			.getService(Ci.nsIClipboardHelper)
+			.copyString(val);
 }
 
 /*********************************************************

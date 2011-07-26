@@ -715,6 +715,7 @@ InstantFoxSearch.prototype = {
 				} else {
 					url = null
 					results = InstantFoxModule.geoResult
+					callOnSearchReady = true
 				}
 			} else {
 				// nop
@@ -734,6 +735,7 @@ InstantFoxSearch.prototype = {
 			this.listener = listener;
 			this.startReq(url)
 		} else { // no need for xhr
+			q.results = results;
 			var newResult = new SimpleAutoCompleteResult(results, searchString);
 			listener.onSearchResult(this, newResult);			
 			if (callOnSearchReady)
