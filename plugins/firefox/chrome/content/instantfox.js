@@ -628,7 +628,10 @@ window.addEventListener('load', InstantFox.initialize, true);
 function URLBarSetURI(aURI) {
 	// auri is null if URLBarSetURI is called from urlbar.handleRevert
 	if (InstantFox.$urlBarModified) {
-		if (aURI && InstantFoxModule.currentQuery.tabId == InstantFox._ctabID){
+		if (aURI 
+			&& InstantFoxModule.currentQuery
+			&& InstantFoxModule.currentQuery.tabId == InstantFox._ctabID
+		) {
 			InstantFox.onPageLoad(aURI.spec)
 			return;
 		} else { //hide shadow if user switched tabs
