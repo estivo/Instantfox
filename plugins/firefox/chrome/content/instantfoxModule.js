@@ -152,7 +152,7 @@ var pluginLoader = {
 		// remove default plugins from other locale
 		for (var pn in InstantFoxModule.Plugins){
 			var p = InstantFoxModule.Plugins[pn]
-			if (p.type == 'default' && !pluginData.plugins[pn])
+			if (p.type == 'default' && !pluginData.plugins[pn] && !this.isUserModified(p))
 				delete InstantFoxModule.Plugins[pn]
 		}
 		InstantFoxModule.defaultPlugin = InstantFoxModule.defaultPlugin||'google'
@@ -276,6 +276,13 @@ var pluginLoader = {
 			spec += '/'+ locale + '/plugins.json';
 		}
 		return spec
+	},
+	isUserModified: function(plugin){
+		for each(var i in ['url', 'name', 'key']){
+			if(plugin['def_'+i] != null && plugin['def_'+i] != plugin[i])
+				return true
+		}
+		return false
 	}
 
 }
