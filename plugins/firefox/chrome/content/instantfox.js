@@ -209,10 +209,10 @@ var InstantFox = {
 				}
 			} else if (key == 13 && !meta && !ctrl) { // 13 == ENTER
 				if(!alt)
-					InstantFox.onEnter(InstantFoxModule.currentQuery.query)
-				else {
+					InstantFox.onEnter()
+				else
 					InstantFox.openLoadedPageInNewTab()
-				}
+
 				event.preventDefault();
 			} else if (!alt && !meta && !ctrl && [38,40,34,33].indexOf(key)!=-1) {//UP,DOWN,PAGE_UP,PAGE_DOWN
 				if(!InstantFoxModule.currentQuery.plugin.disableInstant) {
@@ -403,31 +403,34 @@ var InstantFox = {
 	// ****** instant preview ****************************************
 	minLoadTime: 50,
 	maxLoadTime: 200,
-	doPreload: function(q, qVal) {
-		if(this.timeout)
+	doPreload: function(q, ignoreShadow) {
+		if (this.timeout)
 			this._timeout = clearTimeout(this._timeout)
 
-		if(!q.query && !qVal)
-			return ''
+		if (q.query) {
+			var url2go = q.plugin.url;
+			if(ignoreShadow){
+				var query = q.query
+			}else
+				var query = q.shadow || q.query
 
+			// encode query
+			if (q.plugin.id == 'imdb')
+				query = escape(query.replace(/ /g, '+'));
+			else
+				query = encodeURIComponent(query);
 
-		var url2go = q.plugin.url;
-		if(qVal){
-			var query = qVal || q.query || q.domain || ''
-		}else
-			var query = q.shadow || q.query || q.domain || ''
+			url2go = url2go.replace('%q', query);
 
-		// encode query
-		if (q.plugin.id == 'imdb')
-		    query = escape(query.replace(/ /g, '+'));
-		else
-			query = encodeURIComponent(query);
+			if(q.preloadURL &&
+				url2go.toLowerCase() == q.preloadURL.toLowerCase())
+				return url2go		
+		} else {
+			var url2go = q.plugin.domain || ''
+			url2go = url2go.replace('%q', '')//wikipedia domain was handled incorrectly
+					.replace(/\/$/, '')
+		}
 
-		url2go = url2go.replace('%q', query);
-
-		if(q.preloadURL &&
-			url2go.toLowerCase() == q.preloadURL.toLowerCase())
-			return url2go
 
 		q.preloadURL = url2go
 
@@ -503,10 +506,10 @@ var InstantFox = {
 		for each (var entry in entries)
 			history.addEntry(entry, true);
 	},
-	onEnter: function(value){
+	onEnter: function(){
 		InstantFoxModule.previousQuery = InstantFoxModule.currentQuery
 
-		var tmp = this.doPreload(InstantFoxModule.currentQuery, value)
+		var tmp = this.doPreload(InstantFoxModule.currentQuery, true)
 		gURLBar.value = tmp;
 		gBrowser.userTypedValue = null;
 
@@ -523,7 +526,7 @@ var InstantFox = {
 		var newTab = Cc['@mozilla.org/browser/sessionstore;1'].getService(Ci.nsISessionStore).duplicateTab(window, tab, historyOffset);
 		newTab.linkedBrowser.userTypedValue = null;
 		gBrowser.moveTabTo(tab,tab._tPos+1)
-		this.onEnter(q.query)
+		this.onEnter()
 	},
 }
 
