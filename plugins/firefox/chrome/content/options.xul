@@ -460,8 +460,9 @@ openEditLigthbox = function(e){
 		return;
 
 	var panel = $('edit-box')
-	if (editPopupJustClosed=='open' || panel.state=='open') {
-		editPopupJustClosed = false
+
+	if ( panel.state!='closed') {
+		panel.hidePopup()
 		return
 	}
 	
