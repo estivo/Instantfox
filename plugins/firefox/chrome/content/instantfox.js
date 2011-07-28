@@ -506,8 +506,11 @@ var InstantFox = {
 		for each (var entry in entries)
 			history.addEntry(entry, true);
 	},
-	onEnter: function(){
+	onEnter: function(value){
 		InstantFoxModule.previousQuery = InstantFoxModule.currentQuery
+
+		if (value)
+			InstantFoxModule.currentQuery.query = value
 
 		var tmp = this.doPreload(InstantFoxModule.currentQuery, true)
 		gURLBar.value = tmp;
