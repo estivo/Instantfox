@@ -1,3 +1,83 @@
+/*s=document.createElement('vbox')
+
+gURLBar.parentNode.parentNode.appendChild(s)*/
+
+s.className='searchbar-textbox'
+s.style.backgroundColor= "-moz-field";
+s.appendChild
+
+r=document.createElement('image')
+
+s.appendChild(r)
+
+//r.src='moz-anno:favicon:http://www.google.am/favicon.ico'
+
+s.align='center'
+s.pack='center'
+r.style.padding='0 10px'
+
+
+
+
+
+
+
+
+http://translate.google.com/translate_t?q=g&bav=on.2,or.r_gc.r_pw.&um=1&ie=UTF-8&sa=N&hl=en&tab=wT
+
+http://translate.google.com/translate_t?
+	q=g&
+	bav=on.2,or.r_gc.r_pw.&
+	um=1&ie=UTF-8&
+	sa=N&
+	hl=en&
+	tab=wT
+		#la|en|vita di oculus ra
+		#auto|en|%q
+
+http://translate.google.com/translate?
+	sl=auto&
+	tl=en&
+	u=http://piro.sakura.ne.jp/latest/blosxom/life/2011-07-24_gym.htm
+	
+	
+
+
+if(b&&b.parentNode)
+	b.parentNode.removeChild(b)
+var b=document.createElement('vbox')
+
+var bi=document.createElement('vbox')
+bi.className='ou'
+b.appendChild(bi)
+
+for each(p in InstantFoxModule.Plugins){
+	i=document.createElement('image')
+	i.setAttribute('src',p.iconURI)
+b1=document.createElement('hbox')
+	b1.appendChild(i)
+b2=document.createElement('vbox')
+	b1.appendChild(b2)
+b2.setAttribute('flex',1)
+b1.className='op'
+	bi.appendChild(b1)
+}
+
+gURLBar.parentNode.appendChild(b)
+
+b.style.position='fixed'
+b.style.top=gURLBar.getBoundingClientRect().bottom+'px'
+b.style.right='10px'
+b.style.zIndex='1000'
+
+//b.style.position='relative'
+
+shadia.inspect(b)
+
+
+
+
+
 /** devel__( */
 function makeReqAsync(href, callback) {
     req = new XMLHttpRequest;

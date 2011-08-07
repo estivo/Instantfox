@@ -53,10 +53,11 @@ function dump() {
  *    } 
  ***************/
 function fixupPlugin(p){
-	domainRe = /:\/\/([^#?]*)/;
+	var domainRe = /\w+:\/\/[^#?]*/;
 	if(p.url){
+	dump(p.url.match(domainRe),p.url)
 		var match = p.url.match(domainRe)
-		p.domain = match ?match[1] :''
+		p.domain = match ? match[0] :''
 		p.name = p.name||p.id
 		p.id = p.id.toLowerCase()
 		p.iconURI = p.iconURI || getFavicon(p.url);
@@ -92,7 +93,7 @@ function cleanCopyPlugin(p){
 var pluginLoader = {
 	preprocessRawData: function (pluginData){
 		var localeRe=/%l(?:s|l|d)/g,
-			domainRe = /:\/\/([^#?]*)/;
+			domainRe = /\w+:\/\/[^#?]*/;
 		function replacer(m) pluginData.localeMap[m]
 		
 		var newPlugins = {}
@@ -103,7 +104,8 @@ var pluginLoader = {
 				continue
 			
 			p.url = p.url.replace(localeRe, replacer)
-			p.domain = p.url.match(domainRe)[1]
+			p.domain = p.url.match(domainRe)[0]||''
+			dump(p.domain , p.url)
 			p.name = p.name||i
 			p.id = i.toLowerCase()
 			p.iconURI = p.iconURI || getFavicon(p.url);
@@ -706,6 +708,7 @@ InstantFoxSearch.prototype = {
 		} else if (!plugin.json || plugin.disableSuggest){
 			// suggest is dissabled
 			url = null
+			callOnSearchReady = true
 		} else if(!q.query) {
 			// in some cases we can provide suggestions even before user started typing
 			if (isMaps) {

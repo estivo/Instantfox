@@ -346,7 +346,7 @@ var InstantFox = {
 		InstantFox.updateLogo(true, q)
 	},
 	updateLogo: function(show, q) {
-		show = show && q.results.length >= 4
+		show = show && q.results && q.results.length >= 4
 		if (this.logoAdded == show)
 			return;
 		this.logoAdded = show;

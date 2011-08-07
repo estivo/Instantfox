@@ -160,7 +160,7 @@ var instantFoxDevel = {
 				this.copyLocaleManifest()
 				break
 			case 'delete-plugin-file':
-				this.deletePluginFile()
+				this.deletePluginFile(e.button)
 				break
 			case 'jsonify-plugins':
 				this.jsonifyPlugins()
@@ -168,16 +168,20 @@ var instantFoxDevel = {
 		}
 	},	
 	// file utils
-	getContainingFolder: function(){
+	getContainingFolder: function(showFile){
 		return getLocalFile('chrome://instantfox/content').parent.parent.parent.QueryInterface(Ci.nsILocalFile)
 	},
-	deletePluginFile: function(){
+	deletePluginFile: function(showFile){
 		var file = Cu.import(this.moduleHref).getUserFile('instantFoxPlugins.js')
 		if(!file) {
 			alert('already removed')
 			return
 		}
-		file.QueryInterface(Ci.nsILocalFile).remove(false)
+		file = file.QueryInterface(Ci.nsILocalFile)
+		if(file.exists())
+			showFile?file.reveal():file.remove(false)
+		else
+			alert('already removed')
 	},
 	jsonifyPlugins: function(){
 		// override makeReq from foximirror to properly handle encodings
