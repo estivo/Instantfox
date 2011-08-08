@@ -29,7 +29,7 @@ calculator = {
 	  if (vlr == ret) {
 		  vlr = 'error'
 	  }
-	  setContent('<div class="env calculator">'+ret+' = <span class="result">'+vlr+'</span></div>');
+	  setContent('\<div class="env calculator">'+ret+' = \<span class="result">'+vlr+'\<\/span>\<\/div>');
 	  setTitle(ret+' = '+vlr);
 	}
   },
@@ -39,16 +39,16 @@ calculator = {
 	  if (vlr.length>0) {
 		for(var i=0;i<vlr.length;i++) {
 		  if (this.scope.indexOf(vlr.charAt(i)) < 0) {
-			setContent('<div class="env calculator">Unkown operation.<br />Available operators: '+this.scope+'</div>');
+			setContent('\<div class="env calculator">Unkown operation.\<br \/>Available operators: '+this.scope+'\<\/div>');
 			return null;
 		  }
 		};
 		return vlr;
 	  } else {
-		setContent('<div class="env calculator">Welcome to InstantFox Calculator</div>');
+		setContent('\<div class="env calculator">Welcome to InstantFox Calculator\<\/div>');
 	  }
 	} catch(ex) {
-      setContent('<div class="env calculator">Unkown operation.:(</div>');
+      setContent('\<div class="env calculator">Unkown operation.:(\<\/div>');
 
 	  return null;
 	}
