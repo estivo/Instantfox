@@ -450,7 +450,7 @@ window.addEventListener("DOMContentLoaded", function() {
 	// this must be called after menulists' binding is loaded 
 	updateLocaleList()
 	rebuild()
-	var size = document.getElementsByTagName('tabbox')[0].clientWidth + 50;
+	var size = document.getElementsByTagName('tabbox')[0].clientWidth + 100;
 	// check if we are inside popup
 	var InstantFox = top.InstantFox
 	if (InstantFox) {
@@ -458,7 +458,7 @@ window.addEventListener("DOMContentLoaded", function() {
 		var el = document.getElementById('pinbox')
 		el.hidden = false
 		el.firstChild.checked = !!InstantFox.popupPinned
-
+dump(size)
 		InstantFox.updatePopupSize(size)
 		// don't let clicks inside options window to close popup
 		window.addEventListener('mousedown', InstantFox.popupClickListener, false)

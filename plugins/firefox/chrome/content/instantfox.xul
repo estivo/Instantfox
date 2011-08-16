@@ -34,7 +34,7 @@
 	<toolbarbutton type="menu" id='instantFox-options' class='toolbarbutton-1 chromeclass-toolbar-additional'
 	style='list-style-image:url(chrome://instantfox/content/skin/button-logo.png)' label='InstantFox'>
 		<panel onpopupshowing="if(event.target==this)InstantFox.onPopupShowing(this)"  onpopuphiding="if(event.target==this)InstantFox.onPopupHiding(this)"
-			noautohide='true'/>
+			noautohide='true' position='after_end'/>
 	</toolbarbutton>
   </toolbarpalette>
   

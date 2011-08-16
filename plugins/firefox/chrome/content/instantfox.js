@@ -5,10 +5,13 @@ var InstantFox = {
 	update_url:  "http://www.instantfox.net/update.php",
 	checkversion: true,
 	
-	notifyOpenTab: function(url){
+	addTab: function(url, nextToCurrent){
 		if(url){
 			var targetTab = gBrowser.addTab(url);
+			if(nextToCurrent)
+				gBrowser.moveTabTo(targetTab , gBrowser.mCurrentTab._tPos+1)
 			gBrowser.selectedTab = targetTab;
+			return targetTab
 		}
 	},
 	notifyTab: function(){
@@ -27,13 +30,16 @@ var InstantFox = {
 			if(oldVersion == "0.0.0"){
 				var url = InstantFox.install_url + '?to=' + newVersion;
 				// add options button only on first install
-				InstantFox.updateOptionsButton();
+				InstantFox.updateToolbarItems();
 				setTimeout(InstantFox.showInstallNotification, 600);
-			}else{				
+			}else{
 				var url = InstantFox.update_url + '?to=' + newVersion + '&from=' +oldVersion
+				if (oldVersion<'2.5.0')
+					InstantFox.updateToolbarItems();
 			}
 			
-			setTimeout(InstantFox.notifyOpenTab, 500, url);
+			
+			setTimeout(InstantFox.addTab, 500, url);
 		})
 	},
 	showInstallNotification: function(){
@@ -46,7 +52,7 @@ var InstantFox = {
 			action: 'document.getElementById("instantFox-options").open=true;',
 			a: {
 				label: 'remove this button',
-				action: 'InstantFox.updateOptionsButton(true)'
+				action: 'InstantFox.updateToolbarItems(true)'
 			}
 		}
 
@@ -445,14 +451,26 @@ var InstantFox = {
 				return
 			}
 			//content.location.replace(url2go);
-		}else{
-			q.index = webNav.sessionHistory.index
+			webNav.loadURI(url2go, char_change, null, null, null);
+		}else if(InstantFoxModule.openSearchInNewTab){
+			gBrowser.userTypedValue=null
+			var targetTab = gBrowser.addTab(url2go);
+			gBrowser.moveTabTo(targetTab, gBrowser.mCurrentTab._tPos+1)
+			
+			q.tabId == targetTab.linkedPanel
+			this._isOwnQuery = true;
+			gBrowser.selectedTab = targetTab;
 			gBrowser.docShell.useGlobalHistory = false
+			gBrowser.userTypedValue = q.value
+			q.index = 1
+		}else{
+			gBrowser.docShell.useGlobalHistory = false
+			q.index = webNav.sessionHistory.index
 			//content.location.assign(url2go);
 			this._isOwnQuery = true;
+			webNav.loadURI(url2go, char_change, null, null, null);
 		}
 
-		webNav.loadURI(url2go, char_change, null, null, null);
 		this.loadTime = q.loadTime = now
 		return url2go
 	},
@@ -598,7 +616,7 @@ InstantFox.openHelp = function() {
 }
 
 // todo: call this after window load on first install releted to FS#32
-InstantFox.updateOptionsButton = function(remove) {
+InstantFox.updateToolbarItems = function(remove) {
 	var myId = "instantFox-options";
 	var navBar = document.getElementById("nav-bar");
 	var curSet = navBar.currentSet.split(",");
@@ -614,13 +632,17 @@ InstantFox.updateOptionsButton = function(remove) {
 		curSet.splice(pos, 0, myId)
 	} else if (i != -1 && remove) {
 		curSet.splice(i, 1)
-	} else {
-		curSet = null
-	}
-
-	if (curSet){
-		navBar.setAttribute("currentset", curSet.join(","));
-		navBar.currentSet = curSet.join(",");
+	} 
+	
+	// remove searchbar
+	i = curSet.indexOf("search-container")
+	if(i != -1)
+		curSet.splice(i, 1)
+		
+	curSet = curSet.join(",")
+	if (curSet != navBar.currentSet){
+		navBar.setAttribute("currentset", curSet);
+		navBar.currentSet = curSet;
 		document.persist(navBar.id, "currentset");
 		try {
 			BrowserToolboxCustomizeDone(true);

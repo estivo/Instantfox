@@ -212,6 +212,12 @@ label[control='opacity-scale']{
 	</tabpanel>
 	<tabpanel orient='vertical'  flex='1' >
 	  <prefpane align='center' hidden='true'>
+		<preferences>
+          <preference id="keyword-URL" name="keyword.URL" type="string" />
+          <preference id="fontsize" name="extensions.InstantFox.fontsize" type="string" />
+          <preference id="opacity" name="extensions.InstantFox.opacity" type="int" />
+          <preference id="openintab" name="browser.search.openintab" type="bool" />
+        </preferences>
 	    <label value='fontsize of suggest:' control='fontsize-text'/>
 	    <textbox preference="fontsize"  id='fontsize-text'/>
 	    <label value='opacity of suggest dropdown:' control='opacity-scale'/>
@@ -230,7 +236,7 @@ label[control='opacity-scale']{
 		    <menuitem label=""/>
 		  </menupopup>
 	    </menulist>
-		<!-- devel__(
+		<!-- devel__(-->
 		<vbox style='padding-top:5px'>
 			<label value='show suggestions from google,when there ' control='default-suggest'/>
 			<hbox >
@@ -238,13 +244,12 @@ label[control='opacity-scale']{
 				<checkbox preference="default-suggest-pref"  id='default-suggest'/>
 			</hbox>
 		</vbox>
-          <preference id="default-suggest-pref" name="extensions.InstantFox.defaultSuggest" type="bool" />
-		 devel__) -->
-		<preferences>
-          <preference id="keyword-URL" name="keyword.URL" type="string" />
-          <preference id="fontsize" name="extensions.InstantFox.fontsize" type="string" />
-          <preference id="opacity" name="extensions.InstantFox.opacity" type="int" />
-        </preferences>
+		<!-- devel__) -->
+		<separator class='groove'/>
+		<hbox align='center'>
+			<label  value='open search in new tab' controll='openintab-checkbox'/>
+			<checkbox id='openintab-checkbox' preference="openintab" oncommand='InstantFoxModule.openSearchInNewTab=this.checked'/>
+		</hbox>
 	  </prefpane>
 	</tabpanel>
 	<tabpanel orient='vertical'  flex='1'>

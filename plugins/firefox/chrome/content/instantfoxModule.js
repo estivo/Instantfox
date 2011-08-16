@@ -381,7 +381,14 @@ InstantFoxModule = {
 	helpURL: 'http://www.instantfox.net/help/',
 	editingHelpURL: 'http://www.instantfox.net/help/#add-plugin',
 	uninstallURL: 'http://www.instantfox.net/uninstall',
-
+	
+	//
+	get openSearchInNewTab(){
+		delete this.openSearchInNewTab
+		this.openSearchInNewTab = Services.prefs.getBoolPref("browser.search.openintab")
+		return this.openSearchInNewTab
+	},
+	
 	initialize: function(){
 		this.pluginLoader.loadPlugins()
 		this.initialize=function(){}
@@ -827,7 +834,7 @@ var addonListener = addonListener || {
 	onUninstalling: function(addon){
 		if(addon.id=='searchy@searchy'){
 			Services.wm.getMostRecentWindow('navigator:browser')
-				.InstantFox.notifyOpenTab(InstantFoxModule.uninstallURL + '?version=' + addon.version + '&face=:(')
+				.InstantFox.addTab(InstantFoxModule.uninstallURL + '?version=' + addon.version + '&face=:(')
 			// open page only once
 			Cu.import('resource://gre/modules/AddonManager.jsm', {}).AddonManager.removeAddonListener(this)
 		}
