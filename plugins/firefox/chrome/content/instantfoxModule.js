@@ -669,10 +669,10 @@ InstantFoxSearch.prototype = {
 	// implement searchListener for historyAutoComplete
 	onSearchResult: function(search, result) {
 		this.$searchingHistory = false;
-		dump('this.$searchingHistory', this.$searchingHistory, result.matchCount)
+		//dump('this.$searchingHistory', this.$searchingHistory, result.matchCount)
 		if (result.matchCount){
 			this.listener.onSearchResult(this, result)	
-			dump(this, result)
+			//dump(this, result)
 			
 		} else if(InstantFoxModule.autosearch){
 			autoSearch.query = autoSearch.value = this.searchString
@@ -687,8 +687,8 @@ InstantFoxSearch.prototype = {
 		//win = Services.wm.getMostRecentWindow("navigator:browser");
 		if (!InstantFoxModule.currentQuery) {
 			//Search user's history
-			this.historyAutoComplete = this.historyAutoComplete ||
-					Cc["@mozilla.org/autocomplete/search;1?name=history"].getService(Ci.nsIAutoCompleteSearch);
+			/* this.historyAutoComplete = this.historyAutoComplete ||
+					Cc["@mozilla.org/autocomplete/search;1?name=history"].getService(Ci.nsIAutoCompleteSearch); */
 			this.$searchingHistory = true
 			this.listener = listener;
 			this.searchString = searchString;
@@ -741,7 +741,7 @@ InstantFoxSearch.prototype = {
 		} else { // no need for xhr
 			q.results = results;
 			var newResult = new SimpleAutoCompleteResult(results, searchString);
-			listener.onSearchResult(this, newResult);			
+			listener.onSearchResult(this, newResult);
 			if (callOnSearchReady)
 				InstantFoxModule.currentQuery.onSearchReady()
 			return true;
@@ -751,39 +751,43 @@ InstantFoxSearch.prototype = {
 	stopSearch: function(){
 		if(this.historyAutoComplete)
 			this.historyAutoComplete.stopSearch();
-		if(this._req)
-			this._req.abort();
+		//if(this._req)
+			//this._req.abort();
 
 		this.listener = null;
 	},
 
 	// handle xhr
 	startReq: function(url){
-		if(this._req)
+	dump('start',url)
+		/*if(this._req)
 			this._req.abort()
-		else{
+		else{} */
 			this._req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
 			this._req.onload = this.onSearchReady.bind(this)
-		}
+		
 
 		this._req.open("GET", url, true);
 		this._req.send(null);
 	},
 	
-	onSearchReady: function(e){
+	onSearchReady: function(e){	dump('end',e.target.channel.name)
+
 		var json = e.target.responseText;
 
 		var q = InstantFoxModule.currentQuery || autoSearch
 		var key = q.plugin.key
 		
 		q.results = this.parser(json, key, q.splitSpace)
-		var newResult = new SimpleAutoCompleteResult(q.results, q.value);
+		var newResult = new SimpleAutoCompleteResult(q.results, q.value);		
 		this.listener.onSearchResult(this, newResult);
-		this.listener = null;
+		//this.listener = null;
 		
 		q.onSearchReady()
 	},
 };
+XPCOMUtils.defineLazyServiceGetter(InstantFoxSearch.prototype, "historyAutoComplete",
+					"@mozilla.org/autocomplete/search;1?name=history", "nsIAutoCompleteSearch")
 
 var autoSearch = {
 	plugin:{
