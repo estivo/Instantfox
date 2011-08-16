@@ -9,7 +9,16 @@
 	xmlns:svg='http://www.w3.org/2000/svg'
 	title="instantfox options"
 	resizable='yes' onunload='savePlugins()'>
-
+<script>
+Components.utils.import("resource://gre/modules/Services.jsm");
+try{
+	if(window.opener.location.href=='about:addons'){
+		Services.wm.getMostRecentWindow('navigator:browser').openDialog(window.location, '', 'dialog=no,centerscreen')//top='+screenY+',left='+screenX)
+		window.close()	
+		savePlugins = function(){}
+	}
+}catch(e){}
+</script>
 
 <svg:svg height="0">
     <svg:filter id="gray">
@@ -165,8 +174,8 @@ label[control='opacity-scale']{
 
 
 <!-- devel__( -->
-<shadiaglue id='status-bar'/>
-<!-- devel__) -->
+<!-- <shadiaglue id='status-bar'/>
+ --><!-- devel__) -->
 
 <tabbox flex='1'>
   <hbox id='pinbox' hidden='true'>

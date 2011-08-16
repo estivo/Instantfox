@@ -455,7 +455,12 @@ window.addEventListener("DOMContentLoaded", function() {
 		window.addEventListener('mousedown', InstantFox.popupClickListener, false)
 	} else {
 		setTimeout(function(){
-			window.innerWidth = size
+			var el=$('shortcuts')
+			var delta = el._scrollbox.scrollWidth-el.clientWidth
+			if (delta>0) {
+				window.resizeBy(delta+50, 0)
+				dump('this must not happen *************************************')
+			}
 		}, 100)
 	}
 
