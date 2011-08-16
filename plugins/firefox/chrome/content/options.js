@@ -419,11 +419,14 @@ rebuild = function(){
 				(def ? xml : userxml).push(px)
 		}
 	}
+	var sepXML1 = "<label class='separator' value='   ", sepXML2 =" search plugins'/>"
+
+	xml.unshift(sepXML1 + "standard" + sepXML2)
 	if(userxml.length)
-		xml.push("<separator class='groove'/>")
+		xml.push(sepXML1 + "your" + sepXML2)
 	
 	if(disabledxml.length)
-		userxml.push("<separator class='groove'/>")
+		userxml.push(sepXML1 + "inactive" + sepXML2)
 	
 	var el = $("shortcuts");
 	clean(el)

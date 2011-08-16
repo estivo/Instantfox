@@ -151,6 +151,16 @@ label[control='opacity-scale']{
 #standard-shortcuts,#user-shortcuts{
 	text-align:center;
 }
+.separator{
+	font-size:80%;
+	color: graytext;
+	-moz-border-bottom-colors:threedshadow threedhighlight;
+	-moz-border-top-colors: threedshadow;
+	border-bottom: 2px solid ;
+	border-top: 1px solid ;
+	margin:0px;
+ 
+}
 </html:style>
 
 
