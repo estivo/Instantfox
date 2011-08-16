@@ -160,8 +160,17 @@ openEditLigthbox = function(e){
 		saveGPlugin()
 		return
 	}
+	if (!aID && item.className == 'separator'){
+		var start = item.nextSibling, end = item = start
+
+		while((item = item.nextSibling) && ( item.nodeName == 'richlistitem')  ){
+			end = item
+		}
+		start.parentNode.selectItemRange(start, end)
+	}
+	
 	//**********
-	if (aID!='edit-link')
+	if (aID != 'edit-link')
 		return;
 
 	var panel = $('edit-box')

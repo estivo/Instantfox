@@ -174,8 +174,8 @@ label[control='opacity-scale']{
 
 
 <!-- devel__( -->
-<!-- <shadiaglue id='status-bar'/>
- --><!-- devel__) -->
+ <shadiaglue id='status-bar'/>
+<!-- devel__) -->
 
 <tabbox flex='1'>
   <hbox id='pinbox' hidden='true'>
@@ -264,7 +264,7 @@ label[control='opacity-scale']{
 
 <menupopup id="context" onpopupshowing='initContextMenu(this)' oncommand='onContextMenuCommand(event)'>
 	<menuitem label='instant' type='checkbox' aID='disableInstant'/>
-	<menuitem label='enabled' type='checkbox' aID='disabled'/>
+	<menuitem label='suggest' type='checkbox' aID='disableSuggest'/>
 	<menuitem label='show on context' type='checkbox' aID='hideFromContextMenu'/>
 	<menuseparator/>
 	<menuitem label='edit' aID='edit'/>
