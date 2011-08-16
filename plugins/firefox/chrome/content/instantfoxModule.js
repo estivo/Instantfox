@@ -380,6 +380,7 @@ function pluginFromNsiSearch(bp){
 InstantFoxModule = {
 	helpURL: 'http://www.instantfox.net/help/',
 	editingHelpURL: 'http://www.instantfox.net/help/#add-plugin',
+	uninstallURL: 'http://www.instantfox.net/uninstall',
 
 	initialize: function(){
 		this.pluginLoader.loadPlugins()
@@ -796,7 +797,6 @@ var autoSearch = {
 /*******************************************************
  *  component registration
  *************/
-
 ;(function(component){
 	var reg = Components.manager.QueryInterface(Components.interfaces.nsIComponentRegistrar)
 	var CONTRACT_ID = component.prototype.contractID
@@ -811,5 +811,25 @@ var autoSearch = {
 	reg.registerFactory(cp.classID, cp.classDescription, cp.contractID, factory);
 })(InstantFoxSearch);
 
-
 InstantFoxModule.initialize()
+
+
+/***************************************************
+ * uninstall listener
+ * see https://developer.mozilla.org/en/Addons/Add-on_Manager/AddonListener
+ * todo: will not be needed for restartless addon
+ ***********************/
+var addonListener = addonListener || {
+	onUninstalling: function(addon){
+		if(addon.id=='searchy@searchy'){
+			Services.wm.getMostRecentWindow('navigator:browser')
+				.InstantFox.notifyOpenTab(InstantFoxModule.uninstallURL + '?version=' + addon.version + '&face=:(')
+			// open page only once
+			Cu.import('resource://gre/modules/AddonManager.jsm', {}).AddonManager.removeAddonListener(this)
+		}
+	}
+	// onDisabled
+}
+
+Cu.import('resource://gre/modules/AddonManager.jsm', {}).AddonManager.addAddonListener(addonListener)
+
