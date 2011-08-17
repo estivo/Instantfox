@@ -52,11 +52,12 @@ richlistitem[selected="true"] {
 	background-color: #EEF9FF;
 	color:#0500A0
 } 
+/* ======================/*\======/*\====================== */
 textbox{
 	-moz-appearance: none;
 	border: none;
 	background: #EEF9FF;
-	color: #777;
+	color: #556;
 	width: 5ch;
 	box-shadow: 0pt 0pt 1.5px 1px gray;
 }
@@ -64,9 +65,16 @@ textbox.key{
 	padding: 1px 1px 2px 1px;
 	border: none;
 }
+textbox.longbox{
+	width: 50ch;
+}
 .key.hidden{
 	opacity: 0;
 	pointer-events: none;
+}
+textbox[focused='true']{
+	color:-moz-fieldtext;
+	background:-moz-field
 }
 textbox[conflict=true]{
 	color: darkred!important;
@@ -76,6 +84,7 @@ textbox[conflict=maybe]{
 	color:darkred!important;
 	text-shadow: 0pt -1px 3px gold;//#ffd700;
 }
+/* ======================/*\======/*\====================== */
 richlistitem[disabled="true"]>label:not(.link){
 	color: graytext;
 	text-decoration: line-through;
@@ -174,97 +183,103 @@ label[control='opacity-scale']{
 
 
 <!-- devel__( -->
- <shadiaglue id='status-bar'/>
+	<shadiaglue id='status-bar'/>
 <!-- devel__) -->
 
 <tabbox flex='1'>
   <hbox id='pinbox' hidden='true'>
 	<toolbarbutton type='checkbox' tooltiptext='pin' oncommand='window.top.InstantFox.popupPinned=this.checked'/>
   </hbox>
-  <tabs onselect="onTabSelect.call(this)">
-	<tab label='engines'/>
-	<tab label='appearance'/>
-	<tab label='about'/>
-  </tabs>
-  <tabpanels  flex='1'>
-	<tabpanel orient='vertical'  flex='1'>
-		<vbox>
-			<hbox pack='center'>
-				<vbox>
-					<label value="Choose language:" id="highlight"></label>
-					<menulist id="locale" sizetopopup='none'
-						oncommand = 'gPluginsChanged=true;InstantFoxModule.pluginLoader.loadPlugins(event.target.label, rebuild)'>
-						<menupopup/>
-					</menulist>
+	<tabs onselect="onTabSelect.call(this)">
+		<tab label='engines'/>
+		<tab label='advanced'/>
+		<tab label='about'/>
+	</tabs>
+	<tabpanels  flex='1'>
+		<tabpanel orient='vertical'  flex='1'>
+			<vbox>
+				<hbox pack='center'>
+					<vbox>
+						<label value="Choose language:" id="highlight"></label>
+						<menulist id="locale" sizetopopup='none'
+							oncommand = 'gPluginsChanged=true;InstantFoxModule.pluginLoader.loadPlugins(event.target.label, rebuild)'>
+							<menupopup/>
+						</menulist>
+						<spacer flex='1'/>
+					</vbox><!-- 
 					<spacer flex='1'/>
-				</vbox><!-- 
-				<spacer flex='1'/>
-				<image src='skin/logo.png' onclick='open(InstantFoxModule.helpURL)' class='link' tooltiptext='open help'/>
- -->			</hbox>
-			<hbox align='center'>
-				<label value="search-plugins"></label>
-				<spacer flex='1'/>
-				<slickbutton id="add" label='add +' oncommand='addPlugin(event)'/>
-			</hbox>
-		</vbox>
-		<richlistbox id='shortcuts' flex='1'
-			seltype='multiple' context='context' onselect='onSelect(this)' onmouseup='openEditLigthbox(event)'/>		
-	</tabpanel>
-	<tabpanel orient='vertical'  flex='1' >
-	  <prefpane align='center' hidden='true'>
-		<preferences>
-          <preference id="keyword-URL" name="keyword.URL" type="string" />
-          <preference id="fontsize" name="extensions.InstantFox.fontsize" type="string" />
-          <preference id="opacity" name="extensions.InstantFox.opacity" type="int" />
-          <preference id="openintab" name="browser.search.openintab" type="bool" />
-        </preferences>
-	    <label value='fontsize of suggest:' control='fontsize-text'/>
-	    <textbox preference="fontsize"  id='fontsize-text'/>
-	    <label value='opacity of suggest dropdown:' control='opacity-scale'/>
-		<hbox pack='center' align='center'>
-			<scale value='20' min='10' max='100' flex='1' id='opacity-scale' preference-editable="true" preference="opacity" />
-			<textbox preference="opacity" id='opacity-text'/>
-			<label value='%'/>
-		</hbox>
+					<image src='skin/logo.png' onclick='open(InstantFoxModule.helpURL)' class='link' tooltiptext='open help'/>
+	 -->			</hbox>
+				<hbox align='center'>
+					<label value="search-plugins"></label>
+					<spacer flex='1'/>
+					<slickbutton id="add" label='add +' oncommand='addPlugin(event)'/>
+				</hbox>
+			</vbox>
+			<richlistbox id='shortcuts' flex='1'
+				seltype='multiple' context='context' onselect='onSelect(this)' onmouseup='openEditLigthbox(event)'/>		
+		</tabpanel>
+		<tabpanel orient='vertical'  flex='1' >
+			<prefpane align='center' hidden='true' flex='1'>
+				<preferences>
+					<preference id="keyword-URL" name="keyword.URL" type="string" />
+					<preference id="fontsize" name="extensions.InstantFox.fontsize" type="string" />
+					<preference id="opacity" name="extensions.InstantFox.opacity" type="int" />
+					<preference id="openintab" name="browser.search.openintab" type="bool" />
+				</preferences>
+				<label value='fontsize of suggest:' control='fontsize-text'/>
+				<textbox preference="fontsize"  id='fontsize-text'/>
+				<label value='opacity of suggest dropdown:' control='opacity-scale'/>
+				<hbox pack='center' align='center'>
+					<scale value='20' min='10' max='100' flex='1' id='opacity-scale' preference-editable="true" preference="opacity" />
+					<textbox preference="opacity" id='opacity-text'/>
+					<label value='%'/>
+				</hbox>
 	   
-	    <label value='standard search without shortcuts:' control='keyword-URL-menu'/>
-	    <menulist editable="true" preference="keyword-URL" id="keyword-URL-menu">
-		  <menupopup >
-		    <menuitem label=""/>
-		    <menuitem label="http://www.google.com/#fp=1&amp;cad=b&amp;q="/>
-		    <menuitem label="http://www.bing.com/search?q="/>
-		    <menuitem label=""/>
-		  </menupopup>
-	    </menulist>
-		<!-- devel__(-->
-		<vbox style='padding-top:5px'>
-			<label value='show suggestions from google,when there ' control='default-suggest'/>
-			<hbox >
-				<label value='are no history results:' control='default-suggest'/>
-				<checkbox preference="default-suggest-pref"  id='default-suggest'/>
-			</hbox>
-		</vbox>
-		<!-- devel__) -->
-		<separator class='groove'/>
-		<hbox align='center'>
-			<label  value='open search in new tab' controll='openintab-checkbox'/>
-			<checkbox id='openintab-checkbox' preference="openintab" oncommand='InstantFoxModule.openSearchInNewTab=this.checked'/>
-		</hbox>
-	  </prefpane>
-	</tabpanel>
-	<tabpanel orient='vertical'  flex='1'>
-	</tabpanel>
-  </tabpanels>
+				<label value='standard search without shortcuts:' control='keyword-URL-menu'/>
+				<menulist editable="true" preference="keyword-URL" id="keyword-URL-menu">
+				<menupopup >
+					<menuitem label=""/>
+					<menuitem label="http://www.google.com/#fp=1&amp;cad=b&amp;q="/>
+					<menuitem label="http://www.bing.com/search?q="/>
+					<menuitem label=""/>
+				</menupopup>
+				</menulist>
+				<!-- devel__(-->
+				<vbox style='padding-top:5px'>
+					<label value='show suggestions from google,when there ' control='default-suggest'/>
+					<hbox >
+						<label value='are no history results:' control='default-suggest'/>
+						<checkbox preference="default-suggest-pref"  id='default-suggest'/>
+					</hbox>
+				</vbox>
+				<!-- devel__) -->
+				<separator class='groove'/>
+				<hbox align='center'>
+					<label  value='open search in new tab' controll='openintab-checkbox'/>
+					<checkbox id='openintab-checkbox' preference="openintab" oncommand='InstantFoxModule.openSearchInNewTab=this.checked'/>
+				</hbox>
+				<spacer flex='1'/>
+				<hbox align='center'>
+					<slickbutton label='copyPluginsToClipboard' oncommand='copyPluginsToClipboard()'/>
+					<slickbutton label='pastePluginData' oncommand='addPluginsFromClipboar()'/>
+					<spacer flex='1'/>
+				</hbox>
+		</prefpane>
+		</tabpanel>
+		<tabpanel orient='vertical'  flex='1'></tabpanel>
+	</tabpanels>
 </tabbox>
-  <hbox>
+
+<hbox>
 	<toolbarbutton id='' label='add plugin' type='menu' oncommand='' hidden='true'>
 		<menupopup>
 		</menupopup>
 	</toolbarbutton>
-
 	<spacer flex='1'/>
 	<slickbutton label='ok' oncommand='resultOK=true;close()'/>
-  </hbox>
+</hbox>
+
 
 
 <menupopup id="context" onpopupshowing='initContextMenu(this)' oncommand='onContextMenuCommand(event)'>
@@ -275,39 +290,67 @@ label[control='opacity-scale']{
 	<menuitem label='edit' aID='edit'/>
 </menupopup>
 
-<panel id="edit-box" ignorekeys='true' type="arrow" orient='vertical' onpopuphiding='editPopupSave(this)'>
-	<hbox align='center'>
-		<label value='name:'/>
-		<textbox aID='name' flex='1' oninput="
-		this.nextSibling.hidden = !canResetProp(this);
-		"/>
-		<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
-		<hbox align="center" class='image'>
-			<image aID='image'/>
-		</hbox>
-	</hbox>
-	<hbox align='center'>
-		<label value='url:'/>
-		<textbox type='url' aID='url' flex='1' oninput="
-		this.nextSibling.hidden = !canResetProp(this);
-		if(this.timeout==null)
-			this.timeout=setTimeout(function(a){
-				a.timeout=null;
-				$t($('edit-box'), 'image').src='http://g.etfv.co/'+a.value;
-			}, 500, this)
-		"/>
-		<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
-	</hbox>
-	<label value='please replace the searchword with %q'/>
-	<hbox align='center'>
-		<label value='key:'/>
-		<textbox aID='key'/>
-	</hbox>
-	<hbox>
-		<checkbox label='load page instantly' aID='instant'/>
-		<spacer width='40'/>
-		<checkbox label='suggest' aID='suggest'/>
-	</hbox>
+<panel id="edit-box" ignorekeys='true' type="arrow" 
+		orient='vertical' onpopuphiding='editPopupSave(this)' position='start_before'>	
+	<grid >
+		<columns>
+			<column flex="0"/>
+			<column flex="1"/>
+		</columns>
+		<rows>
+			<row>
+				<label value='name:'/>
+				<hbox>
+					<textbox aID='name' flex='1' oninput="this.nextSibling.hidden = !canResetProp(this);"/>
+					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
+					<label value='key:'/>
+					<textbox aID='key'/>
+				</hbox>
+				<hbox align="center" class='image'>
+					<image aID='image'/>
+				</hbox>
+			</row>
+			<row>
+				<label value='url:'/>
+				<hbox>
+					<textbox type='url' aID='url' flex='1' class='longbox' oninput="
+						this.nextSibling.hidden = !canResetProp(this);
+						if(this.timeout==null)
+							this.timeout=setTimeout(function(a){
+								a.timeout=null;
+								$t($('edit-box'), 'image').src='http://g.etfv.co/'+a.value;
+							}, 500, this)
+						"/>
+					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
+				</hbox>
+			</row>
+			<row>
+				<label value='suggest'/>
+				<hbox>
+					<textbox type='url' aID='json' flex='1' class='longbox' oninput="
+						this.nextSibling.hidden = !canResetProp(this);
+						"/>
+					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
+				</hbox>
+			</row>
+			<row>
+				<hbox/>
+				<hbox>
+					<spacer flex='1'/>
+					<label value='please replace the searchword with %q'/>
+				</hbox>
+			</row>
+			<row>
+				<hbox/>
+				<hbox>
+					<checkbox label='load page instantly' aID='instant'/>
+					<spacer width='40'/>
+				</hbox>
+			</row>
+
+		</rows>
+	</grid>
+
 	<hbox align='center'>
 		<slickbutton label='remove' aID='remove' oncommand="removePlugin(gPlugin);$('edit-box').hidePopup();"/>
 		<toolbarbutton label='more' hidden='true'/>

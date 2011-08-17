@@ -183,12 +183,12 @@ openEditLigthbox = function(e){
 	var item = $parent(e.target)
 	gPlugin = InstantFoxModule.Plugins[item.id]
 	
-	$t(panel, 'suggest').checked = !gPlugin.disableSuggest
+	//$t(panel, 'suggest').checked = !gPlugin.disableSuggest
 	$t(panel, 'instant').checked = !gPlugin.disableInstant
 	$t(panel, 'image').src = gPlugin.iconURI
 	$t(panel, 'key').value = gPlugin.key
 	
-	for each(var i in ['url', 'name']){
+	for each(var i in ['url', 'name', 'json']){
 		var box = $t(panel, i)
 		box.value = gPlugin[i]
 		box.nextSibling.hidden = !canResetProp(box)
@@ -200,7 +200,7 @@ openEditLigthbox = function(e){
 	
 	var popupBoxObject = panel.popupBoxObject;
 	popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
-	panel.openPopup(item.firstElementChild,'before_start',0,0,false,true)
+	panel.openPopup(item.lastElementChild, 'start_before', 0, 0, false, true)
 	
 }
 editPopupSave = function(panel){
@@ -210,7 +210,7 @@ editPopupSave = function(panel){
 		var createNew = true
 		gPlugin = createEmptyPlugin()
 	}
-	gPlugin.disableSuggest = !$t(panel, 'suggest').checked
+	//gPlugin.disableSuggest = !$t(panel, 'suggest').checked
 	gPlugin.disableInstant = !$t(panel, 'instant').checked
 
 	gPlugin.name = $t(panel, 'name').value
@@ -504,4 +504,46 @@ function onTabSelect(){
 		this.parentNode.selectedPanel.appendChild(iframe);
 	}
 	//$("add").hidden = this.selectedIndex != 0
+}
+
+/***********************************************************************/
+var gClipboardHelper = {
+	get cbHelperService() {
+		delete this.cbHelperService
+		this.cbHelperService = Cc["@mozilla.org/widget/clipboardhelper;1"].getService(Ci.nsIClipboardHelper)
+		return this.cbHelperService
+	},
+	copyString: function(str) str&&this.cbHelperService.copyString(str),
+	getData: function(){
+		try{
+			var clip = Cc["@mozilla.org/widget/clipboard;1"].getService(Ci.nsIClipboard);
+			var trans = Cc["@mozilla.org/widget/transferable;1"].createInstance(Ci.nsITransferable);
+			trans.addDataFlavor("text/unicode");
+			clip.getData(trans,1)
+			var str={},strLength={}
+			trans.getTransferData("text/unicode",str,strLength)
+			str = str.value.QueryInterface(Components.interfaces.nsISupportsString);
+			pastetext = str.data.substring(0, strLength.value/2);
+			return pastetext||''
+		}catch(e){
+			Cu.reportError(e)
+			return ''
+		}
+	}
+}
+
+copyPluginsToClipboard = function(){
+	var str = InstantFoxModule.pluginLoader.getPluginString(true)
+	gClipboardHelper.copyString(str) 
+}
+
+addPluginsFromClipboar = function(){
+	var str = gClipboardHelper.getData()
+	try{
+		var js = JSON.parse(str)
+	}catch(e){
+		alert('invalid plugin data')
+		return
+	}
+	InstantFoxModule.pluginLoader.addPlugins(js)
 }

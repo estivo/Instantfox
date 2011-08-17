@@ -65,7 +65,7 @@ function fixupPlugin(p){
 	if(!p.json)
 		p.json = InstantFoxModule.Plugins.google.json
 }
-function cleanCopyPlugin(p){
+function cleanCopyPlugin(p, forUser){
 	var p1 = {}
 	p1.url = p.url;
 	p1.json = p.json;
@@ -220,11 +220,11 @@ var pluginLoader = {
 		this.initShortcuts()
 	},
 	
-	savePlugins: function(){
+	getPluginString: function(forUser){
 		var ob={}
 		for each(var p in InstantFoxModule.Plugins)
 			if(p.url)
-				ob[p.id]=cleanCopyPlugin(p)
+				ob[p.id]=cleanCopyPlugin(p, forUser)
 				
 		var pluginData = {
 			selectedLocale: InstantFoxModule.selectedLocale,
@@ -232,7 +232,10 @@ var pluginLoader = {
 			plugins: ob
 		}
 
-		var js = JSON.stringify(pluginData, null, 1)
+		return JSON.stringify(pluginData, null, forUser?4:1)
+	},	
+	savePlugins: function(){
+		var js = this.getPluginString(false)
 
 		writeToFile(getUserFile('instantFoxPlugins.js'), js)
 	},
