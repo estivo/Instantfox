@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<overlay id="instantfox-browser-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<overlay id="instantfox-browser-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" xmlns:svg='http://www.w3.org/2000/svg'>
   <!-- devel__( -->
   <script type="text/javascript" src="__devel__.js"></script>
   <statusbar id="status-bar" ordinal="1000" hideresizer="true">
@@ -29,10 +29,24 @@
 
   <!-- devel__) -->
   <script type="text/javascript" src="chrome://instantfox/content/instantfox.js"></script>
+  <script type="text/javascript" src="chrome://instantfox/content/mouseUI.js"></script>
 
   <toolbarpalette id="BrowserToolbarPalette">
 	<toolbarbutton type="menu" id='instantFox-options' class='toolbarbutton-1 chromeclass-toolbar-additional'
 	style='list-style-image:url(chrome://instantfox/content/skin/button-logo.png)' label='InstantFox'>
+		<panel onpopupshowing="if(event.target==this)InstantFox.onPopupShowing(this)"  onpopuphiding="if(event.target==this)InstantFox.onPopupHiding(this)"
+			noautohide='true' position='after_end'/>
+	</toolbarbutton>
+	<toolbarbutton type="menu" id='instantFox-icons' class='toolbarbutton-1 chromeclass-toolbar-additional'
+		style='list-style-image:url(chrome://instantfox/content/skin/button-logo.png)' label='InstantFox'>
+<svg:svg height="0">
+    <svg:filter id="gray">
+      <svg:feColorMatrix values="0.3333 0.3333 0.3333 0 0 
+                                 0.3333 0.3333 0.3333 0 0 
+                                 0.3333 0.3333 0.3333 0 0 
+                                 0      0      0      1 0"/>
+    </svg:filter>
+</svg:svg>	
 		<panel onpopupshowing="if(event.target==this)InstantFox.onPopupShowing(this)"  onpopuphiding="if(event.target==this)InstantFox.onPopupHiding(this)"
 			noautohide='true' position='after_end'/>
 	</toolbarbutton>

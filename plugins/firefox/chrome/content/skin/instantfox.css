@@ -84,3 +84,36 @@ menu[type=splitmenu] {
 	list-style-image: url("chrome://instantfox/content/skin/logo.png");
 }
 
+/** mouseUI      ************************************/
+.instantFox-mouseUI{
+	/filter: url("#instantFox-gray");
+	background:white;
+	position:fixed;
+	opacity:0.5
+}
+.instantFox-mouseUI:hover{
+	filter: none;
+	opacity: 1
+}
+.instantFox-plugin{
+	background: white -moz-linear-gradient(white, yellow) no-repeat;
+	background-size: 0% 100%;
+	-moz-transition-property: background-size;
+	-moz-transition-duration: 1s;
+	padding:2px;
+	border:1px solid transparent;
+	border-radius:3px;
+	/max-width: 50px;
+}
+.instantFox-plugin[selected]{
+	border:1px solid blue;
+}
+.instantFox-plugin:hover{
+	-moz-transgorm:translate(-0px -2px);	
+	background-size: 100% 100%;
+	border:1px solid lightblue;
+}
+
+
+
+

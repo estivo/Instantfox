@@ -100,6 +100,7 @@ var InstantFox = {
 		// (fortunately this function is same the in 3.6-8.0a)
 		gURLBar._copyCutController.doCommand = InstantFox._urlbarCutCommand
 		gURLBar.addEventListener('blur', InstantFox.onblur, false);
+		gURLBar.addEventListener('focus', InstantFox.onfocus, false);
 
 		dump('instantFox initialized')
 		InstantFox.notifyTab()
@@ -286,12 +287,20 @@ var InstantFox = {
 		}
 	},
 	onblur: function(e) {
-		// Return power to Site if urlbar really lost focus
+		if(gURLBar.mIgnoreFocus || e.originalTarget != gURLBar.mInputField)
+			return
+
         if (InstantFox._isOwnQuery && !gURLBar.mIgnoreFocus && e.originalTarget == gURLBar.mInputField) {
 			gURLBar.value = content.document.location.href;
 			gBrowser.userTypedValue = null;
 			InstantFox.finishSearch();
         }
+		InstantFox.mouseUI.remove();
+    },
+	onfocus: function(e) {
+		if(gURLBar.mIgnoreFocus || e.originalTarget != gURLBar.mInputField)
+			return
+		InstantFox.mouseUI.add();
     },
 
 	// ****** ----- -------- ****************************************

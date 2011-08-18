@@ -190,7 +190,7 @@ openEditLigthbox = function(e){
 	
 	for each(var i in ['url', 'name', 'json']){
 		var box = $t(panel, i)
-		box.value = gPlugin[i]
+		box.value = gPlugin[i] || '';
 		box.nextSibling.hidden = !canResetProp(box)
 	}
 	
