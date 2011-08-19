@@ -156,8 +156,8 @@ var instantFoxDevel = {
 				break
 			case 'build-d':
 				break
-			case 'copyLocaleManifest':
-				this.copyLocaleManifest()
+			case 'buildLocales':
+				this.buildLocales()
 				break
 			case 'delete-plugin-file':
 				this.deletePluginFile(e.button)
@@ -213,7 +213,10 @@ var instantFoxDevel = {
 		})
 		
 	},
-	copyLocaleManifest: function(){
+	buildLocales: function(){
+		Services.scriptloader.loadSubScript('chrome://instantfox/content/__locales__.js?'+Date.now(), window, 'UTF-8')
+	
+		// and copy manifest
 		InstantFoxModule.pluginLoader.getAvaliableLocales(function(locales) {
 			var decl = 'locale    instantfox %n%s chrome/locale/%n/'
 			var ans = locales.map(function(x){
@@ -221,7 +224,7 @@ var instantFoxDevel = {
 			}).join('\n')
 			//alert(ans)
 			gClipboardHelper.copyString(ans)
-		})		
+		})
 	}
 	
 }
