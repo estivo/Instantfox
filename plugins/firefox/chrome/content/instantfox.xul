@@ -10,10 +10,9 @@
     <menupopup>
       <menuitem action="build" label="build"/>
        <!--<menuitem action="build-d" label="build-debug"/>-->
-      <menuitem action="delete-plugin-file" label="delete-plugin-file"/>
-      <menuitem action="jsonify-plugins" label="jsonify plugins"/>
-      <menuitem action="test-first-run" label="test first run"/>
       <menuitem action="buildLocales" label="buildLocales+copyManifest"/>
+      <menuitem action="delete-plugin-file" label="delete-plugin-file"/>
+      <menuitem action="test-first-run" label="test first run"/>
       <menuitem action="show-folder" label="show folder"/>
     </menupopup>
   </toolbarbutton>

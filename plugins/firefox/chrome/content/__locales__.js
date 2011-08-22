@@ -385,6 +385,43 @@ locale("es-MX", ["es","es-MX","com.mx"], {
 	}
 })
 
+locale("es-CL", ["es","es-CL","cl"], {
+	Google: true,
+	GoogleImages: {
+		url: "http://www.google.%ld/images?q=%q",
+		json: "http://suggestqueries.google.com/complete/search?json&ds=i&q=%q",
+		name: "Google Imágenes"
+	},
+	GoogleMaps: {
+		url: "http://maps.google.com/maps?q=%q&hl=%ls",
+		name: "Google Mapas"
+	},
+	Wikipedia: true,
+	Youtube: {
+		json: "http://suggestqueries.google.com/complete/search?json&ds=yt&q=%q"
+	},
+	Amazon: {
+		url: "http://www.amazon.com/gp/search?ie=UTF8&keywords=%q&tag=406-20&index=aps&linkCode=ur2&camp=1789&creative=9325",
+		json: "http://completion.amazon.co.uk/search/complete?method=completion&q=%q&search-alias=aps&mkt=4"
+	},
+	Twitter: true,
+	Weather: {
+		key: "to",
+		name: "Tiempo"
+	},
+	IMDb: {
+		name: "IMDb"
+	},
+	GoogleLuck: {
+		key: "gs",
+		url: "http://www.google.com/search?q=%q&btnI=1",
+		name: "Google Suerte"
+	},
+	Calculator: {
+		name: "Calculadora"
+	}
+})
+
 locale("fr", ["fr","fr-FR","fr"], {
 	Google: true,
 	GoogleImages: {

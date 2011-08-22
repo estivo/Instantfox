@@ -15,6 +15,7 @@ locale    instantfox en-CA    chrome/locale/en-CA/
 locale    instantfox en-GB    chrome/locale/en-GB/
 locale    instantfox en-US    chrome/locale/en-US/
 locale    instantfox es-AR    chrome/locale/es-AR/
+locale    instantfox es-CL    chrome/locale/es-CL/
 locale    instantfox es-ES    chrome/locale/es-ES/
 locale    instantfox es-MX    chrome/locale/es-MX/
 locale    instantfox fr       chrome/locale/fr/
