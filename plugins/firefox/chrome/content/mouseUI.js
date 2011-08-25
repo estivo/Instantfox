@@ -1,5 +1,8 @@
+//__devel__(
 InstantFox.mouseUI ={
 	add: function(){
+		this.remove()
+		
 		var wrapBox = this.wrapBox = document.createElement('vbox')
 		document.getElementById('browser-panel').appendChild(wrapBox)
 		
@@ -21,7 +24,10 @@ InstantFox.mouseUI ={
 			mainBox.appendChild(this.createBox(p))
 	},
 	remove: function(){
-		this.wrapBox.parentNode.removeChild(this.wrapBox)
+		if(this.wrapBox){
+			this.wrapBox.parentNode.removeChild(this.wrapBox)
+			this.wrapBox = null
+		}
 	}, 
 
 	createBox: function(plugin) {
@@ -35,7 +41,7 @@ InstantFox.mouseUI ={
 		image.height=16
 		box.appendChild(image)
 		var label=document.createElement('label')
-		label.setAttribute('value', plugin.name)
+		label.setAttribute('value', plugin.key)
 		box.appendChild(label)
 		return box
 	},

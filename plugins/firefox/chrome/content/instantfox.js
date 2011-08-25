@@ -295,12 +295,12 @@ var InstantFox = {
 			gBrowser.userTypedValue = null;
 			InstantFox.finishSearch();
         }
-		InstantFox.mouseUI.remove();
+		//InstantFox.mouseUI.remove();
     },
 	onfocus: function(e) {
 		if(gURLBar.mIgnoreFocus || e.originalTarget != gURLBar.mInputField)
 			return
-		InstantFox.mouseUI.add();
+		//InstantFox.mouseUI.add();
     },
 
 	// ****** ----- -------- ****************************************

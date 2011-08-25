@@ -65,32 +65,12 @@ function fixupPlugin(p){
 	if(!p.json)
 		p.json = InstantFoxModule.Plugins.google.json
 }
-function cleanCopyPlugin(p, forUser){
-	var p1 = {}
-	p1.url = p.url;
-	p1.json = p.json;
-	p1.domain = p.domain;
-	//
-	p1.iconURI = p.iconURI;
-	p1.type = p.type;
-	p1.name = p.name;
-	p1.id = p.id;
-	p1.key = p.key
-	//
-	p.disabled && (p1.disabled = true)
-	p.disableInstant && (p1.disableInstant = true)
-	p.disableSuggest && (p1.disableSuggest = true)
-	p.hideFromContextMenu && (p1.hideFromContextMenu = true)
-	//
-	if(p.type=='default'){	
-		p.def_url != null && (p1.def_url = p.def_url)
-		p.def_key != null && (p1.def_key = p.def_key)
-		p.def_name != null && (p1.def_name = p.def_name)
-	}
 
-	return p1
-}
 var pluginLoader = {
+	// properties with default values
+	defPropNames: ['key','url','name','json'],
+	
+	
 	preprocessRawData: function (pluginData){
 		var localeRe=/%l(?:s|l|d)/g,
 			domainRe = /\w+:\/\/[^#?]*/;
@@ -117,8 +97,8 @@ var pluginLoader = {
 			
 			p.type = 'default'
 			
-			// user modifiable props
-			;['key','url','name'].forEach(function(propName){
+			// handle user modifiable props
+			this.defPropNames.forEach(function(propName){
 				p['def_'+propName] = p[propName]
 			})
 
@@ -141,7 +121,7 @@ var pluginLoader = {
 						p[n] = mP[n]
 				});
 				// add this properties if user modified them
-				['key','url','name'].forEach(function(propName){
+				this.defPropNames.forEach(function(propName){
 					if(mP['def_'+propName] != null && mP['def_'+propName] != mP[propName])
 						p[propName] = mP[propName]
 				});
@@ -224,7 +204,7 @@ var pluginLoader = {
 		var ob={}
 		for each(var p in InstantFoxModule.Plugins)
 			if(p.url)
-				ob[p.id]=cleanCopyPlugin(p, forUser)
+				ob[p.id] = this.cleanCopyPlugin(p, forUser)
 				
 		var pluginData = {
 			selectedLocale: InstantFoxModule.selectedLocale,
@@ -283,13 +263,39 @@ var pluginLoader = {
 		return spec
 	},
 	isUserModified: function(plugin){
-		for each(var i in ['url', 'name', 'key']){
+		for each(var i in this.defPropNames){
 			if(plugin['def_'+i] != null && plugin['def_'+i] != plugin[i])
 				return true
 		}
 		return false
-	}
+	},
 
+	// utils
+	cleanCopyPlugin: function(p, forUser){
+		var p1 = {}
+		p1.url = p.url;
+		p1.json = p.json;
+		p1.domain = p.domain;
+		//
+		p1.iconURI = p.iconURI;
+		p1.type = p.type;
+		p1.name = p.name;
+		p1.id = p.id;
+		p1.key = p.key
+		//
+		p.disabled && (p1.disabled = true)
+		p.disableInstant && (p1.disableInstant = true)
+		p.disableSuggest && (p1.disableSuggest = true)
+		p.hideFromContextMenu && (p1.hideFromContextMenu = true)
+		//
+		if(p.type=='default'){
+			for each(var i in this.defPropNames){
+				var prop = 'def_'+i 
+				p[prop] != null && (p1[prop] = p[prop])
+			}
+		}
+		return p1
+	}
 }
  
 function getFileUri(mPath) {

@@ -65,7 +65,7 @@ textbox.key{
 	padding: 1px 1px 2px 1px;
 	border: none;
 }
-textbox.longbox{
+.longbox{
 	width: 50ch;
 }
 .key.hidden{
@@ -74,7 +74,8 @@ textbox.longbox{
 }
 textbox[focused='true']{
 	color:-moz-fieldtext;
-	background:-moz-field
+	background:-moz-field;
+	box-shadow: 0pt 0pt 1.5px 1px gray, 0pt 0pt 2.5px 1px yellow;
 }
 textbox[conflict=true]{
 	color: darkred!important;
@@ -179,12 +180,11 @@ label[control='opacity-scale']{
 	margin:0px;
  
 }
+.image{
+	width:16px
+}
 </html:style>
 
-
-<!-- devel__( -->
-	<shadiaglue id='status-bar'/>
-<!-- devel__) -->
 
 <tabbox flex='1'>
   <hbox id='pinbox' hidden='true'>
@@ -267,7 +267,11 @@ label[control='opacity-scale']{
 				</hbox>
 		</prefpane>
 		</tabpanel>
-		<tabpanel orient='vertical'  flex='1'></tabpanel>
+		<tabpanel orient='vertical'  flex='1'>
+			<!-- devel__( -->
+				<shadiaglue id='status-bar'/>
+			<!-- devel__) -->
+		</tabpanel>
 	</tabpanels>
 </tabbox>
 
@@ -300,7 +304,7 @@ label[control='opacity-scale']{
 		<rows>
 			<row>
 				<label value='name:'/>
-				<hbox>
+				<hbox align='center' flex='1'>
 					<textbox aID='name' flex='1' oninput="this.nextSibling.hidden = !canResetProp(this);"/>
 					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
 					<label value='key:'/>
@@ -312,8 +316,8 @@ label[control='opacity-scale']{
 			</row>
 			<row>
 				<label value='url:'/>
-				<hbox>
-					<textbox type='url' aID='url' flex='1' class='longbox' oninput="
+				<hbox align='center' flex='1' class='longbox'>
+					<textbox type='url' aID='url' flex='1'  oninput="
 						this.nextSibling.hidden = !canResetProp(this);
 						if(this.timeout==null)
 							this.timeout=setTimeout(function(a){
@@ -326,8 +330,8 @@ label[control='opacity-scale']{
 			</row>
 			<row>
 				<label value='suggest'/>
-				<hbox>
-					<textbox type='url' aID='json' flex='1' class='longbox' oninput="
+				<hbox align='center' flex='1' class='longbox'>
+					<textbox type='url' aID='json' flex='1' oninput="
 						this.nextSibling.hidden = !canResetProp(this);
 						"/>
 					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
@@ -335,9 +339,16 @@ label[control='opacity-scale']{
 			</row>
 			<row>
 				<hbox/>
-				<hbox>
+				<hbox flex='1' align='center'>
 					<spacer flex='1'/>
 					<label value='please replace the searchword with %q'/>
+				</hbox>
+			</row>
+			<row>
+				<hbox/>
+				<hbox flex='1' align='center'>
+					<spacer flex='1'/>
+					<label value=' '/>
 				</hbox>
 			</row>
 			<row>
