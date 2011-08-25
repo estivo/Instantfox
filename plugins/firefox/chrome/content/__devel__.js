@@ -89,7 +89,12 @@ var instantFoxDevel = {
 		document.documentElement.appendChild(s)
 	},
 
+	/*get sourceList() {		
+		var t=makeReq("chrome://instantfox/content/instantfox.xul")
+		t.match(/<script.*src="(.*)"/g).map(function(x)x.match(/src="(.*)"/)[1])
+	}*/
 	sourceList: [
+		"chrome://instantfox/content/instantfox.js",
 		"chrome://instantfox/content/instantfox.js"
 	],
 	moduleHref: 'chrome://instantfox/content/instantfoxModule.js',
@@ -410,8 +415,6 @@ function isInvalid(entry) {
 	return /\.xpi$|\.zip$|\.rar$|thumbs.db$|^\.|^__/i.test(entry.leafName)	
 }
 
-
-
 /**zr constants*/
 var PR_RDONLY      = 0x01;
 var PR_WRONLY      = 0x02;
@@ -450,95 +453,3 @@ function writeToFile(file, text) {
     converter.close();
 }
 
-/*
-function log(msg) {
-  if(typeof Firebug != 'undefined') {
-	Firebug.Console.log(msg);
-  } else {
-	Components.utils.reportError(msg);
-  }
-  return msg;
-}
-function print_r(x, max, sep, l) {	
-	l = l || 0;
-	max = max || 10;
-	sep = sep || ' ';
-	
-	if (l > max) {
-		return "[WARNING: Too much recursion]\n";
-	}
-
-	var
-		i,
-		r = '',
-		t = typeof x,
-		tab = '';
-
-	if (x === null) {
-		r += "(null)\n";
-	} else if (t == 'object') {
-		l++;
-
-		for (i = 0; i < l; i++) {
-			tab += sep;
-		}
-
-		if (x && x.length) {
-			t = 'array';
-		}
-
-		r += '(' + t + ") :\n";
-
-		for (i in x) {
-			try {
-				r += tab + '[' + i + '] : ' + print_r(x[i], max, sep, (l + 1));
-			} catch(e) {
-				return "[ERROR: " + e + "]\n";
-			}
-		}
-
-	} else {
-
-		if (t == 'string') {
-			if (x == '') {
-				x = '(empty)';
-			}
-		}
-
-		r += '(' + t + ') ' + x + "\n";
-
-	}	
-	return r;	
-};
-*/ 
-
-
-
-/*
-var reg=Components.manager.QueryInterface(Components.interfaces.nsIComponentRegistrar)
-reg.isContractIDRegistered('@mozilla.org/autocomplete/search;1?name=instantFoxAutoComplete')
-f=getLocalFile('chrome://instantfox/content/g').parent.parent.parent
-f.append('components')
-f.append('instantfox_search.js')
-Cc["@mozilla.org/autocomplete/search;1?name=instantFoxAutoComplete"]
-Cc[contractid].number
-//Components.ID("c541b971-0729-4f5d-a5c4-1f4dadef365e").number==Cc[contractid].number
-f1 = InstantFoxSearch.prototype
-f = NSGetFactory(f1.classID)
-reg.registerFactory(f1.classID, f1.classDescription, f1.contractID, f);
-
-contractID="@mozilla.org/autocomplete/search;1?name=instantFoxAutoComplete"
-var reg=Components.manager.QueryInterface(Components.interfaces.nsIComponentRegistrar)
-try{
-reg.unregisterFactory(
-	reg.contractIDToCID(contractID),
-	reg.getClassObjectByContractID(contractID,Ci.nsISupports)
-)
-}catch(e){}
-
-p=jn.getParent(uiiu)
-t=makeReq(Services.io.newFileURI(p.__LOCATION__).spec)
-
-p.eval(t,p)
-
-*/

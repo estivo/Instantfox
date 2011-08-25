@@ -113,6 +113,8 @@ var InstantFox = {
 		//dump('---***---',arguments.callee.caller)
 		gURLBar.removeEventListener('keydown', InstantFox.onKeydown, false);
 		gURLBar.removeEventListener('input', InstantFox.onInput, false);
+		gURLBar.removeEventListener('focus', InstantFox.onfocus, false);
+		gURLBar.removeEventListener('blur', InstantFox.onblur, false);
 	},
 
 	checkURLBarBinding: function() {
@@ -451,34 +453,16 @@ var InstantFox = {
 
 		var now = Date.now()
 
-		var char_change = nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE
-		var webNav = getWebNavigation()
 		if(this._isOwnQuery){
 			// gBrowser.docShell.isLoadingDocument
 			if(now - this.loadTime < this.minLoadTime){
 				this.schedulePreload(this.minLoadTime)
 				return
 			}
-			//content.location.replace(url2go);
-			webNav.loadURI(url2go, char_change, null, null, null);
-		}else if(InstantFoxModule.openSearchInNewTab){
-			gBrowser.userTypedValue=null
-			var targetTab = gBrowser.addTab(url2go);
-			gBrowser.moveTabTo(targetTab, gBrowser.mCurrentTab._tPos+1)
-			
-			q.tabId == targetTab.linkedPanel
-			this._isOwnQuery = true;
-			gBrowser.selectedTab = targetTab;
-			gBrowser.docShell.useGlobalHistory = false
-			gBrowser.userTypedValue = q.value
-			q.index = 1
 		}else{
-			gBrowser.docShell.useGlobalHistory = false
-			q.index = webNav.sessionHistory.index
-			//content.location.assign(url2go);
 			this._isOwnQuery = true;
-			webNav.loadURI(url2go, char_change, null, null, null);
 		}
+		this.pageLoader.addPreview(url2go);
 
 		this.loadTime = q.loadTime = now
 		return url2go
@@ -507,31 +491,15 @@ var InstantFox = {
 			br = br && br.getElementsByTagName("xul:browser")[0]
 		}
 
-		if (br)
-			br.docShell.useGlobalHistory = true
+		InstantFox.pageLoader.persistPreview()
+		InstantFox.pageLoader.removePreview()
 
-		// todo: investigate why this crashes browser sometimes
-		if (InstantFoxModule.currentQuery.index != null)
-			this.collapseHistory(InstantFoxModule.currentQuery.index)
+
 		InstantFoxModule.currentQuery = null;
 		if(this.timeout)
 			this._timeout = clearTimeout(this._timeout)
 		//
 		InstantFox.updateLogo(false)
-	},
-	collapseHistory: function(index) {
-		var history = gBrowser.selectedBrowser.sessionHistory.QueryInterface(Ci.nsISHistoryInternal);
-		var entries=[];
-
-		for (var i = 0; i < index; i++)
-			entries.push(history.getEntryAtIndex(i, false));
-		// last entry
-		entries.push(history.getEntryAtIndex(history.index, false));
-		//
-		history.PurgeHistory(history.count);
-
-		for each (var entry in entries)
-			history.addEntry(entry, true);
 	},
 	onEnter: function(value){
 		InstantFoxModule.previousQuery = InstantFoxModule.currentQuery
@@ -546,16 +514,9 @@ var InstantFox = {
 		this.finishSearch()
 
 		InstantFoxModule.currentQuery=null;
-
-		gBrowser.selectedBrowser.focus();
 	},
 	openLoadedPageInNewTab: function(){
-		var q = InstantFoxModule.currentQuery;
-		var tab = gBrowser.mCurrentTab;
-		var historyOffset = q.index == null? 0 : q.index - getWebNavigation().sessionHistory.index;
-		var newTab = Cc['@mozilla.org/browser/sessionstore;1'].getService(Ci.nsISessionStore).duplicateTab(window, tab, historyOffset);
-		newTab.linkedBrowser.userTypedValue = null;
-		gBrowser.moveTabTo(tab,tab._tPos+1)
+		InstantFox.pageLoader.persistPreview(null, true)
 		this.onEnter()
 	}
 }

@@ -28,7 +28,7 @@
 
   <!-- devel__) -->
   <script type="text/javascript" src="chrome://instantfox/content/instantfox.js"></script>
-  <script type="text/javascript" src="chrome://instantfox/content/mouseUI.js"></script>
+  <script type="text/javascript" src="chrome://instantfox/content/contentHandler.js"></script>
 
   <toolbarpalette id="BrowserToolbarPalette">
 	<toolbarbutton type="menu" id='instantFox-options' class='toolbarbutton-1 chromeclass-toolbar-additional'
@@ -36,6 +36,9 @@
 		<panel onpopupshowing="if(event.target==this)InstantFox.onPopupShowing(this)"  onpopuphiding="if(event.target==this)InstantFox.onPopupHiding(this)"
 			noautohide='true' position='after_end'/>
 	</toolbarbutton>
+	
+	
+	<!-- devel__( -->
 	<toolbarbutton type="menu" id='instantFox-icons' class='toolbarbutton-1 chromeclass-toolbar-additional'
 		style='list-style-image:url(chrome://instantfox/content/skin/button-logo.png)' label='InstantFox'>
 <svg:svg height="0">
@@ -49,6 +52,7 @@
 		<panel onpopupshowing="if(event.target==this)InstantFox.onPopupShowing(this)"  onpopuphiding="if(event.target==this)InstantFox.onPopupHiding(this)"
 			noautohide='true' position='after_end'/>
 	</toolbarbutton>
+	 <!-- devel__) -->
   </toolbarpalette>
   
 </overlay>

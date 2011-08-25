@@ -7,29 +7,39 @@ InstantFox.contentHandler = {
 	finishGoogleLocation: function(){
 		content.document.getElementById("gac_scont").style.display='';
 		content.document.getElementById("gray").style.display=''
+	},
+	setURL: function(url){
+		// todo:
+		InstantFox.pageLoader.addPreview(url)
 	}
-	
-	
-	
 }
 
 InstantFox.pageLoader = {
 	preview: null,
     removePreview: function() {
-        if (this.preview != null) {
-            this.preview.parentNode.removeChild(this.preview);
-            this.preview = null;
+        if (this.preview != null && this.preview.parentNode) {
+            this.preview.parentNode.removeChild(this.preview);            
         }
     },
 
     // Provide a way to replace the current tab with the preview
-    persistPreview: function() {
+    persistPreview: function(event, inNewTab) {
+		if(InstantFoxModule.openSearchInNewTab || inNewTab){
+			gBrowser._lastRelatedTab=null
+			// todo: option to open at far left
+			let tab = gBrowser.addTab('', {relatedToCurrent:true, skipAnimation:true})
+			gBrowser.selectedTab = tab;   
+		}
+		this.swapBrowsers()
+	},
+	swapBrowsers: function() {
 		let preview = this.preview
         if (preview == null)
 			return;
 
         // Mostly copied from tabbrowser.xml swapBrowsersAndCloseOther
-        let selectedTab = browser.selectedTab;
+        let browser = window.gBrowser;
+		let selectedTab = browser.selectedTab;
         let selectedBrowser = selectedTab.linkedBrowser;
         selectedBrowser.stop();
 
@@ -76,7 +86,7 @@ InstantFox.pageLoader = {
         browser.setTabTitle(selectedTab);
         browser.updateCurrentBrowser(true);
         browser.useDefaultIcon(selectedTab);
-        urlBar.value = (selectedBrowser.currentURI.spec != "about:blank") ? selectedBrowser.currentURI.spec : preview.getAttribute("src");
+        gURLBar.value = (selectedBrowser.currentURI.spec != "about:blank") ? selectedBrowser.currentURI.spec : preview.getAttribute("src");
 
         // Restore the progress listener
         tabListener = browser.mTabProgressListener(selectedTab, selectedBrowser, tabListenerBlank);
@@ -93,15 +103,22 @@ InstantFox.pageLoader = {
     addPreview: function(url) {
         // Only auto-load some types of uris
         //let url = result.getAttribute("url");
-        if (url.search(/^(data|ftp|https?):/) == -1) {
+        /* if (url.search(/^(data|ftp|https?):/) == -1) {
             this.removePreview();
             return;
-        }
+        } */
 		let preview = this.preview
 		let browser = window.gBrowser;
         // Create the preview if it's missing
         if (preview == null) {
+			/* this.image = window.document.createElement("image");
+			this.image.setAttribute('src', 'chrome://shadia/content/icons/lightbox-ico-loading.gif')
+			this.image.style.position = 'fixed'
+			this.image.style.display = 'block' */
+			
+			
             preview = window.document.createElement("browser");
+			preview.style.border='solid'
             preview.setAttribute("type", "content");
 
             // Copy some inherit properties of normal tabbrowsers
@@ -113,17 +130,22 @@ InstantFox.pageLoader = {
             preview.addEventListener("DOMTitleChanged", function(e) e.stopPropagation(), true);
 
             // The user clicking or tabbinb to the content should indicate persist
-            preview.addEventListener("focus", persistPreview, true);
+            preview.addEventListener("focus", this.persistPreview.bind(this), true);
+			this.preview = preview
         }
 
         // Move the preview to the current tab if switched
         let selectedStack = browser.selectedBrowser.parentNode;
-        if (selectedStack != preview.parentNode)
+        if (selectedStack != preview.parentNode){			
 			selectedStack.appendChild(preview);
-
+		}	
+		preview.docShell.useGlobalHistory = false
         // Load the url i
         preview.webNavigation.loadURI(url, nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE, null, null, null);
-    }
+    },
+	
+	
+
 }
 
 
