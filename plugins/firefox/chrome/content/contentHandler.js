@@ -32,14 +32,14 @@ InstantFox.pageLoader = {
 		}
 		this.swapBrowsers()
 	},
-	swapBrowsers: function() {
+	swapBrowsers: function(selectedTab) {
 		let preview = this.preview
         if (preview == null)
 			return;
 
         // Mostly copied from tabbrowser.xml swapBrowsersAndCloseOther
         let browser = window.gBrowser;
-		let selectedTab = browser.selectedTab;
+		let selectedTab = selectedTab||browser.selectedTab;
         let selectedBrowser = selectedTab.linkedBrowser;
         selectedBrowser.stop();
 
@@ -111,14 +111,8 @@ InstantFox.pageLoader = {
 		let browser = window.gBrowser;
         // Create the preview if it's missing
         if (preview == null) {
-			/* this.image = window.document.createElement("image");
-			this.image.setAttribute('src', 'chrome://shadia/content/icons/lightbox-ico-loading.gif')
-			this.image.style.position = 'fixed'
-			this.image.style.display = 'block' */
-			
-			
+						
             preview = window.document.createElement("browser");
-			preview.style.border='solid'
             preview.setAttribute("type", "content");
 
             // Copy some inherit properties of normal tabbrowsers
@@ -138,8 +132,12 @@ InstantFox.pageLoader = {
         let selectedStack = browser.selectedBrowser.parentNode;
         if (selectedStack != preview.parentNode){			
 			selectedStack.appendChild(preview);
-		}	
+			InstantFox.urlBarListener.init(preview)
+		}
+		// disable history
 		preview.docShell.useGlobalHistory = false
+		
+		
         // Load the url i
         preview.webNavigation.loadURI(url, nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE, null, null, null);
     },
@@ -147,6 +145,86 @@ InstantFox.pageLoader = {
 	
 
 }
+InstantFox.nop = function(){}
+InstantFox.urlBarListener = {
+    QueryInterface: function(aIID) {
+		if (aIID.equals(Ci.nsIWebProgressListener)
+		 || aIID.equals(Ci.nsISupportsWeakReference)
+		 || aIID.equals(Components.interfaces.nsISupports))
+			return this;
+		throw Components.results.NS_NOINTERFACE;
+	},
+
+    onLocationChange: InstantFox.nop,
+
+    onStateChange: function(aWebProgress, aRequest, aStateFlags, aStatus){
+		const nsIWebProgressListener = Ci.nsIWebProgressListener;
+		const nsIChannel = Ci.nsIChannel;
+		dump(aRequest.URI && aRequest.URI.spec, '***************************')
+
+		if (aStateFlags & nsIWebProgressListener.STATE_START) {
+			if(!this._busyUI){
+				this._busyUI = true
+				this.image.hidden = false				
+			}
+		} else if (aStateFlags & nsIWebProgressListener.STATE_STOP) {
+			if(this._busyUI){
+				this._busyUI = false
+				this.image.hidden = true				
+			}
+		}
+	},
+	onProgressChange: function (aWebProgress, aRequest,
+			aCurSelfProgress, aMaxSelfProgress, aCurTotalProgress, aMaxTotalProgress) {
+			dump(aMaxTotalProgress,aCurTotalProgress)
+		if (aMaxTotalProgress > 0 && this._busyUI){
+			let percentage = (aCurTotalProgress * 100) / aMaxTotalProgress;
+			this.button.label = percentage;
+		}
+	},
+	onStatusChange: InstantFox.nop,
+	onSecurityChange: InstantFox.nop,
+	
+	init: function(browser) {
+        // Listen for webpage loads
+		if(!this.a){
+			InstantFox.pageLoader.preview.addProgressListener(this);
+			this.a=true
+		}
+		
+		if(!this.image){
+			var image = window.document.createElement("image");
+			image.setAttribute('src', 'chrome://shadia/content/icons/lightbox-ico-loading.gif')
+			
+			var box = window.document.createElement("vbox");
+			box.appendChild(image)
+			image = box
+			
+			var box = window.document.createElement("hbox");
+			box.setAttribute('bottom',0)
+			box.setAttribute('left','10%')
+
+			var button = window.document.createElement("button");
+
+			box.appendChild(button)
+			box.appendChild(image)
+			
+			this.button = button
+			this.image = image
+			this.box = box
+			
+			box.style.border='solid gold'
+
+		}
+			
+		browser.parentNode.appendChild(this.box)		
+    },
+
+    uninit: function(browser) {
+        InstantFox.pageLoader.preview.removeProgressListener(this);
+    },
+};
+
 
 
 // google test

@@ -95,7 +95,7 @@ var instantFoxDevel = {
 	}*/
 	sourceList: [
 		"chrome://instantfox/content/instantfox.js",
-		"chrome://instantfox/content/instantfox.js"
+		"chrome://instantfox/content/contentHandler.js"
 	],
 	moduleHref: 'chrome://instantfox/content/instantfoxModule.js',
 	
