@@ -77,7 +77,7 @@ textbox[focused='true']{
 	background:-moz-field;
 	box-shadow: 0pt 0pt 1.5px 1px gray, 0pt 0pt 2.5px 1px yellow;
 }
-textbox[conflict=true]{
+textbox[conflict=true], label[conflict=true]{
 	color: darkred!important;
 	text-shadow: -1px -1px 2px #FFFFFF, 0pt -1px 6px red;
 }
@@ -213,11 +213,11 @@ label[control='opacity-scale']{
 				<hbox align='center'>
 					<label value="search-plugins"></label>
 					<spacer flex='1'/>
-					<slickbutton id="add" label='add +' oncommand='addPlugin(event)'/>
+					<slickbutton id="add" label='add +' onmouseup='openEditPopup(this)'/>
 				</hbox>
 			</vbox>
 			<richlistbox id='shortcuts' flex='1'
-				seltype='multiple' context='context' onselect='onSelect(this)' onmouseup='openEditLigthbox(event)'/>		
+				seltype='multiple' context='context' onselect='onSelect(this)' onmouseup='rbMouseup(event)'/>		
 		</tabpanel>
 		<tabpanel orient='vertical'  flex='1' >
 			<prefpane align='center' hidden='true' flex='1'>
@@ -260,11 +260,11 @@ label[control='opacity-scale']{
 					<checkbox id='openintab-checkbox' preference="openintab" oncommand='InstantFoxModule.openSearchInNewTab=this.checked'/>
 				</hbox>
 				<spacer flex='1'/>
-				<hbox align='center'>
+				<vbox align='center'>
 					<slickbutton label='copyPluginsToClipboard' oncommand='copyPluginsToClipboard()'/>
-					<slickbutton label='pastePluginData' oncommand='addPluginsFromClipboar()'/>
+					<slickbutton label='addPluginDataFromClipboard' oncommand='addPluginsFromClipboar()'/>
 					<spacer flex='1'/>
-				</hbox>
+				</vbox>
 		</prefpane>
 		</tabpanel>
 		<tabpanel orient='vertical'  flex='1'>
@@ -294,7 +294,7 @@ label[control='opacity-scale']{
 	<menuitem label='edit' aID='edit'/>
 </menupopup>
 
-<panel id="edit-box" ignorekeys='true' type="arrow" 
+<panel id="edit-box" ignorekeys='true' type="arrow" noautohide='true'
 		orient='vertical' onpopuphiding='editPopupSave(this)' position='start_before'>	
 	<grid >
 		<columns>
@@ -340,8 +340,8 @@ label[control='opacity-scale']{
 			<row>
 				<hbox/>
 				<hbox flex='1' align='center'>
+					<label id='qWarn' value='replace the searchword with %q'/>
 					<spacer flex='1'/>
-					<label value='please replace the searchword with %q'/>
 				</hbox>
 			</row>
 			<row>

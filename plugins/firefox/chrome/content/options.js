@@ -112,13 +112,13 @@ var escapeMap = { "&": "amp", '"': "quot", "<": "lt", ">": "gt" }
 initContextMenu = function(popup){
 	var item = document.popupNode	
 	item = $parent(item)
-	var selectedItems = item.parentNode.selectedItems
+	var selectedItems = $('shortcuts').selectedItems
 
 	$t(popup, 'disableInstant').setAttribute('checked', !selectedItems.some(function(x){
 		return InstantFoxModule.Plugins[x.id].disableInstant
 	}))
-	$t(popup, 'disabled').setAttribute('checked', !selectedItems.some(function(x){
-		return InstantFoxModule.Plugins[x.id].disabled
+	$t(popup, 'disableSuggest').setAttribute('checked', !selectedItems.some(function(x){
+		return InstantFoxModule.Plugins[x.id].disableSuggest
 	}))
 	$t(popup, 'hideFromContextMenu').setAttribute('checked', !selectedItems.some(function(x){
 		return InstantFoxModule.Plugins[x.id].hideFromContextMenu
@@ -133,7 +133,7 @@ onContextMenuCommand = function(e){
 	var item = document.popupNode	
 	item = $parent(item)
 	if (name=='edit'){
-		openEditLigthbox({target: item.lastChild})
+		openEditPopup({target: item.lastChild})
 		return
 	}
 	
@@ -148,8 +148,78 @@ onContextMenuCommand = function(e){
 }
 
 //************************ edit popup utils
-var gPlugin, gPluginsChanged, gPrefChanged, resultOK=true;
-openEditLigthbox = function(e){
+var gPlugin, gEditPopupAnchor, gPluginsChanged, gPrefChanged, resultOK = true;
+initEditPopup = function(plugin, panel){
+	if(plugin)
+		gPlugin = ibp.pluginLoader.cleanCopyPlugin(plugin)
+	else
+		gPlugin = createEmptyPlugin(plugin)
+
+	//$t(panel, 'suggest').checked = !gPlugin.disableSuggest
+	$t(panel, 'instant').checked = !gPlugin.disableInstant
+	$t(panel, 'image').src = gPlugin.iconURI
+	$t(panel, 'key').value = gPlugin.key
+	
+	for each(var i in ['url', 'name', 'json']){
+		var box = $t(panel, i)
+		box.value = gPlugin[i] || '';
+		box.nextSibling.hidden = !canResetProp(box)
+	}
+	
+	var rem =  $t(panel, 'remove')
+	if(plugin){
+		rem.label = gPlugin.type == 'user' ? 'remove': 'disable';
+		rem.hidden = false;
+	}else{
+		rem.label = 'cancel';
+		rem.hidden = false;
+	}
+}
+createEmptyPlugin=function(){
+	var i=0
+	while(InstantFoxModule.Plugins['user'+i])
+		i++
+	return {
+		type: 'user',
+		id: 'user'+i,
+		disableInstant: true,
+		name: '',
+		key: '',
+		url: '',
+		json: '',
+		iconURI: '',
+		createNew: true
+	}	
+}
+openEditPopup = function(item, plugin){
+	var panel = $('edit-box')
+	if(panel.hasAttribute('warn'))
+		return
+	
+	if(item == gEditPopupAnchor){
+		panel.hidePopup()
+		return
+	}
+	
+	// without this arrow isn't shown first time
+ 	if(!window.$panelHackApplied){
+		window.$panelHackApplied=true
+		panel.openPopup(document.documentElement)
+		panel.hidePopup()
+	}
+	
+	initEditPopup(plugin, panel)	
+	
+	var popupBoxObject = panel.popupBoxObject;
+	popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
+	panel.openPopup(item, 'start_before', 0, 0, false, true)
+	
+	gEditPopupAnchor = item
+	
+	window.addEventListener('mousedown', editPopupCloser, false)	
+}
+
+rbMouseup = function(e){
 	var item = e.target;
 	var aID = item.getAttribute('aID')
 	//**********
@@ -172,44 +242,37 @@ openEditLigthbox = function(e){
 	//**********
 	if (aID != 'edit-link')
 		return;
-
-	var panel = $('edit-box')
-
-	if ( panel.state!='closed') {
-		panel.hidePopup()
-		return
-	}
 	
 	var item = $parent(e.target)
-	gPlugin = InstantFoxModule.Plugins[item.id]
-	
-	//$t(panel, 'suggest').checked = !gPlugin.disableSuggest
-	$t(panel, 'instant').checked = !gPlugin.disableInstant
-	$t(panel, 'image').src = gPlugin.iconURI
-	$t(panel, 'key').value = gPlugin.key
-	
-	for each(var i in ['url', 'name', 'json']){
-		var box = $t(panel, i)
-		box.value = gPlugin[i] || '';
-		box.nextSibling.hidden = !canResetProp(box)
-	}
-	
-	var rem =  $t(panel, 'remove')
-	rem.label = gPlugin.type == 'user' ? 'remove': 'disable';
-	rem.hidden = false;
-	
-	var popupBoxObject = panel.popupBoxObject;
-	popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
-	panel.openPopup(item.lastElementChild, 'start_before', 0, 0, false, true)
-	
+	var p = InstantFoxModule.Plugins[item.id]
+
+	openEditPopup(item.lastElementChild, p)	
 }
+
+editPopupCloser = function(e){
+	var el = e.target
+
+	while(el){
+		if(el.id == 'edit-box')
+			return
+		el = el.parentNode		
+	}
+	dump(el+5)
+
+	var panel = $('edit-box')
+	if(editPopupSave(panel) !== false){	
+		$('edit-box').hidePopup()
+		window.removeEventListener('mousedown', editPopupCloser, true)
+	}else{
+		e.preventDefault()
+		e.stopPropagation()
+	}
+}
+
 editPopupSave = function(panel){
 	if(!gPlugin)
 		return
-	if(gPlugin=='createNew'){
-		var createNew = true
-		gPlugin = createEmptyPlugin()
-	}
+
 	//gPlugin.disableSuggest = !$t(panel, 'suggest').checked
 	gPlugin.disableInstant = !$t(panel, 'instant').checked
 
@@ -217,11 +280,32 @@ editPopupSave = function(panel){
 	gPlugin.url = $t(panel, 'url').value
 	gPlugin.key = $t(panel, 'key').value
 	gPlugin.iconURI = $t(panel, 'image').src
+	
+	// warn about invalid plugin
+	var warnedOnce = panel.hasAttribute('warn')
+	if(!warnedOnce && (
+		!gPlugin.url ||
+		 gPlugin.url.indexOf('%q') == -1 ||
+		(gPlugin.json && gPlugin.json.indexOf('%q') == -1 )
+	)){
+		var el = $('qWarn')
+		el.value = 'please replace the searchword with %q'	
+		el.setAttribute('conflict', true)
+		
+		panel.setAttribute('warn', true)
+		return false
+	}else if(warnedOnce){
+		panel.removeAttribute('warn')
+		el.value = 'replace the searchword with %q'		
+		key.removeAttribute('conflict')
+	}
 
-	saveGPlugin(createNew)
+	saveGPlugin()
+	return true
 }
+
 saveGPlugin = function(createNew){
-	if (createNew) {
+	if (gPlugin.createNew) {
 		ibp.fixupPlugin(gPlugin)
 		if(!gPlugin.url)
 			return
@@ -236,46 +320,15 @@ saveGPlugin = function(createNew){
 		replaceXML(el, plugin2XML(gPlugin))
 		container.selectedIndex = si
 	}
+	InstantFoxModule.Plugins[gPlugin.id] = ibp.pluginLoader.cleanCopyPlugin(gPlugin)
 	ibp.pluginLoader.initShortcuts()
 	markConflicts()
-	
-	gPluginsChanged = true
-}
-createEmptyPlugin=function(){
-	var i=0
-	while(InstantFoxModule.Plugins['user'+i])
-		i++
-	return {
-		type: 'user',
-		id: 'user'+i
-	}	
-}
-addPlugin=function(e){
-	var panel = $('edit-box')
 		
-	var item = $parent(e.target)
-	gPlugin = 'createNew'
-	
-	$t(panel, 'suggest').checked = true
-	$t(panel, 'instant').checked = false
-	$t(panel, 'name').value = ''
-	$t(panel, 'key').value = ''
-	
-	var urlBox = $t(panel, 'url')
-	for each(var i in ['url', 'name']){
-		var box = $t(panel, i)
-		box.value = ''
-		box.nextSibling.hidden = true
-	}
-	$t(panel, 'image').src = ''	
-	var rem =  $t(panel, 'remove')
-	rem.label = 'cancel';
-	rem.hidden = false;
-
-	var popupBoxObject = panel.popupBoxObject;
-	popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
-	panel.openPopup(item,'before_start',0,0,false,true)
+	gPluginsChanged = true
+	gPlugin = null
 }
+
+
 removePlugin=function(p) {
 	if (p == 'createNew') {
 		gPlugin = null
