@@ -1,32 +1,5 @@
 /** devel__( */
 
-function debug(aMessage) {
-	try {
-		var objects = [];
-		objects.push.apply(objects, arguments);
-		Firebug.Console.logFormatted(objects,
-		TabWatcher.getContextByWindow
-		(content.document.defaultView.wrappedJSObject));
-	}
-	catch (e) {
-	}
-
-	var consoleService = Components.classes["@mozilla.org/consoleservice;1"].getService
-		(Components.interfaces.nsIConsoleService);
-	if (aMessage === "") consoleService.logStringMessage("(empty string)");
-	else if (aMessage != null) consoleService.logStringMessage(aMessage.toString());
-	else consoleService.logStringMessage("null");
-}
-function dump() {
-    var aMessage = "aMessage: ";
-    for (var i = 0; i < arguments.length; ++i) {
-        var a = arguments[i];
-        aMessage += (a && !a.toString ? "[object call]" : a) + " , ";
-    }
-    var consoleService = Components.classes['@mozilla.org/consoleservice;1'].getService(Components.interfaces.nsIConsoleService);
-    consoleService.logStringMessage("" + aMessage);
-}
-
 /** ************************* ---===--- ************************* **/
 function makeReq(href) {
 	var req = new XMLHttpRequest;

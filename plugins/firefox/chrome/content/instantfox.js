@@ -115,6 +115,8 @@ var InstantFox = {
 		gURLBar.removeEventListener('input', InstantFox.onInput, false);
 		gURLBar.removeEventListener('focus', InstantFox.onfocus, false);
 		gURLBar.removeEventListener('blur', InstantFox.onblur, false);
+		
+		this.finishSearch()
 	},
 
 	checkURLBarBinding: function() {
@@ -202,37 +204,43 @@ var InstantFox = {
 		var key = event.keyCode ? event.keyCode : event.which,
 			alt = event.altKey, meta = event.metaKey,
 			ctrl = event.ctrlKey, shift = event.shiftKey,
-			simulateInput, i;
+			simulateInput, i, q;
 
-		if (InstantFoxModule.currentQuery) {
+		if (q = InstantFoxModule.currentQuery) {
+			q.shadowOff = false
 			if (key == 9 || (!ctrl && !shift && key == 39)) { // 9 == Tab
 				if (InstantFox.rightShadow != '') {
 					gURLBar.value += InstantFox.rightShadow;
 					InstantFox.rightShadow = '';
 					simulateInput = true;
 				}
-			} else if (key == 39 && ctrl && !shift) { // 39 == RIGHT
+			}
+			else if (key == 39 && ctrl && !shift) { // 39 == RIGHT
 				if (InstantFox.rightShadow != '' && gURLBar.selectionEnd == gURLBar.value.length) {
 					gURLBar.value += InstantFox.rightShadow[0]
 					simulateInput = true;
 				}
-			} else if (key == 13 && !meta && !ctrl) { // 13 == ENTER
-				if(!alt)
-					InstantFox.onEnter()
-				else
-					InstantFox.openLoadedPageInNewTab()
-
+			}
+			else if (key == 13 && !meta && !ctrl) { // 13 == ENTER
+				InstantFox.onEnter(null, alt)
+				
 				event.preventDefault();
-			} else if (!alt && !meta && !ctrl && [38,40,34,33].indexOf(key)!=-1) {//UP,DOWN,PAGE_UP,PAGE_DOWN
-				if(!InstantFoxModule.currentQuery.plugin.disableInstant) {
+			}
+			else if (!alt && !meta && !ctrl && [38,40,34,33].indexOf(key)!=-1) {//UP,DOWN,PAGE_UP,PAGE_DOWN
+				if(!q.plugin.disableInstant) {
 					InstantFox.schedulePreload()
-					InstantFoxModule.currentQuery.shadow = '';
+					q.shadow = '';
 				}
-			} else if (key == 27) { // 27 == ESCAPE
-				gBrowser.webNavigation.gotoIndex(0)
-				InstantFox.finishSearch(InstantFoxModule.currentQuery.index)
-				event.preventDefault();
-				gURLBar.blur()
+			}
+			else if (key == 27) { // 27 == ESCAPE
+				if(InstantFox.pageLoader.preview.parentNode)
+					InstantFox.pageLoader.removePreview()
+				else
+					gURLBar.blur()
+			}
+			else if (key == 8 || key == 46) { // 8 == BACK_SPACE, 46 == DELETE]
+				if(gURLBar.selectionEnd == gURLBar.mInputField.value.length)
+					InstantFoxModule.currentQuery.shadowOff = true
 			}
 		}
 
@@ -265,7 +273,7 @@ var InstantFox = {
 						 key == 40 ? -10:
 						 key == 34 ? -200:
 					   /*key == 33 ?*/200;
-			content.scrollBy(0, -amount)
+			(InstantFox.pageLoader.previewIsActive ? preview.contentWindow : content).scrollBy(0, -amount)
 		}
 
 		if(simulateInput){
@@ -282,11 +290,12 @@ var InstantFox = {
 		if (q) {
 			InstantFoxModule.currentQuery = q;
 			InstantFox.findBestShadow(q)
-			InstantFox.updateShadowLink(q);
+			//q.shadowOff = false
 		} else if (InstantFoxModule.currentQuery) {
 			InstantFoxModule.currentQuery = null;
-			InstantFox.updateShadowLink(q);
+			
 		}
+		InstantFox.updateShadowLink(q);
 	},
 	onblur: function(e) {
 		if(gURLBar.mIgnoreFocus || e.originalTarget != gURLBar.mInputField)
@@ -375,6 +384,10 @@ var InstantFox = {
 	},
 	findBestShadow: function(q){
 		q.shadow = ''
+		// after backspace and delete
+		if(q.shadowOff)
+			return
+
 		var query = q.query.toLowerCase()
 		for each(var i in q.results) {
 			var title = i.title.toLowerCase()
@@ -454,6 +467,14 @@ var InstantFox = {
 		var now = Date.now()
 
 		if(this._isOwnQuery){
+/* 			//fixme:
+if(q.plugin.id == 'google'){
+			//
+
+		InstantFox.pageLoader.preview.contentDocument.getElementById("lst-ib").value=query; 
+	
+	return
+} */
 			// gBrowser.docShell.isLoadingDocument
 			if(now - this.loadTime < this.minLoadTime){
 				this.schedulePreload(this.minLoadTime)
@@ -484,14 +505,21 @@ var InstantFox = {
 		this.updateShadowLink(null)
 
 		var q = InstantFoxModule.currentQuery, br
-		if (q.tabId == InstantFox._ctabID)
-			br = gBrowser
-		else {
-			br = document.getElementById(InstantFoxModule.currentQuery.tabId)
-			br = br && br.getElementsByTagName("xul:browser")[0]
+		if (q.tabId == InstantFox._ctabID){
+			InstantFox.pageLoader.persistPreview(q.forceNewTab?'new':'')
+		}else {
+			for (var i = 0; i < gBrowser.tabs.length; i++) {
+				if (gBrowser.tabs[i].linkedPanel == q.tabId ){
+					var tab = gBrowser.tabs[i]
+					break
+				}
+			}
+			if(tab)
+				InstantFox.pageLoader.persistPreview(tab, true)
+			else
+				dump('no tab')
 		}
 
-		InstantFox.pageLoader.persistPreview()
 		InstantFox.pageLoader.removePreview()
 
 
@@ -501,12 +529,20 @@ var InstantFox = {
 		//
 		InstantFox.updateLogo(false)
 	},
-	onEnter: function(value){
-		InstantFoxModule.previousQuery = InstantFoxModule.currentQuery
+	onEnter: function(value, forceNewTab){
+		var q = InstantFoxModule.currentQuery
+		InstantFoxModule.previousQuery = q
+		
+		// 
+		q.forceNewTab = InstantFoxModule.openSearchInNewTab ? !forceNewTab : forceNewTab
 
+		//
 		if (value)
-			InstantFoxModule.currentQuery.query = value
-
+			q.query = value
+		else if(q.shadow)
+			q.query = q.shadow
+		
+		//
 		var tmp = this.doPreload(InstantFoxModule.currentQuery, true)
 		gURLBar.value = tmp;
 		gBrowser.userTypedValue = null;
@@ -515,10 +551,6 @@ var InstantFox = {
 
 		InstantFoxModule.currentQuery=null;
 	},
-	openLoadedPageInNewTab: function(){
-		InstantFox.pageLoader.persistPreview(null, true)
-		this.onEnter()
-	}
 }
 
 //************************************************************************

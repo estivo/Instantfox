@@ -81,7 +81,7 @@ var commonPlugins = {
 	},
 	GoogleTranslate: {
 		key: "gt",
-		url: "resource://instantfox/calculator.html#%q",
+		url: "http://translate.google.com/#auto|%ls|%q",
 		name: "Translate"
 	},
 	
@@ -110,7 +110,8 @@ locale("de", ["de","de-DE","de"], {
 	GoogleLuck: {
 		name: "Google Glück"
 	},
-	Calculator: true
+	Calculator: true,
+	GoogleTranslate: true
 })
 
 locale("de-AT", ["de","de-AT","at"], {
@@ -133,7 +134,8 @@ locale("de-AT", ["de","de-AT","at"], {
 	GoogleLuck: {
 		name: "Google Glück"
 	},
-	Calculator: true
+	Calculator: true,
+	GoogleTranslate: true
 })
 
 locale("de-CH", ["de","de-CH","ch"], {
@@ -156,7 +158,8 @@ locale("de-CH", ["de","de-CH","ch"], {
 	GoogleLuck: {
 		name: "Google Glück"
 	},
-	Calculator: true
+	Calculator: true,
+	GoogleTranslate: true
 })
 
 locale("en-AU", ["en","en-AU","com.au"], {
@@ -185,7 +188,8 @@ locale("en-AU", ["en","en-AU","com.au"], {
 	GoogleLuck: {
 		url: "http://www.google.com/search?q=%q&btnI=1"
 	},
-	Calculator: true
+	Calculator: true,
+	GoogleTranslate: true
 })
 
 locale("en-CA", ["en","en-CA","ca"], {
@@ -214,7 +218,8 @@ locale("en-CA", ["en","en-CA","ca"], {
 	GoogleLuck: {
 		url: "http://www.google.com/search?q=%q&btnI=1"
 	},
-	Calculator: true
+	Calculator: true,
+	GoogleTranslate: true
 })
 
 locale("en-GB", ["en","en-GB","co.uk"], {
@@ -243,7 +248,8 @@ locale("en-GB", ["en","en-GB","co.uk"], {
 	GoogleLuck: {
 		url: "http://www.google.com/search?q=%q&btnI=1"
 	},
-	Calculator: true
+	Calculator: true,
+	GoogleTranslate: true
 })
 
 locale("en-US", ["en","en-US","com"], {
@@ -272,7 +278,8 @@ locale("en-US", ["en","en-US","com"], {
 	GoogleLuck: {
 		url: "http://www.google.com/search?q=%q&btnI=1"
 	},
-	Calculator: true
+	Calculator: true,
+	GoogleTranslate: true
 })
 
 locale("es-AR", ["es","es-AR","com.ar"], {
@@ -308,7 +315,8 @@ locale("es-AR", ["es","es-AR","com.ar"], {
 	},
 	Calculator: {
 		name: "Calculadora"
-	}
+	},
+	GoogleTranslate: true
 })
 
 locale("es-ES", ["es","es-ES","es"], {
@@ -346,7 +354,8 @@ locale("es-ES", ["es","es-ES","es"], {
 	},
 	Calculator: {
 		name: "Calculadora"
-	}
+	},
+	GoogleTranslate: true
 })
 
 locale("es-MX", ["es","es-MX","com.mx"], {
@@ -382,7 +391,8 @@ locale("es-MX", ["es","es-MX","com.mx"], {
 	},
 	Calculator: {
 		name: "Calculadora"
-	}
+	},
+	GoogleTranslate: true
 })
 
 locale("es-CL", ["es","es-CL","cl"], {
@@ -419,7 +429,8 @@ locale("es-CL", ["es","es-CL","cl"], {
 	},
 	Calculator: {
 		name: "Calculadora"
-	}
+	},
+	GoogleTranslate: true
 })
 
 locale("fr", ["fr","fr-FR","fr"], {
@@ -454,7 +465,8 @@ locale("fr", ["fr","fr-FR","fr"], {
 	},
 	Calculator: {
 		name: "Calculateur"
-	}
+	},
+	GoogleTranslate: true
 })
 
 locale("it", ["it","it-IT","it"], {
@@ -483,7 +495,8 @@ locale("it", ["it","it-IT","it"], {
 	GoogleLuck: {
 		url: "http://www.google.com/search?q=%q&btnI=1"
 	},
-	Calculator: true
+	Calculator: true,
+	GoogleTranslate: true
 })
 
 locale("nl", ["nl","nl","nl"], {
@@ -515,7 +528,8 @@ locale("nl", ["nl","nl","nl"], {
 	GoogleLuck: {
 		url: "http://www.google.com/search?q=%q&btnI=1"
 	},
-	Calculator: true
+	Calculator: true,
+	GoogleTranslate: true
 })
 
 locale("pl", ["pl","pl","pl"], {
@@ -549,7 +563,8 @@ locale("pl", ["pl","pl","pl"], {
 		url: "http://www.google.com/search?q=%q&btnI=1",
 		name: "Google Szczęścia"
 	},
-	Calculator: true
+	Calculator: true,
+	GoogleTranslate: true
 })
 
 locale("pt", ["pt","pt","pt"], {
@@ -578,7 +593,8 @@ locale("pt", ["pt","pt","pt"], {
 	GoogleLuck: {
 		url: "http://www.google.com/search?q=%q&btnI=1"
 	},
-	Calculator: true
+	Calculator: true,
+	GoogleTranslate: true
 })
 
 locale("pt-BR", ["pt","pt-BR","com.br"], {
@@ -606,7 +622,8 @@ locale("pt-BR", ["pt","pt-BR","com.br"], {
 	GoogleLuck: {
 		url: "http://www.google.com/search?q=%q&btnI=1"
 	},
-	Calculator: true
+	Calculator: true,
+	GoogleTranslate: true
 })
 
 locale("ru", ["ru","ru","ru"], {
@@ -643,7 +660,8 @@ locale("ru", ["ru","ru","ru"], {
 	GoogleLuck: {
 		url: "http://www.google.com/search?q=%q&btnI=1"
 	},
-	Calculator: true
+	Calculator: true,
+	GoogleTranslate: true
 })
 
 locale("tr", ["tr","tr","com.tr"], {
@@ -661,7 +679,8 @@ locale("tr", ["tr","tr","com.tr"], {
 	IMDb: {
 		name: "IMDb"
 	},
-	Calculator: true
+	Calculator: true,
+	GoogleTranslate: true
 })
 /*************************end of data  section *************************
  * locale(name, map:['%ls', '%ll', '%ld'], plugins)

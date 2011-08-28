@@ -12,15 +12,15 @@ function debug(aMessage) {
 	try {
 		var objects = [];
 		objects.push.apply(objects, arguments);
-		Firebug.Console.logFormatted(objects,
-		TabWatcher.getContextByWindow
-		(content.document.defaultView.wrappedJSObject));
+		Firebug.Console.logFormatted(
+			objects,
+			TabWatcher.getContextByWindow(content.document.defaultView.wrappedJSObject)
+		);
 	}
 	catch (e) {
 	}
 
-	var consoleService = Components.classes["@mozilla.org/consoleservice;1"].getService
-		(Components.interfaces.nsIConsoleService);
+	var consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
 	if (aMessage === "") consoleService.logStringMessage("(empty string)");
 	else if (aMessage != null) consoleService.logStringMessage(aMessage.toString());
 	else consoleService.logStringMessage("null");
@@ -407,15 +407,23 @@ InstantFoxModule = {
 			return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 		}
 
-		var match=false;
+		var match=false, localizedMatchingPlugin;
 		for(var key in this.Shortcuts){
 			var i = this.Shortcuts[key]
 			var p = this.Plugins[i]
 			if(p && p.url){
-				if(url.indexOf(p.domain)!=-1){
+				var dom = p.domain.replace(/\w+\:\/\/(www\.)?/, '')
+				if(url.indexOf(dom)!=-1){
 					match=true;
 					break;
 				}
+				dom = dom.replace(/\.\w{1,3}(\.\w{1,3})?\//, '.@@@@/')
+				if(dom == '.')
+					continue		
+				// test in other locales
+				dom = escapeRegexp(dom).replace('@@@@','\\w{1,3}(?:\.\\w{1,3})?')
+				if(RegExp(dom).test(url))
+					localizedMatchingPlugin = p
 			}
 		}
 		if(!match){
@@ -425,7 +433,9 @@ InstantFoxModule = {
 			}else if(url.indexOf('weather.instantfox.net') > 0){
 				var regexp=/\/([^\/#]*)(?:#|$)/
 				p = this.Plugins.weather
-			}else
+			}else if(localizedMatch)
+				p = localizedMatchingPlugin
+			else
 				return null;
 		}
 
