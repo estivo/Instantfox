@@ -294,7 +294,7 @@ label[control='opacity-scale']{
 	<menuitem label='edit' aID='edit'/>
 </menupopup>
 
-<panel id="edit-box" ignorekeys='true' type="arrow" noautohide='true'
+<panel id="edit-box" ignorekeys='true' type="arrow" 
 		orient='vertical' onpopuphiding='editPopupSave(this)' position='start_before'>	
 	<grid >
 		<columns>

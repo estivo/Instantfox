@@ -33,12 +33,13 @@ InstantFox.pageLoader = {
 
 		if(tab == 'new'){
 			gURLBar.blur()
-			gBrowser._lastRelatedTab=null
+			gBrowser._lastRelatedTab = null
 			// todo: option to open at far left
 			var tab = gBrowser.addTab('', {relatedToCurrent:true, skipAnimation:true})
 			gBrowser.selectedTab = tab;   
 		}
 		var browser = this.swapBrowsers(tab)
+		browser.userTypedValue = null;
 		
 		// Move focus out of the preview to the tab's browser before removing it
        
@@ -90,7 +91,8 @@ InstantFox.pageLoader = {
         }
 
         // Add the last entry from the preview; in-progress preview will add itself
-        if (entry != null) history.addEntry(entry, true);
+        if (entry != null)
+			history.addEntry(entry, true);
 
         // Swap the docshells then fix up various properties
         selectedBrowser.swapDocShells(preview);
@@ -214,7 +216,7 @@ InstantFox.urlBarListener = {
         // Listen for webpage loads
 		if(!this.a){
 			//InstantFox.pageLoader.preview.addProgressListener(this);
-			this.a=true
+			this.a = true
 		}
 		
 		if(!this.image){

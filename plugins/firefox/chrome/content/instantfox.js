@@ -36,6 +36,8 @@ var InstantFox = {
 				var url = InstantFox.update_url + '?to=' + newVersion + '&from=' +oldVersion
 				if (oldVersion<'2.5.0')
 					InstantFox.updateToolbarItems();
+				// check if new plugins are added by this update
+				InstantFoxModule.pluginLoader.onInstantfoxUpdate()
 			}
 			
 			
@@ -166,9 +168,9 @@ var InstantFox = {
 		boxStyle.paddingRight = '1px'
 	},
 	updateUserStyle: function() {
-		var ss=document.styleSheets
-		for(var i=ss.length; i--; ){
-			var s=ss[i]
+		var ss = document.styleSheets
+		for(var i = ss.length; i--; ){
+			var s = ss[i]
 			if(s.href=="chrome://instantfox/content/skin/instantfox.css"){
 				// caution: this depends on the order of css rules in instantfox.css
 				var prefs = Services.prefs
@@ -247,18 +249,18 @@ var InstantFox = {
 		if (key == 32 && ctrl) { // 32 == SPACE
 			var origVal = gURLBar.value;
 			var keyIndex = origVal.indexOf(' ')
-			var key=origVal.substring(0,keyIndex)
+			var key = origVal.substring(0,keyIndex)
 
 			if(key in InstantFoxModule.Shortcuts || key[0] == '`'){
 			//gURLBar.value = '`'+origVal
-				if (gURLBar.selectionStart<=keyIndex) {
+				if (gURLBar.selectionStart <= keyIndex) {
 					gURLBar.selectionStart = keyIndex+1
 					gURLBar.selectionEnd = origVal.length
 				} else {
-					gURLBar.selectionStart=0
-					gURLBar.selectionEnd=keyIndex
+					gURLBar.selectionStart = 0
+					gURLBar.selectionEnd = keyIndex
 				}
-				simulateInput=true
+				simulateInput = true
 			}else{
 				var val = InstantFoxModule.queryFromURL(origVal)
 				if(val){
@@ -273,7 +275,12 @@ var InstantFox = {
 						 key == 40 ? -10:
 						 key == 34 ? -200:
 					   /*key == 33 ?*/200;
-			(InstantFox.pageLoader.previewIsActive ? preview.contentWindow : content).scrollBy(0, -amount)
+			if(InstantFox.pageLoader.previewIsActive)
+				var win = InstantFox.pageLoader.preview.contentWindow
+			else
+				var win = window.content
+			
+			win.scrollBy(0, -amount)
 		}
 
 		if(simulateInput){
@@ -327,7 +334,7 @@ var InstantFox = {
 		if(val[0]=='`'){
 			if (i == -1)
 				i = val.length
-			if(gURLBar.selectionStart<=i)
+			if(gURLBar.selectionStart <= i)
 				plugin = {
 					suggestPlugins: true,
 					key: val.substring(1, i),
@@ -395,7 +402,7 @@ var InstantFox = {
 				q.shadow = i.title
 				break
 			}
-			if (!q.shadow && title.indexOf(query)==0)
+			if (!q.shadow && title.indexOf(query) == 0)
 				q.shadow = i.title
 		}
 	},
@@ -408,7 +415,7 @@ var InstantFox = {
 			gURLBar.instantFoxKeyNode.textContent =
 			gURLBar.instantFoxSpacerNode.textContent =
 			gURLBar.instantFoxShadowNode.textContent = '';
-			gURLBar.instantFoxTipNode.parentNode.hidden=true;
+			gURLBar.instantFoxTipNode.parentNode.hidden = true;
 			this.rightShadow = ''
 			return
 		}
@@ -514,10 +521,11 @@ if(q.plugin.id == 'google'){
 					break
 				}
 			}
-			if(tab)
+			if(tab){
 				InstantFox.pageLoader.persistPreview(tab, true)
-			else
+			}else{
 				dump('no tab')
+			}
 		}
 
 		InstantFox.pageLoader.removePreview()
@@ -549,7 +557,7 @@ if(q.plugin.id == 'google'){
 
 		this.finishSearch()
 
-		InstantFoxModule.currentQuery=null;
+		InstantFoxModule.currentQuery = null;
 	},
 }
 
@@ -784,7 +792,7 @@ nsContextMenu.prototype.isTextSelection = function() {
 
     return true;
 }
-nsContextMenu.prototype.fillSearchSubmenu=function(popup) {
+nsContextMenu.prototype.fillSearchSubmenu = function(popup) {
 	var menu
 	while(menu = popup.firstChild)
 		popup.removeChild(menu)
@@ -803,13 +811,13 @@ nsContextMenu.prototype.fillSearchSubmenu=function(popup) {
 		popup.appendChild(menu)
 	}
 }
-nsContextMenu.prototype.doSearch=function(e) {
+nsContextMenu.prototype.doSearch = function(e) {
 	var name = e.originalTarget.getAttribute('name')
 	if(!name)
 		return;
 	var selectedText = this.getSelectedText()
 	if(name == 'open as link')
-		openLinkIn(selectedText, e.button!=0?"current":"tab", {relatedToCurrent: true});
+		openLinkIn(selectedText, e.button != 0?"current":"tab", {relatedToCurrent: true});
 
 	var type = e.originalTarget.getAttribute('type')
 	if (type == "instantFox") {
@@ -823,6 +831,6 @@ nsContextMenu.prototype.doSearch=function(e) {
 		var href = submission.uri.spec
 		var postData = submission.postData
 	}
-    openLinkIn(href, e.button!=0?"current":"tab", {postData: postData, relatedToCurrent: true});
+    openLinkIn(href, e.button != 0?"current":"tab", {postData: postData, relatedToCurrent: true});
 }
 

@@ -52,15 +52,24 @@ function dump() {
  *        id:
  *    } 
  ***************/
+// used for new plufins only
 function fixupPlugin(p){
 	var domainRe = /\w+:\/\/[^#?]*/;
 	if(p.url){
-	dump(p.url.match(domainRe),p.url)
 		var match = p.url.match(domainRe)
 		p.domain = match ? match[0] :''
-		p.name = p.name||p.id
+		
 		p.id = p.id.toLowerCase()
 		p.iconURI = p.iconURI || getFavicon(p.url);
+		
+		if(!p.name){
+			try{
+				var host = Services.io.newURI(p.url,null,null).host
+				host = Services.eTLD.getBaseDomainFromHost(host)
+				p.name = host.substring(0,host.indexOf('.'))
+			}catch(e){}
+			p.name = p.name || p.id
+		}
 	}
 	if(!p.json)
 		p.json = InstantFoxModule.Plugins.google.json
@@ -78,7 +87,7 @@ var pluginLoader = {
 		
 		var newPlugins = {}
 
-		for(var i in pluginData.plugins){
+		for(var i in pluginData.plugins) {
 			var p = pluginData.plugins[i];
 			if(!p || !p.url)
 				continue
@@ -139,6 +148,7 @@ var pluginLoader = {
 		}
 		InstantFoxModule.defaultPlugin = InstantFoxModule.defaultPlugin||'google'
 	},
+	
 	initShortcuts: function(){
 		InstantFoxModule.Shortcuts = {}
 		var conflicts={}
@@ -178,7 +188,7 @@ var pluginLoader = {
 				InstantFoxModule.Plugins[p.id].key = p.key
 		}
 		this.initShortcuts()
-	},	
+	},
 	onPluginsLoaded: function(e){
 		e.target.onload=null
 		var js = e.target.responseText
@@ -295,6 +305,10 @@ var pluginLoader = {
 			}
 		}
 		return p1
+	},
+	// add new plugins when instantfox is updated
+	onInstantfoxUpdate: function(){
+		this.loadPlugins(InstantFoxModule.selectedLocale)
 	}
 }
  
@@ -430,10 +444,10 @@ InstantFoxModule = {
 			if(url.indexOf('.wikipedia.') > 0){
 				var regexp=/\/([^\/#]*)(?:#|$)/
 				p = this.Plugins.wikipedia
-			}else if(url.indexOf('weather.instantfox.net') > 0){
+			}else if(url.indexOf('weather.instantfox.net') != -1){
 				var regexp=/\/([^\/#]*)(?:#|$)/
 				p = this.Plugins.weather
-			}else if(localizedMatch)
+			}else if(localizedMatchingPlugin)
 				p = localizedMatchingPlugin
 			else
 				return null;

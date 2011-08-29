@@ -216,7 +216,7 @@ openEditPopup = function(item, plugin){
 	
 	gEditPopupAnchor = item
 	
-	window.addEventListener('mousedown', editPopupCloser, false)	
+	//window.addEventListener('mousedown', editPopupCloser, false)	
 }
 
 rbMouseup = function(e){
@@ -277,18 +277,19 @@ editPopupSave = function(panel){
 	gPlugin.disableInstant = !$t(panel, 'instant').checked
 
 	gPlugin.name = $t(panel, 'name').value
+	gPlugin.json = $t(panel, 'json').value
 	gPlugin.url = $t(panel, 'url').value
 	gPlugin.key = $t(panel, 'key').value
 	gPlugin.iconURI = $t(panel, 'image').src
 	
 	// warn about invalid plugin
-	var warnedOnce = panel.hasAttribute('warn')
+	/*var warnedOnce = panel.hasAttribute('warn')
+	var el = $('qWarn')
 	if(!warnedOnce && (
 		!gPlugin.url ||
 		 gPlugin.url.indexOf('%q') == -1 ||
 		(gPlugin.json && gPlugin.json.indexOf('%q') == -1 )
 	)){
-		var el = $('qWarn')
 		el.value = 'please replace the searchword with %q'	
 		el.setAttribute('conflict', true)
 		
@@ -297,8 +298,8 @@ editPopupSave = function(panel){
 	}else if(warnedOnce){
 		panel.removeAttribute('warn')
 		el.value = 'replace the searchword with %q'		
-		key.removeAttribute('conflict')
-	}
+		el.removeAttribute('conflict')
+	}*/
 
 	saveGPlugin()
 	return true
@@ -310,7 +311,8 @@ saveGPlugin = function(createNew){
 		if(!gPlugin.url)
 			return
 		InstantFoxModule.Plugins[gPlugin.id] = gPlugin;
-		appendXML($("shortcuts"), plugin2XML(gPlugin))
+		//appendXML($("shortcuts"), plugin2XML(gPlugin))
+		rebuild()
 	} else {
 		var el = $(gPlugin.id)
 		if (!el)
