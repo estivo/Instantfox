@@ -137,14 +137,27 @@ onContextMenuCommand = function(e){
 		return
 	}
 	
-	var selectedItems = item.parentNode.selectedItems	
+	var rbox = $("shortcuts")
+	var selectedItems = rbox.selectedItems	
 	var value = menu.getAttribute('checked')!='true'
+	
+	var ids = []
+	
 	selectedItems.forEach(function(x){
-
+		ids.push(x.id)
 		InstantFoxModule.Plugins[x.id][name] = value
 	})
-	if (name == 'disabled')
-		rebuild(true)
+	
+	rebuild()
+	
+	//restore selection  
+	ids.forEach(function(x){
+	dump(x)
+	
+		rbox.addItemToSelection($(x));
+	})
+   
+
 }
 
 //************************ edit popup utils
@@ -466,6 +479,9 @@ rebuild = function(){
 		userxml.push(sepXML1 + "inactive" + sepXML2)
 	
 	var el = $("shortcuts");
+	//it's important to clear selection of richbox before removing its' children
+	el.clearSelection()
+
 	clean(el)
 	appendXML(el, xml.join('') + userxml.join('')+ disabledxml.join('')	)
 	
