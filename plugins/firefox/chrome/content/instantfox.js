@@ -235,12 +235,15 @@ var InstantFox = {
 				}
 			}
 			else if (key == 27) { // 27 == ESCAPE
-				if(InstantFox.pageLoader.preview.parentNode)
+				if(InstantFox.pageLoader.preview.parentNode){
 					InstantFox.pageLoader.removePreview()
-				else
+					// restore security and icon
+					XULBrowserWindow._hostChanged = true
+					XULBrowserWindow.onSecurityChange(null, null, XULBrowserWindow._state);
+				} else
 					gURLBar.blur()
 			}
-			else if (key == 8 || key == 46) { // 8 == BACK_SPACE, 46 == DELETE]
+			else if (key == 8 || key == 46) { // 8 == BACK_SPACE, 46 == DELETE
 				if(gURLBar.selectionEnd == gURLBar.mInputField.value.length)
 					InstantFoxModule.currentQuery.shadowOff = true
 			}

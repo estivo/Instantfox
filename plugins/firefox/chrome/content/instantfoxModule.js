@@ -94,7 +94,7 @@ var pluginLoader = {
 			
 			p.url = p.url.replace(localeRe, replacer)
 			p.domain = p.url.match(domainRe)[0]||''
-			dump(p.domain , p.url)
+
 			p.name = p.name||i
 			p.id = i.toLowerCase()
 			p.iconURI = p.iconURI || getFavicon(p.url);
@@ -102,7 +102,7 @@ var pluginLoader = {
 			if(p.json)
 				p.json = p.json.replace(localeRe, replacer)
 			else
-				p.json = false
+				p.json = ''
 			
 			p.type = 'default'
 			

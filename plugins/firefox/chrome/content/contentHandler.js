@@ -30,9 +30,8 @@ InstantFox.pageLoader = {
     persistPreview: function(tab, inBackground) {
 		if (!this.previewIsActive)
 			return;
-
-		if(tab == 'new'){
-			gURLBar.blur()
+		gURLBar.blur()
+		if(tab == 'new'){			
 			gBrowser._lastRelatedTab = null
 			// todo: option to open at far left
 			var tab = gBrowser.addTab('', {relatedToCurrent:true, skipAnimation:true})
@@ -154,6 +153,11 @@ InstantFox.pageLoader = {
         if (selectedStack != preview.parentNode){
 			selectedStack.appendChild(preview);
 			InstantFox.urlBarListener.init(preview)
+			
+			// set urlbaricon
+			// todo: handle this elsewhere
+			PageProxySetIcon('chrome://instantfox/content/skin/button-logo.png')
+			gIdentityHandler.setMode(gIdentityHandler.IDENTITY_MODE_UNKNOWN)
 		}
 		this.previewIsActive = true
 		// disable history
@@ -164,9 +168,7 @@ InstantFox.pageLoader = {
         preview.webNavigation.loadURI(url, nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE, null, null, null);
 		
 		
-		// set urlbaricon
-		// todo: handle this elsewhere
-		PageProxySetIcon('chrome://instantfox/content/skin/button-logo.png')
+
     },
 	
 	

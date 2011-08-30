@@ -148,14 +148,13 @@ onContextMenuCommand = function(e){
 }
 
 //************************ edit popup utils
-var gPlugin, gEditPopupAnchor, gPluginsChanged, gPrefChanged, resultOK = true;
+var gPlugin, gPluginsChanged, gPrefChanged, resultOK = true;
 initEditPopup = function(plugin, panel){
 	if(plugin)
 		gPlugin = ibp.pluginLoader.cleanCopyPlugin(plugin)
 	else
 		gPlugin = createEmptyPlugin(plugin)
 
-	//$t(panel, 'suggest').checked = !gPlugin.disableSuggest
 	$t(panel, 'instant').checked = !gPlugin.disableInstant
 	$t(panel, 'image').src = gPlugin.iconURI
 	$t(panel, 'key').value = gPlugin.key
@@ -164,6 +163,18 @@ initEditPopup = function(plugin, panel){
 		var box = $t(panel, i)
 		box.value = gPlugin[i] || '';
 		box.nextSibling.hidden = !canResetProp(box)
+	}
+	
+	var suggest = !gPlugin.disableSuggest // !!(gPlugin.json && !gPlugin.disableSuggest)
+	var chkbox = $t(panel, 'suggest')
+	chkbox.checked = suggest	
+	var st = chkbox.nextSibling.style;
+	if(suggest){
+		st.opacity="";
+		st.pointerEvents=""
+	}else{
+		st.opacity=0;
+		st.pointerEvents="none"
 	}
 	
 	var rem =  $t(panel, 'remove')
@@ -182,7 +193,6 @@ createEmptyPlugin=function(){
 	return {
 		type: 'user',
 		id: 'user'+i,
-		disableInstant: true,
 		name: '',
 		key: '',
 		url: '',
@@ -193,19 +203,15 @@ createEmptyPlugin=function(){
 }
 openEditPopup = function(item, plugin){
 	var panel = $('edit-box')
-	if(panel.hasAttribute('warn'))
-		return
-	
-	if(item == gEditPopupAnchor){
-		panel.hidePopup()
-		return
-	}
-	
-	// without this arrow isn't shown first time
+
+	// without this, arrow isn't shown first time
  	if(!window.$panelHackApplied){
+		var p = gPlugin
+		gPlugin = null
 		window.$panelHackApplied=true
 		panel.openPopup(document.documentElement)
 		panel.hidePopup()
+		gPlugin = p
 	}
 	
 	initEditPopup(plugin, panel)	
@@ -213,10 +219,6 @@ openEditPopup = function(item, plugin){
 	var popupBoxObject = panel.popupBoxObject;
 	popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
 	panel.openPopup(item, 'start_before', 0, 0, false, true)
-	
-	gEditPopupAnchor = item
-	
-	//window.addEventListener('mousedown', editPopupCloser, false)	
 }
 
 rbMouseup = function(e){
@@ -249,57 +251,18 @@ rbMouseup = function(e){
 	openEditPopup(item.lastElementChild, p)	
 }
 
-editPopupCloser = function(e){
-	var el = e.target
-
-	while(el){
-		if(el.id == 'edit-box')
-			return
-		el = el.parentNode		
-	}
-	dump(el+5)
-
-	var panel = $('edit-box')
-	if(editPopupSave(panel) !== false){	
-		$('edit-box').hidePopup()
-		window.removeEventListener('mousedown', editPopupCloser, true)
-	}else{
-		e.preventDefault()
-		e.stopPropagation()
-	}
-}
-
 editPopupSave = function(panel){
 	if(!gPlugin)
 		return
 
-	//gPlugin.disableSuggest = !$t(panel, 'suggest').checked
+	gPlugin.disableSuggest = !$t(panel, 'suggest').checked
 	gPlugin.disableInstant = !$t(panel, 'instant').checked
 
 	gPlugin.name = $t(panel, 'name').value
 	gPlugin.json = $t(panel, 'json').value
-	gPlugin.url = $t(panel, 'url').value
+	gPlugin.url = $t(panel, 'url').value || gPlugin.url
 	gPlugin.key = $t(panel, 'key').value
 	gPlugin.iconURI = $t(panel, 'image').src
-	
-	// warn about invalid plugin
-	/*var warnedOnce = panel.hasAttribute('warn')
-	var el = $('qWarn')
-	if(!warnedOnce && (
-		!gPlugin.url ||
-		 gPlugin.url.indexOf('%q') == -1 ||
-		(gPlugin.json && gPlugin.json.indexOf('%q') == -1 )
-	)){
-		el.value = 'please replace the searchword with %q'	
-		el.setAttribute('conflict', true)
-		
-		panel.setAttribute('warn', true)
-		return false
-	}else if(warnedOnce){
-		panel.removeAttribute('warn')
-		el.value = 'replace the searchword with %q'		
-		el.removeAttribute('conflict')
-	}*/
 
 	saveGPlugin()
 	return true
@@ -312,19 +275,22 @@ saveGPlugin = function(createNew){
 			return
 		InstantFoxModule.Plugins[gPlugin.id] = gPlugin;
 		//appendXML($("shortcuts"), plugin2XML(gPlugin))
-		rebuild()
 	} else {
+		// todo: is this needed
 		var el = $(gPlugin.id)
-		if (!el)
+ 		if (!el)
 			return;
-		var container = el.parentNode
-		var si = container.selectedIndex
-		replaceXML(el, plugin2XML(gPlugin))
-		container.selectedIndex = si
 	}
 	InstantFoxModule.Plugins[gPlugin.id] = ibp.pluginLoader.cleanCopyPlugin(gPlugin)
 	ibp.pluginLoader.initShortcuts()
+	rebuild()
 	markConflicts()
+	
+	var el = $(gPlugin.id)
+	if (el){
+		$("shortcuts").selectItemRange(el, el)
+	}
+
 		
 	gPluginsChanged = true
 	gPlugin = null
@@ -364,10 +330,14 @@ resetPluginProp = function(self){
 //*************************
 
 function markConflicts(){
+	dump.trace('sssssss')
+
 	var cf = InstantFoxModule.ShortcutConflicts || {}
 
 	for (var id in InstantFoxModule.Plugins){
 		var key = $t($(id), 'key')
+		if(!key)
+			continue
 
 		if(cf[id])
 			key.setAttribute('conflict', cf[id])
@@ -448,7 +418,9 @@ xmlFragment =
 			<image src="$iconURI$" width="16" height="16"/>
 		</hbox>
 		<label value="$name$"/>
-		<spacer flex='1' />
+		<hbox flex='1' pack='start' align='top'> 
+			<hbox class="plugin-status" status="$status$" aID='edit-link'/>
+		</hbox>
 		<hbox align="center" class='key'>
 			<textbox class='key' aID='key' value='$key$' tooltiptext='edit plugin key'
 				onblur='onTextboxEnter(this)' oninput='onTextboxInput(this)'/>
@@ -467,6 +439,7 @@ xmlFragmentDis =
 	  </richlistitem>.toXMLString().replace(/>\s*</g,'><')
 
 function plugin2XML(p){
+	updatePluginStatus(p)
 	return formatString(p.disabled?xmlFragmentDis:xmlFragment, p)
 }
 
@@ -499,6 +472,17 @@ rebuild = function(){
 	markConflicts()
 }
 
+function updatePluginStatus(p){
+	// warn about invalid plugin
+	if (!p.url ||
+		 p.url.indexOf('%q') == -1 ||
+		(p.json && p.json.indexOf('%q') == -1 )	) {
+		p.status = "invalid"
+	} else if(p.disableInstant) {
+		p.status = "not-instant"
+	} else
+		p.status = ""	
+}
 
 window.addEventListener("DOMContentLoaded", function() {
 	window.removeEventListener("DOMContentLoaded", arguments.callee, false)
@@ -513,7 +497,6 @@ window.addEventListener("DOMContentLoaded", function() {
 		var el = document.getElementById('pinbox')
 		el.hidden = false
 		el.firstChild.checked = !!InstantFox.popupPinned
-dump(size)
 		InstantFox.updatePopupSize(size)
 		// don't let clicks inside options window to close popup
 		window.addEventListener('mousedown', InstantFox.popupClickListener, false)
@@ -527,7 +510,6 @@ dump(size)
 			}
 		}, 100)
 	}
-
 }, false)
 
 /*

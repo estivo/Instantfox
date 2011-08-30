@@ -67,6 +67,8 @@ textbox.key{
 }
 .longbox{
 	width: 50ch;
+	-moz-transition-duration: 0.8s;
+	-moz-transition-property: opacity;
 }
 .key.hidden{
 	opacity: 0;
@@ -183,6 +185,36 @@ label[control='opacity-scale']{
 .image{
 	width:16px
 }
+
+#instantLoad{
+	-moz-appearance:none;
+	-moz-transition-duration: 0.8s;
+	-moz-transition-property: text-shadow;
+	border-radius: 4px;
+	margin-top:-5px;
+	margin-bottom:5px;	
+}
+#instantLoad[checked]{
+	text-shadow: -1px -1px 3px gold, 0pt -1px 3px gold;
+}
+checkbox:-moz-focusring > .checkbox-label-box{
+	border: 1px dotted transparent;
+} 
+
+.plugin-status{
+	width: 1ch;
+	height: 1ch;
+	border-radius:50%;	
+}
+.plugin-status[status=""]{
+	background-color:lime
+}
+.plugin-status[status="not-instant"]{
+	background-color:yellow
+}
+.plugin-status[status="invalid"]{
+	background-color:red
+}
 </html:style>
 
 
@@ -267,10 +299,7 @@ label[control='opacity-scale']{
 				</vbox>
 		</prefpane>
 		</tabpanel>
-		<tabpanel orient='vertical'  flex='1'>
-			<!-- devel__( -->
-				<shadiaglue id='status-bar'/>
-			<!-- devel__) -->
+		<tabpanel orient='vertical'  flex='1'>		
 		</tabpanel>
 	</tabpanels>
 </tabbox>
@@ -280,6 +309,9 @@ label[control='opacity-scale']{
 		<menupopup>
 		</menupopup>
 	</toolbarbutton>
+	<!-- devel__( -->
+		<shadiaglue id='status-bar'/>
+	<!-- devel__) -->
 	<spacer flex='1'/>
 	<slickbutton label='ok' oncommand='resultOK=true;close()'/>
 </hbox>
@@ -296,6 +328,9 @@ label[control='opacity-scale']{
 
 <panel id="edit-box" ignorekeys='true' type="arrow" 
 		orient='vertical' onpopuphiding='editPopupSave(this)' position='start_before'>	
+	<hbox align='center' pack='center'>
+		<checkbox label='load page instantly' aID='instant' id='instantLoad'/>
+	</hbox>
 	<grid >
 		<columns>
 			<column flex="0"/>
@@ -331,7 +366,9 @@ label[control='opacity-scale']{
 			<row>
 				<label value='suggest'/>
 				<hbox align='center' flex='1' class='longbox'>
-					<textbox type='url' aID='json' flex='1' oninput="
+					<checkbox aID='suggest' oncommand='var st=this.nextSibling.style;
+					if(this.checked){st.opacity="";st.pointerEvents=""}else{st.opacity=0;st.pointerEvents="none"}'/>
+					<textbox type='url' aID='json' flex='1' class='longbox' oninput="
 						this.nextSibling.hidden = !canResetProp(this);
 						"/>
 					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
@@ -349,13 +386,6 @@ label[control='opacity-scale']{
 				<hbox flex='1' align='center'>
 					<spacer flex='1'/>
 					<label value=' '/>
-				</hbox>
-			</row>
-			<row>
-				<hbox/>
-				<hbox>
-					<checkbox label='load page instantly' aID='instant'/>
-					<spacer width='40'/>
 				</hbox>
 			</row>
 

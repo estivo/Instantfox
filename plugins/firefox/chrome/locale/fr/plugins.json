@@ -73,6 +73,11 @@
             "url": "resource://instantfox/calculator.html#%q",
             "hideFromContextMenu": true,
             "name": "Calculateur"
+        },
+        "GoogleTranslate": {
+            "key": "gt",
+            "url": "http://translate.google.com/#auto|%ls|%q",
+            "name": "Translate"
         }
     },
     "localeMap": {
