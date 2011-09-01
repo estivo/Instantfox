@@ -311,7 +311,7 @@ saveGPlugin = function(createNew){
 
 
 removePlugin=function(p) {
-	if (p == 'createNew') {
+	if (p.createNew) {
 		gPlugin = null
 	}else if (p.type != 'user' ) {
 		p.disabled = true		
@@ -505,7 +505,7 @@ window.addEventListener("DOMContentLoaded", function() {
 	// this must be called after menulists' binding is loaded 
 	updateLocaleList()
 	rebuild()
-	var size = document.getElementsByTagName('tabbox')[0].clientWidth + 100;
+	var size = document.getElementsByTagName('tabbox')[0].clientWidth + 50;
 	// check if we are inside popup
 	var InstantFox = top.InstantFox
 	if (InstantFox) {

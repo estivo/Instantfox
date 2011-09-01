@@ -812,6 +812,8 @@ InstantFoxSearch.prototype = {
 	},
 	
 	onSearchReady: function(e){	dump('end',e.target.channel.name)
+		if(!this.listener)
+			return
 
 		var json = e.target.responseText;
 

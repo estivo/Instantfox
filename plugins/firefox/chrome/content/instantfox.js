@@ -462,9 +462,11 @@ var InstantFox = {
 
 			url2go = url2go.replace('%q', query);
 
-			if(q.preloadURL &&
-				url2go.toLowerCase() == q.preloadURL.toLowerCase())
+			if(q.preloadURL && url2go.toLowerCase() == q.preloadURL.toLowerCase()){
+				if(q.plugin.id == 'google')
+					InstantFox.pageLoader.checkPreview(500)
 				return url2go		
+			}
 		} else {
 			var url2go = q.plugin.domain || ''
 			url2go = url2go.replace('%q', '')//wikipedia domain was handled incorrectly
@@ -477,18 +479,15 @@ var InstantFox = {
 		var now = Date.now()
 
 		if(this._isOwnQuery){
-/* 			//fixme:
-if(q.plugin.id == 'google'){
-			//
-
-		InstantFox.pageLoader.preview.contentDocument.getElementById("lst-ib").value=query; 
-	
-	return
-} */
 			// gBrowser.docShell.isLoadingDocument
 			if(now - this.loadTime < this.minLoadTime){
 				this.schedulePreload(this.minLoadTime)
 				return
+			}
+			//fixme:
+			if(q.plugin.id == 'google'){
+				//InstantFox.pageLoader.preview.contentDocument.getElementById("lst-ib").value=query; 
+				InstantFox.pageLoader.checkPreview(800)
 			}
 		}else{
 			this._isOwnQuery = true;

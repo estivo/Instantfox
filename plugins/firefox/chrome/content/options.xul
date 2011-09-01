@@ -232,6 +232,19 @@ checkbox:-moz-focusring > .checkbox-label-box{
 			<vbox>
 				<hbox pack='center'>
 					<vbox>
+						<label value="enable instant:" id="highlight"></label>
+						<menulist id="global-instant" sizetopopup='none'
+							oncommand = 'gPluginsChanged=true;InstantFoxModule.pluginLoader.loadPlugins(event.target.label, rebuild)'>
+							<menupopup>
+								<menuitem label='all pages' value='all'/>
+								<menuitem label='only google' value='google'/>
+								<menuitem label='none' value='none'/>								
+							</menupopup>
+						</menulist>
+						<spacer flex='1'/>
+					</vbox>
+					<spacer flex='1'/>
+					<vbox>
 						<label value="Choose language:" id="highlight"></label>
 						<menulist id="locale" sizetopopup='none'
 							oncommand = 'gPluginsChanged=true;InstantFoxModule.pluginLoader.loadPlugins(event.target.label, rebuild)'>
@@ -241,7 +254,7 @@ checkbox:-moz-focusring > .checkbox-label-box{
 					</vbox><!-- 
 					<spacer flex='1'/>
 					<image src='skin/logo.png' onclick='open(InstantFoxModule.helpURL)' class='link' tooltiptext='open help'/>
-	 -->			</hbox>
+	 -->		</hbox>
 				<hbox align='center'>
 					<label value="search-plugins"></label>
 					<spacer flex='1'/>
