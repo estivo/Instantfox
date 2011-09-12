@@ -310,7 +310,7 @@ saveGPlugin = function(createNew){
 }
 
 
-removePlugin=function(p) {
+removePlugin = function(p) {
 	if (p.createNew) {
 		gPlugin = null
 	}else if (p.type != 'user' ) {
@@ -328,7 +328,7 @@ removePlugin=function(p) {
 }
 canResetProp = function(el){
 	var name = el.getAttribute('aID')
-	return gPlugin.type == 'default' &&
+	return (gPlugin.type == 'default' || gPlugin.type == 'browserSearch') &&
 		gPlugin['def_' + name] != null &&
 		gPlugin['def_' + name] != el.value
 }
@@ -336,6 +336,32 @@ resetPluginProp = function(self){
 	var el = self.previousSibling
 	var name = el.getAttribute('aID')
 	el.value = gPlugin['def_'+name]
+	var e=document.createEvent('UIEvent')
+	e.initUIEvent('input',true, true, window, 1)
+	el.dispatchEvent(e)
+}
+
+onJsonPopupShowing = function(popup){
+	var xml=[]
+	var jsonP = [], jsonList = []
+    for each(var p in InstantFoxModule.Plugins){
+		var json = p.def_json || p.json
+		if(json && jsonList.indexOf(json) == -1){
+			jsonList.push(json)
+			jsonP.push(p)
+		}
+	}
+	var str = "<menuitem class='menuitem-iconic' label='$name$' image='$iconURI$' value='$id$'/>"
+	for each(var p in jsonP)
+		xml.push(formatString(str, p))
+
+	clean(popup)
+	appendXML(popup, xml.join(''))
+}
+setPluginJson = function(json){
+	var el = document.querySelector('#edit-box textbox[aID=json]')
+	el.value = json
+	
 	var e=document.createEvent('UIEvent')
 	e.initUIEvent('input',true, true, window, 1)
 	el.dispatchEvent(e)
@@ -505,6 +531,7 @@ window.addEventListener("DOMContentLoaded", function() {
 	// this must be called after menulists' binding is loaded 
 	updateLocaleList()
 	rebuild()
+	
 	var size = document.getElementsByTagName('tabbox')[0].clientWidth + 50;
 	// check if we are inside popup
 	var InstantFox = top.InstantFox
@@ -526,21 +553,29 @@ window.addEventListener("DOMContentLoaded", function() {
 			}
 		}, 100)
 	}
+	updateBrowserEngines()
 }, false)
 
-/*
-gBrowser.mCurrentBrowser.engines[0].uri
-
-if (target.getAttribute("class").indexOf("addengine-item") != -1) {
-	var searchService =
-		Cc["@mozilla.org/browser/search-service;1"]
-			  .getService(Ci.nsIBrowserSearchService);
-	// We only detect OpenSearch files
-	var type = Components.interfaces.nsISearchEngine.DATA_XML;
-	searchService.addEngine(target.getAttribute("uri"), type,
-							target.getAttribute("src"), false);
+// called when popup containing this window is opened
+onOptionsPopupShowing = function(){
+	rebuild()
+	updateBrowserEngines()	
 }
-*/
+updateBrowserEngines = function(){
+	gBrowser.mCurrentBrowser.engines[0].uri
+
+
+	var e = []
+	for each(b in gBrowser.browsers)
+		e.push.apply(e, b.engines)
+
+	e=e[0]
+
+	var type = Ci.nsISearchEngine.DATA_XML;
+	Services.search.addEngine(
+		e.uri, type, e.icon, false
+	)
+}
 
 function onTabSelect(){
 	if(!this.pane1Ready && this.selectedIndex==1){

@@ -234,11 +234,12 @@ checkbox:-moz-focusring > .checkbox-label-box{
 					<vbox>
 						<label value="enable instant:" id="highlight"></label>
 						<menulist id="global-instant" sizetopopup='none'
-							oncommand = 'gPluginsChanged=true;InstantFoxModule.pluginLoader.loadPlugins(event.target.label, rebuild)'>
+							oncommand = 'gPluginsChanged=true;'>
 							<menupopup>
 								<menuitem label='all pages' value='all'/>
 								<menuitem label='only google' value='google'/>
 								<menuitem label='none' value='none'/>								
+								<menuitem label='manual' value='manual'/>								
 							</menupopup>
 						</menulist>
 						<spacer flex='1'/>
@@ -267,7 +268,6 @@ checkbox:-moz-focusring > .checkbox-label-box{
 		<tabpanel orient='vertical'  flex='1' >
 			<prefpane align='center' hidden='true' flex='1'>
 				<preferences>
-					<preference id="keyword-URL" name="keyword.URL" type="string" />
 					<preference id="fontsize" name="extensions.InstantFox.fontsize" type="string" />
 					<preference id="opacity" name="extensions.InstantFox.opacity" type="int" />
 					<preference id="openintab" name="browser.search.openintab" type="bool" />
@@ -340,7 +340,7 @@ checkbox:-moz-focusring > .checkbox-label-box{
 </menupopup>
 
 <panel id="edit-box" ignorekeys='true' type="arrow" 
-		orient='vertical' onpopuphiding='editPopupSave(this)' position='start_before'>	
+		orient='vertical' onpopuphiding='if(event.target==this)editPopupSave(this)' position='start_before'>	
 	<hbox align='center' pack='center'>
 		<checkbox label='load page instantly' aID='instant' id='instantLoad'/>
 	</hbox>
@@ -386,6 +386,13 @@ checkbox:-moz-focusring > .checkbox-label-box{
 						"/>
 					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
 				</hbox>
+				<hbox align="center" class='image'>
+					<toolbarbutton type='menu'>
+						<menupopup onpopupshowing="onJsonPopupShowing(this)" 
+							oncommand="var p=InstantFoxModule.Plugins[event.target.value];
+							setPluginJson(p.def_json || p.json)"/>
+					</toolbarbutton>
+				</hbox>
 			</row>
 			<row>
 				<hbox/>
@@ -413,7 +420,6 @@ checkbox:-moz-focusring > .checkbox-label-box{
 		<slickbutton label='ok' onclick="$('edit-box').hidePopup()"/>
 	</hbox>
 </panel>
-  <!-- <script type="text/javascript" src="__devel__.js"></script> -->
 
 
 <script type="application/x-javascript" src="options.js"></script>

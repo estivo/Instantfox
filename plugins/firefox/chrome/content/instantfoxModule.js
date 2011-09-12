@@ -54,7 +54,7 @@ function dump() {
  ***************/
 // used for new plufins only
 function fixupPlugin(p){
-	var domainRe = /\w+:\/\/[^#?]*/;
+	var domainRe = /\w+:\/\/[^#?(\/%q)]*/;
 	if(p.url){
 		var match = p.url.match(domainRe)
 		p.domain = match ? match[0] :''
@@ -71,8 +71,33 @@ function fixupPlugin(p){
 			p.name = p.name || p.id
 		}
 	}
+	// try to find best matching json`  FS#156 - Wikipedia - Suggest Rules 
+	if(!p.json && p.domain){
+    	var jRe = p.domain.split(/[\/\.\?#]/)
+		jRe.shift()
+		jRe = jRe.filter(function(x)x)
+		var ans = []
+		for each(pp in InstantFoxModule.Plugins){
+            if(!pp.json)
+                continue
+			var match = 0, count = 0
+			for each(i in jRe){
+				if(pp.domain.indexOf(i)>0){
+					match += i.length * i.length
+					count++
+				}
+			}
+			if(match >= 9)
+				ans.push({match:match, D:pp.domain, json:pp.json})
+		}
+		ans.sort(function(a, b) b.match-a.match)
+		
+		if(ans[0])
+			p.json = ans[0].json			
+	}
+	// in case nothing better is found use google
 	if(!p.json)
-		p.json = InstantFoxModule.Plugins.google.json
+		p.json = InstantFoxModule.Plugins.google.json	
 }
 
 var pluginLoader = {
@@ -179,22 +204,17 @@ var pluginLoader = {
 		}
 		this.preprocessRawData(rawPluginData)
 		this.addPlugins(rawPluginData)
-		// add data from browser searches
-		var browserPlugins = Services.search.getEngines().map(pluginFromNsiSearch)
-		for each(var p in browserPlugins){
-			if(!InstantFoxModule.Plugins[p.id])
-				InstantFoxModule.Plugins[p.id] = p
-			else if(p.key)
-				InstantFoxModule.Plugins[p.id].key = p.key
-		}
+		// add data from browser search engines
+		importBrowserPlugins(true)
 		this.initShortcuts()
 	},
 	onPluginsLoaded: function(e){
-		e.target.onload=null
+		e.target.onload = null
 		var js = e.target.responseText
 		try{
 			var pluginData = JSON.parse(js)
 		}catch(e){
+			// settings in user profile were corrupted, load default plugins
 			this.loadPlugins(true)
 			return
 		}
@@ -207,6 +227,8 @@ var pluginLoader = {
 				p.key = mP.key
 			InstantFoxModule.Plugins[id] = p;
 		}
+		// add data from browser search engines
+		importBrowserPlugins(false)
 		this.initShortcuts()
 	},
 	
@@ -298,7 +320,7 @@ var pluginLoader = {
 		p.disableSuggest && (p1.disableSuggest = true)
 		p.hideFromContextMenu && (p1.hideFromContextMenu = true)
 		//
-		if(p.type=='default'){
+		if(p.type=='default' || p.type == 'browserSearch'){
 			for each(var i in this.defPropNames){
 				var prop = 'def_'+i 
 				p[prop] != null && (p1[prop] = p[prop])
@@ -393,9 +415,35 @@ function pluginFromNsiSearch(bp){
 		disabled:true,
 		key: bp.alias,
 		type:'browserSearch'
-	}	
+	}
+}
+function importBrowserPlugins(importKeys) {
+	var browserPlugins = Services.search.getEngines().map(pluginFromNsiSearch)
+	for each(var p in browserPlugins){
+		if(!InstantFoxModule.Plugins[p.id])
+			InstantFoxModule.Plugins[p.id] = p
+		else if(importKeys && p.key)
+			InstantFoxModule.Plugins[p.id].key = p.key
+		
+		// handle default plugins
+		var p1 = InstantFoxModule.Plugins[p.id]
+		pluginLoader.defPropNames.forEach(function(propName){
+			p1['def_'+propName] = p[propName]
+		})
+	}
 }
 
+searchEngineObserver = {    
+    observe: function(subject, topic, j){
+    	dump(subject, topic,'+++++++++++++**********+++++++',j)
+		importBrowserPlugins(false)
+	},
+    QueryInterface: function() this
+}
+Services.obs.addObserver(searchEngineObserver, "engine-added", true)
+Services.obs.addObserver(searchEngineObserver, "engine-loaded", true)
+Services.obs.addObserver(searchEngineObserver, "engine-removed", true)
+Services.obs.addObserver(searchEngineObserver, "browser-search-engine-modified", true)
 
 /*****************************************************
  * main object
@@ -709,7 +757,7 @@ InstantFoxSearch.prototype = {
 	// implement searchListener for historyAutoComplete
 	onSearchResult: function(search, result) {
 		this.$searchingHistory = false;
-		//dump('this.$searchingHistory', this.$searchingHistory, result.matchCount)
+		dump('this.$searchingHistory', this.$searchingHistory, result.matchCount)
 		if (result.matchCount){
 			this.listener.onSearchResult(this, result)	
 			//dump(this, result)
@@ -719,7 +767,8 @@ InstantFoxSearch.prototype = {
 			var url = autoSearch.plugin.json.replace('%q', encodeURIComponent(autoSearch.query))
 			this.parser = parseSimpleJson
 			this.startReq(url)
-		}
+		} else
+			this.listener.onSearchResult(this, result)	
 	},
 	
 	// implement nsIAutoCompleteSearch

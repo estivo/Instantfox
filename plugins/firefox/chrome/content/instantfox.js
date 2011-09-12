@@ -588,7 +588,7 @@ InstantFox.onPopupShowing = function(p) {
 
 	if (p.hasChildNodes()){
 		// rebuild in case user modified plugins by another options window instance
-		p.firstChild.contentWindow.rebuild(true)
+		p.firstChild.contentWindow.onOptionsPopupShowing()
 		return;
 	}
 	//while(p.hasChildNodes())
@@ -819,7 +819,7 @@ nsContextMenu.prototype.doSearch = function(e) {
 		return;
 	var selectedText = this.getSelectedText()
 	if(name == 'open as link')
-		openLinkIn(selectedText, e.button != 0?"current":"tab", {relatedToCurrent: true});
+		openLinkIn(selectedText, e.button>1?"current":"tab", {relatedToCurrent: true});
 
 	var type = e.originalTarget.getAttribute('type')
 	if (type == "instantFox") {
@@ -833,6 +833,6 @@ nsContextMenu.prototype.doSearch = function(e) {
 		var href = submission.uri.spec
 		var postData = submission.postData
 	}
-    openLinkIn(href, e.button != 0?"current":"tab", {postData: postData, relatedToCurrent: true});
+    openLinkIn(href, e.button>1 ?"current":"tab", {postData: postData, relatedToCurrent: true});
 }
 

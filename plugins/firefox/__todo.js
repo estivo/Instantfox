@@ -78,7 +78,7 @@ shadia.inspect(b)
 
 
 
-/** devel__( */
+
 function makeReqAsync(href, callback) {
     req = new XMLHttpRequest;
     req.open("GET", href, true);
@@ -124,77 +124,22 @@ content.document.body.style.opacity='0.5'
 url = 'http://www.google.com/search?q=hello'
 makeReqAsync(url, processRequest)
 
-
-
-function addPrerenderBrowser() {
-	var s=document.getElementById("sidebar")
-	var b = document.createElementNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul", "browser");
-	b.setAttribute("type", "content");
-	s.parentNode.appendChild(b)
-	b.id='prerender-browser'
-	b.flex=1
-
-	b.docShell.useGlobalHistory=false
 	b.docShell.isOffScreenBrowser=true
 	b.docShell.isActive=false
-	return b
-}
 
-//b=addPrerenderBrowser()
 
-b.webNavigation.loadURI('about:config',null,null,null,null)
+
 	
 
-//b._webNavigation
-//b._fastFind=gBrowser.fastFind
+content.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindowUtils).
+sendNativeKeyEvent(
+18,
+0,
+0,
+'\x300000000???©©??§§§¦¦¦???¤¤¤??????????',
+''
+)
 
-b.stop()
-
-b.docShell.isActive=false
-
-
-let flags = Ci.nsIWebNavigation.LOAD_FLAGS_NONE;
-
-            flags |= Ci.nsIWebNavigation.LOAD_FLAGS_ALLOW_THIRD_PARTY_FIXUP;
-
-
-            flags |= Ci.nsIWebNavigation.LOAD_FLAGS_FROM_EXTERNAL;
-
-        try {
-            b.loadURIWithFlags('http://google.com', flags, null, null, null);
-        } catch (ex) {
-            Cu.reportError(ex);
-        }
-/**/
-
-
-b2=gBrowser.mCurrentBrowser
-b1=b
-
-var fieldsToSwap = ["_docShell", "_webBrowserFind", "_contentWindow", "_webNavigation"];
-var b1Vals= {};
-var b2Vals= {};
-for each (var field in fieldsToSwap) {
-	b1Vals[field] = b1[field];
-	b2Vals[field] = b2[field];
-}
-b1.QueryInterface(Ci.nsIFrameLoaderOwner).swapFrameLoaders(b2);
-for each (var field in fieldsToSwap) {
-	b1[field] = b2Vals[field];
-	b2[field] = b1Vals[field];
-}
-
-b1._fastFind==b2.fastFind
-
-
-   /* var ourTabBrowser = this.getTabBrowser();
-    if (ourTabBrowser != null != (aOtherBrowser.getTabBrowser() != null)) {
-        throw "Unable to perform swap on <browsers> if one is in a <tabbrowser> and one is not";
-    }
-    if (!ourTabBrowser) {
-        fieldsToSwap.push("_fastFind");
-    }*/
-
-	content.document.getElementById('lpu').href
-
-b.loadURI('http://www.google.com/url?sa=f&rct=j&url=http://www.youtube.com/&q=youtube&usg=AFQjCNHrwkxoJgICbl8bUFiXz2Hn__NzUg')
+content.document.getElementById("lst-ib").value='npp'
+a=31
+a.toString(16)
