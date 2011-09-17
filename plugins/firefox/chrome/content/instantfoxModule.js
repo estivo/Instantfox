@@ -840,29 +840,33 @@ InstantFoxSearch.prototype = {
 	stopSearch: function(){
 		if(this.historyAutoComplete)
 			this.historyAutoComplete.stopSearch();
-		//if(this._req)
-			//this._req.abort();
+		//stopping _req here leads to slow suggestions
 
 		this.listener = null;
 	},
 
 	// handle xhr
 	startReq: function(url){
-	dump('start',url)
-		/*if(this._req)
-			this._req.abort()
-		else{} */
-			this._req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
-			this._req.onload = this.onSearchReady.bind(this)
-		
+		if(!this._reqList){
+			this._reqList = []
+			this.onSearchReady = this.onSearchReady.bind(this)
+		}
 
-		this._req.open("GET", url, true);
-		this._req.send(null);
+		var _req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
+		_req.onload = this.onSearchReady;
+
+		this._reqList.push(_req)
+
+		_req.open("GET", url, true);
+		_req.send(null);
 	},
 	
-	onSearchReady: function(e){	dump('end',e.target.channel.name)
+	onSearchReady: function(e){
+		dump('end',e.target.channel.name, this._reqList[0] == e.target)
 		if(!this.listener)
 			return
+		// don't let older requests completing later mess with suggestions
+		this.stopOldRequests(e.target)
 
 		var json = e.target.responseText;
 
@@ -876,6 +880,18 @@ InstantFoxSearch.prototype = {
 		
 		q.onSearchReady()
 	},
+	
+	stopOldRequests: function(req){
+		var i = this._reqList.indexOf(req)
+		if(i==-1){
+			dump(i, '=======================')
+			return
+		}
+		while(i--){
+			this._reqList.shift().abort()
+		}
+		this._reqList.shift()
+	}
 };
 XPCOMUtils.defineLazyServiceGetter(InstantFoxSearch.prototype, "historyAutoComplete",
 					"@mozilla.org/autocomplete/search;1?name=history", "nsIAutoCompleteSearch")
