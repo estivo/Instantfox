@@ -412,7 +412,7 @@ function pluginFromNsiSearch(bp){
 		name:name,
 		id:name.toLowerCase(),
 		domain: url.match(domainRe)[1],
-		disabled:true,
+		disabled:false,
 		key: bp.alias,
 		type:'browserSearch'
 	}
@@ -427,9 +427,10 @@ function importBrowserPlugins(importKeys) {
 		
 		// handle default plugins
 		var p1 = InstantFoxModule.Plugins[p.id]
-		pluginLoader.defPropNames.forEach(function(propName){
-			p1['def_'+propName] = p[propName]
-		})
+		if(p1.type == 'browserSearch')
+			pluginLoader.defPropNames.forEach(function(propName){
+				p1['def_'+propName] = p[propName]
+			})
 	}
 }
 

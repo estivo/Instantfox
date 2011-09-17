@@ -340,32 +340,116 @@ resetPluginProp = function(self){
 	e.initUIEvent('input',true, true, window, 1)
 	el.dispatchEvent(e)
 }
+var gBrowserEngineList
+enginesPopup = {
+	type: '',
+	show: function(anchor, type){
+		this.type = type;
+		var panel = $("engine-list")
+		var popupBoxObject = panel.popupBoxObject;
+		popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
+		panel.openPopup(anchor, 'before_end', 0, 0, false, true)
+	},
+	onShowing: function(popup){
+		dump
+		var items = this['fill_' + this.type]()
+		this.fillPopup(popup, items)
+	},
+	onCommand: function(popup){
+		this['command_' + this.type](popup)
+	},
+	fillPopup: function(popup, items){
+		var xml=[]		
+		var str = "<menuitem class='menuitem-iconic' label='$name$' image='$iconURI$' value='$id$'/>"
+		for each(var p in items)
+			xml.push(formatString(str, p))
 
-onJsonPopupShowing = function(popup){
-	var xml=[]
-	var jsonP = [], jsonList = []
-    for each(var p in InstantFoxModule.Plugins){
-		var json = p.def_json || p.json
-		if(json && jsonList.indexOf(json) == -1){
-			jsonList.push(json)
-			jsonP.push(p)
+		clean(popup)
+		appendXML(popup, xml.join(''))
+	},
+	fill_Json: function(){
+		var jsonP = [], jsonList = []
+		for each(var p in InstantFoxModule.Plugins){
+			var json = p.def_json || p.json
+			if(json && jsonList.indexOf(json) == -1){
+				jsonList.push(json)
+				jsonP.push(p)
+			}
 		}
-	}
-	var str = "<menuitem class='menuitem-iconic' label='$name$' image='$iconURI$' value='$id$'/>"
-	for each(var p in jsonP)
-		xml.push(formatString(str, p))
+		return jsonP
+	},
+	command_Json: function(event){
+		var p = InstantFoxModule.Plugins[event.target.value];
+		var el = document.querySelector('#edit-box textbox[aID=json]')
+		el.value = p.def_json || p.json	
+		var e=document.createEvent('UIEvent')
+		e.initUIEvent('input',true, true, window, 1)
+		el.dispatchEvent(e)
+	},
+	fill_InstantFox: function(){
+		var items = [{name:'none'}], jsonList = []
+		for each(var p in InstantFoxModule.Plugins)
+			if(!p.disabled)
+				items.push(p)
 
-	clean(popup)
-	appendXML(popup, xml.join(''))
+		return items
+	},
+	command_InstantFox: function(event){
+		var id = event.target.value;
+		if(!id){
+		
+		}else
+			var p = InstantFoxModule.Plugins[id];
+		
+		
+	},
+	fill_Browser: function(popup){
+		gBrowserEngineList = []
+		var win = Services.wm.getMostRecentWindow("navigator:browser")
+		if(!win){
+			return 
+		}
+		var gBrowser = win.gBrowser
+		var uriList = []
+
+		for each(var e in gBrowser.mCurrentBrowser.engines){
+			if(uriList.indexOf(e.uri) == -1){
+				uriList.push(e.uri)
+				gBrowserEngineList.push({
+					name: e.title,
+					iconURI: e.icon,
+					uri: e.uri,
+					id: gBrowserEngineList.length+''
+				})
+			}
+		}
+
+		for each(var b in gBrowser.browsers){
+			for each(var e in b.engines){
+				if(uriList.indexOf(e.uri) == -1){
+					uriList.push(e.uri)
+					gBrowserEngineList.push({
+						name: e.name,
+						iconURI: e.icon,
+						uri: e.uri,
+						id: gBrowserEngineList.length
+					})
+				}
+			}	
+		}
+
+		return gBrowserEngineList
+	},
+	command_Browser: function(event){
+		var id = event.target.value
+		var e = gBrowserEngineList[id]
+		var type = Ci.nsISearchEngine.DATA_XML;
+		Services.search.addEngine(
+			e.uri, type, e.iconURI, false
+		)
+	}
 }
-setPluginJson = function(json){
-	var el = document.querySelector('#edit-box textbox[aID=json]')
-	el.value = json
-	
-	var e=document.createEvent('UIEvent')
-	e.initUIEvent('input',true, true, window, 1)
-	el.dispatchEvent(e)
-}
+
 //*************************
 
 function markConflicts(){
@@ -562,29 +646,23 @@ onOptionsPopupShowing = function(){
 	updateBrowserEngines()	
 }
 updateBrowserEngines = function(){
-
-	return
-	gBrowser.mCurrentBrowser.engines[0].uri
-
-
-	var e = []
-	for each(b in gBrowser.browsers)
-		e.push.apply(e, b.engines)
-
-	e=e[0]
-
-	var type = Ci.nsISearchEngine.DATA_XML;
-	Services.search.addEngine(
-		e.uri, type, e.icon, false
-	)
+	var win = Services.wm.getMostRecentWindow("navigator:browser")
+	var hide = true
+	if(win){
+		for each(var b in win.gBrowser.browsers){
+			if(b.engines && b.engines.length){
+				hide = false
+				break
+			}
+		}	
+	}
+	$("add-from-browser").hidden = hide
 }
 
 function onTabSelect(){
 	if(!this.pane1Ready && this.selectedIndex==1){
 		this.pane1Ready=true;
 		this.parentNode.selectedPanel.firstChild.hidden=false;gPrefChanged=true;
-		$('keyword-URL-menu').firstChild.firstChild.label = 
-			InstantFoxModule.Plugins.google.url.replace('q=%q&','')+'&q=%q';
 	}else if(!this.pane2Ready && this.selectedIndex==2){
 		this.pane2Ready=true;
 		var iframe = document.createElement('iframe');
