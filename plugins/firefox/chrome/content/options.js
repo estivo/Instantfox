@@ -562,6 +562,8 @@ onOptionsPopupShowing = function(){
 	updateBrowserEngines()	
 }
 updateBrowserEngines = function(){
+
+	return
 	gBrowser.mCurrentBrowser.engines[0].uri
 
 

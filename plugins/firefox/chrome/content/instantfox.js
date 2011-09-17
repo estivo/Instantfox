@@ -566,7 +566,7 @@ var InstantFox = {
 //************************************************************************
 // experimental options popup
 InstantFox.popupCloser = function(e) {
-	var inPopup = InstantFox.clickedInPopup
+	var inPopup = InstantFox.clickedInPopup 
 	InstantFox.clickedInPopup = false
 	if (e.target.id == 'instantFox-options') {
 		window.removeEventListener('mousedown', InstantFox.popupCloser, false)
@@ -575,7 +575,7 @@ InstantFox.popupCloser = function(e) {
 		e.preventDefault()
 		return
 	}
-	if (InstantFox.popupPinned == true || inPopup)
+	if (InstantFox.popupPinned == true || inPopup || e.target.nodeName == 'resizer')
 		return
 	window.removeEventListener('mousedown', InstantFox.popupCloser, false)
 	document.getElementById('instantFox-options').firstChild.hidePopup()
@@ -586,23 +586,25 @@ InstantFox.onPopupShowing = function(p) {
 
 	window.addEventListener('mousedown', InstantFox.popupCloser, false)
 
-	if (p.hasChildNodes()){
+	var st = p.querySelector('stack')
+	var i = p.querySelector('iframe')
+	if (i){
+		// touch the stack, otherwise it isn't drawn in nightly
+		st.flex=0
+		st.flex=1
 		// rebuild in case user modified plugins by another options window instance
-		p.firstChild.contentWindow.onOptionsPopupShowing()
+		try{
+			i.contentWindow.onOptionsPopupShowing()
+		}catch(e){Components.utils.reportError(e)}
 		return;
 	}
-	//while(p.hasChildNodes())
-	//	p.removeChild(p.firstChild)
 	var i = document.createElement('iframe')
 	i.setAttribute('src', 'chrome://instantfox/content/options.xul')
 	i.setAttribute('flex', '1')
-	p.appendChild(i)
-	p.height = screen.availHeight * 4/5
-	p.width = 250 // approximate width
-	p.wrongSize = true
+	st.insertBefore(i, st.firstChild)
 }
 InstantFox.onPopupHiding = function(p) {
-	var i = document.getElementById('instantFox-options').firstChild.firstChild
+	var i = document.getElementById('instantFox-options').querySelector('iframe')
 	i.contentWindow.savePlugins()
 	window.removeEventListener('mousedown', InstantFox.popupCloser, false)
 }
@@ -621,7 +623,6 @@ InstantFox.closeOptionsPopup = function(p) {
 	p = p || document.getElementById('instantFox-options').firstChild
 	p.hidePopup()
 }
-
 InstantFox.openHelp = function() {
 	var url = InstantFoxModule.helpURL
 	gBrowser.loadOneTab(url, {inBackground: false, relatedToCurrent: true});
