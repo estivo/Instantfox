@@ -106,9 +106,16 @@ var InstantFox = {
 
 		dump('instantFox initialized')
 		InstantFox.notifyTab()
+		// apply user modified styles
 		InstantFox.checkURLBarBinding()
 		InstantFox.updateUserStyle()
-		// apply user modified styles
+		
+		// this is needed if searchbar is removed from toolbar
+		BrowserSearch.__defineGetter__("searchbar", function(){
+			return document.getElementById("searchbar") || document.getElementById("urlbar")
+		})
+		
+		InstantFox.prepareAutoSearch()
 	},
 
 	destroy: function(event) {
@@ -448,19 +455,13 @@ var InstantFox = {
 			this._timeout = clearTimeout(this._timeout)
 
 		if (q.query) {
-			var url2go = q.plugin.url;
+			q.plugin.url;
 			if(ignoreShadow){
 				var query = q.query
 			}else
 				var query = q.shadow || q.query
-
-			// encode query
-			if (q.plugin.id == 'imdb')
-				query = escape(query.replace(/ /g, '+'));
-			else
-				query = encodeURIComponent(query);
-
-			url2go = url2go.replace('%q', query);
+			
+			var url2go = InstantFoxModule.urlFromQuery(q.plugin, query);
 
 			if(q.preloadURL && url2go.toLowerCase() == q.preloadURL.toLowerCase()){
 				if(q.plugin.id == 'google')
@@ -775,20 +776,16 @@ nsContextMenu.prototype.isTextSelection = function() {
     if (selectedText.length > 15)
       selectedText = selectedText.substr(0,15) + this.ellipsis;
 
-    // Use the current engine if the search bar is visible, the default
-    // engine otherwise.
-    var engine = Services.search[isElementVisible(BrowserSearch.searchBar)?
-												"currentEngine": "defaultEngine"];
+    var engine = InstantFoxModule.Plugins[InstantFoxModule.defaultPlugin];
 
     // format "Search <engine> for <selection>" string to show in menu
     var menuLabel = gNavigatorBundle.getFormattedString("contextMenuSearchText",
                                                         [engine.name, selectedText]);
 	if(menu){
-	dump(menu.id)
-	dump(menu.item)
 		menu.label = menuLabel;
-		menu.image = engine.iconURI.spec
-		menu.item.setAttribute('name', engine.name)
+		menu.image = engine.iconURI
+		menu.item.setAttribute('name', engine.id)
+		menu.item.setAttribute('type', "instantFox")
 		menu.accessKey = gNavigatorBundle.getString("contextMenuSearchText.accesskey");
 		menu.hidden = false
 	}
@@ -824,7 +821,7 @@ nsContextMenu.prototype.doSearch = function(e) {
 
 	var type = e.originalTarget.getAttribute('type')
 	if (type == "instantFox") {
-		var href  = InstantFoxModule.Plugins[name].url.replace('%q', selectedText)
+		var href  = InstantFoxModule.urlFromQuery(name, selectedText)
 	} else {
 		var engine = Services.search.getEngineByName(name);
 		var submission = engine.getSubmission(selectedText);
@@ -835,5 +832,160 @@ nsContextMenu.prototype.doSearch = function(e) {
 		var postData = submission.postData
 	}
     openLinkIn(href, e.button>1 ?"current":"tab", {postData: postData, relatedToCurrent: true});
+}
+
+
+
+InstantFox.prepareAutoSearch = function(){
+	var autoSearch = InstantFoxModule.autoSearch
+	
+	if(!autoSearch){
+		InstantFox.handleCommand_orig = gURLBar.handleCommand
+		InstantFox._canonizeURL_orig = gURLBar._canonizeURL
+		
+		gURLBar.handleCommand = InstantFox.handleCommand
+		gURLBar._canonizeURL = InstantFox._canonizeURL
+	}else if(InstantFox.handleCommand_orig){
+		gURLBar.handleCommand = InstantFox.handleCommand_orig
+		gURLBar._canonizeURL = InstantFox._canonizeURL_orig
+	}
+}
+
+InstantFox.handleCommand = function(aTriggeringEvent) {
+    if (aTriggeringEvent instanceof MouseEvent &&
+        aTriggeringEvent.button == 2) {
+        return;
+    }
+    var url = this.value;
+	var noFixup;
+    var mayInheritPrincipal = false;
+    var postData = null;
+    var action = this._parseActionUrl(url);
+    if (action) {
+        url = action.param;
+        if (this.hasAttribute("actiontype")) {
+            if (action.type == "switchtab") {
+                this.handleRevert();
+                let prevTab = gBrowser.selectedTab;
+                if (switchToTabHavingURI(url) && isTabEmpty(prevTab)) {
+                    gBrowser.removeTab(prevTab);
+                }
+            }
+            return;
+        }
+    } else {
+        [url, postData, mayInheritPrincipal, instantFoxUri] = this._canonizeURL(url);
+        if (!url) {
+            return;
+        }
+    }
+    this.value = url;
+    gBrowser.userTypedValue = url;
+    try {
+		if(!instantFoxUri)
+			addToUrlbarHistory(url);
+    } catch (ex) {
+        Cu.reportError(ex);
+    }
+
+    function loadCurrent() {
+        var flags = instantFoxUri ? 0 : Ci.nsIWebNavigation.LOAD_FLAGS_ALLOW_THIRD_PARTY_FIXUP;
+        if (!mayInheritPrincipal) {
+            flags |= Ci.nsIWebNavigation.LOAD_FLAGS_DISALLOW_INHERIT_OWNER;
+        }
+        gBrowser.loadURIWithFlags(url, flags, null, null, postData);
+    }
+
+    if (aTriggeringEvent instanceof MouseEvent) {
+        let where = whereToOpenLink(aTriggeringEvent, false, false);
+        if (where == "current") {
+            loadCurrent();
+        } else {
+            this.handleRevert();
+            content.focus();
+            openUILinkIn(url, where, {allowThirdPartyFixup: true, postData: postData});
+        }
+        return;
+    }
+    if (aTriggeringEvent &&
+        aTriggeringEvent.altKey && !isTabEmpty(gBrowser.selectedTab)) {
+        this.handleRevert();
+        content.focus();
+        gBrowser.loadOneTab(url, {postData: postData, inBackground: false, allowThirdPartyFixup: true});
+        aTriggeringEvent.preventDefault();
+        aTriggeringEvent.stopPropagation();
+    } else {
+        loadCurrent();
+    }
+    gBrowser.selectedBrowser.focus();
+}
+InstantFox._canonizeURL = function(url) {
+    if (!url) {
+        return ["", null, false];
+    }
+    
+    var postData = {};
+    var mayInheritPrincipal = {value: false};
+	var noFixup = {}
+    url = InstantFox.getShortcutOrURI(url, postData, mayInheritPrincipal, noFixup);
+    return [url, postData.value, mayInheritPrincipal.value, noFixup.value];
+}
+InstantFox.getShortcutOrURI = function(aURL, aPostDataRef, aMayInheritPrincipal, noFixup) {
+    if (aMayInheritPrincipal) {
+        aMayInheritPrincipal.value = false;
+    }
+    var shortcutURL = null;
+    var keyword = aURL;
+    var param = "";
+    var offset = aURL.indexOf(" ");
+    if (offset > 0) {
+        keyword = aURL.substr(0, offset);
+        param = aURL.substr(offset + 1);
+    }
+    if (!aPostDataRef) {
+        aPostDataRef = {};
+    }
+
+    [shortcutURL, aPostDataRef.value] = PlacesUtils.getURLAndPostDataForKeyword(keyword);
+    if (!shortcutURL || (aURL[0] != '/' && aURL.indexOf(':') == -1 && aURL.indexOf('.') == -1)) {
+		if(noFixup)
+			noFixup.value = true;
+
+		return InstantFoxModule.urlFromQuery(InstantFoxModule.defaultPlugin, aURL);
+    }
+    var postData = "";
+    if (aPostDataRef.value) {
+        postData = unescape(aPostDataRef.value);
+    }
+    if (/%s/i.test(shortcutURL) || /%s/i.test(postData)) {
+        var charset = "";
+        const re = /^(.*)\&mozcharset=([a-zA-Z][_\-a-zA-Z0-9]+)\s*$/;
+        var matches = shortcutURL.match(re);
+        if (matches) {
+            [, shortcutURL, charset] = matches;
+        } else {
+            try {
+                charset = PlacesUtils.history.getCharsetForURI(makeURI(shortcutURL));
+            } catch (e) {
+            }
+        }
+        var encodedParam = "";
+        if (charset && charset != "UTF-8") {
+            encodedParam = escape(convertFromUnicode(charset, param)).replace(/[+@\/]+/g, encodeURIComponent);
+        } else {
+            encodedParam = encodeURIComponent(param);
+        }
+        shortcutURL = shortcutURL.replace(/%s/g, encodedParam).replace(/%S/g, param);
+        if (/%s/i.test(postData)) {
+            aPostDataRef.value = getPostDataStream(postData, param, encodedParam, "application/x-www-form-urlencoded");
+        }
+    } else if (param) {
+        aPostDataRef.value = null;
+        return aURL;
+    }
+    if (aMayInheritPrincipal) {
+        aMayInheritPrincipal.value = true;
+    }
+    return shortcutURL;
 }
 

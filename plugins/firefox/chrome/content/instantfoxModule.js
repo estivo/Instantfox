@@ -52,7 +52,7 @@ function dump() {
  *        id:
  *    } 
  ***************/
-// used for new plufins only
+// used for new plugins only
 function fixupPlugin(p){
 	var domainRe = /\w+:\/\/[^#?(\/%q)]*/;
 	if(p.url){
@@ -513,8 +513,18 @@ InstantFoxModule = {
 
 		return p.key + ' ' + decodeURIComponent(queryString);
 	},
-	URLFromQuery: function(q) {
-		//todo
+	urlFromQuery: function(plugin, query) {
+		if(typeof plugin == 'string'){
+			plugin = InstantFoxModule.Plugins[plugin]
+		}	
+		
+		// encode query
+		if (plugin.id == 'imdb')
+			query = escape(query.replace(/ /g, '+'));
+		else
+			query = encodeURIComponent(query);
+
+		return plugin.url.replace('%q', query);		
 	},
 	parse: function(q) {
 		// We assume that the sting before the space indicates a InstantFox-Plugin
@@ -534,7 +544,16 @@ InstantFoxModule = {
 		if(!key)
 			return this.Plugins[this.defaultPlugin]
 		return filter(InstantFoxModule.Plugins, key.replace('\xB7', ' ', 'g'))[0]||this.Plugins[this.defaultPlugin]
+	},
+	setAutoSearch: function(val){
+		this.autoSearch = val
+		
+		var e = Services.wm.getEnumerator("navigator:browser")
+		while(e.hasMoreElements()){
+			e.getNext().InstantFox.prepareAutoSearch()
+		}
 	}
+	
 }
 
 /*******************************************************
@@ -747,23 +766,23 @@ SimpleAutoCompleteResult.prototype = {
 	}
 };
 
+var r
 function InstantFoxSearch(){}
 InstantFoxSearch.prototype = {
 	classDescription: "Autocomplete 4 InstantFox",
-	historyAutoComplete: null,
 	classID: Components.ID("c541b971-0729-4f5d-a5c4-1f4dadef365e"),
 	contractID: "@mozilla.org/autocomplete/search;1?name=instantFoxAutoComplete",
 	QueryInterface: XPCOMUtils.generateQI([Ci.nsIAutoCompleteSearch]),
 
 	// implement searchListener for historyAutoComplete
 	onSearchResult: function(search, result) {
-		this.$searchingHistory = false;
+		/*if(!r) r = result
+		this.listener.onSearchResult(this, r)
+		return*/
+		//this.$searchingHistory = false;
 		dump('this.$searchingHistory', this.$searchingHistory, result.matchCount)
-		if (result.matchCount){
-			this.listener.onSearchResult(this, result)	
-			//dump(this, result)
-			
-		} else if(InstantFoxModule.autosearch){
+		
+		if (!result.matchCount && InstantFoxModule.autoSearch) {
 			autoSearch.query = autoSearch.value = this.searchString
 			var url = autoSearch.plugin.json.replace('%q', encodeURIComponent(autoSearch.query))
 			this.parser = parseSimpleJson
@@ -775,10 +794,9 @@ InstantFoxSearch.prototype = {
 	// implement nsIAutoCompleteSearch
 	startSearch: function(searchString, searchParam, previousResult, listener) {
 		//win = Services.wm.getMostRecentWindow("navigator:browser");
+		//if (searchString.slice(0) == 'about:')
 		if (!InstantFoxModule.currentQuery) {
 			//Search user's history
-			/* this.historyAutoComplete = this.historyAutoComplete ||
-					Cc["@mozilla.org/autocomplete/search;1?name=history"].getService(Ci.nsIAutoCompleteSearch); */
 			this.$searchingHistory = true
 			this.listener = listener;
 			this.searchString = searchString;
