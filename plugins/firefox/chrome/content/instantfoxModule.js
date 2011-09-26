@@ -64,9 +64,7 @@ function fixupPlugin(p){
 		
 		if(!p.name){
 			try{
-				var host = Services.io.newURI(p.url,null,null).host
-				host = Services.eTLD.getBaseDomainFromHost(host)
-				p.name = host.substring(0,host.indexOf('.'))
+				p.name = Services.io.newURI(p.url,null,null).host
 			}catch(e){}
 			p.name = p.name || p.id
 		}

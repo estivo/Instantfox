@@ -59,6 +59,52 @@ function updateLocaleList(){
 		menulist.selectedIndex = si
 	})
 }
+
+function globalInstantCommand(e){
+	var v = e.target.value
+	if (v == 'all') {
+		for each(var p in InstantFoxModule.Plugins)
+			p.disableInstant = false
+	} else if (v == 'google') {
+		for each(var p in InstantFoxModule.Plugins)
+			p.disableInstant = !(p.url && /#.*%q/.test(p.url))
+	} else if (v == 'none') {
+		for each(var p in InstantFoxModule.Plugins)
+			p.disableInstant = true
+	}
+	gPluginsChanged = true
+	rebuild()
+}
+function updateGlobalInstant(){
+	var ml = $("global-instant")
+
+	var all = 0, dis = 0, goog = 0, googDis = 0
+	for each(var p in InstantFoxModule.Plugins){
+		if(p.disabled || !p.url)
+			continue
+		
+		all++
+		p.disableInstant && dis++
+		//if(p.id=='google' || p.id = 'googletranslate')
+		if(/#.*%q/.test(p.url)) 
+			p.disableInstant? googDis++: goog++
+	}
+
+	var v
+	if(dis == 0)
+		v = 'all'
+	else if(dis == all)
+		v = 'none'
+	else if(googDis == 0 && goog + dis == all)
+		v = 'google'
+	else
+		v = 'manual'
+
+	ml.selectedItem = ml.querySelector("[value="+v+"]")
+	
+	return v
+}
+
 //************* dom utils
 function $(id){
 	return document.getElementById(id)
@@ -569,15 +615,19 @@ function plugin2XML(p){
 rebuild = function(){
 	var xml=[], userxml = [], disabledxml = [];
 	var activePlugins = InstantFoxModule.Plugins
+	
+	var pluginFilter = $("pluginFilter").value
 	for each(var p in activePlugins){
-		if(p.url){
-			var dis = p.disabled, def = p.type=='default'
-			var px = plugin2XML(p)
-			if(dis)
-				disabledxml[p.disabled?'unshift':'push'](px)
-			else
-				(def ? xml : userxml).push(px)
-		}
+		if(!p.url || (pluginFilter && p.name.toLowerCase().indexOf(pluginFilter) == -1))
+			continue
+		
+		var dis = p.disabled, def = p.type=='default'
+		var px = plugin2XML(p)
+		if(dis)
+			disabledxml[p.disabled?'unshift':'push'](px)
+		else
+			(def ? xml : userxml).push(px)
+		
 	}
 	var sepXML1 = "<label class='separator' value='   ", sepXML2 =" search plugins'/>"
 
@@ -596,6 +646,8 @@ rebuild = function(){
 	appendXML(el, xml.join('') + userxml.join('')+ disabledxml.join('')	)
 	
 	markConflicts()
+	// todo: better place for this
+	updateGlobalInstant()
 }
 
 function updatePluginStatus(p){

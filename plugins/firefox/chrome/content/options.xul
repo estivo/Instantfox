@@ -53,7 +53,7 @@ richlistitem[selected="true"] {
 	color:#0500A0
 } 
 /* ======================/*\======/*\====================== */
-textbox{
+textbox:not(.normal){
 	-moz-appearance: none;
 	border: none;
 	background: #EEF9FF;
@@ -74,7 +74,7 @@ textbox.key{
 	opacity: 0;
 	pointer-events: none;
 }
-textbox[focused='true']{
+textbox:not(.normal)[focused='true']{
 	color:-moz-fieldtext;
 	background:-moz-field;
 	box-shadow: 0pt 0pt 1.5px 1px gray, 0pt 0pt 2.5px 1px yellow;
@@ -236,10 +236,9 @@ checkbox:-moz-focusring > .checkbox-label-box{
 				<hbox pack='center'>
 					<vbox>
 						<label value="enable instant:" id="highlight"></label>
-						<menulist id="global-instant" sizetopopup='none'
-							oncommand = 'gPluginsChanged=true;'>
+						<menulist id="global-instant" sizetopopup='none' oncommand = 'globalInstantCommand(event);'>
 							<menupopup>
-								<menuitem label='all pages' value='all'/>
+								<menuitem label='all plugins' value='all'/>
 								<menuitem label='only google' value='google'/>
 								<menuitem label='none' value='none'/>								
 								<menuitem label='manual' value='manual'/>								
@@ -260,7 +259,11 @@ checkbox:-moz-focusring > .checkbox-label-box{
 					<image src='skin/logo.png' onclick='open(InstantFoxModule.helpURL)' class='link' tooltiptext='open help'/>
 	 -->		</hbox>
 				<hbox align='center'>
-					<label value="search-plugins"></label>
+				<hbox align='center' flex='1'>
+					<textbox placeholder="search-plugins" flex='1' class='normal' width='0' id='pluginFilter'
+						oninput="rebuild();this.nextSibling.hidden = !this.value;"/>
+					<resetbutton hidden='true' onclick='var t = this.previousSibling;t.value="";t.oninput()' />
+				</hbox>
 					<spacer flex='1'/>
 					<slickbutton id="add-from-browser" label='add +' class='attention' hidden="dtrue"
 						onmouseup='enginesPopup.show(this, "Browser")'/>
@@ -285,16 +288,22 @@ checkbox:-moz-focusring > .checkbox-label-box{
 					<textbox preference="opacity" id='opacity-text'/>
 					<label value='%'/>
 				</hbox>
-	   
-				<label value='standard search without shortcuts:' control='keyword-URL-menu'/>
-				<menulist editable="true" id="keyword-URL-menu" onclick='enginesPopup.show(this, "InstantFox")'/>
-				<vbox style='padding-top:5px'>
-					<label value='show suggestions from google,when there ' control='default-suggest'/>
-					<hbox >
-						<label value='are no history results:' control='default-suggest'/>
-						<checkbox preference="default-suggest-pref"  id='default-suggest'/>
-					</hbox>
-				</vbox>
+				
+				<groupbox>
+					<caption label='standard search without shortcuts:' control='keyword-URL-menu'/>
+					<menulist editable="true" id="keyword-URL-menu" onclick='enginesPopup.show(this, "InstantFox")'/>
+					<vbox style='padding-top:5px'>
+						<label value='show suggestions from google, when : ' control='default-suggest'/>
+						<hbox height='28' align='center'>
+							<label value=' there are no history results:' control='default-suggest'/>
+							<checkbox preference="default-suggest-pref"  id='default-suggest'/>
+						</hbox><hbox height='28' align='center'>
+							<label value=' query is longer than:' control='default-suggest'/>
+							<textbox preference="default-suggest-pref"  id='default-suggest'/>
+							<label value='chars' control='default-suggest'/>
+						</hbox>
+					</vbox>
+				</groupbox>
 				<separator class='groove'/>
 				<hbox align='center'>
 					<label  value='open search in new tab' controll='openintab-checkbox'/>
