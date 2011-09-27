@@ -328,7 +328,7 @@ var pluginLoader = {
 	},
 	// add new plugins when instantfox is updated
 	onInstantfoxUpdate: function(){
-		this.loadPlugins(InstantFoxModule.selectedLocale)
+		this.loadPlugins(InstantFoxModule.selectedLocale, this.savePlugins.bind(this))
 	}
 }
  
