@@ -837,15 +837,13 @@ nsContextMenu.prototype.doSearch = function(e) {
 
 
 InstantFox.prepareAutoSearch = function(){
-	var autoSearch = InstantFoxModule.autoSearch
-	
-	if(!autoSearch){
+	if (InstantFoxModule.autoSearch) {
 		InstantFox.handleCommand_orig = gURLBar.handleCommand
 		InstantFox._canonizeURL_orig = gURLBar._canonizeURL
 		
 		gURLBar.handleCommand = InstantFox.handleCommand
 		gURLBar._canonizeURL = InstantFox._canonizeURL
-	}else if(InstantFox.handleCommand_orig){
+	} else if (InstantFox.handleCommand_orig) {
 		gURLBar.handleCommand = InstantFox.handleCommand_orig
 		gURLBar._canonizeURL = InstantFox._canonizeURL_orig
 	}
@@ -880,7 +878,10 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
         }
     }
     this.value = url;
-    gBrowser.userTypedValue = url;
+	dump(url, postData, mayInheritPrincipal, instantFoxUri, '*********************')
+    if(!instantFoxUri)
+		gBrowser.userTypedValue = url;
+
     try {
 		if(!instantFoxUri)
 			addToUrlbarHistory(url);
@@ -921,7 +922,7 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
 }
 InstantFox._canonizeURL = function(url) {
     if (!url) {
-        return ["", null, false];
+        return ["", null, false, null];
     }
     
     var postData = {};

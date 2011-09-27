@@ -170,6 +170,10 @@ var pluginLoader = {
 				delete InstantFoxModule.Plugins[pn]
 		}
 		InstantFoxModule.defaultPlugin = InstantFoxModule.defaultPlugin||'google'
+		if("autoSearch" in pluginData)
+			InstantFoxModule.autoSearch = pluginData.autoSearch
+		else
+			InstantFoxModule.autoSearch = InstantFoxModule.Plugins.google
 	},
 	
 	initShortcuts: function(){
@@ -216,8 +220,7 @@ var pluginLoader = {
 			this.loadPlugins(true)
 			return
 		}
-		InstantFoxModule.selectedLocale = pluginData.selectedLocale
-		InstantFoxModule.defaultPlugin = pluginData.defaultPlugin
+			
 		for each(var p in pluginData.plugins){
 			var id = p.id
 			var mP = InstantFoxModule.Plugins[id]
@@ -227,6 +230,14 @@ var pluginLoader = {
 		}
 		// add data from browser search engines
 		importBrowserPlugins(false)
+		
+		InstantFoxModule.selectedLocale = pluginData.selectedLocale
+		InstantFoxModule.defaultPlugin = pluginData.defaultPlugin
+		if("autoSearch" in pluginData)
+			InstantFoxModule.autoSearch = pluginData.autoSearch
+		else
+			InstantFoxModule.autoSearch = InstantFoxModule.Plugins.google
+		
 		this.initShortcuts()
 	},
 	
@@ -239,6 +250,7 @@ var pluginLoader = {
 		var pluginData = {
 			selectedLocale: InstantFoxModule.selectedLocale,
 			defaultPlugin: InstantFoxModule.defaultPlugin,
+			autoSearch: InstantFoxModule.autoSearch,
 			plugins: ob
 		}
 
@@ -712,6 +724,19 @@ function filter(data, text) {
 		return 0;
 	});
 	return table;
+}
+
+function getAboutUrls(){
+	var l="@mozilla.org/network/protocol/about;1?what=", ans=[];
+	for(var i in Cc)
+		if(i.indexOf(l)==0){
+			var name = i.substr(l.length)
+			ans.push({
+				url: 'about:'+ name,
+				name: name
+			})
+		}
+	return ans.sort()
 }
 /*************************************************************************
  *    search component

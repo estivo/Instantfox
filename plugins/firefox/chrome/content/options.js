@@ -198,8 +198,6 @@ onContextMenuCommand = function(e){
 	
 	//restore selection  
 	ids.forEach(function(x){
-	dump(x)
-	
 		rbox.addItemToSelection($(x));
 	})
    
@@ -394,10 +392,10 @@ enginesPopup = {
 		var panel = $("engine-list")
 		var popupBoxObject = panel.popupBoxObject;
 		popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
-		panel.openPopup(anchor, 'before_end', 0, 0, false, true)
+		var pos = this.type == "InstantFox" ? 'after_start' : 'before_end';
+		panel.openPopup(anchor, pos, 0, 0, false, true)
 	},
 	onShowing: function(popup){
-		dump
 		var items = this['fill_' + this.type]()
 		this.fillPopup(popup, items)
 	},
@@ -433,7 +431,7 @@ enginesPopup = {
 		el.dispatchEvent(e)
 	},
 	fill_InstantFox: function(){
-		var items = [{name:'none'}], jsonList = []
+		var items = [this.noPlugin], jsonList = []
 		for each(var p in InstantFoxModule.Plugins)
 			if(!p.disabled)
 				items.push(p)
@@ -443,11 +441,26 @@ enginesPopup = {
 	command_InstantFox: function(event){
 		var id = event.target.value;
 		if(!id){
-		
+			var p = null
 		}else
 			var p = InstantFoxModule.Plugins[id];
 		
+		InstantFoxModule.setAutoSearch(p)
+		this.init_InstantFox()
 		
+		gPluginsChanged = true
+	},
+	init_InstantFox: function(){
+		var p = InstantFoxModule.autoSearch || this.noPlugin
+		
+		var b = $("defaultEngine")
+		b.image = p.iconURI
+		b.label = p.name
+	},
+	
+	noPlugin: {
+		iconURI: "chrome://mozapps/skin/places/defaultFavicon.png",
+		name:'none'
 	},
 	fill_Browser: function(popup){
 		gBrowserEngineList = []
@@ -499,8 +512,6 @@ enginesPopup = {
 //*************************
 
 function markConflicts(){
-	dump.trace('sssssss')
-
 	var cf = InstantFoxModule.ShortcutConflicts || {}
 
 	for (var id in InstantFoxModule.Plugins){
@@ -518,7 +529,7 @@ onTextboxInput = function(el){
 	var id = $parent(el).id
 	var orig = InstantFoxModule.Plugins[id].key
 	InstantFoxModule.Plugins[id].key = el.value
-	dump(id,InstantFoxModule.Plugins[id].key)
+
 	ibp.pluginLoader.initShortcuts()
 	markConflicts()
 	InstantFoxModule.Plugins[id].key = orig
@@ -539,7 +550,6 @@ onTextboxEscape = function(el){
 window.addEventListener('keydown', function(e){
 	var el = e.target
 	if(el.className == 'key'){
-		dump(e.keyCode)
 		if(e.keyCode=='27'){
 			onTextboxEscape(el)
 		}
@@ -548,7 +558,6 @@ window.addEventListener('keydown', function(e){
 			$parent(el).parentNode.focus()
 		}
 		if(e.keyCode=='40'||e.keyCode=='38'){
-			dump($parent(el).parentNode.selectedItem.id)
 			$t($parent(el).parentNode.selectedItem,'key').focus()
 		}
 	}
@@ -714,7 +723,9 @@ updateBrowserEngines = function(){
 function onTabSelect(){
 	if(!this.pane1Ready && this.selectedIndex==1){
 		this.pane1Ready=true;
-		this.parentNode.selectedPanel.firstChild.hidden=false;gPrefChanged=true;
+		this.parentNode.selectedPanel.firstChild.hidden = false;
+		gPrefChanged = true;
+		enginesPopup.init_InstantFox()
 	}else if(!this.pane2Ready && this.selectedIndex==2){
 		this.pane2Ready=true;
 		var iframe = document.createElement('iframe');

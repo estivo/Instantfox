@@ -112,9 +112,11 @@ splitter {
 resetbutton {
 	-moz-appearance: none;
 	-moz-image-region: rect(0, 16px, 16px, 0px);
-	border: none;
+	
+	border: none;	margin: 0px;	padding: 0px;
 	-moz-margin-start: -4px;
 	-moz-margin-end: 4px;
+	
 	border-radius: 4px;
 	background: #EEF9FF;
 	box-shadow: 0pt 0pt 1.5px 1px gray;
@@ -291,7 +293,11 @@ checkbox:-moz-focusring > .checkbox-label-box{
 				
 				<groupbox>
 					<caption label='standard search without shortcuts:' control='keyword-URL-menu'/>
-					<menulist editable="true" id="keyword-URL-menu" onclick='enginesPopup.show(this, "InstantFox")'/>
+					
+					<hbox align="center" pack=''>
+						<toolbarbutton id="defaultEngine" type='menu' onclick='enginesPopup.show(this, "InstantFox")'/>
+					</hbox>
+					
 					<vbox style='padding-top:5px'>
 						<label value='show suggestions from google, when : ' control='default-suggest'/>
 						<hbox height='28' align='center'>

@@ -22,7 +22,7 @@ InstantFox.pageLoader = {
 			this.previewIsActive = false
         if (this.preview != null && this.preview.parentNode) {
             this.preview.parentNode.removeChild(this.preview); 
-            InstantFox.urlBarListener.box.parentNode.removeChild(InstantFox.urlBarListener.box);            
+            this.removeProgressListener(this.preview);            
         }
     },
 
@@ -117,7 +117,9 @@ InstantFox.pageLoader = {
 		this.persistPreview()
 	},
 	onTitleChanged: function(e){
-		InstantFox.urlBarListener.button.label = e.target.title;
+		dump(e.target.title)
+		if(e.target == InstantFox.pageLoader.preview.contentDocument)
+			InstantFox.pageLoader.label.value = e.target.title;
 		e.stopPropagation()
 	},
 
@@ -152,7 +154,7 @@ InstantFox.pageLoader = {
         let selectedStack = browser.selectedBrowser.parentNode;
         if (selectedStack != preview.parentNode){
 			selectedStack.appendChild(preview);
-			InstantFox.urlBarListener.init(preview)
+			this.addProgressListener(preview)
 			
 			// set urlbaricon
 			// todo: handle this elsewhere
@@ -166,9 +168,6 @@ InstantFox.pageLoader = {
 		
         // Load the url i
         preview.webNavigation.loadURI(url, nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE, null, null, null);
-		
-		
-
     },
 	
 	// workaround for google bug
@@ -200,49 +199,10 @@ InstantFox.pageLoader = {
 			self.addPreview(InstantFoxModule.currentQuery.preloadURL)	
 			self.checkPreview(800)
 		}		
-	}
-}
-InstantFox.nop = function(){}
-InstantFox.urlBarListener = {
-    QueryInterface: function(aIID) {
-		if (aIID.equals(Ci.nsIWebProgressListener)
-		 || aIID.equals(Ci.nsISupportsWeakReference)
-		 || aIID.equals(Components.interfaces.nsISupports))
-			return this;
-		throw Components.results.NS_NOINTERFACE;
 	},
 
-    onLocationChange: InstantFox.nop,
-
-    onStateChange: function(aWebProgress, aRequest, aStateFlags, aStatus){
-		const nsIWebProgressListener = Ci.nsIWebProgressListener;
-		const nsIChannel = Ci.nsIChannel;
-		dump(aRequest.URI && aRequest.URI.spec, '***************************')
-
-		if (aStateFlags & nsIWebProgressListener.STATE_START) {
-			if(!this._busyUI){
-				this._busyUI = true
-				this.image.hidden = false				
-			}
-		} else if (aStateFlags & nsIWebProgressListener.STATE_STOP) {
-			if(this._busyUI){
-				this._busyUI = false
-				this.image.hidden = true				
-			}
-		}
-	},
-	onProgressChange: function (aWebProgress, aRequest,
-			aCurSelfProgress, aMaxSelfProgress, aCurTotalProgress, aMaxTotalProgress) {
-			dump(aMaxTotalProgress,aCurTotalProgress)
-		if (aMaxTotalProgress > 0 && this._busyUI){
-			let percentage = (aCurTotalProgress * 100) / aMaxTotalProgress;
-			this.button.label = percentage;
-		}
-	},
-	onStatusChange: InstantFox.nop,
-	onSecurityChange: InstantFox.nop,
-	
-	init: function(browser) {
+	// 
+	addProgressListener: function(browser) {
         // Listen for webpage loads
 		if(!this.a){
 			//InstantFox.pageLoader.preview.addProgressListener(this);
@@ -251,40 +211,40 @@ InstantFox.urlBarListener = {
 		
 		if(!this.image){
 			var image = window.document.createElement("image");
-			image.setAttribute('class', 'tab-throbber')
-			image.setAttribute('progress', 'true')
-			image.setAttribute('fadein', 'true')
-			image.setAttribute('busy', 'true')
-			
-			var box = window.document.createElement("vbox");
-			box.appendChild(image)
-			image = box
+			image.setAttribute('src', 'chrome://instantfox/content/skin/ajax-loader.gif')
+
+			var imagebox = window.document.createElement("vbox");
+			imagebox.appendChild(image)
+			imagebox.setAttribute('align', 'center')
 			
 			var box = window.document.createElement("hbox");
 			box.setAttribute('bottom',0)
-			box.setAttribute('left','10%')
-
+			box.setAttribute('pack', 'center')
+			box.setAttribute('align', 'center')
+			
 			var label = window.document.createElement("label");
 			label.setAttribute('value','debug')
-			var button = window.document.createElement("button");
 
 			box.appendChild(label)
-			box.appendChild(button)
-			box.appendChild(image)
-			
-			this.button = button
+			box.appendChild(imagebox)
+
+			this.label = label
 			this.image = image
 			this.box = box
-			
-			box.style.border='solid gold'
+
+			label.style.background = 'white'
+			label.style.color = 'black'
+			box.style.pointerEvents = 'none'
+			box.style.opacity = '0.7'
+			box.style.width = '100%'
 
 		}
-			
-		browser.parentNode.appendChild(this.box)		
+
+		browser.parentNode.appendChild(this.box)
     },
 
-    uninit: function(browser) {
-        InstantFox.pageLoader.preview.removeProgressListener(this);
+    removeProgressListener: function(browser) {
+		this.box.parentNode.removeChild(this.box);
     },
 };
 
