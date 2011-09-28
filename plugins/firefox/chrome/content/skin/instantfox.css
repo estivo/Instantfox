@@ -42,10 +42,10 @@ richlistbox[type='InstantFoxSuggest'] {
 	color: transparent;
 	text-shadow: 0 -1px 1px #fff, 0 -1px 6px #0099CC
 }
-.instantfox-shadow{	 
+.instantfox-shadow{
 	color: graytext;
 }
-.instantfox-spacer{	 
+.instantfox-spacer{
 	visibility:hidden;
 }
 .instantfox-tip{
@@ -59,25 +59,6 @@ richlistbox[type='InstantFoxSuggest'] {
 }
 .instantfox-box{
 	pointer-events: none
-}
-/** splitmenu ************************************/
-menuitem.split-menuitem-item[_moz-menuactive="true"], .split-menu-right-image[_moz-menuactive="true"] {/*for xp*/
-    background-color: -moz-menuhover;
-    color: -moz-menuhovertext;
-}
-menuitem.split-menuitem-item{/*for mac*/
-	padding: 0!important;
-}
-.split-menu-right-image {
-    -moz-appearance: menuitem;
-    -moz-box-pack: end;
-}
-menu[type=splitmenu] {
-    -moz-binding: url(chrome://instantfox/content/urlbar.xml#splitmenu);
-    -moz-box-orient: horizontal;
-    -moz-appearance: none !important;
-    color: menutext;
-    background-color: transparent !important;
 }
 /** notification ************************************/
 .popup-notification-icon[popupid="instant-fox-installed"] {
@@ -109,7 +90,7 @@ menu[type=splitmenu] {
 	border:1px solid blue;
 }
 .instantFox-plugin:hover{
-	-moz-transgorm:translate(-0px -2px);	
+	-moz-transgorm:translate(-0px -2px);
 	background-size: 100% 100%;
 	border:1px solid lightblue;
 }

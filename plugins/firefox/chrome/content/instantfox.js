@@ -717,9 +717,8 @@ nsContextMenu.prototype.createSearchItem = function(){
 	if(old)
 		old.parentNode.removeChild(old)
 
-	var m = document.createElement('menu')
+	var m = document.createElement('splitmenu')
 	m.setAttribute('id', "ifox-context-searchselect")
-	m.setAttribute('type', "splitmenu")
 	m.setAttribute('iconic', "true")
 	m.setAttribute('onclick', "gContextMenu.doSearch(event)")
 
@@ -732,6 +731,8 @@ nsContextMenu.prototype.createSearchItem = function(){
 
 	var c = document.getElementById("contentAreaContextMenu")
 	c.insertBefore(m, s)
+	
+	m.menuitem.style.padding = m.menu.style.padding = '0'
 	return m
 }
 nsContextMenu.prototype.getSelectedText = function() {
@@ -754,12 +755,13 @@ nsContextMenu.prototype.getSelectedText = function() {
 	return ''
 }
 nsContextMenu.prototype.isTextSelection = function() {
-	var menu = document.getElementById("ifox-context-searchselect") || this.createSearchItem()
+	var splitMenu = document.getElementById("ifox-context-searchselect") || this.createSearchItem()
+	var menuitem = splitMenu.menuitem
 
     var selectedText = this.getSelectedText()
 
 	if (!selectedText){
-		menu.hidden = true
+		splitMenu.hidden = true
 		return false;
 	}
 
@@ -771,13 +773,13 @@ nsContextMenu.prototype.isTextSelection = function() {
     // format "Search <engine> for <selection>" string to show in menu
     var menuLabel = gNavigatorBundle.getFormattedString("contextMenuSearchText",
                                                         [engine.name, selectedText]);
-	if(menu){
-		menu.label = menuLabel;
-		menu.image = engine.iconURI
-		menu.item.setAttribute('name', engine.id)
-		menu.item.setAttribute('type', "instantFox")
-		menu.accessKey = gNavigatorBundle.getString("contextMenuSearchText.accesskey");
-		menu.hidden = false
+	if(menuitem){
+		menuitem.label = menuLabel;
+		menuitem.image = engine.iconURI
+		menuitem.setAttribute('name', engine.id)
+		menuitem.setAttribute('type', "instantFox")
+		menuitem.accessKey = gNavigatorBundle.getString("contextMenuSearchText.accesskey");
+		splitMenu.hidden = false
 	}
 
     return true;
@@ -836,28 +838,26 @@ InstantFox.prepareAutoSearch = function(off){
 }
 
 InstantFox.handleCommand = function(aTriggeringEvent) {
-    if (aTriggeringEvent instanceof MouseEvent &&
-        aTriggeringEvent.button == 2) {
-        return;
-    }
-    var url = this.value;
+	if (aTriggeringEvent instanceof MouseEvent && aTriggeringEvent.button == 2)
+		return; // Do nothing for right clicks
+	var url = this.value;
 	var instantFoxUri;
-    var mayInheritPrincipal = false;
-    var postData = null;
-    var action = this._parseActionUrl(url);
-    if (action) {
-        url = action.param;
-        if (this.hasAttribute("actiontype")) {
-            if (action.type == "switchtab") {
-                this.handleRevert();
-                let prevTab = gBrowser.selectedTab;
-                if (switchToTabHavingURI(url) && isTabEmpty(prevTab)) {
-                    gBrowser.removeTab(prevTab);
-                }
-            }
-            return;
-        }
-    } else {
+	var mayInheritPrincipal = false;
+	var postData = null;
+
+	var action = this._parseActionUrl(url);
+	if (action) {
+		url = action.param;
+		if (this.hasAttribute("actiontype")) {
+			if (action.type == "switchtab") {
+				this.handleRevert();
+				let prevTab = gBrowser.selectedTab;
+				if (switchToTabHavingURI(url) && isTabEmpty(prevTab))
+					gBrowser.removeTab(prevTab);
+			}
+			return;
+		}
+	} else {
 		InstantFox.onInput()
 		// instantfox shortcuts have the highest priority
 		if (InstantFoxModule.currentQuery) {
@@ -880,7 +880,6 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
     }
 
     this.value = url;
-
     if(!instantFoxUri)
 		gBrowser.userTypedValue = url;
 
@@ -899,26 +898,27 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
         gBrowser.loadURIWithFlags(url, flags, null, null, postData);
     }
 
-    if (aTriggeringEvent instanceof MouseEvent) {
-        let where = whereToOpenLink(aTriggeringEvent, false, false);
-        if (where == "current") {
-            loadCurrent();
-        } else {
-            this.handleRevert();
-            content.focus();
+	// Focus the content area before triggering loads, since if the load
+	// occurs in a new tab, we want focus to be restored to the content
+	// area when the current tab is re-selected.
+	gBrowser.selectedBrowser.focus();
+
+	if (aTriggeringEvent instanceof MouseEvent) {
+		// We have a mouse event (from the go button), so use the standard
+		// UI link behaviors
+		let where = whereToOpenLink(aTriggeringEvent, false, false);
+		if (where == "current") {
+			loadCurrent();
+		} else {
+			this.handleRevert();
             openUILinkIn(url, where, {allowThirdPartyFixup: true, postData: postData});
         }
-        return;
-    }
-    if (aTriggeringEvent &&
-        aTriggeringEvent.altKey && !isTabEmpty(gBrowser.selectedTab)) {
-        this.handleRevert();
-        content.focus();
+	} else if (aTriggeringEvent && aTriggeringEvent.altKey && !isTabEmpty(gBrowser.selectedTab)) {
+		this.handleRevert();
         gBrowser.loadOneTab(url, {postData: postData, inBackground: false, allowThirdPartyFixup: true});
-        aTriggeringEvent.preventDefault();
-        aTriggeringEvent.stopPropagation();
-    } else {
-        loadCurrent();
-    }
-    gBrowser.selectedBrowser.focus();
+		aTriggeringEvent.preventDefault();
+		aTriggeringEvent.stopPropagation();
+	} else {
+		loadCurrent();
+	}
 }
