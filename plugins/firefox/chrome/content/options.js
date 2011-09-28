@@ -11,9 +11,9 @@ function updateLocaleList(){
 		var sbs = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService);
 		var langNames = sbs.createBundle("chrome://global/locale/languageNames.properties");
 		var regNames  = sbs.createBundle("chrome://global/locale/regionNames.properties");
-		
+
 		function addDisplayName(locale) {
-			var parts = locale.split(/-/); 
+			var parts = locale.split(/-/);
 			var displayName;
 			try {
 				displayName = langNames.GetStringFromName(parts[0]);
@@ -25,20 +25,20 @@ function updateLocaleList(){
 			}
 			return {displayName: displayName, id: locale}
 		}
-		
+
 		var locales = locales.map(addDisplayName)
-		
+
 		locales.sort(function(x, y)x.displayName > y.displayName)
-		
+
 		var xml = []
 		for each(var i in locales)
 			xml.push('<menuitem label="', i.id, '">',
 				'<label value="', i.displayName, '"/><hbox flex="1"/><label value="', i.id, '"/>',
 			'</menuitem>')
-		
+
 		var menulist = $('locale')
 		appendXML(menulist.firstChild, xml.join(''))
-		
+
 		// find selected index
 		var sl = InstantFoxModule.selectedLocale.toLowerCase()
 		var slPart = sl.substring(0, sl.indexOf('-'))
@@ -82,11 +82,11 @@ function updateGlobalInstant(){
 	for each(var p in InstantFoxModule.Plugins){
 		if(p.disabled || !p.url)
 			continue
-		
+
 		all++
 		p.disableInstant && dis++
 		//if(p.id=='google' || p.id = 'googletranslate')
-		if(/#.*%q/.test(p.url)) 
+		if(/#.*%q/.test(p.url))
 			p.disableInstant? googDis++: goog++
 	}
 
@@ -101,7 +101,7 @@ function updateGlobalInstant(){
 		v = 'manual'
 
 	ml.selectedItem = ml.querySelector("[value="+v+"]")
-	
+
 	return v
 }
 
@@ -110,7 +110,7 @@ function $(id){
 	return document.getElementById(id)
 }
 function $t(el, aID) {
-	
+
 	return el && el.getElementsByAttribute('aID', aID)[0]
 }
 function $parent(el){
@@ -136,12 +136,12 @@ function appendXML(element, xml){
 }
 function replaceXML(element, xml){
 	var range = document.createRange()
-	range.selectNode(element)	
+	range.selectNode(element)
 	var fragment = range.createContextualFragment(xml)
 
 	return element.parentNode.replaceChild(fragment, element)
 }
-function formatString(string, options){	
+function formatString(string, options){
 	return string.replace(/\$[^\$]*\$/g, function(x){
 		var x = x.slice(1,-1)
 		if(x[0]=='!')
@@ -156,7 +156,7 @@ var escapeMap = { "&": "amp", '"': "quot", "<": "lt", ">": "gt" }
 
 //************************ context menu
 initContextMenu = function(popup){
-	var item = document.popupNode	
+	var item = document.popupNode
 	item = $parent(item)
 	var selectedItems = $('shortcuts').selectedItems
 
@@ -176,31 +176,31 @@ initContextMenu = function(popup){
 onContextMenuCommand = function(e){
 	var menu = e.target
 	var name = menu.getAttribute('aID')
-	var item = document.popupNode	
+	var item = document.popupNode
 	item = $parent(item)
 	if (name=='edit'){
 		openEditPopup({target: item.lastChild})
 		return
 	}
-	
+
 	var rbox = $("shortcuts")
-	var selectedItems = rbox.selectedItems	
+	var selectedItems = rbox.selectedItems
 	var value = menu.getAttribute('checked')!='true'
-	
+
 	var ids = []
-	
+
 	selectedItems.forEach(function(x){
 		ids.push(x.id)
 		InstantFoxModule.Plugins[x.id][name] = value
 	})
-	
+
 	rebuild()
-	
-	//restore selection  
+
+	//restore selection
 	ids.forEach(function(x){
 		rbox.addItemToSelection($(x));
 	})
-   
+
 
 }
 
@@ -215,16 +215,16 @@ initEditPopup = function(plugin, panel){
 	$t(panel, 'instant').checked = !gPlugin.disableInstant
 	$t(panel, 'image').src = gPlugin.iconURI
 	$t(panel, 'key').value = gPlugin.key
-	
+
 	for each(var i in ['url', 'name', 'json']){
 		var box = $t(panel, i)
 		box.value = gPlugin[i] || '';
 		box.nextSibling.hidden = !canResetProp(box)
 	}
-	
+
 	var suggest = !gPlugin.disableSuggest // !!(gPlugin.json && !gPlugin.disableSuggest)
 	var chkbox = $t(panel, 'suggest')
-	chkbox.checked = suggest	
+	chkbox.checked = suggest
 	var st = chkbox.nextSibling.style;
 	if(suggest){
 		st.opacity="";
@@ -233,7 +233,7 @@ initEditPopup = function(plugin, panel){
 		st.opacity=0;
 		st.pointerEvents="none"
 	}
-	
+
 	var rem =  $t(panel, 'remove')
 	if(plugin){
 		rem.label = gPlugin.type == 'user' ? 'remove': 'disable';
@@ -256,7 +256,7 @@ createEmptyPlugin=function(){
 		json: '',
 		iconURI: '',
 		createNew: true
-	}	
+	}
 }
 openEditPopup = function(item, plugin){
 	var panel = $('edit-box')
@@ -270,9 +270,9 @@ openEditPopup = function(item, plugin){
 		panel.hidePopup()
 		gPlugin = p
 	}
-	
-	initEditPopup(plugin, panel)	
-	
+
+	initEditPopup(plugin, panel)
+
 	var popupBoxObject = panel.popupBoxObject;
 	popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
 	panel.openPopup(item, 'start_before', 0, 0, false, true)
@@ -297,15 +297,15 @@ rbMouseup = function(e){
 		}
 		start.parentNode.selectItemRange(start, end)
 	}
-	
+
 	//**********
 	if (aID != 'edit-link')
 		return;
-	
+
 	var item = $parent(e.target)
 	var p = InstantFoxModule.Plugins[item.id]
 
-	openEditPopup(item.lastElementChild, p)	
+	openEditPopup(item.lastElementChild, p)
 }
 
 editPopupSave = function(panel){
@@ -342,13 +342,13 @@ saveGPlugin = function(createNew){
 	ibp.pluginLoader.initShortcuts()
 	rebuild()
 	markConflicts()
-	
+
 	var el = $(gPlugin.id)
 	if (el){
 		$("shortcuts").selectItemRange(el, el)
 	}
 
-		
+
 	gPluginsChanged = true
 	gPlugin = null
 }
@@ -358,16 +358,16 @@ removePlugin = function(p) {
 	if (p.createNew) {
 		gPlugin = null
 	}else if (p.type != 'user' ) {
-		p.disabled = true		
+		p.disabled = true
 	} else {
 		delete InstantFoxModule.Plugins[p.id];
 		ibp.pluginLoader.initShortcuts()
 		markConflicts()
-		
+
 		var item = $(p.id)
 		item.parentNode.removeChild(item)
 	}
-	
+
 	gPluginsChanged = true
 }
 canResetProp = function(el){
@@ -403,7 +403,7 @@ enginesPopup = {
 		this['command_' + this.type](popup)
 	},
 	fillPopup: function(popup, items){
-		var xml=[]		
+		var xml=[]
 		var str = "<menuitem class='menuitem-iconic' label='$name$' image='$iconURI$' value='$id$'/>"
 		for each(var p in items)
 			xml.push(formatString(str, p))
@@ -425,7 +425,7 @@ enginesPopup = {
 	command_Json: function(event){
 		var p = InstantFoxModule.Plugins[event.target.value];
 		var el = document.querySelector('#edit-box textbox[aID=json]')
-		el.value = p.def_json || p.json	
+		el.value = p.def_json || p.json
 		var e=document.createEvent('UIEvent')
 		e.initUIEvent('input',true, true, window, 1)
 		el.dispatchEvent(e)
@@ -444,20 +444,20 @@ enginesPopup = {
 			var p = null
 		}else
 			var p = InstantFoxModule.Plugins[id];
-		
+
 		InstantFoxModule.setAutoSearch(p)
 		this.init_InstantFox()
-		
+
 		gPluginsChanged = true
 	},
 	init_InstantFox: function(){
 		var p = InstantFoxModule.autoSearch || this.noPlugin
-		
+
 		var b = $("defaultEngine")
 		b.image = p.iconURI
 		b.label = p.name
 	},
-	
+
 	noPlugin: {
 		iconURI: "chrome://mozapps/skin/places/defaultFavicon.png",
 		name:'none'
@@ -466,7 +466,7 @@ enginesPopup = {
 		gBrowserEngineList = []
 		var win = Services.wm.getMostRecentWindow("navigator:browser")
 		if(!win){
-			return 
+			return
 		}
 		var gBrowser = win.gBrowser
 		var uriList = []
@@ -494,7 +494,7 @@ enginesPopup = {
 						id: gBrowserEngineList.length
 					})
 				}
-			}	
+			}
 		}
 
 		return gBrowserEngineList
@@ -539,7 +539,7 @@ onTextboxEnter = function(el){
 	InstantFoxModule.Plugins[id].key = el.value
 	ibp.pluginLoader.initShortcuts()
 	markConflicts()
-	
+
 	gPluginsChanged = true
 }
 onTextboxEscape = function(el){
@@ -572,7 +572,7 @@ onSelect=function(rbox){
 
 
 
-//************* 
+//*************
 function savePlugins(){
 	if(gPrefChanged)
 		document.getElementsByTagName('prefpane')[0].writePreferences(false)
@@ -589,14 +589,14 @@ function savePlugins(){
 		InstantFoxModule.pluginLoader.loadPlugins()
 	gPluginsChanged = false
 }
-//************* 
-xmlFragment = 
+//*************
+xmlFragment =
 	  <richlistitem align="center" id='$id$'>
 		<hbox align="center" class='image'>
 			<image src="$iconURI$" width="16" height="16"/>
 		</hbox>
 		<label value="$name$"/>
-		<hbox flex='1' pack='start' align='top'> 
+		<hbox flex='1' pack='start' align='top'>
 			<hbox class="plugin-status" status="$status$" aID='edit-link'/>
 		</hbox>
 		<hbox align="center" class='key'>
@@ -605,7 +605,7 @@ xmlFragment =
 		</hbox>
 		<label class='link' value='edit' aID='edit-link'/>
 	  </richlistitem>.toXMLString().replace(/>\s*</g,'><')
-xmlFragmentDis = 
+xmlFragmentDis =
 	  <richlistitem align="center" id='$id$' disabled="true">
 		<hbox align="center" class='image'>
 			<image src="$iconURI$" width="16" height="16"/>
@@ -624,36 +624,36 @@ function plugin2XML(p){
 rebuild = function(){
 	var xml=[], userxml = [], disabledxml = [];
 	var activePlugins = InstantFoxModule.Plugins
-	
+
 	var pluginFilter = $("pluginFilter").value
 	for each(var p in activePlugins){
 		if(!p.url || (pluginFilter && p.name.toLowerCase().indexOf(pluginFilter) == -1))
 			continue
-		
+
 		var dis = p.disabled, def = p.type=='default'
 		var px = plugin2XML(p)
 		if(dis)
 			disabledxml[p.disabled?'unshift':'push'](px)
 		else
 			(def ? xml : userxml).push(px)
-		
+
 	}
 	var sepXML1 = "<label class='separator' value='   ", sepXML2 =" search plugins'/>"
 
 	xml.unshift(sepXML1 + "standard" + sepXML2)
 	if(userxml.length)
 		xml.push(sepXML1 + "your" + sepXML2)
-	
+
 	if(disabledxml.length)
 		userxml.push(sepXML1 + "inactive" + sepXML2)
-	
+
 	var el = $("shortcuts");
 	//it's important to clear selection of richbox before removing its' children
 	el.clearSelection()
 
 	clean(el)
 	appendXML(el, xml.join('') + userxml.join('')+ disabledxml.join('')	)
-	
+
 	markConflicts()
 	// todo: better place for this
 	updateGlobalInstant()
@@ -668,15 +668,15 @@ function updatePluginStatus(p){
 	} else if(p.disableInstant) {
 		p.status = "not-instant"
 	} else
-		p.status = ""	
+		p.status = ""
 }
 
 window.addEventListener("DOMContentLoaded", function() {
 	window.removeEventListener("DOMContentLoaded", arguments.callee, false)
-	// this must be called after menulists' binding is loaded 
+	// this must be called after menulists' binding is loaded
 	updateLocaleList()
 	rebuild()
-	
+
 	var size = document.getElementsByTagName('tabbox')[0].clientWidth + 50;
 	// check if we are inside popup
 	var InstantFox = top.InstantFox
@@ -704,7 +704,7 @@ window.addEventListener("DOMContentLoaded", function() {
 // called when popup containing this window is opened
 onOptionsPopupShowing = function(){
 	rebuild()
-	updateBrowserEngines()	
+	updateBrowserEngines()
 }
 updateBrowserEngines = function(){
 	var win = Services.wm.getMostRecentWindow("navigator:browser")
@@ -715,7 +715,7 @@ updateBrowserEngines = function(){
 				hide = false
 				break
 			}
-		}	
+		}
 	}
 	$("add-from-browser").hidden = hide
 }
@@ -765,7 +765,7 @@ var gClipboardHelper = {
 
 copyPluginsToClipboard = function(){
 	var str = InstantFoxModule.pluginLoader.getPluginString(true)
-	gClipboardHelper.copyString(str) 
+	gClipboardHelper.copyString(str)
 }
 
 addPluginsFromClipboar = function(){

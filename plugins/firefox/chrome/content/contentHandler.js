@@ -2,7 +2,7 @@ InstantFox.contentHandler = {
 	setGoogleLocation: function(){
 		content.document.getElementById("lst-ib").value='opera ';
 		content.document.getElementById("gac_scont").style.display='none';
-		content.document.getElementById("gray").style.display='none';	
+		content.document.getElementById("gray").style.display='none';
 	},
 	finishGoogleLocation: function(){
 		content.document.getElementById("gac_scont").style.display='';
@@ -15,14 +15,17 @@ InstantFox.contentHandler = {
 }
 
 InstantFox.pageLoader = {
+	get isActive(){
+		return this.preview && this.preview.parentNode
+	},
 	preview: null,
 	previewIsActive: false,
     removePreview: function() {
 		if(this.previewIsActive)
 			this.previewIsActive = false
         if (this.preview != null && this.preview.parentNode) {
-            this.preview.parentNode.removeChild(this.preview); 
-            this.removeProgressListener(this.preview);            
+            this.preview.parentNode.removeChild(this.preview);
+            this.removeProgressListener(this.preview);
         }
     },
 
@@ -31,17 +34,17 @@ InstantFox.pageLoader = {
 		if (!this.previewIsActive)
 			return;
 		gURLBar.blur()
-		if(tab == 'new'){			
+		if(tab == 'new'){
 			gBrowser._lastRelatedTab = null
 			// todo: option to open at far left
 			var tab = gBrowser.addTab('', {relatedToCurrent:true, skipAnimation:true})
-			gBrowser.selectedTab = tab;   
+			gBrowser.selectedTab = tab;
 		}
 		var browser = this.swapBrowsers(tab)
 		browser.userTypedValue = null;
-		
+
 		// Move focus out of the preview to the tab's browser before removing it
-       
+
 		this.preview.blur();
         inBackground || browser.focus();
         this.removePreview();
@@ -106,13 +109,13 @@ InstantFox.pageLoader = {
         browser.mTabListeners[selectedIndex] = tabListener;
         filter.addProgressListener(tabListener, Ci.nsIWebProgress.NOTIFY_ALL);
         selectedBrowser.webProgress.addProgressListener(filter, Ci.nsIWebProgress.NOTIFY_ALL);
-		
+
 		// rstore history
 		preview.docShell.useGlobalHistory = false
-		
+
 		return selectedBrowser
     },
-	
+
 	onfocus: function(e){
 		this.persistPreview()
 	},
@@ -155,7 +158,7 @@ InstantFox.pageLoader = {
         if (selectedStack != preview.parentNode){
 			selectedStack.appendChild(preview);
 			this.addProgressListener(preview)
-			
+
 			// set urlbaricon
 			// todo: handle this elsewhere
 			PageProxySetIcon('chrome://instantfox/content/skin/button-logo.png')
@@ -164,16 +167,16 @@ InstantFox.pageLoader = {
 		this.previewIsActive = true
 		// disable history
 		preview.docShell.useGlobalHistory = false
-		
-		
+
+
         // Load the url i
         preview.webNavigation.loadURI(url, nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE, null, null, null);
     },
-	
+
 	// workaround for google bug
 	gre: /[&?#]q=([^&]*)/,
 	checkPreview: function(delay){
-		
+
 		var q = InstantFoxModule.currentQuery
 		dump(q,'-----------', delay)
 		if(!q)
@@ -183,32 +186,32 @@ InstantFox.pageLoader = {
 		if(delay){
 			if(self.timeout)
 				clearTimeout(self.timeout)
-			
+
 			self.timeout = setTimeout(self.checkPreview, delay, 0)
 			return
 		}
-		
+
 		self.timeout = null
-		
+
 		var url = self.preview.contentDocument.location.href
 		var m1 = url.match(self.gre), m2 = q.preloadURL.match(self.gre)
 		dump('***************', url, q.preloadURL)
 		dump('***************', m1, m2, self.gre)
 		if(!m1 || !m2 || m1[1] != m2[1]){
 			Cu.reportError(url + "\n!=\n" + q.preloadURL)
-			self.addPreview(InstantFoxModule.currentQuery.preloadURL)	
+			self.addPreview(InstantFoxModule.currentQuery.preloadURL)
 			self.checkPreview(800)
-		}		
+		}
 	},
 
-	// 
+	//
 	addProgressListener: function(browser) {
         // Listen for webpage loads
 		if(!this.a){
 			//InstantFox.pageLoader.preview.addProgressListener(this);
 			this.a = true
 		}
-		
+
 		if(!this.image){
 			var image = window.document.createElement("image");
 			image.setAttribute('src', 'chrome://instantfox/content/skin/ajax-loader.gif')
@@ -216,12 +219,12 @@ InstantFox.pageLoader = {
 			var imagebox = window.document.createElement("vbox");
 			imagebox.appendChild(image)
 			imagebox.setAttribute('align', 'center')
-			
+
 			var box = window.document.createElement("hbox");
 			box.setAttribute('bottom',0)
 			box.setAttribute('pack', 'center')
 			box.setAttribute('align', 'center')
-			
+
 			var label = window.document.createElement("label");
 			label.setAttribute('value','debug')
 

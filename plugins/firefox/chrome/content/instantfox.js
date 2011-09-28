@@ -4,7 +4,7 @@ var InstantFox = {
 	install_url: "http://www.instantfox.net/welcome.php",
 	update_url:  "http://www.instantfox.net/update.php",
 	checkversion: true,
-	
+
 	addTab: function(url, nextToCurrent){
 		if(url){
 			var targetTab = gBrowser.addTab(url);
@@ -39,8 +39,8 @@ var InstantFox = {
 				// check if new plugins are added by this update
 				InstantFoxModule.pluginLoader.onInstantfoxUpdate()
 			}
-			
-			
+
+
 			setTimeout(InstantFox.addTab, 500, url);
 		})
 	},
@@ -98,7 +98,7 @@ var InstantFox = {
 		gURLBar.addEventListener('keydown', InstantFox.onKeydown, false);
 		gURLBar.addEventListener('input', InstantFox.onInput, false);
 		// gURLBar.addEventListener('cut', InstantFox.onInput, false);
-		// _copyCutController prevents cut event, so modify it for now 
+		// _copyCutController prevents cut event, so modify it for now
 		// (fortunately this function is same the in 3.6-8.0a)
 		gURLBar._copyCutController.doCommand = InstantFox._urlbarCutCommand
 		gURLBar.addEventListener('blur', InstantFox.onblur, false);
@@ -109,23 +109,23 @@ var InstantFox = {
 		// apply user modified styles
 		InstantFox.checkURLBarBinding()
 		InstantFox.updateUserStyle()
-		
+
 		// this is needed if searchbar is removed from toolbar
 		BrowserSearch.__defineGetter__("searchbar", function(){
 			return document.getElementById("searchbar") || document.getElementById("urlbar")
 		})
-		
+
 		InstantFox.prepareAutoSearch()
 	},
 
 	destroy: function(event) {
-		//dump('---***---',arguments.callee.caller)
-		gURLBar.removeEventListener('keydown', InstantFox.onKeydown, false);
-		gURLBar.removeEventListener('input', InstantFox.onInput, false);
-		gURLBar.removeEventListener('focus', InstantFox.onfocus, false);
-		gURLBar.removeEventListener('blur', InstantFox.onblur, false);
-		
+		gURLBar.removeEventListener('keydown', this.onKeydown, false);
+		gURLBar.removeEventListener('input', this.onInput, false);
+		gURLBar.removeEventListener('focus', this.onfocus, false);
+		gURLBar.removeEventListener('blur', this.onblur, false);
+
 		this.finishSearch()
+		this.prepareAutoSearch('off')
 	},
 
 	checkURLBarBinding: function() {
@@ -231,9 +231,11 @@ var InstantFox = {
 				}
 			}
 			else if (key == 13 && !meta && !ctrl) { // 13 == ENTER
-				InstantFox.onEnter(null, alt)
-				
-				event.preventDefault();
+				if (InstantFox.pageLoader.previewIsActive) {
+					InstantFox.onEnter(null, alt)
+					event.preventDefault();
+				}
+				// case with no preview will be handled by gURLBar.handleCommand
 			}
 			else if (!alt && !meta && !ctrl && [38,40,34,33].indexOf(key)!=-1) {//UP,DOWN,PAGE_UP,PAGE_DOWN
 				if(!q.plugin.disableInstant) {
@@ -251,8 +253,10 @@ var InstantFox = {
 					gURLBar.blur()
 			}
 			else if (key == 8 || key == 46) { // 8 == BACK_SPACE, 46 == DELETE
-				if(gURLBar.selectionEnd == gURLBar.mInputField.value.length)
+				if(gURLBar.selectionEnd == gURLBar.mInputField.value.length){
 					InstantFoxModule.currentQuery.shadowOff = true
+					key == 46 && InstantFox.onInput()
+				}
 			}
 		}
 
@@ -289,7 +293,7 @@ var InstantFox = {
 				var win = InstantFox.pageLoader.preview.contentWindow
 			else
 				var win = window.content
-			
+
 			win.scrollBy(0, -amount)
 		}
 
@@ -310,7 +314,6 @@ var InstantFox = {
 			//q.shadowOff = false
 		} else if (InstantFoxModule.currentQuery) {
 			InstantFoxModule.currentQuery = null;
-			
 		}
 		InstantFox.updateShadowLink(q);
 	},
@@ -450,30 +453,17 @@ var InstantFox = {
 	// ****** instant preview ****************************************
 	minLoadTime: 50,
 	maxLoadTime: 200,
-	doPreload: function(q, ignoreShadow) {
+	doPreload: function(q) {
 		if (this.timeout)
 			this._timeout = clearTimeout(this._timeout)
 
-		if (q.query) {
-			q.plugin.url;
-			if(ignoreShadow){
-				var query = q.query
-			}else
-				var query = q.shadow || q.query
-			
-			var url2go = InstantFoxModule.urlFromQuery(q.plugin, query);
+		var url2go = InstantFoxModule.urlFromQuery(q);
 
-			if(q.preloadURL && url2go.toLowerCase() == q.preloadURL.toLowerCase()){
-				if(q.plugin.id == 'google')
-					InstantFox.pageLoader.checkPreview(500)
-				return url2go		
-			}
-		} else {
-			var url2go = q.plugin.domain || ''
-			url2go = url2go.replace('%q', '')//wikipedia domain was handled incorrectly
-					.replace(/\/$/, '')
+		if(q.query && q.preloadURL && url2go.toLowerCase() == q.preloadURL.toLowerCase()){
+			if(q.plugin.id == 'google')
+				InstantFox.pageLoader.checkPreview(500)
+			return url2go
 		}
-
 
 		q.preloadURL = url2go
 
@@ -487,7 +477,7 @@ var InstantFox = {
 			}
 			//fixme:
 			if(q.plugin.id == 'google'){
-				//InstantFox.pageLoader.preview.contentDocument.getElementById("lst-ib").value=query; 
+				//InstantFox.pageLoader.preview.contentDocument.getElementById("lst-ib").value=query;
 				InstantFox.pageLoader.checkPreview(800)
 			}
 		}else{
@@ -515,9 +505,11 @@ var InstantFox = {
 		this.updateShadowLink(null)
 
 		var q = InstantFoxModule.currentQuery, br
-		if (q.tabId == InstantFox._ctabID){
-			InstantFox.pageLoader.persistPreview(q.forceNewTab?'new':'')
-		}else {
+		if (!q) {
+			this.pageLoader.removePreview()
+		} else if (q.tabId == this._ctabID){
+			this.pageLoader.persistPreview(q.forceNewTab?'new':'')
+		} else {
 			for (var i = 0; i < gBrowser.tabs.length; i++) {
 				if (gBrowser.tabs[i].linkedPanel == q.tabId ){
 					var tab = gBrowser.tabs[i]
@@ -525,36 +517,34 @@ var InstantFox = {
 				}
 			}
 			if(tab){
-				InstantFox.pageLoader.persistPreview(tab, true)
+				this.pageLoader.persistPreview(tab, true)
 			}else{
 				dump('no tab')
+				this.pageLoader.removePreview()
 			}
 		}
-
-		InstantFox.pageLoader.removePreview()
-
 
 		InstantFoxModule.currentQuery = null;
 		if(this.timeout)
 			this._timeout = clearTimeout(this._timeout)
 		//
-		InstantFox.updateLogo(false)
+		this.updateLogo(false)
 	},
 	onEnter: function(value, forceNewTab){
 		var q = InstantFoxModule.currentQuery
 		InstantFoxModule.previousQuery = q
-		
-		// 
+
+		//
 		q.forceNewTab = InstantFoxModule.openSearchInNewTab ? !forceNewTab : forceNewTab
 
 		//
 		if (value)
-			q.query = value
+			q.shadow = q.query = value
 		else if(q.shadow)
 			q.query = q.shadow
-		
+
 		//
-		var tmp = this.doPreload(InstantFoxModule.currentQuery, true)
+		var tmp = this.doPreload(InstantFoxModule.currentQuery)
 		gURLBar.value = tmp;
 		gBrowser.userTypedValue = null;
 
@@ -567,7 +557,7 @@ var InstantFox = {
 //************************************************************************
 // experimental options popup
 InstantFox.popupCloser = function(e) {
-	var inPopup = InstantFox.clickedInPopup 
+	var inPopup = InstantFox.clickedInPopup
 	InstantFox.clickedInPopup = false
 	if (e.target.id == 'instantFox-options') {
 		window.removeEventListener('mousedown', InstantFox.popupCloser, false)
@@ -646,13 +636,13 @@ InstantFox.updateToolbarItems = function(remove) {
 		curSet.splice(pos, 0, myId)
 	} else if (i != -1 && remove) {
 		curSet.splice(i, 1)
-	} 
-	
+	}
+
 	// remove searchbar
 	i = curSet.indexOf("search-container")
 	if(i != -1)
 		curSet.splice(i, 1)
-		
+
 	curSet = curSet.join(",")
 	if (curSet != navBar.currentSet){
 		navBar.setAttribute("currentset", curSet);
@@ -670,7 +660,7 @@ window.addEventListener('load', InstantFox.initialize, true);
 function URLBarSetURI(aURI) {
 	// auri is null if URLBarSetURI is called from urlbar.handleRevert
 	if (InstantFox.$urlBarModified) {
-		if (aURI 
+		if (aURI
 			&& InstantFoxModule.currentQuery
 			&& InstantFoxModule.currentQuery.tabId == InstantFox._ctabID
 		) {
@@ -726,20 +716,20 @@ nsContextMenu.prototype.createSearchItem = function(){
 	var old = document.getElementById("context-searchselect")
 	if(old)
 		old.parentNode.removeChild(old)
-	
+
 	var m = document.createElement('menu')
 	m.setAttribute('id', "ifox-context-searchselect")
 	m.setAttribute('type', "splitmenu")
 	m.setAttribute('iconic', "true")
 	m.setAttribute('onclick', "gContextMenu.doSearch(event)")
-	
+
 	var p = document.createElement('menupopup')
 	p.setAttribute('onpopupshowing', "gContextMenu.fillSearchSubmenu(this)")
-	
+
 	m.appendChild(p)
-	
+
 	var s = document.getElementById("context-sep-open")
-	
+
 	var c = document.getElementById("contentAreaContextMenu")
 	c.insertBefore(m, s)
 	return m
@@ -836,16 +826,12 @@ nsContextMenu.prototype.doSearch = function(e) {
 
 
 
-InstantFox.prepareAutoSearch = function(){
-	if (InstantFoxModule.autoSearch) {
+InstantFox.prepareAutoSearch = function(off){
+	if (off) {
 		InstantFox.handleCommand_orig = gURLBar.handleCommand
-		InstantFox._canonizeURL_orig = gURLBar._canonizeURL
-		
 		gURLBar.handleCommand = InstantFox.handleCommand
-		gURLBar._canonizeURL = InstantFox._canonizeURL
 	} else if (InstantFox.handleCommand_orig) {
 		gURLBar.handleCommand = InstantFox.handleCommand_orig
-		gURLBar._canonizeURL = InstantFox._canonizeURL_orig
 	}
 }
 
@@ -855,7 +841,7 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
         return;
     }
     var url = this.value;
-	var noFixup;
+	var instantFoxUri;
     var mayInheritPrincipal = false;
     var postData = null;
     var action = this._parseActionUrl(url);
@@ -872,13 +858,29 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
             return;
         }
     } else {
-        [url, postData, mayInheritPrincipal, instantFoxUri] = this._canonizeURL(url);
-        if (!url) {
+		InstantFox.onInput()
+		// instantfox shortcuts have the highest priority
+		if (InstantFoxModule.currentQuery) {
+			url = InstantFoxModule.urlFromQuery(InstantFoxModule.currentQuery);
+			InstantFox.finishSearch()
+		} else if (InstantFoxModule.autoSearch) {
+			// let firefox to handle builtin shortcuts if any
+			var shortcutURL = getShortcutOrURI(url, {}, {})
+			//
+			if (shortcutURL == url && (url[0] != '/' && url.indexOf(':') == -1 && url.indexOf('.') == -1))
+				url = InstantFoxModule.urlFromQuery(InstantFoxModule.autoSearch, url);
+
+		} else {
+			// fallback to default behaviour
+			[url, postData, mayInheritPrincipal] = this._canonizeURL(aTriggeringEvent)
+		}
+
+        if (!url)
             return;
-        }
     }
+
     this.value = url;
-	dump(url, postData, mayInheritPrincipal, instantFoxUri, '*********************')
+
     if(!instantFoxUri)
 		gBrowser.userTypedValue = url;
 
@@ -920,73 +922,3 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
     }
     gBrowser.selectedBrowser.focus();
 }
-InstantFox._canonizeURL = function(url) {
-    if (!url) {
-        return ["", null, false, null];
-    }
-    
-    var postData = {};
-    var mayInheritPrincipal = {value: false};
-	var noFixup = {}
-    url = InstantFox.getShortcutOrURI(url, postData, mayInheritPrincipal, noFixup);
-    return [url, postData.value, mayInheritPrincipal.value, noFixup.value];
-}
-InstantFox.getShortcutOrURI = function(aURL, aPostDataRef, aMayInheritPrincipal, noFixup) {
-    if (aMayInheritPrincipal) {
-        aMayInheritPrincipal.value = false;
-    }
-    var shortcutURL = null;
-    var keyword = aURL;
-    var param = "";
-    var offset = aURL.indexOf(" ");
-    if (offset > 0) {
-        keyword = aURL.substr(0, offset);
-        param = aURL.substr(offset + 1);
-    }
-    if (!aPostDataRef) {
-        aPostDataRef = {};
-    }
-
-    [shortcutURL, aPostDataRef.value] = PlacesUtils.getURLAndPostDataForKeyword(keyword);
-    if (!shortcutURL || (aURL[0] != '/' && aURL.indexOf(':') == -1 && aURL.indexOf('.') == -1)) {
-		if(noFixup)
-			noFixup.value = true;
-
-		return InstantFoxModule.urlFromQuery(InstantFoxModule.defaultPlugin, aURL);
-    }
-    var postData = "";
-    if (aPostDataRef.value) {
-        postData = unescape(aPostDataRef.value);
-    }
-    if (/%s/i.test(shortcutURL) || /%s/i.test(postData)) {
-        var charset = "";
-        const re = /^(.*)\&mozcharset=([a-zA-Z][_\-a-zA-Z0-9]+)\s*$/;
-        var matches = shortcutURL.match(re);
-        if (matches) {
-            [, shortcutURL, charset] = matches;
-        } else {
-            try {
-                charset = PlacesUtils.history.getCharsetForURI(makeURI(shortcutURL));
-            } catch (e) {
-            }
-        }
-        var encodedParam = "";
-        if (charset && charset != "UTF-8") {
-            encodedParam = escape(convertFromUnicode(charset, param)).replace(/[+@\/]+/g, encodeURIComponent);
-        } else {
-            encodedParam = encodeURIComponent(param);
-        }
-        shortcutURL = shortcutURL.replace(/%s/g, encodedParam).replace(/%S/g, param);
-        if (/%s/i.test(postData)) {
-            aPostDataRef.value = getPostDataStream(postData, param, encodedParam, "application/x-www-form-urlencoded");
-        }
-    } else if (param) {
-        aPostDataRef.value = null;
-        return aURL;
-    }
-    if (aMayInheritPrincipal) {
-        aMayInheritPrincipal.value = true;
-    }
-    return shortcutURL;
-}
-

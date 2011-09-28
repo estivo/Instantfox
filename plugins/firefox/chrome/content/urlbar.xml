@@ -133,7 +133,7 @@
           <![CDATA[
             var title = this.getAttribute("title");
             var url = this.getAttribute("url");
-           
+
 		   dump(title, url)
             return title + " " + url;
           ]]>
@@ -286,10 +286,10 @@
 	<handlers>
       <handler event="mouseup">
         <![CDATA[
-		// var q=InstantFoxModule.currentQuery		
+		// var q=InstantFoxModule.currentQuery
 		var search = this.getAttribute("title")
 
-		InstantFox.onEnter(search)
+		InstantFox.onEnter(search, event.ctrlKey||event.altKey||event.metaKey)
         event.preventDefault()
 		event.stopPropagation()
       ]]>

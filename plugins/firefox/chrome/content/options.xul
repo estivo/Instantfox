@@ -14,7 +14,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 try{
 	if(window.opener.location.href=='about:addons'){
 		Services.wm.getMostRecentWindow('navigator:browser').openDialog(window.location, '', 'dialog=no,centerscreen')//top='+screenY+',left='+screenX)
-		window.close()	
+		window.close()
 		savePlugins = function(){}
 	}
 }catch(e){}
@@ -22,13 +22,13 @@ try{
 
 <svg:svg height="0">
     <svg:filter id="gray">
-      <svg:feColorMatrix values="0.3333 0.3333 0.3333 0 0 
-                                 0.3333 0.3333 0.3333 0 0 
-                                 0.3333 0.3333 0.3333 0 0 
+      <svg:feColorMatrix values="0.3333 0.3333 0.3333 0 0
+                                 0.3333 0.3333 0.3333 0 0
+                                 0.3333 0.3333 0.3333 0 0
                                  0      0      0      1 0"/>
     </svg:filter>
-</svg:svg>	
-	
+</svg:svg>
+
 <html:style>
 .link {
 	color:blue;
@@ -51,7 +51,7 @@ richlistitem:nth-child(odd) {
 richlistitem[selected="true"] {
 	background-color: #EEF9FF;
 	color:#0500A0
-} 
+}
 /* ======================/*\======/*\====================== */
 textbox:not(.normal){
 	-moz-appearance: none;
@@ -104,7 +104,7 @@ richlistitem:hover{
 richlistbox[seltype="multiple"]:focus > richlistitem[current="true"]{
 	outline: 0px solid highlight!important;
 	outline-offset: -2px!important;
-} 
+}
 splitter {
 	-moz-appearance: none;
 }
@@ -112,15 +112,15 @@ splitter {
 resetbutton {
 	-moz-appearance: none;
 	-moz-image-region: rect(0, 16px, 16px, 0px);
-	
+
 	border: none;	margin: 0px;	padding: 0px;
 	-moz-margin-start: -4px;
 	-moz-margin-end: 4px;
-	
+
 	border-radius: 4px;
 	background: #EEF9FF;
 	box-shadow: 0pt 0pt 1.5px 1px gray;
-	
+
 	list-style-image: url("chrome://instantfox/content/skin/search-close.png");
 	-moz-binding: url("chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton");
 
@@ -185,7 +185,7 @@ label[control='opacity-scale']{
 	border-bottom: 2px solid ;
 	border-top: 1px solid ;
 	margin:0px;
- 
+
 }
 .image{
 	width:16px
@@ -197,19 +197,19 @@ label[control='opacity-scale']{
 	-moz-transition-property: text-shadow;
 	border-radius: 4px;
 	margin-top:-5px;
-	margin-bottom:5px;	
+	margin-bottom:5px;
 }
 #instantLoad[checked]{
 	text-shadow: -1px -1px 3px gold, 0pt -1px 3px gold;
 }
 checkbox:-moz-focusring > .checkbox-label-box{
 	border: 1px dotted transparent;
-} 
+}
 
 .plugin-status{
 	width: 1ch;
 	height: 1ch;
-	border-radius:50%;	
+	border-radius:50%;
 }
 .plugin-status[status=""]{
 	background-color:lime
@@ -242,8 +242,8 @@ checkbox:-moz-focusring > .checkbox-label-box{
 							<menupopup>
 								<menuitem label='all plugins' value='all'/>
 								<menuitem label='only google' value='google'/>
-								<menuitem label='none' value='none'/>								
-								<menuitem label='manual' value='manual'/>								
+								<menuitem label='none' value='none'/>
+								<menuitem label='manual' value='manual'/>
 							</menupopup>
 						</menulist>
 						<spacer flex='1'/>
@@ -256,7 +256,7 @@ checkbox:-moz-focusring > .checkbox-label-box{
 							<menupopup/>
 						</menulist>
 						<spacer flex='1'/>
-					</vbox><!-- 
+					</vbox><!--
 					<spacer flex='1'/>
 					<image src='skin/logo.png' onclick='open(InstantFoxModule.helpURL)' class='link' tooltiptext='open help'/>
 	 -->		</hbox>
@@ -273,7 +273,7 @@ checkbox:-moz-focusring > .checkbox-label-box{
 				</hbox>
 			</vbox>
 			<richlistbox id='shortcuts' flex='1'
-				seltype='multiple' context='context' onselect='onSelect(this)' onmouseup='rbMouseup(event)'/>		
+				seltype='multiple' context='context' onselect='onSelect(this)' onmouseup='rbMouseup(event)'/>
 		</tabpanel>
 		<tabpanel orient='vertical'  flex='1' >
 			<prefpane align='center' hidden='true' flex='1'>
@@ -290,14 +290,14 @@ checkbox:-moz-focusring > .checkbox-label-box{
 					<textbox preference="opacity" id='opacity-text'/>
 					<label value='%'/>
 				</hbox>
-				
+
 				<groupbox>
 					<caption label='standard search without shortcuts:' control='keyword-URL-menu'/>
-					
+
 					<hbox align="center" pack=''>
 						<toolbarbutton id="defaultEngine" type='menu' onclick='enginesPopup.show(this, "InstantFox")'/>
 					</hbox>
-					
+
 					<vbox style='padding-top:5px'>
 						<label value='show suggestions from google, when : ' control='default-suggest'/>
 						<hbox height='28' align='center'>
@@ -323,7 +323,7 @@ checkbox:-moz-focusring > .checkbox-label-box{
 				</vbox>
 		</prefpane>
 		</tabpanel>
-		<tabpanel orient='vertical'  flex='1'>		
+		<tabpanel orient='vertical'  flex='1'>
 		</tabpanel>
 	</tabpanels>
 </tabbox>
@@ -352,8 +352,8 @@ checkbox:-moz-focusring > .checkbox-label-box{
 	<menuitem label='edit' aID='edit'/>
 </menupopup>
 
-<panel id="edit-box" ignorekeys='true' type="arrow" 
-		orient='vertical' onpopuphiding='if(event.target==this)editPopupSave(this)' position='start_before'>	
+<panel id="edit-box" ignorekeys='true' type="arrow"
+		orient='vertical' onpopuphiding='if(event.target==this)editPopupSave(this)' position='start_before'>
 	<hbox align='center' pack='center'>
 		<checkbox label='load page instantly' aID='instant' id='instantLoad'/>
 	</hbox>

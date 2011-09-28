@@ -2,12 +2,12 @@
 InstantFox.mouseUI ={
 	add: function(){
 		this.remove()
-		
+
 		var wrapBox = this.wrapBox = document.createElement('vbox')
 		document.getElementById('browser-panel').appendChild(wrapBox)
-		
+
 		wrapBox.setAttribute('onclick', 'InstantFox.mouseUI.onClick(event)')
-		
+
 		wrapBox.className='instantFox-mouseUI'
 		var st=wrapBox.style
 
@@ -17,7 +17,7 @@ InstantFox.mouseUI ={
 		st.top=cr.bottom+10+'px'
 
 		mainBox=document.createElement('vbox')
-		wrapBox.appendChild(mainBox)	
+		wrapBox.appendChild(mainBox)
 
 		//clear(mainBox)
 		for each(var p in InstantFoxModule.Plugins)
@@ -28,7 +28,7 @@ InstantFox.mouseUI ={
 			this.wrapBox.parentNode.removeChild(this.wrapBox)
 			this.wrapBox = null
 		}
-	}, 
+	},
 
 	createBox: function(plugin) {
 		var box=document.createElement('hbox')
@@ -54,9 +54,9 @@ InstantFox.mouseUI ={
 		}
 		if(!el)
 			return
-		
+
 		var id = el.getAttribute('aID')
-		
+
 		if(el.hasAttribute('selected')){
 			InstantFox.onEnter()
 			return
@@ -64,7 +64,7 @@ InstantFox.mouseUI ={
 		var oldEl = el.parentNode.querySelector('[selected]')
 		oldEl && oldEl.removeAttribute('selected')
 		el.setAttribute('selected', true)
-		
+
 		gURLBar.value = InstantFoxModule.Plugins[id].key + ' ' + gURLBar.value.replace(/\w+ /, '')
 					gURLBar.controller.handleText(true)
 			InstantFox.onInput()

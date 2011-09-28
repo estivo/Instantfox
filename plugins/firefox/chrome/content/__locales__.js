@@ -84,7 +84,7 @@ var commonPlugins = {
 		url: "http://translate.google.com/#auto|%ls|%q",
 		name: "Translate"
 	},
-	
+
 }
 
 /****************************** data *************************
@@ -703,14 +703,14 @@ function locale(name, mapArray, plugins){
 	//============================
 	loc.plugins = {}
 	for(var i in plugins){
-		loc.plugins[i]=extend(commonPlugins[i], plugins[i])		
+		loc.plugins[i]=extend(commonPlugins[i], plugins[i])
 	}
 
 	//============================
 	loc.localeMap = {}
 	;['%ls', '%ll', '%ld'].forEach(function(x, i)loc.localeMap[x] = mapArray[i])
-	
-	writeToFile(file, JSON.stringify(loc, null, 4))	
+
+	writeToFile(file, JSON.stringify(loc, null, 4))
 }
 
 
@@ -741,7 +741,7 @@ function removeCommon(p, pc){
 			}
 		}
 		if(!isDifferent)
-			o[i]=true	
+			o[i]=true
 	}
 	return o
 }
@@ -749,16 +749,16 @@ function unjsonify(locale){
 	var spec = InstantFoxModule.pluginLoader.getPluginFileSpec(locale)
 	var t = makeReq(spec)
 	var obj = JSON.parse(t)
-	
+
 	obj.plugins = removeCommon(obj.plugins, commonPlugins)
-	
+
 	var t1 = JSON.stringify(obj.plugins, null, 1)
 		.replace(/^ +/mg, function(x) Array(x.length+1).join('\t') )
 		.replace(/"(\w+)"\:/g, '$1:')
-	
+
 	var t2 = JSON.stringify(['%ls', '%ll', '%ld'].map(function(x)obj.localeMap[x]))
 
-	return 'locale("'+locale+'", '+t2+', '+t1+')' 
+	return 'locale("'+locale+'", '+t2+', '+t1+')'
 }
 
 var a='',jn, jn1=jn

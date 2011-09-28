@@ -16,7 +16,7 @@ var instantFoxDevel = {
 		var p = Cc["@mozilla.org/appshell/appShellService;1"]
 			.getService(Ci.nsIAppShellService)
 			.hiddenDOMWindow._InstantFox_Component_Scope_
-		
+
 		if(!p)
 			return dump('**********************error component debugging disabled*******************');
 		// uregister
@@ -28,10 +28,10 @@ var instantFoxDevel = {
 				reg.getClassObjectByContractID(CONTRACT_ID, Ci.nsISupports)
 			)
 		}catch(e){}
-		
+
 		var spec = 	Services.io.newFileURI(p.__LOCATION__).spec
 		var t = makeReq(spec)
-		//p.eval(t,p)		
+		//p.eval(t,p)
 		var sandbox = new Cu.Sandbox(Cc["@mozilla.org/systemprincipal;1"].createInstance(Ci.nsIPrincipal))
 		sandbox.__LOCATION__ = p.__LOCATION__.clone()
 		Cu.evalInSandbox(t, sandbox, '1.8', spec, 1);
@@ -42,13 +42,13 @@ var instantFoxDevel = {
 		var f = scope.NSGetFactory(f1.classID)
 		reg.registerFactory(f1.classID, f1.classDescription, f1.contractID, f);
 	},
-	
+
 	reloadModule: function(href){
 		//Cu.import(href).eval(makeReq(href))
 		//return Cu.import(href)
-		//Cc["@mozilla.org/moz/jssubscript-loader;1"].getService(Ci.mozIJSSubScriptLoader) 
+		//Cc["@mozilla.org/moz/jssubscript-loader;1"].getService(Ci.mozIJSSubScriptLoader)
 		var bp = Cu.import(href)
-		// query needed to confuse startupcache in ff 8.0+ 
+		// query needed to confuse startupcache in ff 8.0+
 		Services.scriptloader.loadSubScript(href+'?'+Date.now(), bp);
 		return bp
 	},
@@ -62,7 +62,7 @@ var instantFoxDevel = {
 		document.documentElement.appendChild(s)
 	},
 
-	/*get sourceList() {		
+	/*get sourceList() {
 		var t=makeReq("chrome://instantfox/content/instantfox.xul")
 		t.match(/<script.*src="(.*)"/g).map(function(x)x.match(/src="(.*)"/)[1])
 	}*/
@@ -71,24 +71,24 @@ var instantFoxDevel = {
 		"chrome://instantfox/content/contentHandler.js"
 	],
 	moduleHref: 'chrome://instantfox/content/instantfoxModule.js',
-	
+
 	doReload: function(){
 		//this.reloadComponent()
 		try{InstantFox.destroy()}catch(e){}
-		
+
 		try{
 			var p = document.getElementById('instantFox-options').firstChild
 			while(p.hasChildNodes())
 				p.removeChild(p.firstChild)
 		}catch(e){}
-		
-		var i = this.loadedScriptsCount = 0		
+
+		var i = this.loadedScriptsCount = 0
 		this.loadScript(this.sourceList[i], i)
 	},
 	onLoad: function(e, script){
 		this.loadedScriptsCount++;
 		if(this.loadedScriptsCount == this.sourceList.length){
-			this.m = this.reloadModule(this.moduleHref)	
+			this.m = this.reloadModule(this.moduleHref)
 			// simulate document load event
 			InstantFox.initialize()
 		}else{
@@ -96,7 +96,7 @@ var instantFoxDevel = {
 			var i = this.loadedScriptsCount
 			this.loadScript(this.sourceList[i], i)
 			dump('next')
-		}		
+		}
 	},
 	clearFirstRunPref: function(update){
 		try{
@@ -105,7 +105,7 @@ var instantFoxDevel = {
 				Services.prefs.setCharPref("extensions.instantfox.version", 'oldVersion')
 			else
 				Services.prefs.clearUserPref("extensions.instantfox.version")
-				
+
 			InstantFox.updateOptionsButton(true)
 		}catch(e){}
 	},
@@ -144,7 +144,7 @@ var instantFoxDevel = {
 				this.jsonifyPlugins()
 				break
 		}
-	},	
+	},
 	// file utils
 	getContainingFolder: function(showFile){
 		return getLocalFile('chrome://instantfox/content').parent.parent.parent.QueryInterface(Ci.nsILocalFile)
@@ -172,7 +172,7 @@ var instantFoxDevel = {
 			}
 			return req.responseText;
 		}
-		
+
 		function jsonify(locale){
 			var spec = InstantFoxModule.pluginLoader.getPluginFileSpec(locale)
 
@@ -189,7 +189,7 @@ var instantFoxDevel = {
 		InstantFoxModule.pluginLoader.getAvaliableLocales(function(locales) {
 			locales.forEach(jsonify)
 		})
-		
+
 	},
 	buildLocales: function(){
 		Services.scriptloader.loadSubScript('chrome://instantfox/content/__locales__.js?'+Date.now(), window, 'UTF-8')
@@ -202,12 +202,12 @@ var instantFoxDevel = {
 			}).join('\n')
 			//alert(ans)
 			gClipboardHelper.copyString(ans)
-			
+
 			self.getContainingFolder().reveal()
 		})
-		
+
 	}
-	
+
 }
 
 var gClipboardHelper = {
@@ -261,14 +261,14 @@ getLocalFile=function getLocalFile(mPath){
 var maxRecursion=1000, recur=0, cancel=false
 function makeXPI(){
 	var contextFolder = instantFoxDevel.getContainingFolder()
-	
+
 	packXPI(contextFolder, function(nsFile){
 		nsFile.QueryInterface(Ci.nsILocalFile).reveal()
 	})
 }
-function packXPI(folder, callback){	
+function packXPI(folder, callback){
 	var nsFile = folder.clone()
-	
+
 	// Create a new file
 	nsFile.append(folder.leafName + ".xpi");
 	if(nsFile.exists()){
@@ -281,14 +281,14 @@ function packXPI(folder, callback){
 		}catch(e){}
 		nsFile.remove(true)
 	}
-	nsFile.create(Ci.nsIFile.NORMAL_FILE_TYPE, 0666); 
-  
+	nsFile.create(Ci.nsIFile.NORMAL_FILE_TYPE, 0666);
+
 	var zipWriter = Components.Constructor("@mozilla.org/zipwriter;1", "nsIZipWriter");
 	var zipW = new zipWriter();
-  
+
 	zipW.open(nsFile, PR_RDWR | PR_CREATE_FILE | PR_TRUNCATE);
-	
-	
+
+
 	// We don't want to block the main thread, so the zipping is done asynchronously
 	// and here we get the notification that it has finished
 	var observer = {
@@ -303,7 +303,7 @@ function packXPI(folder, callback){
 	recur = 0,cancel = false
 	try{
 		addFolderContentsToZip(zipW, folder, "");
-		zipW.processQueue(observer, null);	
+		zipW.processQueue(observer, null);
 	}catch(e){
 		zipW.close();
 		Components.utils.reportError(e)
@@ -317,7 +317,7 @@ function packXPI(folder, callback){
 * root a string defining the relative path for this folder in the zip
 */
 function addFolderContentsToZip(zipW, folder, root){
-	var entries = folder.directoryEntries; 
+	var entries = folder.directoryEntries;
 	while(entries.hasMoreElements()){
 		recur++
 		if(recur>maxRecursion){
@@ -328,14 +328,14 @@ function addFolderContentsToZip(zipW, folder, root){
 				recur=0
 		}
 
-		var entry = entries.getNext(); 
+		var entry = entries.getNext();
 		entry.QueryInterface(Ci.nsIFile);
 		dump(entry, isInvalid(entry))
 		if (isInvalid(entry))//skip archives and .svn
 			continue
-		
+
 		var jarName = root + entry.leafName
-		if (entry.isDirectory()) {			
+		if (entry.isDirectory()) {
 			zipW.addEntryFile(jarName, Ci.nsIZipWriter.COMPRESSION_DEFAULT, entry, true);
 			addFolderContentsToZip(zipW, entry, root + entry.leafName + "/");
 		} else if (!/\.(xml|xul|jsm?|css)$/.test(jarName)) {
@@ -344,27 +344,27 @@ function addFolderContentsToZip(zipW, folder, root){
 			addTrimmedFileContentsToJAR(zipW, jarName, entry)
 	}
 }
-// 
+//
 addTrimmedFileContentsToJAR = function(zipW, entryPath, file){
 	var data = readEntireFile(file)
 	data = removeDebugCode(data)
 	if (data.length < 10)
 		return
-	
-	//var istream = Cc["@mozilla.org/io/string-input-stream;1"].createInstance(Ci.nsIStringInputStream);	
+
+	//var istream = Cc["@mozilla.org/io/string-input-stream;1"].createInstance(Ci.nsIStringInputStream);
 	//istream.setData(data, data.length);
 	//todo: do we need to keep encoding from file instead of converting everything to UTF-8
 	var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter);
 	converter.charset = "UTF-8";
 	var istream = converter.convertToInputStream(data)
 
-	zipW.addEntryStream(entryPath, null, Ci.nsIZipWriter.COMPRESSION_DEFAULT, istream, true)   
+	zipW.addEntryStream(entryPath, null, Ci.nsIZipWriter.COMPRESSION_DEFAULT, istream, true)
 }
-removeDebugCode = function(code){	
+removeDebugCode = function(code){
 	var startMarker = 'devel__' + '('
 	var endMarker = 'devel__' + ')'
 	var i = 0, ans = '';
-	
+
 	function readBlock(){
 		var i1 = i;
 		i = code.indexOf(startMarker, i)
@@ -373,11 +373,11 @@ removeDebugCode = function(code){
 			return false
 		}
 		ans += code.substring(i1, i)
-		
+
 		i = code.indexOf(endMarker, i + 1)
 		return i != -1;
 	}
-	
+
 	var n = 100;
 	while(n-- && readBlock());
 
@@ -385,7 +385,7 @@ removeDebugCode = function(code){
 }
 //
 function isInvalid(entry) {
-	return /\.xpi$|\.zip$|\.rar$|thumbs.db$|^\.|^__/i.test(entry.leafName)	
+	return /\.xpi$|\.zip$|\.rar$|thumbs.db$|^\.|^__/i.test(entry.leafName)
 }
 
 /**zr constants*/

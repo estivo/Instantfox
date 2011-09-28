@@ -50,7 +50,7 @@ function dump() {
  *        type:
  *        name:
  *        id:
- *    } 
+ *    }
  ***************/
 // used for new plugins only
 function fixupPlugin(p){
@@ -58,10 +58,10 @@ function fixupPlugin(p){
 	if(p.url){
 		var match = p.url.match(domainRe)
 		p.domain = match ? match[0] :''
-		
+
 		p.id = p.id.toLowerCase()
 		p.iconURI = p.iconURI || getFavicon(p.url);
-		
+
 		if(!p.name){
 			try{
 				p.name = Services.io.newURI(p.url,null,null).host
@@ -69,7 +69,7 @@ function fixupPlugin(p){
 			p.name = p.name || p.id
 		}
 	}
-	// try to find best matching json`  FS#156 - Wikipedia - Suggest Rules 
+	// try to find best matching json`  FS#156 - Wikipedia - Suggest Rules
 	if(!p.json && p.domain){
     	var jRe = p.domain.split(/[\/\.\?#]/)
 		jRe.shift()
@@ -89,32 +89,32 @@ function fixupPlugin(p){
 				ans.push({match:match, D:pp.domain, json:pp.json})
 		}
 		ans.sort(function(a, b) b.match-a.match)
-		
+
 		if(ans[0])
-			p.json = ans[0].json			
+			p.json = ans[0].json
 	}
 	// in case nothing better is found use google
 	if(!p.json)
-		p.json = InstantFoxModule.Plugins.google.json	
+		p.json = InstantFoxModule.Plugins.google.json
 }
 
 var pluginLoader = {
 	// properties with default values
 	defPropNames: ['key','url','name','json'],
-	
-	
+
+
 	preprocessRawData: function (pluginData){
 		var localeRe=/%l(?:s|l|d)/g,
 			domainRe = /\w+:\/\/[^#?]*/;
 		function replacer(m) pluginData.localeMap[m]
-		
+
 		var newPlugins = {}
 
 		for(var i in pluginData.plugins) {
 			var p = pluginData.plugins[i];
 			if(!p || !p.url)
 				continue
-			
+
 			p.url = p.url.replace(localeRe, replacer)
 			p.domain = p.url.match(domainRe)[0]||''
 
@@ -126,9 +126,9 @@ var pluginLoader = {
 				p.json = p.json.replace(localeRe, replacer)
 			else
 				p.json = ''
-			
+
 			p.type = 'default'
-			
+
 			// handle user modifiable props
 			this.defPropNames.forEach(function(propName){
 				p['def_'+propName] = p[propName]
@@ -146,7 +146,7 @@ var pluginLoader = {
 			var mP = InstantFoxModule.Plugins[id]
 			//copy user modified values
 			if(mP){
-				// add properties 
+				// add properties
 				['hideFromContextMenu', 'disableInstant',
 					'disableSuggest', 'disabled'].forEach(function(n){
 					if(n in mP)
@@ -175,24 +175,24 @@ var pluginLoader = {
 		else
 			InstantFoxModule.autoSearch = InstantFoxModule.Plugins.google
 	},
-	
+
 	initShortcuts: function(){
 		InstantFoxModule.Shortcuts = {}
 		var conflicts={}
-		
+
 		for each(var  p in InstantFoxModule.Plugins){
 			if(p.url && p.key && !p.disabled) {
 				if(InstantFoxModule.Shortcuts[p.key])
 					conflicts[InstantFoxModule.Plugins[InstantFoxModule.Shortcuts[p.key]].id] =
 						conflicts[p.id] = true
-					
+
 				InstantFoxModule.Shortcuts[p.key] = p.id
 			}
 		}
 
 		InstantFoxModule.ShortcutConflicts = conflicts
 	},
-	
+
 	onRawPluginsLoaded: function(e){
 		e.target.onload=null
 		var js = e.target.responseText
@@ -220,7 +220,7 @@ var pluginLoader = {
 			this.loadPlugins(true)
 			return
 		}
-			
+
 		for each(var p in pluginData.plugins){
 			var id = p.id
 			var mP = InstantFoxModule.Plugins[id]
@@ -230,23 +230,23 @@ var pluginLoader = {
 		}
 		// add data from browser search engines
 		importBrowserPlugins(false)
-		
+
 		InstantFoxModule.selectedLocale = pluginData.selectedLocale
 		InstantFoxModule.defaultPlugin = pluginData.defaultPlugin
 		if("autoSearch" in pluginData)
 			InstantFoxModule.autoSearch = pluginData.autoSearch
 		else
 			InstantFoxModule.autoSearch = InstantFoxModule.Plugins.google
-		
+
 		this.initShortcuts()
 	},
-	
+
 	getPluginString: function(forUser){
 		var ob={}
 		for each(var p in InstantFoxModule.Plugins)
 			if(p.url)
 				ob[p.id] = this.cleanCopyPlugin(p, forUser)
-				
+
 		var pluginData = {
 			selectedLocale: InstantFoxModule.selectedLocale,
 			defaultPlugin: InstantFoxModule.defaultPlugin,
@@ -255,7 +255,7 @@ var pluginLoader = {
 		}
 
 		return JSON.stringify(pluginData, null, forUser?4:1)
-	},	
+	},
 	savePlugins: function(){
 		var js = this.getPluginString(false)
 
@@ -264,7 +264,7 @@ var pluginLoader = {
 	loadPlugins: function(locale, callback){
 		if(this.req)
 			this.req.abort()
-		
+
 		this.req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
 
 		var file = getUserFile('instantFoxPlugins.js')
@@ -281,13 +281,13 @@ var pluginLoader = {
 			onload(e)
 			callback&&callback()
 		}
-		
+
 		this.req.overrideMimeType("text/plain");
 		dump(spec)
 		this.req.open("GET", spec, true);
 		this.req.send(null)
 	},
-	
+
 	getAvaliableLocales: function(callback){
 		var upre=/\/[^\/]*$/
 		var href = getFileUri('chrome://instantfox/locale/plugins.json').replace(upre,'').replace(upre,'') + '/'
@@ -332,7 +332,7 @@ var pluginLoader = {
 		//
 		if(p.type=='default' || p.type == 'browserSearch'){
 			for each(var i in this.defPropNames){
-				var prop = 'def_'+i 
+				var prop = 'def_'+i
 				p[prop] != null && (p1[prop] = p[prop])
 			}
 		}
@@ -343,7 +343,7 @@ var pluginLoader = {
 		this.loadPlugins(InstantFoxModule.selectedLocale, this.savePlugins.bind(this))
 	}
 }
- 
+
 function getFileUri(mPath) {
     var uri = Services.io.newURI(mPath, null, null), file;
 	var gChromeReg = Cc["@mozilla.org/chrome/chrome-registry;1"].getService(Ci.nsIXULChromeRegistry);
@@ -393,7 +393,7 @@ function getFavicon(url){
 		var host = url.match(/^[a-z]*:\/\/([^\/#?]*)/)[1];
 		var icon = faviconService.getFaviconImageForPage(makeURI('http://'+host)).spec
 		if(icon != faviconService.defaultFavicon.spec)
-			return icon		
+			return icon
 	}catch(e){}
 	return 'http://g.etfv.co/http://'+host
 }
@@ -406,13 +406,13 @@ function pluginFromNsiSearch(bp){
 	if(!url)
 		return
 	url = url.uri.spec.replace('%25qqq','%q')
-	
+
 	var json = bp.getSubmission('%qqq',"application/x-suggestions+json")
 	if(json)
 		json = json.uri.spec.replace('%25qqq','%q')
 	else
 		json = false
-	
+
 	var name = bp.name
 	var iconURI = bp.iconURI && bp.iconURI.spec
 	return {
@@ -434,7 +434,7 @@ function importBrowserPlugins(importKeys) {
 			InstantFoxModule.Plugins[p.id] = p
 		else if(importKeys && p.key)
 			InstantFoxModule.Plugins[p.id].key = p.key
-		
+
 		// handle default plugins
 		var p1 = InstantFoxModule.Plugins[p.id]
 		if(p1.type == 'browserSearch')
@@ -444,7 +444,7 @@ function importBrowserPlugins(importKeys) {
 	}
 }
 
-searchEngineObserver = {    
+searchEngineObserver = {
     observe: function(subject, topic, j){
     	dump(subject, topic,'+++++++++++++**********+++++++',j)
 		importBrowserPlugins(false)
@@ -463,14 +463,14 @@ InstantFoxModule = {
 	helpURL: 'http://www.instantfox.net/help/',
 	editingHelpURL: 'http://www.instantfox.net/help/#add-plugin',
 	uninstallURL: 'http://www.instantfox.net/uninstall',
-	
+
 	//
 	get openSearchInNewTab(){
 		delete this.openSearchInNewTab
 		this.openSearchInNewTab = Services.prefs.getBoolPref("browser.search.openintab")
 		return this.openSearchInNewTab
 	},
-	
+
 	initialize: function(){
 		this.pluginLoader.loadPlugins()
 		this.initialize=function(){}
@@ -492,7 +492,7 @@ InstantFoxModule = {
 				}
 				dom = dom.replace(/\.\w{1,3}(\.\w{1,3})?\//, '.@@@@/')
 				if(dom == '.')
-					continue		
+					continue
 				// test in other locales
 				dom = escapeRegexp(dom).replace('@@@@','\\w{1,3}(?:\.\\w{1,3})?')
 				if(RegExp(dom).test(url))
@@ -524,17 +524,29 @@ InstantFoxModule = {
 		return p.key + ' ' + decodeURIComponent(queryString);
 	},
 	urlFromQuery: function(plugin, query) {
-		if(typeof plugin == 'string'){
+		if (typeof plugin == 'string') {
 			plugin = InstantFoxModule.Plugins[plugin]
-		}	
-		
+		} else if (plugin.plugin){
+			var q = plugin
+			plugin = q.plugin
+			query = q.shadow || q.query //ignoreShadow
+		}
+
+
+		if (!query && q) {
+			var url2go = q.plugin.domain || ''
+			url2go = url2go.replace('%q', '')//wikipedia domain was handled incorrectly
+					.replace(/\/$/, '')
+			return url2go
+		}
+
 		// encode query
 		if (plugin.id == 'imdb')
 			query = escape(query.replace(/ /g, '+'));
 		else
 			query = encodeURIComponent(query);
 
-		return plugin.url.replace('%q', query);		
+		return plugin.url.replace('%q', query);
 	},
 	parse: function(q) {
 		// We assume that the sting before the space indicates a InstantFox-Plugin
@@ -549,7 +561,7 @@ InstantFoxModule = {
 	Plugins: {},
 	Shortcuts: {},
 	pluginLoader: pluginLoader,
-	
+
 	getBestPluginMatch: function(key){
 		if(!key)
 			return this.Plugins[this.defaultPlugin]
@@ -557,13 +569,13 @@ InstantFoxModule = {
 	},
 	setAutoSearch: function(val){
 		this.autoSearch = val
-		
+
 		var e = Services.wm.getEnumerator("navigator:browser")
 		while(e.hasMoreElements()){
 			e.getNext().InstantFox.prepareAutoSearch()
 		}
 	}
-	
+
 }
 
 /*******************************************************
@@ -609,9 +621,9 @@ var parseGeoJson = function(json, key, splitSpace){
 	var city = json.match(/"city":"(.*?)"/)
 	// sometimes city can be '(null)': why?
 	if (!city || /\(?null\)?/.test())
-		return 
+		return
 	var result = city[1]
-	// side effect	
+	// side effect
 	return InstantFoxModule.geoResult = [{
 		icon: '',
 		title: result,
@@ -804,16 +816,16 @@ InstantFoxSearch.prototype = {
 		return*/
 		//this.$searchingHistory = false;
 		dump('this.$searchingHistory', this.$searchingHistory, result.matchCount)
-		
+
 		if (!result.matchCount && InstantFoxModule.autoSearch) {
 			autoSearch.query = autoSearch.value = this.searchString
 			var url = autoSearch.plugin.json.replace('%q', encodeURIComponent(autoSearch.query))
 			this.parser = parseSimpleJson
 			this.startReq(url)
 		} else
-			this.listener.onSearchResult(this, result)	
+			this.listener.onSearchResult(this, result)
 	},
-	
+
 	// implement nsIAutoCompleteSearch
 	startSearch: function(searchString, searchParam, previousResult, listener) {
 		//win = Services.wm.getMostRecentWindow("navigator:browser");
@@ -831,9 +843,9 @@ InstantFoxSearch.prototype = {
 		var q = InstantFoxModule.currentQuery
 		var plugin = q.plugin
 		var results, url, callOnSearchReady;
-		
+
 		var isMaps = plugin && plugin.json && plugin.json.indexOf('http://maps.google') == 0
-				
+
 		if (plugin.suggestPlugins) {
 			// handle ` searches
 			var results = getMatchingPlugins(plugin.key, plugin.tail)
@@ -864,8 +876,8 @@ InstantFoxSearch.prototype = {
 			url = plugin.json.replace('%q', encodeURIComponent(q.query))
 			this.parser = isMaps ? parseMapsJson : parseSimpleJson
 		}
-		
-		
+
+
 		if (url) {
 			this.listener = listener;
 			this.startReq(url)
@@ -902,7 +914,7 @@ InstantFoxSearch.prototype = {
 		_req.open("GET", url, true);
 		_req.send(null);
 	},
-	
+
 	onSearchReady: function(e){
 		dump('end',e.target.channel.name, this._reqList[0] == e.target)
 		if(!this.listener)
@@ -914,15 +926,15 @@ InstantFoxSearch.prototype = {
 
 		var q = InstantFoxModule.currentQuery || autoSearch
 		var key = q.plugin.key
-		
+
 		q.results = this.parser(json, key, q.splitSpace)
-		var newResult = new SimpleAutoCompleteResult(q.results, q.value);		
+		var newResult = new SimpleAutoCompleteResult(q.results, q.value);
 		this.listener.onSearchResult(this, newResult);
 		//this.listener = null;
-		
+
 		q.onSearchReady()
 	},
-	
+
 	stopOldRequests: function(req){
 		var i = this._reqList.indexOf(req)
 		if(i==-1){
