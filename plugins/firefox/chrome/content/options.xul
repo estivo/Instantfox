@@ -8,6 +8,7 @@
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns:svg='http://www.w3.org/2000/svg'
 	title="instantfox options"
+	width="450" height="600" persist='width height' id='instantfox_options'
 	resizable='yes' onunload='savePlugins()'>
 <script>
 Components.utils.import("resource://gre/modules/Services.jsm");
@@ -207,18 +208,18 @@ checkbox:-moz-focusring > .checkbox-label-box{
 }
 
 .plugin-status{
-	width: 1ch;
-	height: 1ch;
-	border-radius:50%;
+	width: 16px;
+	height: 16px;
 }
 .plugin-status[status=""]{
-	background-color:lime
+	background:url(chrome://instantfox/content/skin/instant.png)
 }
 .plugin-status[status="not-instant"]{
-	background-color:yellow
+	/*background-color:yellow*/
 }
 .plugin-status[status="invalid"]{
-	background-color:red
+	background-color:red;
+	border-radius:50%;
 }
 </html:style>
 
@@ -241,7 +242,7 @@ checkbox:-moz-focusring > .checkbox-label-box{
 						<menulist id="global-instant" sizetopopup='none' oncommand = 'globalInstantCommand(event);'>
 							<menupopup>
 								<menuitem label='all plugins' value='all'/>
-								<menuitem label='only google' value='google'/>
+								<menuitem label='auto' value='google'/>
 								<menuitem label='none' value='none'/>
 								<menuitem label='manual' value='manual'/>
 							</menupopup>
@@ -291,31 +292,74 @@ checkbox:-moz-focusring > .checkbox-label-box{
 					<label value='%'/>
 				</hbox>
 
-				<groupbox>
-					<caption label='standard search without shortcuts:' control='keyword-URL-menu'/>
-
-					<hbox align="center" pack=''>
-						<toolbarbutton id="defaultEngine" type='menu' onclick='enginesPopup.show(this, "InstantFox")'/>
-					</hbox>
-
-					<vbox style='padding-top:5px'>
-						<label value='show suggestions from google, when : ' control='default-suggest'/>
-						<hbox height='28' align='center'>
-							<label value=' there are no history results:' control='default-suggest'/>
-							<checkbox preference="default-suggest-pref"  id='default-suggest'/>
-						</hbox><hbox height='28' align='center'>
-							<label value=' query is longer than:' control='default-suggest'/>
-							<textbox preference="default-suggest-pref"  id='default-suggest'/>
-							<label value='chars' control='default-suggest'/>
-						</hbox>
-					</vbox>
-				</groupbox>
-				<separator class='groove'/>
+				<spacer flex='1'/>
+				
 				<hbox align='center'>
 					<label  value='open search in new tab' controll='openintab-checkbox'/>
 					<checkbox id='openintab-checkbox' preference="openintab" oncommand='InstantFoxModule.openSearchInNewTab=this.checked'/>
 				</hbox>
-				<spacer flex='1'/>
+				<groupbox>
+				
+	<grid >
+		<columns>
+			<column flex="0"/>
+			<column flex="1"/>
+		</columns>
+		<rows>
+			<row>
+				<toolbarbutton image='moz-anno:favicon:http://www.google.com/favicon.ico'
+				id="defaultEngine+" type='menu+' onclick='+enginesPopup.show(this, "InstantFox")'/>
+				<checkbox label='standard search without shortcuts' checked='true'/>
+			</row>
+			<row>
+				<label value='url:'/>
+				<hbox align='center' flex='1' class='longbox'>
+					<textbox type='url' aID='url' flex='1'  oninput="
+						this.nextSibling.hidden = !canResetProp(this);
+						if(this.timeout==null)
+							this.timeout=setTimeout(function(a){
+								a.timeout=null;
+								$t($('edit-box'), 'image').src='http://g.etfv.co/'+a.value;
+							}, 500, this)
+						"/>
+					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
+				</hbox>
+				<hbox align="center" class='image'>
+					<toolbarbutton type='menu' onclick='enginesPopup.show(this, "Json")'/>
+				</hbox>
+			</row>
+			<row>
+				<label value='suggest'/>
+				<hbox align='center' flex='1' class='longbox'>
+					<checkbox aID='suggest' oncommand='var st=this.nextSibling.style;
+					if(this.checked){st.opacity="";st.pointerEvents=""}else{st.opacity=0;st.pointerEvents="none"}'/>
+					<textbox type='url' aID='json' flex='1' class='longbox' oninput="
+						this.nextSibling.hidden = !canResetProp(this);
+						"/>
+					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
+				</hbox>
+				<hbox align="center" class='image'>
+					<toolbarbutton type='menu' onclick='enginesPopup.show(this, "Json")'/>
+				</hbox>
+			</row>
+			<row>
+				<label value='instant'/>
+				<menulist id="global-instant" sizetopopup='none' oncommand = ''>
+					<menupopup>
+						<menuitem label='off' value='all'/>
+						<menuitem label='only for history results' value='google'/>
+						<menuitem label='only for search engine results' value='none'/>
+						<menuitem label='always' value='manual'/>
+					</menupopup>
+				</menulist>
+			</row>
+		</rows>
+	</grid>
+	
+<hbox align="center" id='defaultEngine'></hbox>
+
+				</groupbox>
+
 				<vbox align='center'>
 					<slickbutton label='copyPluginsToClipboard' oncommand='copyPluginsToClipboard()'/>
 					<slickbutton label='addPluginDataFromClipboard' oncommand='addPluginsFromClipboar()'/>
