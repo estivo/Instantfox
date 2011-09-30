@@ -738,6 +738,7 @@ function getAboutUrls(){
 			var name = i.substr(l.length)
 			ans.push({
 				url: 'about:'+ name,
+				title: 'about:'+ name,
 				name: name
 			})
 		}
@@ -746,16 +747,28 @@ function getAboutUrls(){
 /*************************************************************************
  *    search component
  ***************/
+function AutoCompleteResultToArray(r){
+	var ans = [];
+	for(var i = 0;i<r.matchCount;i++)
+		ans.push({
+			icon:r.getImageAt(i),
+			type:r.getStyleAt(i),
+			comment:r.getCommentAt(i),
+			label:r.getLabelAt(i),
+			url:r.getValueAt(i),
+		})
+	return ans
+}
 function SimpleAutoCompleteResult(list, searchString, defaultIndex) {
 	this._searchString = searchString;
 	this._defaultIndex = defaultIndex || 0;
 	if (list){
-		this._searchResult = (list.length?'SUCCESS':'NOMATCH')
+		var status = (list.length?'SUCCESS':'NOMATCH')
 		this.list = list;
 	} else
-		this._searchResult = 'FAILURE';
+		var status = 'FAILURE';
 
-	this._searchResult = Ci.nsIAutoCompleteResult['RESULT_' + this._searchResult]
+	this._searchResult = Ci.nsIAutoCompleteResult['RESULT_' + status];
 }
 SimpleAutoCompleteResult.prototype = {
 	/**
@@ -781,11 +794,11 @@ SimpleAutoCompleteResult.prototype = {
 	getLabelAt: function(index) this.list[index].url,//url attribute on richlistitem in popup
 	getValueAt: function(index) this.list[index].url,//displayed in urlbar
 	getImageAt: function(index) this.list[index].icon,
-	getStyleAt: function(index) "InstantFoxSuggest",
+	getStyleAt: function(index) this.list[index].type || "InstantFoxSuggest",
 
 	removeValueAt: function(index, removeFromDb) {
 		dump(index, removeFromDb)
-		this.list.splice(index, 1);
+		// this.list.splice(index, 1);
 	},
 	QueryInterface: function(aIID) {
 		if (!aIID.equals(Ci.nsIAutoCompleteResult) && !aIID.equals(Ci.nsISupports))
@@ -822,13 +835,23 @@ InstantFoxSearch.prototype = {
 	// implement nsIAutoCompleteSearch
 	startSearch: function(searchString, searchParam, previousResult, listener) {
 		//win = Services.wm.getMostRecentWindow("navigator:browser");
-		//if (searchString.slice(0) == 'about:')
+		dump(searchString.slice(0, 6))
+		if (searchString.slice(0, 6) == 'about:'){
+			searchString = searchString.substr(6)
+			var results = filter(getAboutUrls(), searchString)
+			if(results && results.length){
+				var newResult = new SimpleAutoCompleteResult(results, searchString);
+				listener.onSearchResult(this, newResult);
+				return
+			}
+		}
 		if (!InstantFoxModule.currentQuery) {
 			//Search user's history
 			this.$searchingHistory = true
 			this.listener = listener;
 			this.searchString = searchString;
-			this.historyAutoComplete.startSearch(searchString, searchParam, previousResult, this);
+			dump(searchParam)
+			this.historyAutoComplete.startSearch(searchString, "", previousResult, this);
 			return
 		} else if(this.$searchingHistory)
 			this.historyAutoComplete.stopSearch()

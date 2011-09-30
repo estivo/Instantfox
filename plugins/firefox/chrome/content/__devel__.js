@@ -79,7 +79,7 @@ var instantFoxDevel = {
 		try{
 			var p = document.getElementById('instantFox-options').firstChild
 			while(p.hasChildNodes())
-				p.removeChild(p.firstChild)
+				p.removeChild(p.firstChild.firstChild)
 		}catch(e){}
 
 		var i = this.loadedScriptsCount = 0
