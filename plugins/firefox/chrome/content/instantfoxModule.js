@@ -1,7 +1,7 @@
-var Cc	= Components.classes;
-var Ci	= Components.interfaces;
-var Cr	= Components.results;
-var Cu	= Components.utils;
+var Cc  = Components.classes;
+var Ci  = Components.interfaces;
+var Cr  = Components.results;
+var Cu  = Components.utils;
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
@@ -26,13 +26,13 @@ function debug(aMessage) {
 	else consoleService.logStringMessage("null");
 }
 function dump() {
-    var aMessage = "aMessage: ";
-    for (var i = 0; i < arguments.length; ++i) {
-        var a = arguments[i];
-        aMessage += (a && !a.toString ? "[object call]" : a) + " , ";
-    }
-    var consoleService = Components.classes['@mozilla.org/consoleservice;1'].getService(Components.interfaces.nsIConsoleService);
-    consoleService.logStringMessage("" + aMessage);
+	var aMessage = "aMessage: ";
+	for (var i = 0; i < arguments.length; ++i) {
+		var a = arguments[i];
+		aMessage += (a && !a.toString ? "[object call]" : a) + " , ";
+	}
+	var consoleService = Components.classes['@mozilla.org/consoleservice;1'].getService(Components.interfaces.nsIConsoleService);
+	consoleService.logStringMessage("" + aMessage);
 }
 /** devel__) **/
 /*************************************************************************
@@ -71,13 +71,13 @@ function fixupPlugin(p){
 	}
 	// try to find best matching json`  FS#156 - Wikipedia - Suggest Rules
 	if(!p.json && p.domain){
-    	var jRe = p.domain.split(/[\/\.\?#]/)
+		var jRe = p.domain.split(/[\/\.\?#]/)
 		jRe.shift()
 		jRe = jRe.filter(function(x)x)
 		var ans = []
 		for each(pp in InstantFoxModule.Plugins){
-            if(!pp.json)
-                continue
+			if(!pp.json)
+				continue
 			var match = 0, count = 0
 			for each(i in jRe){
 				if(pp.domain.indexOf(i)>0){
@@ -193,9 +193,7 @@ var pluginLoader = {
 		InstantFoxModule.ShortcutConflicts = conflicts
 	},
 
-	onRawPluginsLoaded: function(e){
-		e.target.onload=null
-		var js = e.target.responseText
+	onRawPluginsLoaded: function(js){
 		try {
 			// eval(js)
 			var rawPluginData = JSON.parse(js)
@@ -210,9 +208,7 @@ var pluginLoader = {
 		importBrowserPlugins(true)
 		this.initShortcuts()
 	},
-	onPluginsLoaded: function(e){
-		e.target.onload = null
-		var js = e.target.responseText
+	onPluginsLoaded: function(js){
 		try{
 			var pluginData = JSON.parse(js)
 		}catch(e){
@@ -262,11 +258,6 @@ var pluginLoader = {
 		writeToFile(getUserFile('instantFoxPlugins.js'), js)
 	},
 	loadPlugins: function(locale, callback){
-		if(this.req)
-			this.req.abort()
-
-		this.req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
-
 		var file = getUserFile('instantFoxPlugins.js')
 		if(!locale && file.exists()){
 			var spec = Services.io.newFileURI(file).spec
@@ -275,23 +266,18 @@ var pluginLoader = {
 			spec = this.getPluginFileSpec(locale)
 			var onload = this.onRawPluginsLoaded.bind(this)
 		}
-
-		this.req.onload=function(e) {
-			this.onload = null;
-			onload(e)
-			callback&&callback()
-		}
-
-		this.req.overrideMimeType("text/plain");
 		dump(spec)
-		this.req.open("GET", spec, true);
-		this.req.send(null)
+
+		if(this.req)
+			this.req.abort()
+		
+		this.req = fetchAsync(spec, [onload, callback])
 	},
 
 	getAvaliableLocales: function(callback){
 		var upre=/\/[^\/]*$/
 		var href = getFileUri('chrome://instantfox/locale/plugins.json').replace(upre,'').replace(upre,'') + '/'
-		makeReqAsync(href, function(t){
+		fetchAsync(href, function(t){
 			callback(t.match(/201\: [^ ]* /g).map(function(x)x.slice(5,-1).replace(/\/$/, '')))
 		})
 	},
@@ -345,24 +331,31 @@ var pluginLoader = {
 }
 
 function getFileUri(mPath) {
-    var uri = Services.io.newURI(mPath, null, null), file;
+	var uri = Services.io.newURI(mPath, null, null), file;
 	var gChromeReg = Cc["@mozilla.org/chrome/chrome-registry;1"].getService(Ci.nsIXULChromeRegistry);
-    while (uri.schemeIs("chrome")) {
-        uri = gChromeReg.convertChromeURL(uri);
-    }
+	while (uri.schemeIs("chrome")) {
+		uri = gChromeReg.convertChromeURL(uri);
+	}
 	return uri.spec
 }
 
-function makeReqAsync(href,callback){
-    var req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
-    req.open('GET', href, true);
+function fetchAsync(href, callback){
+	var req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
 	req.overrideMimeType('text/plain')
+	req.open('GET', href, true);
 
-    req.onload = function() {
-		callback(req.responseText);
-	}
+	req.addEventListener('load', function() {
+		req.removeEventListener('load', arguments.callee)
+		if(typeof callback == 'function')
+			callback(req.responseText);
+		else for each(var func in callback){
+			(typeof func == 'function') && func(req.responseText);
+		}
+		delete req
+	})
 
-    req.send(null);
+	req.send(null);
+	return req
 }
 
 function getUserFile(name, dir){
@@ -384,7 +377,7 @@ function writeToFile(file, text){
 //************** favicon utils
 var faviconService;
 function makeURI(aURL, aOriginCharset, aBaseURI) {
-    return Services.io.newURI(aURL, aOriginCharset, aBaseURI);
+	return Services.io.newURI(aURL, aOriginCharset, aBaseURI);
 }
 
 function getFavicon(url){
@@ -445,11 +438,11 @@ function importBrowserPlugins(importKeys) {
 }
 
 searchEngineObserver = {
-    observe: function(subject, topic, j){
-    	dump(subject, topic,'+++++++++++++**********+++++++',j)
+	observe: function(subject, topic, j){
+		dump(subject, topic,'+++++++++++++**********+++++++',j)
 		importBrowserPlugins(false)
 	},
-    QueryInterface: function() this
+	QueryInterface: function() this
 }
 Services.obs.addObserver(searchEngineObserver, "engine-added", true)
 Services.obs.addObserver(searchEngineObserver, "engine-loaded", true)
@@ -557,7 +550,7 @@ InstantFoxModule = {
 			keyindex: index,
 			keylength: q.length
 		};
-    },
+	},
 	Plugins: {},
 	Shortcuts: {},
 	pluginLoader: pluginLoader,
@@ -907,7 +900,7 @@ InstantFoxSearch.prototype = {
 		}
 
 		var _req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
-		_req.onload = this.onSearchReady;
+		_req.addEventListener("load", this.onSearchReady);
 
 		this._reqList.push(_req)
 
