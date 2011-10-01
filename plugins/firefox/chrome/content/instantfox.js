@@ -239,8 +239,8 @@ var InstantFox = {
 			}
 			else if (!alt && !meta && !ctrl && [38,40,34,33].indexOf(key)!=-1) {//UP,DOWN,PAGE_UP,PAGE_DOWN
 				if(!q.plugin.disableInstant) {
-					InstantFox.schedulePreload()
 					q.shadow = '';
+					InstantFox.schedulePreload()
 				}
 			}
 			else if (key == 27) { // 27 == ESCAPE
@@ -255,12 +255,12 @@ var InstantFox = {
 			else if (key == 8 || key == 46) { // 8 == BACK_SPACE, 46 == DELETE
 				if(gURLBar.selectionEnd == gURLBar.mInputField.value.length){
 					InstantFoxModule.currentQuery.shadowOff = true
-					key == 46 && InstantFox.onInput()
+					simulateInput = key == 46
 				}
 			}
 		}
 
-		if (key == 32 && ctrl) { // 32 == SPACE
+		if (key == 32 && (ctrl || meta)) { // 32 == SPACE
 			var origVal = gURLBar.value;
 			var keyIndex = origVal.indexOf(' ')
 			var key = origVal.substring(0,keyIndex)
@@ -342,38 +342,41 @@ var InstantFox = {
 	get _url() InstantFoxModule.currentQuery,
 
 	getQuery: function(val, oldQ){
-		var plugin
+		dump(val, oldQ)
+		var plugin, key
 		var i = val.indexOf(' ');
 		if(val[0]=='`'){
 			if (i == -1)
 				i = val.length
+			key = val.substring(0, i)
 			if(gURLBar.selectionStart <= i)
 				plugin = {
 					suggestPlugins: true,
-					key: val.substring(1, i),
+					key: key,
 					tail: val.substr(i),
 					disableInstant: true
 				}
 			else
-				plugin = InstantFoxModule.getBestPluginMatch(val.substring(1, i))
+				plugin = InstantFoxModule.getBestPluginMatch(key.substr(1))
 		}else{
 			if (i == -1)
-				return false
+				return this.defQ
 			var id = InstantFoxModule.Shortcuts[val.substr(0, i)]
 			if (!id)
-				return;
+				return this.defQ;
 			plugin = InstantFoxModule.Plugins[id]
 		}
 
 		var j = val.substr(i).match(/^\s*/)[0].length
 		if (!oldQ) {
 			oldQ = {
-				browserText: nsContextMenu.prototype.getSelectedText().substr(0, 50),
+				//browserText: nsContextMenu.prototype.getSelectedText().substr(0, 50),
 				tabId: gBrowser.mCurrentTab.linkedPanel,
 				onSearchReady: this.onSearchReady,
 				shadow: ''
 			}
 		}
+		oldQ.key = key || plugin.key
 		oldQ.plugin = plugin
 		oldQ.query = val.substr(i+j)
 		oldQ.splitSpace = val.substr(i,j)
@@ -381,8 +384,7 @@ var InstantFox = {
 		return oldQ
 	},
 	onSearchReady: function(){
-		 var q = this;//
-		//XULBrowserWindow.InsertShadowLink(q.shadow||"", q.value||"");
+		var q = this;//
 		InstantFox.findBestShadow(q)
 		InstantFox.updateShadowLink(q)
 		if(!q.plugin.disableInstant)
@@ -432,8 +434,8 @@ var InstantFox = {
 			this.rightShadow = ''
 			return
 		}
-		var i = q.value.indexOf(' ')
-		var key = q.value.slice(0, i)+q.splitSpace.replace(' ', '\u00a0', 'g');
+
+		var key = q.key + q.splitSpace.replace(' ', '\u00a0', 'g');
 		var l = 1
 		var s = {
 			key: key,
@@ -494,7 +496,11 @@ var InstantFox = {
 
 		this._timeout = setTimeout(function(self){
 			self._timeout = null
-			self.doPreload(InstantFoxModule.currentQuery)
+			if(InstantFoxModule.currentQuery)
+				self.doPreload(InstantFoxModule.currentQuery)
+			else
+				self.defaultSearch.doPreload()
+
 		}, delay||200, this)
 	},
 	onPageLoad: function(spec){
@@ -922,3 +928,15 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
 		loadCurrent();
 	}
 }
+
+
+// search without shortcuts
+// todo: integrate with plugin system?
+InstantFox.defaultSearch = {
+	doPreload: function(){
+		if(this.url)
+			InstantFox.pageLoader.addPreview(this.url)
+	}
+	
+}
+

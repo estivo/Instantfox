@@ -75,18 +75,18 @@ function fixupPlugin(p){
 		jRe.shift()
 		jRe = jRe.filter(function(x)x)
 		var ans = []
-		for each(pp in InstantFoxModule.Plugins){
-			if(!pp.json)
+		for each(var plugin in InstantFoxModule.Plugins){
+			if(!plugin.json)
 				continue
 			var match = 0, count = 0
-			for each(i in jRe){
-				if(pp.domain.indexOf(i)>0){
+			for each(var i in jRe){
+				if(plugin.domain.indexOf(i)>0){
 					match += i.length * i.length
 					count++
 				}
 			}
 			if(match >= 9)
-				ans.push({match:match, D:pp.domain, json:pp.json})
+				ans.push({match:match, D:plugin.domain, json:plugin.json})
 		}
 		ans.sort(function(a, b) b.match-a.match)
 
@@ -456,6 +456,8 @@ InstantFoxModule = {
 	helpURL: 'http://www.instantfox.net/help/',
 	editingHelpURL: 'http://www.instantfox.net/help/#add-plugin',
 	uninstallURL: 'http://www.instantfox.net/uninstall',
+	
+	bp: this,
 
 	//
 	get openSearchInNewTab(){
@@ -940,15 +942,18 @@ InstantFoxSearch.prototype = {
 
 		var json = e.target.responseText;
 
-		var q = InstantFoxModule.currentQuery || autoSearch
-		var key = q.plugin.key
-
-		q.results = this.parser(json, key, q.splitSpace)
-		var newResult = new SimpleAutoCompleteResult(q.results, q.value);
-		this.listener.onSearchResult(this, newResult);
-		//this.listener = null;
-
-		q.onSearchReady()
+		var q = InstantFoxModule.currentQuery
+		if(q){
+			var key = q.key || q.plugin.key
+			q.results = this.parser(json, key, q.splitSpace)		
+			var newResult = new SimpleAutoCompleteResult(q.results, q.value);
+			this.listener.onSearchResult(this, newResult);
+			q.onSearchReady()
+			//this.listener = null;
+		}else{
+			autoSearch.searchResults = this.parser(json, "", "")
+			autoSearch.onSearchReady(this.listener)
+		}
 	},
 
 	stopOldRequests: function(req){

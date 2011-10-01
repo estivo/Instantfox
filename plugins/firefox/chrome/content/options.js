@@ -721,20 +721,24 @@ updateBrowserEngines = function(){
 }
 
 function onTabSelect(){
-	if(!this.pane1Ready && this.selectedIndex==1){
-		this.pane1Ready=true;
+	var i = this.selectedIndex
+	//$("add").hidden = this.selectedIndex != 0
+	
+	if(this[i+"_paneReady"])
+		return;
+	this[i+"_paneReady"] = true
+	
+	if(i == 1 || i == 2){
 		this.parentNode.selectedPanel.firstChild.hidden = false;
 		gPrefChanged = true;
 		enginesPopup.init_InstantFox()
-	}else if(!this.pane2Ready && this.selectedIndex==2){
-		this.pane2Ready=true;
+	}else if(i == 3){
 		var iframe = document.createElement('iframe');
 		iframe.setAttribute('type', 'content');
 		iframe.setAttribute('src', 'resource://instantfox/about.html');
 		iframe.setAttribute('flex', '1');
 		this.parentNode.selectedPanel.appendChild(iframe);
 	}
-	//$("add").hidden = this.selectedIndex != 0
 }
 
 /***********************************************************************/
@@ -768,7 +772,7 @@ copyPluginsToClipboard = function(){
 	gClipboardHelper.copyString(str)
 }
 
-addPluginsFromClipboar = function(){
+addPluginsFromClipboard = function(){
 	var str = gClipboardHelper.getData()
 	try{
 		var js = JSON.parse(str)

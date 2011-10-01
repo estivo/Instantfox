@@ -1,4 +1,3 @@
-
 itest = {}
 ;(function(){
 
@@ -123,6 +122,33 @@ testList = [{
 	},
 	test: function(){
 		return content.location.href.indexOf('--')!=0
+	},
+	delay:100
+},{
+	name: 'wikipedia suggest rules ',
+	run: function(){
+		var p = InstantFoxModule.Plugins.google
+		p.key = 'g'
+		p.disableSuggest = true
+		p.disableInstant = false	
+		
+		window.focus()
+		itest.mouse(gURLBar)
+		gURLBar.select()
+		itest.key('g')
+		itest.key(' ')
+		itest.key('-')
+		itest.key('-')
+	},
+	test: function(){
+		var p = {url:'http://am.wikipedia.org/%q', id:'id'}
+
+		InstantFoxModule.bp.fixupPlugin(p)
+
+		return p.domain == "http://am.wikipedia.org" &&
+			p.iconURI == "http://g.etfv.co/http://am.wikipedia.org" &&
+			p.name == "am.wikipedia.org" &&
+			p.json.indexOf("wikipedia")>0
 	},
 	delay:100
 }]
