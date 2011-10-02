@@ -84,7 +84,13 @@ var commonPlugins = {
 		url: "http://translate.google.com/#auto|%ls|%q",
 		name: "Translate"
 	},
+}
 
+var commonAutoSearch = {
+	json: 'http://clients1.google.de/complete/search?client=chrome&hl=%ls&q=%q',
+	url: commonPlugins.Google.url,
+	instant: "off",
+	suggest: "history"
 }
 
 /****************************** data *************************
@@ -693,7 +699,7 @@ function extend(a, b){
 		o[i] = b[i]
 	return o
 }
-function locale(name, mapArray, plugins){
+function locale(name, mapArray, plugins, autoSearch){
 	var loc = {}
 	var spec = InstantFoxModule.pluginLoader.getPluginFileSpec(name)
 	dump(spec)
@@ -709,6 +715,8 @@ function locale(name, mapArray, plugins){
 	//============================
 	loc.localeMap = {}
 	;['%ls', '%ll', '%ld'].forEach(function(x, i)loc.localeMap[x] = mapArray[i])
+	
+	loc.autoSearch = autoSearch || commonAutoSearch
 
 	writeToFile(file, JSON.stringify(loc, null, 4))
 }
