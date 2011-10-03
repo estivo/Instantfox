@@ -179,7 +179,7 @@ onContextMenuCommand = function(e){
 	var item = document.popupNode
 	item = $parent(item)
 	if (name=='edit'){
-		openEditPopup({target: item.lastChild})
+		openEditPopup(item.lastElementChild)
 		return
 	}
 
@@ -258,7 +258,9 @@ createEmptyPlugin=function(){
 		createNew: true
 	}
 }
-openEditPopup = function(item, plugin){
+openEditPopup = function(item, anchor){
+	var plugin = InstantFoxModule.Plugins[item.id]
+
 	var panel = $('edit-box')
 
 	// without this, arrow isn't shown first time
@@ -275,37 +277,7 @@ openEditPopup = function(item, plugin){
 
 	var popupBoxObject = panel.popupBoxObject;
 	popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
-	panel.openPopup(item, 'start_before', 0, 0, false, true)
-}
-
-rbMouseup = function(e){
-	var item = e.target;
-	var aID = item.getAttribute('aID')
-	//**********
-	if (aID == 'enable-link') {
-		var item = $parent(e.target)
-		gPlugin = InstantFoxModule.Plugins[item.id]
-		gPlugin.disabled = false
-		saveGPlugin()
-		return
-	}
-	if (!aID && item.className == 'separator'){
-		var start = item.nextSibling, end = item = start
-
-		while((item = item.nextSibling) && ( item.nodeName == 'richlistitem')  ){
-			end = item
-		}
-		start.parentNode.selectItemRange(start, end)
-	}
-
-	//**********
-	if (aID != 'edit-link')
-		return;
-
-	var item = $parent(e.target)
-	var p = InstantFoxModule.Plugins[item.id]
-
-	openEditPopup(item.lastElementChild, p)
+	panel.openPopup(anchor || item.lastElementChild || item, 'start_before', 0, 0, false, true)
 }
 
 editPopupSave = function(panel){
@@ -387,8 +359,10 @@ resetPluginProp = function(self){
 var gBrowserEngineList
 enginesPopup = {
 	type: '',
-	show: function(anchor, type){
+	show: function(anchor, type, subType){
+		this.node = anchor;
 		this.type = type;
+		this.subType = subType;
 		var panel = $("engine-list")
 		var popupBoxObject = panel.popupBoxObject;
 		popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
@@ -396,7 +370,7 @@ enginesPopup = {
 		panel.openPopup(anchor, pos, 0, 0, false, true)
 	},
 	onShowing: function(popup){
-		var items = this['fill_' + this.type]()
+		var items = this['getItems_' + this.type](this.subType)
 		this.fillPopup(popup, items)
 	},
 	onCommand: function(popup){
@@ -411,26 +385,27 @@ enginesPopup = {
 		clean(popup)
 		appendXML(popup, xml.join(''))
 	},
-	fill_Json: function(){
-		var jsonP = [], jsonList = []
+	getItems_Url: function(t){
+		var ans = [], usedList = []
 		for each(var p in InstantFoxModule.Plugins){
-			var json = p.def_json || p.json
-			if(json && jsonList.indexOf(json) == -1){
-				jsonList.push(json)
-				jsonP.push(p)
+			var url = p['def_'+t] || p[t]
+			if(url && usedList.indexOf(url) == -1){
+				usedList.push(url)
+				ans.push(p)
 			}
 		}
-		return jsonP
+		return ans
 	},
-	command_Json: function(event){
+	command_Url: function(event){
+		var t = this.subType
 		var p = InstantFoxModule.Plugins[event.target.value];
-		var el = document.querySelector('#edit-box textbox[aID=json]')
-		el.value = p.def_json || p.json
+		var el = $parent(this.node).querySelector('textbox[aID='+t+']')
+		el.value = p['def_'+t] || p[t]
 		var e=document.createEvent('UIEvent')
 		e.initUIEvent('input',true, true, window, 1)
 		el.dispatchEvent(e)
 	},
-	fill_InstantFox: function(){
+	getItems_InstantFox: function(){
 		var items = [this.noPlugin], jsonList = []
 		for each(var p in InstantFoxModule.Plugins)
 			if(!p.disabled)
@@ -462,7 +437,7 @@ enginesPopup = {
 		iconURI: "chrome://mozapps/skin/places/defaultFavicon.png",
 		name:'none'
 	},
-	fill_Browser: function(popup){
+	getItems_Browser: function(popup){
 		gBrowserEngineList = []
 		var win = Services.wm.getMostRecentWindow("navigator:browser")
 		if(!win){
@@ -547,30 +522,70 @@ onTextboxEscape = function(el){
 	el.value = InstantFoxModule.Plugins[id][el.className]
 	el.blur()
 }
-window.addEventListener('keydown', function(e){
-	var el = e.target
-	if(el.className == 'key'){
-		if(e.keyCode=='27'){
-			onTextboxEscape(el)
-		}
-		if(e.keyCode=='13'){
-			el.blur()
-			$parent(el).parentNode.focus()
-		}
-		if(e.keyCode=='40'||e.keyCode=='38'){
-			$t($parent(el).parentNode.selectedItem,'key').focus()
-		}
-	}
-}, false)
 
-onSelect=function(rbox){
+rbSelect=function(e, rbox){
 	var el=document.activeElement
-	if(el.localName=='input'&&el.parentNode.parentNode.className=='key'){
+	if(rbox.selectionInKeyTextbox){
 		$t(rbox.selectedItem,'key').focus()
 	}
 }
+rbKeyPress = function(e, rbox){
+	var c
+	var el = e.target
+		dump(e.keyCode,e.charCode,e.which)
+	if(e.ctrlKey && e.charCode==102){
+		$("pluginFilter").focus()
+		return
+	}
+	if(el.className == 'key'){
+		if(e.keyCode==27){
+			onTextboxEscape(el)
+		}
+		if(e.keyCode==13){
+			el.blur()
+			$parent(el).parentNode.focus()
+		}
+		if(e.keyCode==40||e.keyCode==38){
+			$t($parent(el).parentNode.selectedItem,'key').focus()
+		}
+		rbox.selectionInKeyTextbox = true
+		return
+	}
+	if($t(rbox.selectedItem,'key')){
+		rbox.selectionInKeyTextbox = false	
+	}
+	if(e.keyCode==13){
+		openEditPopup(rbox.selectedItem)
+	}
+}
+rbMouseup = function(e, rbox){
+	rbox.selectionInKeyTextbox = false;
+	//**********
+	var item = e.target;
+	var aID = item.getAttribute('aID')
+	//**********
+	if (aID == 'enable-link') {
+		var item = $parent(e.target)
+		gPlugin = InstantFoxModule.Plugins[item.id]
+		gPlugin.disabled = false
+		saveGPlugin()
+		return
+	}
+	if (!aID && item.className == 'separator'){
+		var start = item.nextSibling, end = item = start
 
+		while((item = item.nextSibling) && ( item.nodeName == 'richlistitem')  ){
+			end = item
+		}
+		start.parentNode.selectItemRange(start, end)
+	}
 
+	//**********
+	if (aID != 'edit-link')
+		return;
+
+	openEditPopup($parent(e.target))
+}
 
 //*************
 function savePlugins(){
