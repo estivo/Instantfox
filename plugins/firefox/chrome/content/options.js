@@ -110,7 +110,6 @@ function $(id){
 	return document.getElementById(id)
 }
 function $t(el, aID) {
-
 	return el && el.getElementsByAttribute('aID', aID)[0]
 }
 function $parent(el){
@@ -225,14 +224,7 @@ initEditPopup = function(plugin, panel){
 	var suggest = !gPlugin.disableSuggest // !!(gPlugin.json && !gPlugin.disableSuggest)
 	var chkbox = $t(panel, 'suggest')
 	chkbox.checked = suggest
-	var st = chkbox.nextSibling.style;
-	if(suggest){
-		st.opacity="";
-		st.pointerEvents=""
-	}else{
-		st.opacity=0;
-		st.pointerEvents="none"
-	}
+	chkbox.doCommand()
 
 	var rem =  $t(panel, 'remove')
 	if(plugin){
@@ -342,20 +334,31 @@ removePlugin = function(p) {
 
 	gPluginsChanged = true
 }
-canResetProp = function(el){
+canResetProp = function(el, plugin){
+	var plugin = el.plugin || gPlugin;
 	var name = el.getAttribute('aID')
-	return (gPlugin.type == 'default' || gPlugin.type == 'browserSearch') &&
-		gPlugin['def_' + name] != null &&
-		gPlugin['def_' + name] != el.value
+	return plugin && (plugin.type == 'default' || plugin.type == 'browserSearch' || !plugin.type) &&
+		plugin['def_' + name] != null &&
+		plugin['def_' + name] != el.value
 }
 resetPluginProp = function(self){
 	var el = self.previousSibling
+	var plugin = el.plugin || gPlugin
 	var name = el.getAttribute('aID')
-	el.value = gPlugin['def_'+name]
-	var e=document.createEvent('UIEvent')
+	el.value = plugin['def_'+name]
+	var e = document.createEvent('UIEvent')
 	e.initUIEvent('input',true, true, window, 1)
 	el.dispatchEvent(e)
 }
+
+toggleVisibility = function(el, selector, on){
+	var list = el.querySelectorAll(selector)
+	var actionName = on?"remove":on==null?"toggle":"add"
+	for(var i = list.length; i--; ){
+		list[i].classList[actionName]("invisible") 
+	}
+}
+
 var gBrowserEngineList
 enginesPopup = {
 	type: '',
@@ -431,12 +434,22 @@ enginesPopup = {
 		var b = $("defaultEngine")
 		b.image = p.iconURI
 		b.label = p.name
+		
+		var g = $("autoSearch")
+		var p = InstantFoxModule.autoSearch
+		
+		$t(g, "url").plugin = $t(g, "json").plugin = p
+		$t(g, "url").value = p.url
+		$t(g, "json").value = p.json
+		
+		$t(g, "disabled").checked = !p.disabled
 	},
 
 	noPlugin: {
 		iconURI: "chrome://mozapps/skin/places/defaultFavicon.png",
 		name:'none'
 	},
+	// display avaliable open search browser plugins
 	getItems_Browser: function(popup){
 		gBrowserEngineList = []
 		var win = Services.wm.getMostRecentWindow("navigator:browser")
@@ -746,7 +759,7 @@ function onTabSelect(){
 	if(i == 1 || i == 2){
 		this.parentNode.selectedPanel.firstChild.hidden = false;
 		gPrefChanged = true;
-		enginesPopup.init_InstantFox()
+		i == 2 && enginesPopup.init_InstantFox()
 	}else if(i == 3){
 		var iframe = document.createElement('iframe');
 		iframe.setAttribute('type', 'content');

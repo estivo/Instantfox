@@ -869,7 +869,7 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
 		if (InstantFoxModule.currentQuery) {
 			url = InstantFoxModule.urlFromQuery(InstantFoxModule.currentQuery);
 			InstantFox.finishSearch()
-		} else if (InstantFoxModule.autoSearch) {
+		} else if (!InstantFoxModule.autoSearch.disabled) {
 			// let firefox to handle builtin shortcuts if any
 			var shortcutURL = getShortcutOrURI(url, {}, {})
 			//

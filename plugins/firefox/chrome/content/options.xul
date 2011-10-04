@@ -68,8 +68,6 @@ textbox.key{
 }
 .longbox{
 	width: 50ch;
-	-moz-transition-duration: 0.8s;
-	-moz-transition-property: opacity;
 }
 .key.hidden{
 	opacity: 0;
@@ -194,8 +192,6 @@ label[control='opacity-scale']{
 
 #instantLoad{
 	-moz-appearance:none;
-	-moz-transition-duration: 0.8s;
-	-moz-transition-property: text-shadow;
 	border-radius: 4px;
 	margin-top:-5px;
 	margin-bottom:5px;
@@ -225,6 +221,14 @@ checkbox:-moz-focusring > .checkbox-label-box{
 dropmarker[type="button"]{
 	-moz-appearance: toolbarbutton;
 } 
+.animate{	
+	-moz-transition-duration: 0.8s;
+	-moz-transition-property: opacity, text-shadow;
+}
+.invisible{
+	opacity:0;
+	pointer-events:none;
+}
 </html:style>
 
 
@@ -306,7 +310,7 @@ dropmarker[type="button"]{
 					<preference id="maxRichResults" name="browser.urlbar.maxRichResults" type="int" />
 				</preferences>
 
-<groupbox>
+<groupbox id="autoSearch">
 	<grid>
 		<columns>
 			<column flex="0"/>
@@ -316,9 +320,9 @@ dropmarker[type="button"]{
 			<row>
 				<toolbarbutton image='moz-anno:favicon:http://www.google.com/favicon.ico'
 				id="defaultEngine+" type='menu+' onclick='+enginesPopup.show(this, "InstantFox")'/>
-				<checkbox label='standard search without shortcuts' checked='true'/>
+				<checkbox label='standard search without shortcuts' aID="disabled" oncommand="toggleVisibility(this.parentNode.parentNode, 'row.animate', this.checked)"/>
 			</row>
-			<row>
+			<row class="animate">
 				<label value='url:'/>
 				<hbox align='center' flex='1' class='longbox'>
 					<textbox type='url' aID='url' flex='1'  oninput="
@@ -326,7 +330,7 @@ dropmarker[type="button"]{
 						if(this.timeout==null)
 							this.timeout=setTimeout(function(a){
 								a.timeout=null;
-								$t($('edit-box'), 'image').src='http://g.etfv.co/'+a.value;
+								$t($('autoSearch'), 'image').src='http://g.etfv.co/'+a.value;
 							}, 500, this)
 						"/>
 					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
@@ -335,21 +339,20 @@ dropmarker[type="button"]{
 					<dropmarker type='button' onmousedown='enginesPopup.show(this, "Url", "url")'/>
 				</hbox>
 			</row>
-			<row>
+			<row class="animate">
 				<label value='suggest'/>
 				<hbox align='center' flex='1' class='longbox'>
-					<checkbox aID='suggest' oncommand='var st=this.nextSibling.style;
-					if(this.checked){st.opacity="";st.pointerEvents=""}else{st.opacity=0;st.pointerEvents="none"}'/>
-					<textbox type='url' aID='json' flex='1' class='longbox' oninput="
+					<checkbox aID='suggest' oncommand='toggleVisibility(this.parentNode.parentNode, ".animate", this.checked)'/>
+					<textbox type='url' aID='json' flex='1' class='longbox animate' oninput="
 						this.nextSibling.hidden = !canResetProp(this);
 						"/>
-					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
+					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default' class="animate"/>
 				</hbox>
-				<hbox align="center" class='image'>
+				<hbox align="center" class='image animate'>
 					<dropmarker type='button' onmousedown='enginesPopup.show(this, "Url", "json")'/>
 				</hbox>
 			</row>
-			<row>
+			<row class="animate">
 				<label value='instant'/>
 				<menulist id="global-instant" sizetopopup='none' oncommand = ''>
 					<menupopup>
@@ -414,7 +417,7 @@ dropmarker[type="button"]{
 <panel id="edit-box" ignorekeys='true' type="arrow"
 		orient='vertical' onpopuphiding='if(event.target==this)editPopupSave(this)' position='start_before'>
 	<hbox align='center' pack='center'>
-		<checkbox label='load page instantly' aID='instant' id='instantLoad'/>
+		<checkbox label='load page instantly' aID='instant' id='instantLoad' class="animate"/>
 	</hbox>
 	<grid >
 		<columns>
@@ -451,14 +454,13 @@ dropmarker[type="button"]{
 			<row>
 				<label value='suggest'/>
 				<hbox align='center' flex='1' class='longbox'>
-					<checkbox aID='suggest' oncommand='var st=this.nextSibling.style;
-					if(this.checked){st.opacity="";st.pointerEvents=""}else{st.opacity=0;st.pointerEvents="none"}'/>
-					<textbox type='url' aID='json' flex='1' class='longbox' oninput="
+					<checkbox aID='suggest' oncommand='toggleVisibility(this.parentNode.parentNode, ".animate", this.checked)'/>
+					<textbox type='url' aID='json' flex='1' class='longbox animate' oninput="
 						this.nextSibling.hidden = !canResetProp(this);
 						"/>
-					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
+					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default' class="animate"/>
 				</hbox>
-				<hbox align="center" class='image'>
+				<hbox align="center" class='image animate'>
 					<dropmarker type='button' onmousedown='enginesPopup.show(this, "Url", "json")'/>
 				</hbox>
 			</row>
