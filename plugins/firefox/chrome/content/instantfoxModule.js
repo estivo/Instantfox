@@ -759,11 +759,12 @@ function AutoCompleteResultToArray(r){
 	var ans = [];
 	for(var i = 0;i<r.matchCount;i++)
 		ans.push({
-			icon:r.getImageAt(i),
-			type:r.getStyleAt(i),
-			comment:r.getCommentAt(i),
-			label:r.getLabelAt(i),
-			url:r.getValueAt(i),
+			icon: r.getImageAt(i),
+			type: r.getStyleAt(i),
+			comment: r.getCommentAt(i),
+			label: r.getLabelAt(i),
+			url: r.getValueAt(i),
+			origIndex: i
 		})
 	return ans
 }
@@ -815,7 +816,9 @@ SimpleAutoCompleteResult.prototype = {
 	}
 };
 
-var r
+var autoQ = {
+	plugin:InstantFoxModule.autoSearch,
+}
 function InstantFoxSearch(){}
 InstantFoxSearch.prototype = {
 	classDescription: "Autocomplete 4 InstantFox",
@@ -825,25 +828,57 @@ InstantFoxSearch.prototype = {
 
 	// implement searchListener for historyAutoComplete
 	onSearchResult: function(search, result) {
-		/*if(!r) r = result
-		this.listener.onSearchResult(this, r)
-		return*/
-		//this.$searchingHistory = false;
 		dump('this.$searchingHistory', this.$searchingHistory, result.matchCount)
-
-		if (!result.matchCount && InstantFoxModule.autoSearch) {
-			autoSearch.query = autoSearch.value = this.searchString
-			var url = autoSearch.plugin.json.replace('%q', encodeURIComponent(autoSearch.query))
-			this.parser = parseSimpleJson
-			this.startReq(url)
-		} else
-			this.listener.onSearchResult(this, result)
+		if(this.$waitingForAutoSearch){
+			this.onHistoryReady(result)
+			return
+		}
+			
+		if (result.matchCount < 3 && InstantFoxModule.autoSearch.suggest)
+			this.startAutoSearch()
+		this.listener.onSearchResult(this, result)
 	},
+	// handle autoSearch 
+	startAutoSearch: function(){
+		var url = InstantFoxModule.autoSearch.json
+		if(!url)
+			return
+		url = url.replace('%q', encodeURIComponent(this.searchString))
+		this.parser = parseSimpleJson // support only general results, not maps or imdb
+		this.startReq(url)
+	},
+	onAutoSearchReady: function(resultArray){
+		this.autoSearchResult = resultArray
+		this.combineResults()
+	},
+	onHistoryReady:function(historyResult){
+		this.originalHistoryResult = historyResult
+		this.historyResult = AutoCompleteResultToArray(historyResult)	
+		this.combineResults()
+	},
+	combineResults:function(){
+		
+		if(!this.historyResult)
+			this.historyResult = []
+		if(!this.autoSearchResult)
+			this.autoSearchResult = []
+		
+		var results = Array.concat(
+			this.historyResult.slice(0, 4),
+			this.autoSearchResult,
+			this.historyResult.slice(4)
+		)
+		
+		var newResult = new SimpleAutoCompleteResult(
+			results,
+			this.searchString, this.originalHistoryResult
+		);
+		this.listener.onSearchResult(this, newResult);
+	},
+	
 
 	// implement nsIAutoCompleteSearch
 	startSearch: function(searchString, searchParam, previousResult, listener) {
-		//win = Services.wm.getMostRecentWindow("navigator:browser");
-		dump(searchString.slice(0, 6))
 		if (searchString.slice(0, 6) == 'about:'){
 			searchString = searchString.substr(6)
 			var results = filter(getAboutUrls(), searchString)
@@ -860,6 +895,13 @@ InstantFoxSearch.prototype = {
 			this.searchString = searchString;
 			dump(searchParam)
 			this.historyAutoComplete.startSearch(searchString, "", previousResult, this);
+			if(InstantFoxModule.autoSearch.suggest){
+				if(this.searchString.length > InstantFoxModule.autoSearch.minQChars){
+					this.startAutoSearch()
+					this.$waitingForAutoSearch = true
+				}else
+					this.$waitingForAutoSearch = false
+			}
 			return
 		} else if(this.$searchingHistory)
 			this.historyAutoComplete.stopSearch()
@@ -955,36 +997,26 @@ InstantFoxSearch.prototype = {
 			var newResult = new SimpleAutoCompleteResult(q.results, q.value);
 			this.listener.onSearchResult(this, newResult);
 			q.onSearchReady()
-			//this.listener = null;
 		}else{
-			autoSearch.searchResults = this.parser(json, "", "")
-			autoSearch.onSearchReady(this.listener)
+			this.onAutoSearchReady(this.parser(json, "", ""))
 		}
+		//this.listener = null;
 	},
 
 	stopOldRequests: function(req){
 		var i = this._reqList.indexOf(req)
-		if(i==-1){
-			dump(i, '=======================')
+		if(i==-1)
 			return
-		}
-		while(i--){
+
+		while(i--)
 			this._reqList.shift().abort()
-		}
+		
 		this._reqList.shift()
 	}
 };
 XPCOMUtils.defineLazyServiceGetter(InstantFoxSearch.prototype, "historyAutoComplete",
 					"@mozilla.org/autocomplete/search;1?name=history", "nsIAutoCompleteSearch")
 
-var autoSearch = {
-	plugin:{
-		json: 'http://clients1.google.de/complete/search?client=chrome&hl=en-US&q=%q',
-		key: '',
-	},
-	splitSpace: '',
-	onSearchReady: function(){}
-}
 
 /*******************************************************
  *  component registration
