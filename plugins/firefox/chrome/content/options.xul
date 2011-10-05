@@ -145,6 +145,9 @@ slickbutton {
 	padding:1px;
 	margin:4px;
 }
+slickbutton .toolbarbutton-icon{
+	display: none;
+}
 slickbutton.attention{
 	background: -moz-linear-gradient(#a3F3FD, #aEFEC3);
 }
@@ -229,6 +232,9 @@ dropmarker[type="button"]{
 	opacity:0;
 	pointer-events:none;
 }
+row{
+	-moz-box-align: center;
+}
 </html:style>
 
 
@@ -310,19 +316,17 @@ dropmarker[type="button"]{
 					<preference id="maxRichResults" name="browser.urlbar.maxRichResults" type="int" />
 				</preferences>
 
-<groupbox id="autoSearch">
-	<grid>
+<groupbox id="autoSearch" oncommand="autoSearchUI.onChange(event)" onkeypress="autoSearchUI.onChange(event)">
+<caption>
+	<checkbox label='standard search without shortcuts' aID="disabled" oncommand="toggleVisibility(this.parentNode.parentNode, 'grid.animate', this.checked)"/>
+</caption>
+	<grid class="animate">
 		<columns>
 			<column flex="0"/>
 			<column flex="1"/>
 		</columns>
 		<rows>
 			<row>
-				<toolbarbutton image='moz-anno:favicon:http://www.google.com/favicon.ico'
-				id="defaultEngine+" type='menu+' onclick='+enginesPopup.show(this, "InstantFox")'/>
-				<checkbox label='standard search without shortcuts' aID="disabled" oncommand="toggleVisibility(this.parentNode.parentNode, 'row.animate', this.checked)"/>
-			</row>
-			<row class="animate">
 				<label value='url:'/>
 				<hbox align='center' flex='1' class='longbox'>
 					<textbox type='url' aID='url' flex='1'  oninput="
@@ -339,10 +343,21 @@ dropmarker[type="button"]{
 					<dropmarker type='button' onmousedown='enginesPopup.show(this, "Url", "url")'/>
 				</hbox>
 			</row>
-			<row class="animate">
+			<row>
+				<label value='instant'/>
+				<menulist aID="instant" sizetopopup='none' oncommand = ''>
+					<menupopup>
+						<menuitem aID='off'     label='off' />
+						<menuitem aID='history' label='only for history results' />
+						<menuitem aID='search'  label='only for search engine results' />
+						<menuitem aID='all'     label='always' />
+					</menupopup>
+				</menulist>
+			</row>
+			<row>
 				<label value='suggest'/>
 				<hbox align='center' flex='1' class='longbox'>
-					<checkbox aID='suggest' oncommand='toggleVisibility(this.parentNode.parentNode, ".animate", this.checked)'/>
+					<checkbox aID='suggest' oncommand='toggleVisibility(this.parentNode.parentNode.parentNode, ".animate", this.checked)'/>
 					<textbox type='url' aID='json' flex='1' class='longbox animate' oninput="
 						this.nextSibling.hidden = !canResetProp(this);
 						"/>
@@ -352,31 +367,33 @@ dropmarker[type="button"]{
 					<dropmarker type='button' onmousedown='enginesPopup.show(this, "Url", "json")'/>
 				</hbox>
 			</row>
-			<row class="animate">
-				<label value='instant'/>
-				<menulist id="global-instant" sizetopopup='none' oncommand = ''>
-					<menupopup>
-						<menuitem label='off' value='all'/>
-						<menuitem label='only for history results' value='google'/>
-						<menuitem label='only for search engine results' value='none'/>
-						<menuitem label='always' value='manual'/>
-					</menupopup>
-				</menulist>
+			<row class='animate'>
+				<label value=''/>
+				<hbox align='center' flex='1' class='longbox'>
+					<label value='start showing remote results if:'/>
+				</hbox>
+				<hbox align="center" class='image animate'/>
+			</row><row class='animate'>
+				<label value=''/>
+				<hbox align='center' flex='1' class='longbox'>
+					<label value='query is longer than'/>
+					<textbox type='number' aID='minQChars' flex='1'/>
+				</hbox>
+				<hbox align="center" class='image animate'/>
 			</row>
 		</rows>
 	</grid>
-
-<hbox align="center" id='defaultEngine'></hbox>
-
+<separator/>
+<hbox align='center'>
+	<label value='max urlbar results' control='maxRichResults-textbox'/>
+	<textbox id='maxRichResults-textbox' preference="maxRichResults"/>
+</hbox>
 </groupbox>
 <hbox align='center'>
 	<label value='open search in new tab' control='openintab-checkbox'/>
 	<checkbox id='openintab-checkbox' preference="openintab" oncommand='InstantFoxModule.openSearchInNewTab=this.checked'/>
 </hbox>
-<hbox align='center'>
-	<label value='max urlbar results' control='openintab-checkbox'/>
-	<textbox id='openintab-checkbox' preference="openintab" oncommand='InstantFoxModule.openSearchInNewTab=this.checked'/>
-</hbox>
+
 <spacer flex="1"/>
 <vbox align='center'>
 	<slickbutton label='copyPluginsToClipboard' oncommand='copyPluginsToClipboard()'/>

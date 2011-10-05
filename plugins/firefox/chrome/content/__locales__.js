@@ -90,7 +90,8 @@ var commonAutoSearch = {
 	json: 'http://clients1.google.de/complete/search?client=chrome&hl=%ls&q=%q',
 	url: commonPlugins.Google.url,
 	instant: "off",
-	suggest: "history"
+	suggest: false,
+	minQChars: 5
 }
 
 /****************************** data *************************

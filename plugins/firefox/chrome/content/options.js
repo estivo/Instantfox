@@ -416,39 +416,7 @@ enginesPopup = {
 
 		return items
 	},
-	command_InstantFox: function(event){
-		var id = event.target.value;
-		if(!id){
-			var p = null
-		}else
-			var p = InstantFoxModule.Plugins[id];
 
-		InstantFoxModule.setAutoSearch(p)
-		this.init_InstantFox()
-
-		gPluginsChanged = true
-	},
-	init_InstantFox: function(){
-		var p = InstantFoxModule.autoSearch || this.noPlugin
-
-		var b = $("defaultEngine")
-		b.image = p.iconURI
-		b.label = p.name
-		
-		var g = $("autoSearch")
-		var p = InstantFoxModule.autoSearch
-		
-		$t(g, "url").plugin = $t(g, "json").plugin = p
-		$t(g, "url").value = p.url
-		$t(g, "json").value = p.json
-		
-		$t(g, "disabled").checked = !p.disabled
-	},
-
-	noPlugin: {
-		iconURI: "chrome://mozapps/skin/places/defaultFavicon.png",
-		name:'none'
-	},
 	// display avaliable open search browser plugins
 	getItems_Browser: function(popup){
 		gBrowserEngineList = []
@@ -496,6 +464,60 @@ enginesPopup = {
 		)
 	}
 }
+
+autoSearchUI = {
+	init: function(){
+		if(!this.onTimeout)
+			this.onTimeout = this.$onTimeout.bind(this)
+
+		var g = $("autoSearch")
+		var p = InstantFoxModule.autoSearch
+		
+		$t(g, "url").plugin = $t(g, "json").plugin = p
+		$t(g, "url").value = p.url
+		$t(g, "json").value = p.json
+		
+		$t(g, "disabled").checked = !p.disabled
+		$t(g, "suggest").checked = !!p.suggest
+		$t(g, "suggest").doCommand()
+		$t(g, "disabled").doCommand()
+		
+		$t(g, "minQChars").value = p.minQChars || 0
+		
+		var menu = $t(g, "instant")
+		menu.selectedItem = $t(menu, p.instant)
+	},
+	onChange: function(e){
+		if(e.target.autoSearchIgnore)
+			return
+		if(this.$timeout)
+			clearTimeout(this.$timeout)
+		
+		this.$timeout = setTimeout(this.onTimeout, 500)
+	},
+	$onTimeout: function(){
+		this.$timeout = null
+		this.saveChanges()
+	},
+	saveChanges: function(){
+		var g = $("autoSearch")
+		var p = InstantFoxModule.autoSearch
+		
+		p.url = $t(g, "url").value
+		p.json = $t(g, "json").value
+		p.disabled = !$t(g, "disabled").checked 
+		
+		p.instant = $t(g, "instant").selectedItem.getAttribute("aID")
+		
+		p.suggest = $t(g, "suggest").checked
+		
+		p.minQChars = parseInt($t(g, "minQChars").value)
+		if(isNaN(p.minQChars))
+			p.minQChars = 0
+	}
+	
+}
+
 
 //*************************
 
@@ -759,7 +781,7 @@ function onTabSelect(){
 	if(i == 1 || i == 2){
 		this.parentNode.selectedPanel.firstChild.hidden = false;
 		gPrefChanged = true;
-		i == 2 && enginesPopup.init_InstantFox()
+		i == 2 && autoSearchUI.init()
 	}else if(i == 3){
 		var iframe = document.createElement('iframe');
 		iframe.setAttribute('type', 'content');
