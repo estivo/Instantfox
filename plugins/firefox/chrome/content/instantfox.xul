@@ -36,7 +36,7 @@
 		<panel onpopupshowing="if(event.target==this)InstantFox.onPopupShowing(this)"  onpopuphiding="if(event.target==this)InstantFox.onPopupHiding(this)"
 			noautohide='true' position='after_end' id='instantfox-popup' persist='width,height' width='400' height='600'>
 			<stack flex='1'>
-				<resizer element='instantfox-popup' dir='bottomleft' left='0' bottom='0' width='16' height='16'/>
+				<resizer element='instantfox-popup' dir='bottomleft' left='0' bottom='0' width='16' height='16' style='-moz-transform: rotate(90deg);'/>
 			</stack>
 		</panel>
 	</toolbarbutton>
