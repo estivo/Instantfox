@@ -137,8 +137,8 @@ resetbutton:hover:active {
 
 slickbutton {
 	-moz-binding: url("chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton");
-	background: -moz-linear-gradient(#F3F3ED, #CECEC3);
-	color: #000000;
+	background: -moz-linear-gradient(#91BD09, #749A02);
+	color: #FFFFFF;
 	box-shadow: 0 0 2px #CECEC3;
 	border: solid 1px #ACA899;
 	-moz-border-radius: 8px;
@@ -149,13 +149,13 @@ slickbutton .toolbarbutton-icon{
 	display: none;
 }
 slickbutton.attention{
-	background: -moz-linear-gradient(#a3F3FD, #aEFEC3);
+	background: -moz-linear-gradient(#91BD09, #749A02);
 }
 slickbutton:hover {
-	background: -moz-linear-gradient(#F3F3ED, #DEDED3);
+	background: -moz-linear-gradient(#749A02, #91BD09);
 }
 slickbutton:hover:active {
-	background: -moz-linear-gradient(#ACA899, #FFFFFF);
+	background: -moz-linear-gradient(#749A02, #91BD09);
 }
 
 label[control='opacity-scale']{
