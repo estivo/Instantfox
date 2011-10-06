@@ -315,6 +315,11 @@ var InstantFox = {
 		} else if (InstantFoxModule.currentQuery) {
 			InstantFoxModule.currentQuery = null;
 		}
+		
+		if(!q && InstantFoxModule.autoSearch.instant != "off"){
+			this._isOwnQuery = true
+			this.schedulePreload(500)
+		}
 		InstantFox.updateShadowLink(q);
 	},
 	onblur: function(e) {
@@ -934,8 +939,8 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
 // todo: integrate with plugin system?
 InstantFox.defaultSearch = {
 	doPreload: function(){
-		if(this.url)
-			InstantFox.pageLoader.addPreview(this.url)
+		
+		InstantFox.pageLoader.addPreview(url2go);
 	}
 	
 }

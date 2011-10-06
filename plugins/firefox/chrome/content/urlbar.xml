@@ -146,6 +146,7 @@
         <parameter name="aSearchTokens"/>
         <body>
           <![CDATA[
+		  dump(aText, aSearchTokens)
           if (aSearchTokens == "")
             return [0, aText.length];
 
@@ -210,14 +211,15 @@
         <body>
           <![CDATA[
           let search = aSearch.toLowerCase();
+		  dump(aSearch)
 		  if(search[0]=='`'){
-			//InstantFoxModule.currentQuery.plugin.key
 		    var i = search.indexOf(' ')
 			if(i==-1)i=search.length
 		    return [search.slice(1, i)]
 		  }
 		  search = search.split(/\s+/)
-		  search.shift()
+		  if(InstantFoxModule.currentQuery)
+			search.shift()
           return search;
           ]]>
         </body>

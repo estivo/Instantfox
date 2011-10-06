@@ -58,7 +58,7 @@ function extendedDomainFromURL(url){
 }
 // used for new plugins only
 function fixupPlugin(p){
-	if(p.url){		
+	if(p.url){
 		p.domain = extendedDomainFromURL(p.url)
 
 		p.id = p.id.toLowerCase()
@@ -143,7 +143,7 @@ var pluginLoader = {
 		var p = pluginData.autoSearch
 		if(p){
 			p.json = p.json.replace(localeRe, replacer)
-			p.url = p.url.replace(localeRe, replacer)			
+			p.url = p.url.replace(localeRe, replacer)
 		}
 		return pluginData
 	},
@@ -177,7 +177,7 @@ var pluginLoader = {
 			if (p.type == 'default' && !pluginData.plugins[pn] && !this.isUserModified(p))
 				delete InstantFoxModule.Plugins[pn]
 		}
-		
+
 		InstantFoxModule.defaultPlugin = InstantFoxModule.defaultPlugin||'google'
 		//---------
 		var p = pluginData.autoSearch
@@ -188,7 +188,7 @@ var pluginLoader = {
 			return
 		}
 		InstantFoxModule.autoSearch.def_json = p.json
-		InstantFoxModule.autoSearch.def_url = p.url		
+		InstantFoxModule.autoSearch.def_url = p.url
 	},
 
 	initShortcuts: function(){
@@ -246,7 +246,7 @@ var pluginLoader = {
 		InstantFoxModule.defaultPlugin = pluginData.defaultPlugin
 		if("autoSearch" in pluginData)
 			InstantFoxModule.autoSearch = pluginData.autoSearch
-		
+
 		this.initShortcuts()
 	},
 
@@ -283,7 +283,7 @@ var pluginLoader = {
 
 		if(this.req)
 			this.req.abort()
-		
+
 		this.req = fetchAsync(spec, [onload, callback])
 	},
 
@@ -468,7 +468,7 @@ InstantFoxModule = {
 	helpURL: 'http://www.instantfox.net/help/',
 	editingHelpURL: 'http://www.instantfox.net/help/#add-plugin',
 	uninstallURL: 'http://www.instantfox.net/uninstall',
-	
+
 	bp: this,
 
 	//
@@ -541,7 +541,7 @@ InstantFoxModule = {
 
 
 		if (!query && q) {
-			var url2go = q.plugin.domain || ''					
+			var url2go = q.plugin.domain || ''
 			return url2go
 		}
 
@@ -799,15 +799,20 @@ SimpleAutoCompleteResult.prototype = {
 	get errorDescription() this._errorDescription,
 	get matchCount() this.list.length,
 
-	getCommentAt: function(index) this.list[index].title,//title attribute on richlistitem in popup
-	getLabelAt: function(index) this.list[index].url,//url attribute on richlistitem in popup
-	getValueAt: function(index) this.list[index].url,//displayed in urlbar
-	getImageAt: function(index) this.list[index].icon,
+	getCommentAt: function(index) this.list[index].title || "",//title attribute on richlistitem in popup
+	getLabelAt: function(index) this.list[index].url || "",//url attribute on richlistitem in popup
+	getValueAt: function(index) this.list[index].url || "",//displayed in urlbar
+	getImageAt: function(index) this.list[index].icon || "chrome://instantfox/content/skin/button-logo.png", //pin-icon.png",  "",//
 	getStyleAt: function(index) this.list[index].type || "InstantFoxSuggest",
 
 	removeValueAt: function(index, removeFromDb) {
 		dump(index, removeFromDb)
-		// this.list.splice(index, 1);
+		if(removeFromDb && this.originalHistoryResult){
+			var item = this.list[index]
+			if(item && item.origIndex != null)
+				this.originalHistoryResult.removeValueAt(item.origIndex, removeFromDb)
+		}
+		this.list.splice(index, 1);
 	},
 	QueryInterface: function(aIID) {
 		if (!aIID.equals(Ci.nsIAutoCompleteResult) && !aIID.equals(Ci.nsISupports))
@@ -833,13 +838,14 @@ InstantFoxSearch.prototype = {
 			this.onHistoryReady(result)
 			return
 		}
-			
+
 		if (result.matchCount < 3 && InstantFoxModule.autoSearch.suggest)
 			this.startAutoSearch()
 		this.listener.onSearchResult(this, result)
 	},
-	// handle autoSearch 
+	// handle autoSearch
 	startAutoSearch: function(){
+		this.autoSearchResult = null
 		var url = InstantFoxModule.autoSearch.json
 		if(!url)
 			return
@@ -848,34 +854,37 @@ InstantFoxSearch.prototype = {
 		this.startReq(url)
 	},
 	onAutoSearchReady: function(resultArray){
+		for each(var i in resultArray){
+			i.icon = "chrome://instantfox/content/skin/pin-icon.png"
+		}
 		this.autoSearchResult = resultArray
 		this.combineResults()
 	},
 	onHistoryReady:function(historyResult){
 		this.originalHistoryResult = historyResult
-		this.historyResult = AutoCompleteResultToArray(historyResult)	
+		this.historyResult = AutoCompleteResultToArray(historyResult)
 		this.combineResults()
 	},
 	combineResults:function(){
-		
+		if(!this.autoSearchResult){
+			this.listener.onSearchResult(this, this.originalHistoryResult)
+			return
+		}
 		if(!this.historyResult)
 			this.historyResult = []
-		if(!this.autoSearchResult)
-			this.autoSearchResult = []
 		
+		var pos = this.searchString.length>5?0:4
 		var results = Array.concat(
-			this.historyResult.slice(0, 4),
+			this.historyResult.slice(0, pos),
 			this.autoSearchResult,
-			this.historyResult.slice(4)
+			this.historyResult.slice(pos)
 		)
-		
-		var newResult = new SimpleAutoCompleteResult(
-			results,
-			this.searchString, this.originalHistoryResult
-		);
+
+		var newResult = new SimpleAutoCompleteResult(results, this.searchString);
+		newResult.originalHistoryResult = this.originalHistoryResult
 		this.listener.onSearchResult(this, newResult);
 	},
-	
+
 
 	// implement nsIAutoCompleteSearch
 	startSearch: function(searchString, searchParam, previousResult, listener) {
@@ -993,7 +1002,7 @@ InstantFoxSearch.prototype = {
 		var q = InstantFoxModule.currentQuery
 		if(q){
 			var key = q.key || q.plugin.key
-			q.results = this.parser(json, key, q.splitSpace)		
+			q.results = this.parser(json, key, q.splitSpace)
 			var newResult = new SimpleAutoCompleteResult(q.results, q.value);
 			this.listener.onSearchResult(this, newResult);
 			q.onSearchReady()
@@ -1010,7 +1019,7 @@ InstantFoxSearch.prototype = {
 
 		while(i--)
 			this._reqList.shift().abort()
-		
+
 		this._reqList.shift()
 	}
 };
