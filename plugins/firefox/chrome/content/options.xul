@@ -137,25 +137,26 @@ resetbutton:hover:active {
 
 slickbutton {
 	-moz-binding: url("chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton");
-	background: -moz-linear-gradient(#91BD09, #749A02);
-	color: #FFFFFF;
+	background: -moz-linear-gradient(#F3F3ED, #CECEC3);
+	color: #000000;
 	box-shadow: 0 0 2px #CECEC3;
 	border: solid 1px #ACA899;
 	-moz-border-radius: 8px;
 	padding:1px;
 	margin:4px;
+	cursor:pointer;
 }
 slickbutton .toolbarbutton-icon{
 	display: none;
 }
 slickbutton.attention{
-	background: -moz-linear-gradient(#91BD09, #749A02);
+	background: -moz-linear-gradient(#a3F3FD, #aEFEC3);
 }
 slickbutton:hover {
-	background: -moz-linear-gradient(#749A02, #91BD09);
+	background: -moz-linear-gradient(#F3F3ED, #DEDED3);
 }
 slickbutton:hover:active {
-	background: -moz-linear-gradient(#749A02, #91BD09);
+	background: -moz-linear-gradient(#ACA899, #FFFFFF);
 }
 
 label[control='opacity-scale']{
@@ -164,8 +165,16 @@ label[control='opacity-scale']{
 }
 
 #add {
-	cursor:pointer;
+	background: -moz-linear-gradient(#91BD09, #749A02);
+	color: #FFFFFF;
 }
+#add:hover {
+	background: -moz-linear-gradient(#749A02, #91BD09);
+}
+#add:hover:active {
+	background: -moz-linear-gradient(#749A02, #91BD09);
+}
+
 #pinbox{
 	position:fixed;
 	top:0;
