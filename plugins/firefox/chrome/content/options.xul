@@ -209,6 +209,7 @@ checkbox:-moz-focusring > .checkbox-label-box{
 .plugin-status{
 	width: 16px;
 	height: 16px;
+	cursor: help;
 }
 .plugin-status[status=""]{
 	background:url(chrome://instantfox/content/skin/instant.png)

@@ -647,7 +647,7 @@ xmlFragment =
 		</hbox>
 		<label value="$name$"/>
 		<hbox flex='1' pack='start' align='top'>
-			<hbox class="plugin-status" status="$status$" aID='edit-link'/>
+			<hbox class="plugin-status" status="$status$" aID='edit-link' tooltiptext='Instant-loading on'/>
 		</hbox>
 		<hbox align="center" class='key'>
 			<textbox class='key' aID='key' value='$key$' tooltiptext='edit plugin key'
