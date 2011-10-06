@@ -298,4 +298,64 @@
       </handler>
     </handlers>
   </binding>
+  
+   <binding id="splitmenu" extends="chrome://global/content/bindings/menu.xml#menuitem-base">
+    <content align='stretch'>
+		<xul:hbox anonid="item" flex="1" allowevents='true'>
+			<xul:menuitem anonid="menuitem" flex="1"
+                    class="menuitem-tooltip split-menuitem-item"
+                    xbl:inherits="label,key,image,value,closemenu,disabled" />
+        </xul:hbox>
+		<xul:hbox anonid="menu" xbl:inherits="_moz-menuactive" allowevents='true' class="split-menu-right-image" >
+            <xul:hbox align="center" class="menu-right" xbl:inherits="_moz-menuactive,disabled" style='pointer-events:none'>
+                <xul:image/>
+            </xul:hbox>
+        </xul:hbox>
+        <children includes="menupopup"/>
+    </content>
+
+    <implementation implements="nsIDOMXULSelectControlItemElement, nsIDOMXULContainerItemElement, nsIAccessibleProvider">
+        <constructor><![CDATA[
+            if (this.getAttribute("iconic") == "true") {
+                this.item.classList.remove("menuitem-tooltip");
+                this.item.classList.add("menuitem-iconic-tooltip");
+                this.item.classList.add("menuitem-iconic");
+            }
+      ]]></constructor>
+     
+      <field name="item" readonly="true">
+            document.getAnonymousElementByAttribute(this, "anonid", "item");
+      </field>
+      <field name="menuitem" readonly="true">
+            document.getAnonymousElementByAttribute(this, "anonid", "menuitem");
+      </field>
+      <field name="menu" readonly="true">
+            document.getAnonymousElementByAttribute(this, "anonid", "menu");
+      </field>
+      
+      
+    </implementation>
+    <handlers>
+      <handler event="mouseover" phase="target"><![CDATA[  
+      //this.menuitem.setAttribute("_moz-menuactive", true)
+      if(event.target!=this||event.originalTarget==this)  
+        return
+      if(event.originalTarget==this.menu){
+          this.menu.style.pointerEvents="none"
+          this.menuitem.setAttribute("_moz-menuactive", false)
+          this.item.style.pointerEvents="" 
+      }else if(event.originalTarget==this.item){
+          this.menuitem.setAttribute("_moz-menuactive", true)
+          this.menu.style.pointerEvents=""
+          this.item.style.pointerEvents="none"
+      }
+      ]]></handler>
+      <handler event="mouseout" phase="target"><![CDATA[  
+      if(event.originalTarget==this){
+        this.menuitem.removeAttribute("_moz-menuactive")
+        this.item.style.pointerEvents="" 
+      }      
+      ]]></handler>
+    </handlers>
+  </binding>
 </bindings>

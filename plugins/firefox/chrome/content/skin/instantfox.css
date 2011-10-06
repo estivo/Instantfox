@@ -60,6 +60,27 @@ richlistbox[type='InstantFoxSuggest'] {
 .instantfox-box{
 	pointer-events: none
 }
+/** splitmenu ************************************/
+menuitem.split-menuitem-item[_moz-menuactive="true"], .split-menu-right-image[_moz-menuactive="true"] {/*for xp*/
+    background-color: -moz-menuhover;
+    color: -moz-menuhovertext;
+}
+menuitem.split-menuitem-item{
+    padding: 0!important;/*for mac*/
+    pointer-events:none;
+    -moz-margin-end:1px;/*for xp*/
+}
+.split-menu-right-image {
+    -moz-appearance: menuitem;
+    -moz-box-pack: end;
+}
+menu[type=splitmenu] {
+    -moz-binding: url(chrome://instantfox/content/urlbar.xml#splitmenu);
+    -moz-box-orient: horizontal;
+    -moz-appearance: none !important;
+    color: menutext;
+    background-color: transparent !important;
+}
 /** notification ************************************/
 .popup-notification-icon[popupid="instant-fox-installed"] {
 	list-style-image: url("chrome://instantfox/content/skin/logo.png");
