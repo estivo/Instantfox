@@ -688,14 +688,14 @@ rebuild = function(){
 			(def ? xml : userxml).push(px)
 
 	}
-	var sepXML1 = "<label class='separator' value='   ", sepXML2 =" search plugins'/>"
+	var sepXML1 = "<label class='separator' value='   ", sepXML2 =" Search Plugins'/>"
 
-	xml.unshift(sepXML1 + "standard" + sepXML2)
+	xml.unshift(sepXML1 + "Standard" + sepXML2)
 	if(userxml.length)
-		xml.push(sepXML1 + "your" + sepXML2)
+		xml.push(sepXML1 + "Your" + sepXML2)
 
 	if(disabledxml.length)
-		userxml.push(sepXML1 + "inactive" + sepXML2)
+		userxml.push(sepXML1 + "Inactive" + sepXML2)
 
 	var el = $("shortcuts");
 	//it's important to clear selection of richbox before removing its' children
