@@ -32,7 +32,7 @@ function updateLocaleList(){
 
 		var xml = []
 		for each(var i in locales)
-			xml.push('<menuitem label="', i.id, '">',
+			xml.push('<menuitem label="', i.displayName, '" value="', i.id ,'">',
 				'<label value="', i.displayName, '"/><hbox flex="1"/><label value="', i.id, '"/>',
 			'</menuitem>')
 
@@ -721,6 +721,7 @@ function updatePluginStatus(p){
 
 window.addEventListener("DOMContentLoaded", function() {
 	window.removeEventListener("DOMContentLoaded", arguments.callee, false)
+	slideCheckbox.initAll()
 	// this must be called after menulists' binding is loaded
 	updateLocaleList()
 	rebuild()
@@ -817,4 +818,52 @@ addPluginsFromClipboard = function(){
 		return
 	}
 	InstantFoxModule.pluginLoader.addPlugins(js)
+}
+
+
+
+slideCheckbox = {
+	init: function(el){
+		if(el.ready)
+			return
+		el.ready = true
+		//<label value=''><slidecheck><check/></slidecheck>
+		el.label = document.createElement("label")
+		el.label.setAttribute("value", el.getAttribute("label"))
+		
+		el.checkbox = document.createElement("slidecheck")
+		el.check = document.createElement("check")
+		
+		el.checkbox.appendChild(el.check)
+		
+		el.appendChild(el.label)
+		el.appendChild(el.checkbox)
+		
+		el.__defineGetter__("checked", this.getChecked)
+		el.__defineSetter__("checked", this.setChecked)
+		
+		el.addEventListener("click", this.onClick)
+	},
+	initAll: function(el){
+		var all = (el||document).querySelectorAll("slidecheckbox")
+		for(var i=all.length;i--;)
+			this.init(all[i])
+	},
+	onClick: function(e){
+		this.checked = !this.checked
+		this.doCommand()
+	},
+	getChecked: function(){
+		return this.classList.contains("checked")
+	},
+	setChecked: function(val){
+		if(val){
+			this.setAttribute("checked", val)
+			this.classList.add("checked")
+		}else{
+			this.removeAttribute("checked")
+			this.classList.remove("checked")
+		}
+		return val
+	}
 }

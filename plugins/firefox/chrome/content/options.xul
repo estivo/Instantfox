@@ -239,7 +239,9 @@ row{
 }
 
 
-
+slidecheckbox{
+	-moz-box-align:center
+}
 slidecheck {
 	display: block;	
 	background: -moz-linear-gradient(19% 75% 90deg,#3095C7, #14539C); 
@@ -247,44 +249,39 @@ slidecheck {
 	border: 1px solid #555555;
 	width: 80px;
 	position: relative;
-	height: 32px;
 	cursor:pointer;
+	text-shadow: #093B5C 0px -1px 1px;
+	color: #fff;
 }
 slidecheck::before {
 	content: "ON";
 	padding-left: 9px;
-	line-height: 32px;
-	color: #fff;
-	font-size: 14px;
-	text-shadow: #093B5C 0px -1px 1px;
 }
 slidecheck::after {
 	content: "OFF";
 	padding-left: 12px;
-	line-height: 32px;
-	color: #fff;
-	font-size: 14px;
-	text-shadow: #093B5C 0px -1px 1px;
 }
 slidecheck>check { 
 	display: block;
-	width: 40px;
-	height: 30px;
+	width: 48%;
+	height: 98%;
 	border-radius: 3px;
-	background: -moz-linear-gradient(19% 75% 90deg,#FFFFFF, #A1A1A1);
-	border: 1px solid #e5e5e5;
+	background: -moz-linear-gradient(19% 75% 90deg,#FAFAFA, #A1A1A1);
+	box-shadow: 0 0 1.5px #e5e5e5 inset;
 	position: absolute;
-	top: 0px;
-	left: 0px;	
+	top: 1%;
+	left: 1%;
 	-moz-transition-duration: 0.1s;
-	-moz-transition-property: left;
+	-moz-transition-property: left,right;
 }
-slidecheck.checked >check {
-	top: 0px;
-	left: 38px;
+slidecheckbox:hover>slidecheck>check{
+	background: -moz-linear-gradient(19% 75% 90deg,#FFF, #B1B1B1);	
+	box-shadow: 0 0 1.5px #FFF;
+}
+.checked>slidecheck >check {
+	left: 50%
 }
 </html:style>
-
 
 <tabbox flex='1'>
 	<tabs onselect="onTabSelect.call(this)">
@@ -297,11 +294,17 @@ slidecheck.checked >check {
 		<tabpanel orient='vertical'  flex='1'>
 			<vbox>
 				<hbox pack='center'>
-		<slidecheck onclick="this.classList.toggle('checked')">
-			<check />
-		</slidecheck>
-					<vbox>
-						<label value="Enable Instant:" id="highlight"></label>
+					<vbox flex='1'>
+						<label value="Choose Language:" id="highlight" flex='1'/>
+						<menulist id="locale" sizetopopup='none'
+							oncommand = 'gPluginsChanged=true;InstantFoxModule.pluginLoader.loadPlugins(event.target.value, rebuild)'>
+							<menupopup/>
+						</menulist>
+						<spacer flex='1'/>
+					</vbox>
+					<spacer flex='100'/>
+					<vbox flex='1'>
+						<label value="Enable Instant:" id="highlight" flex='1'/>
 						<menulist id="global-instant" sizetopopup='none' oncommand = 'globalInstant.onCommand(event);'>
 							<menupopup>
 								<menuitem label='all plugins' value='all'/>
@@ -309,15 +312,6 @@ slidecheck.checked >check {
 								<menuitem label='none' value='none'/>
 								<menuitem label='manual' value='manual'/>
 							</menupopup>
-						</menulist>
-						<spacer flex='1'/>
-					</vbox>
-					<spacer flex='1'/>
-					<vbox>
-						<label value="Choose Language:" id="highlight"></label>
-						<menulist id="locale" sizetopopup='none'
-							oncommand = 'gPluginsChanged=true;InstantFoxModule.pluginLoader.loadPlugins(event.target.label, rebuild)'>
-							<menupopup/>
 						</menulist>
 						<spacer flex='1'/>
 					</vbox>
@@ -348,7 +342,8 @@ slidecheck.checked >check {
 
 <groupbox id="autoSearch" oncommand="autoSearchUI.onChange(event)" onkeypress="autoSearchUI.onChange(event)">
 <caption>
-	<checkbox label='Standard search without shortcuts' aID="disabled" oncommand="toggleVisibility(this.parentNode.parentNode, 'grid.animate', this.checked)"/>
+	<slidecheckbox  aID="disabled" label='Standard search without shortcuts'
+		oncommand="toggleVisibility(this.parentNode.parentNode, 'grid.animate', this.checked)"/>
 </caption>
 	<grid class="animate">
 		<columns>
@@ -481,7 +476,7 @@ slidecheck.checked >check {
 			<image aID='image'/>
 		</hbox>
 			<spacer flex="1"/>
-			<checkbox label='load page instantly' aID='instant' id='instantLoad' class="animate"/>
+			<slidecheckbox label='Instant page loading' aID='instant' id='instantLoad' class="animate"/>
 			<spacer flex="1"/>
 	</hbox>
 	<grid >
