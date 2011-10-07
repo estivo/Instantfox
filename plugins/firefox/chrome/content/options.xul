@@ -216,7 +216,7 @@ checkbox:-moz-focusring > .checkbox-label-box{
 	background:url(chrome://instantfox/content/skin/instant.png)
 }
 .plugin-status[status="not-instant"]{
-	/*background-color:yellow*/
+	display:none
 }
 .plugin-status[status="invalid"]{
 	background-color:red;
@@ -237,6 +237,52 @@ dropmarker[type="button"]{
 row{
 	-moz-box-align: center;
 }
+
+
+
+slidecheck {
+	display: block;	
+	background: -moz-linear-gradient(19% 75% 90deg,#3095C7, #14539C); 
+	border-radius: 4px;
+	border: 1px solid #555555;
+	width: 80px;
+	position: relative;
+	height: 32px;
+	cursor:pointer;
+}
+slidecheck::before {
+	content: "ON";
+	padding-left: 9px;
+	line-height: 32px;
+	color: #fff;
+	font-size: 14px;
+	text-shadow: #093B5C 0px -1px 1px;
+}
+slidecheck::after {
+	content: "OFF";
+	padding-left: 12px;
+	line-height: 32px;
+	color: #fff;
+	font-size: 14px;
+	text-shadow: #093B5C 0px -1px 1px;
+}
+slidecheck>check { 
+	display: block;
+	width: 40px;
+	height: 30px;
+	border-radius: 3px;
+	background: -moz-linear-gradient(19% 75% 90deg,#FFFFFF, #A1A1A1);
+	border: 1px solid #e5e5e5;
+	position: absolute;
+	top: 0px;
+	left: 0px;	
+	-moz-transition-duration: 0.1s;
+	-moz-transition-property: left;
+}
+slidecheck.checked >check {
+	top: 0px;
+	left: 38px;
+}
 </html:style>
 
 
@@ -251,6 +297,9 @@ row{
 		<tabpanel orient='vertical'  flex='1'>
 			<vbox>
 				<hbox pack='center'>
+		<slidecheck onclick="this.classList.toggle('checked')">
+			<check />
+		</slidecheck>
 					<vbox>
 						<label value="Enable Instant:" id="highlight"></label>
 						<menulist id="global-instant" sizetopopup='none' oncommand = 'globalInstant.onCommand(event);'>
