@@ -799,11 +799,16 @@ SimpleAutoCompleteResult.prototype = {
 	get errorDescription() this._errorDescription,
 	get matchCount() this.list.length,
 
-	getCommentAt: function(index) this.list[index].title || "",//title attribute on richlistitem in popup
-	getLabelAt: function(index) this.list[index].url || "",//url attribute on richlistitem in popup
-	getValueAt: function(index) this.list[index].url || "",//displayed in urlbar
-	getImageAt: function(index) this.list[index].icon || "chrome://instantfox/content/skin/button-logo.png", //pin-icon.png",  "",//
-	getStyleAt: function(index) this.list[index].type || "InstantFoxSuggest",
+	getCommentAt: function(index) 
+		this.list[index] && this.list[index].title || "",//title attribute on richlistitem in popup
+	getLabelAt: function(index) 
+		this.list[index] && this.list[index].url || "",//url attribute on richlistitem in popup
+	getValueAt: function(index) 
+		this.list[index] && this.list[index].url || "",//displayed in urlbar
+	getImageAt: function(index) 
+		this.list[index] && this.list[index].icon || "chrome://instantfox/content/skin/button-logo.png", //pin-icon.png",  "",//
+	getStyleAt: function(index) 
+		this.list[index] && this.list[index].type || "InstantFoxSuggest",
 
 	removeValueAt: function(index, removeFromDb) {
 		dump(index, removeFromDb)
@@ -821,9 +826,7 @@ SimpleAutoCompleteResult.prototype = {
 	}
 };
 
-var autoQ = {
-	plugin:InstantFoxModule.autoSearch,
-}
+
 function InstantFoxSearch(){}
 InstantFoxSearch.prototype = {
 	classDescription: "Autocomplete 4 InstantFox",
@@ -854,6 +857,7 @@ InstantFoxSearch.prototype = {
 		this.startReq(url)
 	},
 	onAutoSearchReady: function(resultArray){
+	dump("onAutoSearchReady", resultArray)
 		for each(var i in resultArray){
 			i.icon = "chrome://instantfox/content/skin/pin-icon.png"
 		}
@@ -862,24 +866,32 @@ InstantFoxSearch.prototype = {
 	},
 	onHistoryReady:function(historyResult){
 		this.originalHistoryResult = historyResult
-		this.historyResult = AutoCompleteResultToArray(historyResult)
+		this.historyResults = AutoCompleteResultToArray(historyResult)
 		this.combineResults()
 	},
 	combineResults:function(){
+	results = this.autoSearchResult || []
+dump(results, this.historyResults, this.autoSearchResult)
+		var newResult = new SimpleAutoCompleteResult(results, this.searchString);
+		newResult.originalHistoryResult = this.originalHistoryResult
+		this.listener.onSearchResult(this, newResult);
+		return
+	
 		if(!this.autoSearchResult){
 			this.listener.onSearchResult(this, this.originalHistoryResult)
 			return
 		}
-		if(!this.historyResult)
-			this.historyResult = []
+		if(!this.historyResults)
+			this.historyResults = []
 		
 		var pos = this.searchString.length>5?0:4
 		var results = Array.concat(
-			this.historyResult.slice(0, pos),
+			this.historyResults.slice(0, pos),
 			this.autoSearchResult,
-			this.historyResult.slice(pos)
+			this.historyResults.slice(pos)
 		)
-
+		results = this.autoSearchResult
+dump(results, this.historyResults, this.autoSearchResult)
 		var newResult = new SimpleAutoCompleteResult(results, this.searchString);
 		newResult.originalHistoryResult = this.originalHistoryResult
 		this.listener.onSearchResult(this, newResult);

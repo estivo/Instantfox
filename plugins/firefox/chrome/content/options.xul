@@ -65,13 +65,10 @@ textbox:not(.normal){
 textbox.key{
 	padding: 1px 1px 2px 1px;
 	border: none;
+	text-align: center;
 }
 .longbox{
 	width: 50ch;
-}
-.key.hidden{
-	opacity: 0;
-	pointer-events: none;
 }
 textbox:not(.normal)[focused='true']{
 	color:-moz-fieldtext;
@@ -142,7 +139,7 @@ slickbutton {
 	box-shadow: 0 0 2px #CECEC3;
 	border: solid 1px #ACA899;
 	-moz-border-radius: 8px;
-	padding:1px;
+	padding:1px 4px;
 	margin:4px;
 	cursor:pointer;
 }
@@ -175,12 +172,7 @@ label[control='opacity-scale']{
 	background: -moz-linear-gradient(#749A02, #91BD09);
 }
 
-#pinbox{
-	position:fixed;
-	top:0;
-	right:0;
-	list-style-image: url(chrome://instantfox/content/skin/pin-icon.png)!important;
-}
+
 #highlight {
 	font-weight:bold;
 	font-size: 14px;
@@ -201,12 +193,12 @@ label[control='opacity-scale']{
 .image{
 	width:16px
 }
-
-#instantLoad{
-	-moz-appearance:none;
-	border-radius: 4px;
+.shiftTop{
 	margin-top:-5px;
 	margin-bottom:5px;
+}
+#instantLoad{
+	-moz-appearance:none;
 }
 #instantLoad[checked]{
 	text-shadow: -1px -1px 3px gold, 0pt -1px 3px gold;
@@ -240,7 +232,7 @@ dropmarker[type="button"]{
 }
 .invisible{
 	opacity:0;
-	pointer-events:none;
+	pointer-events: none;
 }
 row{
 	-moz-box-align: center;
@@ -249,9 +241,6 @@ row{
 
 
 <tabbox flex='1'>
-  <hbox id='pinbox' hidden='true'>
-	<toolbarbutton type='checkbox' tooltiptext='pin' oncommand='window.top.InstantFox.popupPinned=this.checked'/>
-  </hbox>
 	<tabs onselect="onTabSelect.call(this)">
 		<tab label='Engines'/>
 		<tab label='Advanced'/>
@@ -264,10 +253,10 @@ row{
 				<hbox pack='center'>
 					<vbox>
 						<label value="Enable Instant:" id="highlight"></label>
-						<menulist id="global-instant" sizetopopup='none' oncommand = 'globalInstantCommand(event);'>
+						<menulist id="global-instant" sizetopopup='none' oncommand = 'globalInstant.onCommand(event);'>
 							<menupopup>
 								<menuitem label='all plugins' value='all'/>
-								<menuitem label='recommended' value='google'/>
+								<menuitem label='recommended' value='recomended'/>
 								<menuitem label='none' value='none'/>
 								<menuitem label='manual' value='manual'/>
 							</menupopup>
@@ -322,12 +311,7 @@ row{
 				<label value='Search URL:'/>
 				<hbox align='center' flex='1' class='longbox'>
 					<textbox type='url' aID='url' flex='1'  oninput="
-						this.nextSibling.hidden = !canResetProp(this);
-						if(this.timeout==null)
-							this.timeout=setTimeout(function(a){
-								a.timeout=null;
-								$t($('autoSearch'), 'image').src='http://g.etfv.co/'+a.value;
-							}, 500, this)
+						this.nextSibling.hidden = !canResetProp(this, InstantFoxModule.autoSearch);
 						"/>
 					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
 				</hbox>
@@ -351,7 +335,7 @@ row{
 				<hbox align='center' flex='1' class='longbox'>
 					<checkbox aID='suggest' oncommand='toggleVisibility(this.parentNode.parentNode.parentNode, ".animate", this.checked)'/>
 					<textbox type='url' aID='json' flex='1' class='longbox animate' oninput="
-						this.nextSibling.hidden = !canResetProp(this);
+						this.nextSibling.hidden = !canResetProp(this, InstantFoxModule.autoSearch);
 						"/>
 					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default' class="animate"/>
 				</hbox>
@@ -443,8 +427,13 @@ row{
 
 <panel id="edit-box" ignorekeys='true' type="arrow"
 		orient='vertical' onpopuphiding='if(event.target==this)editPopupSave(this)' position='start_before'>
-	<hbox align='center' pack='center'>
-		<checkbox label='load page instantly' aID='instant' id='instantLoad' class="animate"/>
+	<hbox flex="1" align="top" class="shiftTop">	
+					<hbox align="center" class='image'>
+			<image aID='image'/>
+		</hbox>
+			<spacer flex="1"/>
+			<checkbox label='load page instantly' aID='instant' id='instantLoad' class="animate"/>
+			<spacer flex="1"/>
 	</hbox>
 	<grid >
 		<columns>
@@ -460,9 +449,7 @@ row{
 					<label value='Shortcut:'/>
 					<textbox aID='key'/>
 				</hbox>
-				<hbox align="center" class='image'>
-					<image aID='image'/>
-				</hbox>
+				
 			</row>
 			<row>
 				<label value='Search URL:'/>

@@ -577,7 +577,7 @@ InstantFox.popupCloser = function(e) {
 		e.preventDefault()
 		return
 	}
-	if (InstantFox.popupPinned == true || inPopup || e.target.nodeName == 'resizer')
+	if (inPopup || e.target.nodeName == 'resizer')
 		return
 	window.removeEventListener('mousedown', InstantFox.popupCloser, false)
 	document.getElementById('instantFox-options').firstChild.hidePopup()

@@ -59,52 +59,53 @@ function updateLocaleList(){
 		menulist.selectedIndex = si
 	})
 }
+globalInstant = {
+	recomended: ["google","googlemaps", "googleimages", "wikipedia", "youtube", "amazon", "weather", "calculator"],
+	onCommand: function(e){
+		var v = e.target.value
+		if (v == 'all') {
+			for each(var p in InstantFoxModule.Plugins)
+				p.disableInstant = false
+		} else if (v == 'recomended') {
+			for each(var p in InstantFoxModule.Plugins)
+				p.disableInstant = !~this.recomended.indexOf(p.id)
+		} else if (v == 'none') {
+			for each(var p in InstantFoxModule.Plugins)
+				p.disableInstant = true
+		}
+		gPluginsChanged = true
+		rebuild()
+	},
+	update: function(){
+		var ml = $("global-instant")
 
-function globalInstantCommand(e){
-	var v = e.target.value
-	if (v == 'all') {
-		for each(var p in InstantFoxModule.Plugins)
-			p.disableInstant = false
-	} else if (v == 'google') {
-		for each(var p in InstantFoxModule.Plugins)
-			p.disableInstant = !(p.url && /#.*%q/.test(p.url))
-	} else if (v == 'none') {
-		for each(var p in InstantFoxModule.Plugins)
-			p.disableInstant = true
+		var all = 0, dis = 0, good = 0, goodDis = 0
+		for each(var p in InstantFoxModule.Plugins){
+			if(p.disabled || !p.url)
+				continue
+
+			all++
+			p.disableInstant && dis++
+			//if(p.id=='google' || p.id = 'googletranslate')
+			if(this.recomended.indexOf(p.id)>-1)
+				p.disableInstant? goodDis++: good++
+		}
+
+		var v
+		if(dis == 0)
+			v = 'all'
+		else if(dis == all)
+			v = 'none'
+		else if(goodDis == 0 && good + dis == all)
+			v = 'recomended'
+		else
+			v = 'manual'
+
+		ml.selectedItem = ml.querySelector("[value="+v+"]")
+
+		return v
 	}
-	gPluginsChanged = true
-	rebuild()
 }
-function updateGlobalInstant(){
-	var ml = $("global-instant")
-
-	var all = 0, dis = 0, goog = 0, googDis = 0
-	for each(var p in InstantFoxModule.Plugins){
-		if(p.disabled || !p.url)
-			continue
-
-		all++
-		p.disableInstant && dis++
-		//if(p.id=='google' || p.id = 'googletranslate')
-		if(/#.*%q/.test(p.url))
-			p.disableInstant? googDis++: goog++
-	}
-
-	var v
-	if(dis == 0)
-		v = 'all'
-	else if(dis == all)
-		v = 'none'
-	else if(googDis == 0 && goog + dis == all)
-		v = 'google'
-	else
-		v = 'manual'
-
-	ml.selectedItem = ml.querySelector("[value="+v+"]")
-
-	return v
-}
-
 //************* dom utils
 function $(id){
 	return document.getElementById(id)
@@ -408,14 +409,6 @@ enginesPopup = {
 		e.initUIEvent('input',true, true, window, 1)
 		el.dispatchEvent(e)
 	},
-	getItems_InstantFox: function(){
-		var items = [this.noPlugin], jsonList = []
-		for each(var p in InstantFoxModule.Plugins)
-			if(!p.disabled)
-				items.push(p)
-
-		return items
-	},
 
 	// display avaliable open search browser plugins
 	getItems_Browser: function(popup){
@@ -509,11 +502,13 @@ autoSearchUI = {
 		
 		p.instant = $t(g, "instant").selectedItem.getAttribute("aID")
 		
-		p.suggest = $t(g, "suggest").checked
+		p.suggest = !!$t(g, "suggest").checked
 		
 		p.minQChars = parseInt($t(g, "minQChars").value)
 		if(isNaN(p.minQChars))
-			p.minQChars = 0
+			p.minQChars = 0	
+
+		gPluginsChanged = true
 	}
 	
 }
@@ -624,8 +619,11 @@ rbMouseup = function(e, rbox){
 
 //*************
 function savePlugins(){
-	if(gPrefChanged)
-		document.getElementsByTagName('prefpane')[0].writePreferences(false)
+	if(gPrefChanged){
+		var panes = document.getElementsByTagName('prefpane')
+		for (var i=panes.length;i--;)
+			panes[i].writePreferences(false)
+	}
 
 	var em = Services.wm.getEnumerator('navigator:browser')
 	while(em.hasMoreElements())
@@ -662,7 +660,7 @@ xmlFragmentDis =
 		</hbox>
 		<label value="$name$"/>
 		<spacer flex='1' />
-		<textbox class='key hidden' aID='key'/>
+		<textbox class='key invisible' aID='key'/>
 		<label class='link' value='enable' aID='enable-link'/>
 	  </richlistitem>.toXMLString().replace(/>\s*</g,'><')
 
@@ -706,7 +704,7 @@ rebuild = function(){
 
 	markConflicts()
 	// todo: better place for this
-	updateGlobalInstant()
+	globalInstant.update()
 }
 
 function updatePluginStatus(p){
@@ -732,21 +730,9 @@ window.addEventListener("DOMContentLoaded", function() {
 	var InstantFox = top.InstantFox
 	if (InstantFox) {
 		window.close = InstantFox.closeOptionsPopup
-		var el = document.getElementById('pinbox')
-		el.hidden = false
-		el.firstChild.checked = !!InstantFox.popupPinned
 		InstantFox.updatePopupSize(size)
 		// don't let clicks inside options window to close popup
 		window.addEventListener('mousedown', InstantFox.popupClickListener, false)
-	} else {
-		setTimeout(function(){
-			var el=$('shortcuts')
-			var delta = el._scrollbox.scrollWidth-el.clientWidth
-			if (delta>0) {
-				window.resizeBy(delta+50, 0)
-				dump('this must not happen *************************************')
-			}
-		}, 100)
 	}
 	updateBrowserEngines()
 }, false)
@@ -781,7 +767,7 @@ function onTabSelect(){
 	if(i == 1 || i == 2){
 		this.parentNode.selectedPanel.firstChild.hidden = false;
 		gPrefChanged = true;
-		i == 2 && autoSearchUI.init()
+		i == 1 && autoSearchUI.init()
 	}else if(i == 3){
 		var iframe = document.createElement('iframe');
 		iframe.setAttribute('type', 'content');
