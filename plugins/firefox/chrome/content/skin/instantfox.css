@@ -75,7 +75,7 @@ menuitem.split-menuitem-item{
     -moz-box-pack: end;
 }
 menu[type=splitmenu] {
-    -moz-binding: url(chrome://instantfox/content/urlbar.xml#splitmenu);
+    -moz-binding: url(chrome://instantfox/content/urlbar.xml#splitmenu)!important;
     -moz-box-orient: horizontal;
     -moz-appearance: none !important;
     color: menutext;

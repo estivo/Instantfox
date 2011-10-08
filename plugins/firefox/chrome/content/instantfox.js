@@ -775,9 +775,9 @@ InstantFox.modifyContextMenu = function(enable){
 			var m = document.createElement('menu')
 			m.setAttribute('id', "ifox-context-searchselect")
 			m.setAttribute('type', "splitmenu")
-			m.setAttribute('iconic', "true")
 			m.setAttribute('onclick', "gContextMenu&&gContextMenu.doSearch(event)")
 			m.setAttribute('oncommand', "gContextMenu&&gContextMenu.doSearch(event)")
+			m.setAttribute('class', "menu-non-iconic")
 
 			var p = document.createElement('menupopup')
 			p.setAttribute('onpopupshowing', "gContextMenu.fillSearchSubmenu(this)")
