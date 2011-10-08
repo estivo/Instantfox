@@ -247,19 +247,21 @@ slidecheck {
 	background: -moz-linear-gradient(19% 75% 90deg,#3095C7, #14539C); 
 	border-radius: 4px;
 	border: 1px solid #555555;
-	width: 80px;
+	width: 5em;
 	position: relative;
 	cursor:pointer;
 	text-shadow: #093B5C 0px -1px 1px;
 	color: #fff;
+	text-align: center
 }
 slidecheck::before {
 	content: "ON";
-	padding-left: 9px;
+	width: 50%;display: inline-block;	
 }
 slidecheck::after {
 	content: "OFF";
-	padding-left: 12px;
+	width: 50%;
+	right:0;display: inline-block;	
 }
 slidecheck>check { 
 	display: block;
@@ -272,7 +274,8 @@ slidecheck>check {
 	top: 1%;
 	left: 1%;
 	-moz-transition-duration: 0.1s;
-	-moz-transition-property: left,right;
+	-moz-transition-property: left,right,width;
+	pointer-events:none
 }
 slidecheckbox:hover>slidecheck>check{
 	background: -moz-linear-gradient(19% 75% 90deg,#FFF, #B1B1B1);	
@@ -338,6 +341,7 @@ slidecheckbox:hover>slidecheck>check{
 				<preferences>
 					<preference id="openintab" name="browser.search.openintab" type="bool" />
 					<preference id="maxRichResults" name="browser.urlbar.maxRichResults" type="int" />
+					<preference id="context-usedefault" name="extensions.InstantFox.context.usedefault" type="bool" />
 				</preferences>
 
 <groupbox id="autoSearch" oncommand="autoSearchUI.onChange(event)" onkeypress="autoSearchUI.onChange(event)">
@@ -409,9 +413,14 @@ slidecheckbox:hover>slidecheck>check{
 	<textbox id='maxRichResults-textbox' preference="maxRichResults"/>
 </hbox>
 </groupbox>
+<separator/>
 <hbox align='center'>
 	<label value='Open search in new tab' control='openintab-checkbox'/>
 	<checkbox id='openintab-checkbox' preference="openintab" oncommand='InstantFoxModule.openSearchInNewTab=this.checked'/>
+</hbox>
+<hbox align='center'>
+	<label value='Use default contextmenu item' control='context-usedefault-checkbox'/>
+	<checkbox id='context-usedefault-checkbox' preference="context-usedefault" oncommand='InstantFoxModule.modifyContextMenu(!this.checked)'/>
 </hbox>
 
 <spacer flex="1"/>

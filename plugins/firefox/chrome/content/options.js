@@ -821,7 +821,9 @@ addPluginsFromClipboard = function(){
 }
 
 
-
+  /**********************************************************************/
+ /** iphone style sliding checkbox, supports only cliking no drag yet **/
+/**********************************************************************/
 slideCheckbox = {
 	init: function(el){
 		if(el.ready)

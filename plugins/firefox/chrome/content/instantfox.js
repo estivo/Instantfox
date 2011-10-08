@@ -126,6 +126,8 @@ var InstantFox = {
 
 		this.finishSearch()
 		this.prepareAutoSearch('off')
+		
+		InstantFox.modifyContextMenu(false)
 	},
 
 	checkURLBarBinding: function() {
@@ -723,143 +725,168 @@ InstantFox._urlbarCutCommand =  function(aCommand){
 /*********************************************************
  * contextMenu
  *******/
-nsContextMenu.prototype.createSearchItem = function(){
-	var old = document.getElementById("context-searchselect")
-	if(old)
-		old.parentNode.removeChild(old)
-
-	var m = document.createElement('menu')
-	m.setAttribute('id', "ifox-context-searchselect")
-	m.setAttribute('type', "splitmenu")
-	m.setAttribute('iconic', "true")
-	m.setAttribute('onclick', "gContextMenu.doSearch(event)")
-	m.setAttribute('oncommand', "gContextMenu.doSearch(event)")
-
-	var p = document.createElement('menupopup')
-	p.setAttribute('onpopupshowing', "gContextMenu.fillSearchSubmenu(this)")
-
-	m.appendChild(p)
-
-	var s = document.getElementById("context-sep-open")
-
-	var c = document.getElementById("contentAreaContextMenu")
-	c.insertBefore(m, s)
-	return m
-}
-nsContextMenu.prototype.getSelectedText = function() {
-	var selectedText = getBrowserSelection();
-
-    if (selectedText)
-		return selectedText
-	try{
-		var editor = content.document.activeElement
-			.QueryInterface(Ci.nsIDOMNSEditableElement).editor
-	}catch(e){
-		try{
-			var editor = document.popupNode
-				.QueryInterface(Ci.nsIDOMNSEditableElement).editor
-		}catch(e){}
+InstantFox.modifyContextMenu = function(enable){
+	if(enable == undefined){
+		let pname = "extensions.InstantFox.context.usedefault"
+		enable = !(Services.prefs.prefHasUserValue(pname) && Services.prefs.getBoolPref(pname))
 	}
-	try{
-		return editor.selection.toString()
-	}catch(e){}
-	return ''
-}
-nsContextMenu.prototype.isTextSelection = function() {
-	var splitMenu = document.getElementById("ifox-context-searchselect") || this.createSearchItem()
-	var menuitem = splitMenu.menuitem
+	let proto = nsContextMenu.prototype
+	if(enable && !proto.isTextSelection_orig){
+		proto.isTextSelection_orig = proto.isTextSelection_orig || proto.isTextSelection 
+		proto.isTextSelection = function() {
+			var splitMenu = document.getElementById("ifox-context-searchselect") || this.createSearchItem()
+			var menuitem = splitMenu.menuitem
 
-    var selectedText = this.getSelectedText()
+			var selectedText = this.getSelectedText()
 
-	if (!selectedText){
-		splitMenu.hidden = true
-		return false;
-	}
+			if (!selectedText){
+				splitMenu.hidden = true
+				return false;
+			}
 
-    if (selectedText.length > 15)
-      selectedText = selectedText.substr(0,15) + this.ellipsis;
+			if (selectedText.length > 15)
+			  selectedText = selectedText.substr(0,15) + this.ellipsis;
 
-    var engine = InstantFoxModule.Plugins[InstantFoxModule.defaultPlugin];
+			var engine = InstantFoxModule.Plugins[InstantFoxModule.defaultPlugin];
 
-    // format "Search <engine> for <selection>" string to show in menu
-    var menuLabel = gNavigatorBundle.getFormattedString("contextMenuSearchText",
-                                                        [engine.name, selectedText]);
-	if(menuitem){
-		menuitem.label = menuLabel;
-		menuitem.image = engine.iconURI
-		splitMenu.setAttribute('name', engine.id)
-		splitMenu.setAttribute('pluginType', "instantFox")
-		menuitem.accessKey = gNavigatorBundle.getString("contextMenuSearchText.accesskey");
-		splitMenu.hidden = false
-	}
+			// format "Search <engine> for <selection>" string to show in menu
+			var menuLabel = gNavigatorBundle.getFormattedString("contextMenuSearchText",
+																[engine.name, selectedText]);
+			if(menuitem){
+				menuitem.label = menuLabel;
+				menuitem.image = engine.iconURI
+				splitMenu.setAttribute('name', engine.id)
+				splitMenu.setAttribute('pluginType', "instantFox")
+				menuitem.accessKey = gNavigatorBundle.getString("contextMenuSearchText.accesskey");
+				splitMenu.hidden = false
+			}
 
-    return true;
-}
-nsContextMenu.prototype.fillSearchSubmenu = function(popup) {
-	var menu
-	while(menu = popup.firstChild)
-		popup.removeChild(menu)
-
-	for each (engine in InstantFoxModule.Plugins){
-		if(engine.disabled||engine.hideFromContextMenu)
-			continue
-
-		menu = document.createElement('menuitem')
-		menu.setAttribute('name', engine.id)
-		menu.setAttribute('label', engine.name)
-		menu.setAttribute('image', engine.iconURI)
-		menu.setAttribute('class', "menuitem-iconic")
-		//todo: main search must be instantfox search too
-		menu.setAttribute('pluginType', "instantFox")
-		popup.appendChild(menu)
-	}
-}
-nsContextMenu.prototype.doSearch = function(e) {
-	var mustClosePopup = false
-	dump(e.type,
-	e.target.menuitem
-	)
-	if(e.type == "click"){
-		if(e.target.menuitem){
-			if(e.target.menuitem.hasAttribute("_moz-menuactive"))
-				mustClosePopup = e.button != 1
-			else
-				return // click on menu
-		}			
-	}
-	mustClosePopup = e.button != 1
-	if(e.type == "command"){
-		
-	}
-	
-	var name = e.target.getAttribute('name')
-	if(!name)
-		return;
-	var selectedText = this.getSelectedText()
-	if(name == 'open as link'){
-		openLinkIn(selectedText, e.button>1?"current":"tab", {relatedToCurrent: true});
-		return
-	}
-
-	var type = e.target.getAttribute('pluginType')
-	if (type == "instantFox") {
-		var href  = InstantFoxModule.urlFromQuery(name, selectedText)
-	} else {
-		var engine = Services.search.getEngineByName(name);
-		var submission = engine.getSubmission(selectedText);
-		if (!submission) {
-			return;
+			return true;
 		}
-		var href = submission.uri.spec
-		var postData = submission.postData
+
+		proto.createSearchItem = function(){
+			var old = document.getElementById("context-searchselect")
+			if(old){
+				nsContextMenu.prototype.oldNode = old
+				nsContextMenu.prototype.oldNodePosId = old.nextSibling && old.nextSibling.id
+				old.parentNode.removeChild(old)
+			}
+
+			var m = document.createElement('menu')
+			m.setAttribute('id', "ifox-context-searchselect")
+			m.setAttribute('type', "splitmenu")
+			m.setAttribute('iconic', "true")
+			m.setAttribute('onclick', "gContextMenu&&gContextMenu.doSearch(event)")
+			m.setAttribute('oncommand', "gContextMenu&&gContextMenu.doSearch(event)")
+
+			var p = document.createElement('menupopup')
+			p.setAttribute('onpopupshowing', "gContextMenu.fillSearchSubmenu(this)")
+
+			m.appendChild(p)
+
+			var s = document.getElementById("context-sep-open")
+
+			var c = document.getElementById("contentAreaContextMenu")
+			c.insertBefore(m, s)
+			return m
+		}
+		proto.getSelectedText = function() {
+			var selectedText = getBrowserSelection();
+
+			if (selectedText)
+				return selectedText
+			try{
+				var editor = content.document.activeElement
+					.QueryInterface(Ci.nsIDOMNSEditableElement).editor
+			}catch(e){
+				try{
+					var editor = document.popupNode
+						.QueryInterface(Ci.nsIDOMNSEditableElement).editor
+				}catch(e){}
+			}
+			try{
+				return editor.selection.toString()
+			}catch(e){}
+			return ''
+		}
+		proto.fillSearchSubmenu = function(popup) {
+			var menu
+			while(menu = popup.firstChild)
+				popup.removeChild(menu)
+
+			for each (engine in InstantFoxModule.Plugins){
+				if(engine.disabled||engine.hideFromContextMenu)
+					continue
+
+				menu = document.createElement('menuitem')
+				menu.setAttribute('name', engine.id)
+				menu.setAttribute('label', engine.name)
+				menu.setAttribute('image', engine.iconURI)
+				menu.setAttribute('class', "menuitem-iconic")
+				//todo: main search must be instantfox search too
+				menu.setAttribute('pluginType', "instantFox")
+				popup.appendChild(menu)
+			}
+		}
+		proto.doSearch = function(e) {
+			var mustClosePopup = false
+			dump(e.type,
+			e.target.menuitem
+			)
+			if(e.type == "click"){
+				if(e.target.menuitem){
+					if(e.target.menuitem.hasAttribute("_moz-menuactive"))
+						mustClosePopup = e.button != 1
+					else
+						return // click on menu
+				}			
+			}
+			mustClosePopup = e.button != 1
+			if(e.type == "command"){
+				
+			}
+			
+			var name = e.target.getAttribute('name')
+			if(!name)
+				return;
+			var selectedText = this.getSelectedText()
+			if(name == 'open as link'){
+				openLinkIn(selectedText, e.button>1?"current":"tab", {relatedToCurrent: true});
+				return
+			}
+
+			var type = e.target.getAttribute('pluginType')
+			if (type == "instantFox") {
+				var href  = InstantFoxModule.urlFromQuery(name, selectedText)
+			} else {
+				var engine = Services.search.getEngineByName(name);
+				var submission = engine.getSubmission(selectedText);
+				if (!submission) {
+					return;
+				}
+				var href = submission.uri.spec
+				var postData = submission.postData
+			}
+			openLinkIn(href, e.button>1 ?"current":"tab", {postData: postData, relatedToCurrent: true});
+			
+			if(mustClosePopup)
+				e.currentTarget.parentNode.hidePopup()
+		}
 	}
-    openLinkIn(href, e.button>1 ?"current":"tab", {postData: postData, relatedToCurrent: true});
-	
-	if(mustClosePopup)
-		e.currentTarget.parentNode.hidePopup()
+	else if(!enable && proto.isTextSelection_orig){
+		proto.isTextSelection = proto.isTextSelection_orig
+		delete proto.isTextSelection_orig 
+		delete proto.createSearchItem 
+		delete proto.getSelectedText 
+		delete proto.fillSearchSubmenu 
+		delete proto.doSearch 
+		let popup = document.getElementById("contentAreaContextMenu")
+		let node = document.getElementById("ifox-context-searchselect")
+		node && node.parentNode.removeChild(node)
+		popup.insertBefore(proto.oldNode, proto.oldNodePosId && document.getElementById(proto.oldNodePosId))
+	}
+
 }
-
-
 
 InstantFox.prepareAutoSearch = function(off){
 	if (off && InstantFox.handleCommand_orig) {
@@ -967,3 +994,6 @@ InstantFox.defaultSearch = {
 	
 }
 
+InstantFox.modifyContextMenu()
+
+dump("instantfox initialization success")

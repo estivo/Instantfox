@@ -575,6 +575,12 @@ InstantFoxModule = {
 	setAutoSearch: function(val){
 		// todo
 		this.autoSearch = val
+	},
+	modifyContextMenu: function(val){
+		var e = Services.wm.getEnumerator("navigator:browser")
+		while(e.hasMoreElements()){
+			e.getNext().InstantFox.modifyContextMenu(val)
+		}
 	}
 
 }
