@@ -317,9 +317,9 @@
     <implementation implements="nsIDOMXULSelectControlItemElement, nsIDOMXULContainerItemElement, nsIAccessibleProvider">
         <constructor><![CDATA[
             if (this.getAttribute("iconic") == "true") {
-                this.item.classList.remove("menuitem-tooltip");
-                this.item.classList.add("menuitem-iconic-tooltip");
-                this.item.classList.add("menuitem-iconic");
+                this.menuitem.classList.remove("menuitem-tooltip");
+                this.menuitem.classList.add("menuitem-iconic-tooltip");
+                this.menuitem.classList.add("menuitem-iconic");
             }
       ]]></constructor>
      

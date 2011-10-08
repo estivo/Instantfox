@@ -35,10 +35,13 @@ InstantFox.pageLoader = {
 			return;
 		gURLBar.blur()
 		if(tab == 'new'){
-			gBrowser._lastRelatedTab = null
-			// todo: option to open at far left
-			var tab = gBrowser.addTab('', {relatedToCurrent:true, skipAnimation:true})
-			gBrowser.selectedTab = tab;
+			tab = gBrowser.selectedTab
+			if(!isTabEmpty(tab)){
+				gBrowser._lastRelatedTab = null
+                var relatedToCurrent = Services.prefs.getBoolPref("browser.tabs.insertRelatedAfterCurrent")
+				var tab = gBrowser.addTab('', {relatedToCurrent:relatedToCurrent, skipAnimation:true})
+				gBrowser.selectedTab = tab;
+			}
 		}
 		var browser = this.swapBrowsers(tab)
 		browser.userTypedValue = null;

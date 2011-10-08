@@ -317,8 +317,8 @@ var InstantFox = {
 		}
 		
 		if(!q && InstantFoxModule.autoSearch.instant != "off"){
-			this._isOwnQuery = true
-			this.schedulePreload(500)
+			InstantFox._isOwnQuery = true
+			InstantFox.schedulePreload(500)
 		}
 		InstantFox.updateShadowLink(q);
 	},
@@ -327,8 +327,8 @@ var InstantFox = {
 			return
 
         if (InstantFox._isOwnQuery && !gURLBar.mIgnoreFocus && e.originalTarget == gURLBar.mInputField) {
-			gURLBar.value = content.document.location.href;
-			gBrowser.userTypedValue = null;
+			//gURLBar.value = content.document.location.href;
+			//gBrowser.userTypedValue = null;
 			InstantFox.finishSearch();
         }
 		//InstantFox.mouseUI.remove();
@@ -389,7 +389,7 @@ var InstantFox = {
 		return oldQ
 	},
 	onSearchReady: function(){
-		var q = this;//
+		var q = this;
 		InstantFox.findBestShadow(q)
 		InstantFox.updateShadowLink(q)
 		if(!q.plugin.disableInstant)
@@ -728,10 +728,12 @@ nsContextMenu.prototype.createSearchItem = function(){
 	if(old)
 		old.parentNode.removeChild(old)
 
-	var m = document.createElement('splitmenu')
+	var m = document.createElement('menu')
 	m.setAttribute('id', "ifox-context-searchselect")
+	m.setAttribute('type', "splitmenu")
 	m.setAttribute('iconic', "true")
-	m.setAttribute('onmousedown', "gContextMenu.doSearch(event)")
+	m.setAttribute('onclick', "gContextMenu.doSearch(event)")
+	m.setAttribute('oncommand', "gContextMenu.doSearch(event)")
 
 	var p = document.createElement('menupopup')
 	p.setAttribute('onpopupshowing', "gContextMenu.fillSearchSubmenu(this)")
@@ -742,8 +744,6 @@ nsContextMenu.prototype.createSearchItem = function(){
 
 	var c = document.getElementById("contentAreaContextMenu")
 	c.insertBefore(m, s)
-	
-	m.menuitem.style.padding = m.menu.style.padding = '0'
 	return m
 }
 nsContextMenu.prototype.getSelectedText = function() {
@@ -788,7 +788,7 @@ nsContextMenu.prototype.isTextSelection = function() {
 		menuitem.label = menuLabel;
 		menuitem.image = engine.iconURI
 		splitMenu.setAttribute('name', engine.id)
-		splitMenu.setAttribute('type', "instantFox")
+		splitMenu.setAttribute('pluginType', "instantFox")
 		menuitem.accessKey = gNavigatorBundle.getString("contextMenuSearchText.accesskey");
 		splitMenu.hidden = false
 	}
@@ -810,7 +810,7 @@ nsContextMenu.prototype.fillSearchSubmenu = function(popup) {
 		menu.setAttribute('image', engine.iconURI)
 		menu.setAttribute('class', "menuitem-iconic")
 		//todo: main search must be instantfox search too
-		menu.setAttribute('type', "instantFox")
+		menu.setAttribute('pluginType', "instantFox")
 		popup.appendChild(menu)
 	}
 }
@@ -822,7 +822,7 @@ nsContextMenu.prototype.doSearch = function(e) {
 	if(name == 'open as link')
 		openLinkIn(selectedText, e.button>1?"current":"tab", {relatedToCurrent: true});
 
-	var type = e.target.getAttribute('type')
+	var type = e.target.getAttribute('pluginType')
 	if (type == "instantFox") {
 		var href  = InstantFoxModule.urlFromQuery(name, selectedText)
 	} else {
@@ -940,7 +940,7 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
 InstantFox.defaultSearch = {
 	doPreload: function(){
 		
-		InstantFox.pageLoader.addPreview(url2go);
+		//InstantFox.pageLoader.addPreview(url2go);
 	}
 	
 }
