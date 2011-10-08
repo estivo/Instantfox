@@ -303,7 +303,7 @@
     <content align='stretch'>
 		<xul:hbox anonid="item" flex="1" allowevents='true'>
 			<xul:menuitem anonid="menuitem" flex="1"
-                    class="menuitem-tooltip split-menuitem-item"
+                    class="menuitem-iconic-tooltip menuitem-iconic split-menuitem-item"
                     xbl:inherits="label,key,image,value,closemenu,disabled" />
         </xul:hbox>
 		<xul:hbox anonid="menu" xbl:inherits="_moz-menuactive" allowevents='true' class="split-menu-right-image" >
@@ -316,11 +316,6 @@
 
     <implementation implements="nsIDOMXULSelectControlItemElement, nsIDOMXULContainerItemElement, nsIAccessibleProvider">
         <constructor><![CDATA[
-            if (this.getAttribute("iconic") == "true") {
-                this.menuitem.classList.remove("menuitem-tooltip");
-                this.menuitem.classList.add("menuitem-iconic-tooltip");
-                this.menuitem.classList.add("menuitem-iconic");
-            }
       ]]></constructor>
      
       <field name="item" readonly="true">
@@ -335,17 +330,18 @@
       
       
     </implementation>
-    <handlers>
-      <handler event="mouseover" phase="target"><![CDATA[  
+	<handlers>
+      <handler event="mouseover" phase="target"><![CDATA[
       //this.menuitem.setAttribute("_moz-menuactive", true)
       if(event.target!=this||event.originalTarget==this)  
         return
       if(event.originalTarget==this.menu){
           this.menu.style.pointerEvents="none"
-          this.menuitem.setAttribute("_moz-menuactive", false)
+          this.menuitem.removeAttribute("_moz-menuactive")
           this.item.style.pointerEvents="" 
       }else if(event.originalTarget==this.item){
-          this.menuitem.setAttribute("_moz-menuactive", true)
+          if(this.hasAttribute("_moz-menuactive"))
+            this.menuitem.setAttribute("_moz-menuactive", true)
           this.menu.style.pointerEvents=""
           this.item.style.pointerEvents="none"
       }
@@ -354,8 +350,15 @@
       if(event.originalTarget==this){
         this.menuitem.removeAttribute("_moz-menuactive")
         this.item.style.pointerEvents="" 
-      }      
+      }
       ]]></handler>
-    </handlers>
+      <handler event="DOMMenuItemInactive" phase="target"><![CDATA[
+        this.menuitem.setAttribute("_moz-menuactive", false)
+      ]]></handler>
+      <handler event="DOMMenuItemActive" phase="target"><![CDATA[
+        if(this.item.style.pointerEvents=="none")
+            this.menuitem.setAttribute("_moz-menuactive", true)
+      ]]></handler>
+	  </handlers>
   </binding>
 </bindings>

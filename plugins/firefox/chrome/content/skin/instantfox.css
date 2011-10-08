@@ -68,7 +68,7 @@ menuitem.split-menuitem-item[_moz-menuactive="true"], .split-menu-right-image[_m
 menuitem.split-menuitem-item{
     padding: 0!important;/*for mac*/
     pointer-events:none;
-    /-moz-margin-end:1px;/*for xp*/
+    -moz-margin-end:1px;/*for xp*/
 }
 .split-menu-right-image {
     -moz-appearance: menuitem;

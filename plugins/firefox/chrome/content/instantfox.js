@@ -815,12 +815,31 @@ nsContextMenu.prototype.fillSearchSubmenu = function(popup) {
 	}
 }
 nsContextMenu.prototype.doSearch = function(e) {
+	var mustClosePopup = false
+	dump(e.type,
+	e.target.menuitem
+	)
+	if(e.type == "click"){
+		if(e.target.menuitem){
+			if(e.target.menuitem.hasAttribute("_moz-menuactive"))
+				mustClosePopup = e.button != 1
+			else
+				return // click on menu
+		}			
+	}
+	mustClosePopup = e.button != 1
+	if(e.type == "command"){
+		
+	}
+	
 	var name = e.target.getAttribute('name')
 	if(!name)
 		return;
 	var selectedText = this.getSelectedText()
-	if(name == 'open as link')
+	if(name == 'open as link'){
 		openLinkIn(selectedText, e.button>1?"current":"tab", {relatedToCurrent: true});
+		return
+	}
 
 	var type = e.target.getAttribute('pluginType')
 	if (type == "instantFox") {
@@ -835,6 +854,9 @@ nsContextMenu.prototype.doSearch = function(e) {
 		var postData = submission.postData
 	}
     openLinkIn(href, e.button>1 ?"current":"tab", {postData: postData, relatedToCurrent: true});
+	
+	if(mustClosePopup)
+		e.currentTarget.parentNode.hidePopup()
 }
 
 
