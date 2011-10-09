@@ -89,6 +89,8 @@ var instantFoxDevel = {
 		this.loadedScriptsCount++;
 		if(this.loadedScriptsCount == this.sourceList.length){
 			this.m = this.reloadModule(this.moduleHref)
+			if("$shadia" in window)
+				this.m.dump = $shadia.dump
 			// simulate document load event
 			InstantFox.initialize()
 		}else{

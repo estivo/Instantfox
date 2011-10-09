@@ -331,7 +331,7 @@ var InstantFox = {
         if (InstantFox._isOwnQuery && !gURLBar.mIgnoreFocus && e.originalTarget == gURLBar.mInputField) {
 			//gURLBar.value = content.document.location.href;
 			//gBrowser.userTypedValue = null;
-			InstantFox.finishSearch();
+			InstantFox.finishSearch("block");
         }
 		//InstantFox.mouseUI.remove();
     },
@@ -830,9 +830,7 @@ InstantFox.modifyContextMenu = function(enable){
 		}
 		proto.doSearch = function(e) {
 			var mustClosePopup = false
-			dump(e.type,
-			e.target.menuitem
-			)
+			dump(e.type, e.target.menuitem)
 			if(e.type == "click"){
 				if(e.target.menuitem){
 					if(e.target.menuitem.hasAttribute("_moz-menuactive"))

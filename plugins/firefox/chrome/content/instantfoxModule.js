@@ -863,7 +863,7 @@ InstantFoxSearch.prototype = {
 		this.startReq(url)
 	},
 	onAutoSearchReady: function(resultArray){
-	dump("onAutoSearchReady", resultArray)
+		dump("onAutoSearchReady", resultArray.map(function(x)x.title).join("\n"))
 		for each(var i in resultArray){
 			i.icon = "chrome://instantfox/content/skin/pin-icon.png"
 		}
@@ -873,13 +873,14 @@ InstantFoxSearch.prototype = {
 	onHistoryReady:function(historyResult){
 		this.originalHistoryResult = historyResult
 		this.historyResults = AutoCompleteResultToArray(historyResult)
-		this.combineResults()
+		dump("history ready", this.historyResults.map(function(x)x.title).join("\n"))
+		//this.combineResults()
 	},
 	combineResults:function(){
 	results = this.autoSearchResult || []
-dump(results, this.historyResults, this.autoSearchResult)
-		var newResult = new SimpleAutoCompleteResult(results, this.searchString);
-		newResult.originalHistoryResult = this.originalHistoryResult
+//dump(results, this.historyResults, this.autoSearchResult)
+		var newResult = new SimpleAutoCompleteResult(results, this.searchString+Math.random());
+		//newResult.originalHistoryResult = this.originalHistoryResult
 		this.listener.onSearchResult(this, newResult);
 		return
 	

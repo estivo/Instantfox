@@ -146,7 +146,7 @@
         <parameter name="aSearchTokens"/>
         <body>
           <![CDATA[
-		  dump(aText, aSearchTokens)
+		  //dump(aText, aSearchTokens)
           if (aSearchTokens == "")
             return [0, aText.length];
 
@@ -211,7 +211,7 @@
         <body>
           <![CDATA[
           let search = aSearch.toLowerCase();
-		  dump(aSearch)
+		 // dump(aSearch)
 		  if(search[0]=='`'){
 		    var i = search.indexOf(' ')
 			if(i==-1)i=search.length
@@ -315,9 +315,7 @@
     </content>
 
     <implementation implements="nsIDOMXULSelectControlItemElement, nsIDOMXULContainerItemElement, nsIAccessibleProvider">
-        <constructor><![CDATA[
-      ]]></constructor>
-     
+      
       <field name="item" readonly="true">
             document.getAnonymousElementByAttribute(this, "anonid", "item");
       </field>
