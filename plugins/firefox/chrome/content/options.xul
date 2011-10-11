@@ -211,12 +211,16 @@ checkbox:-moz-focusring > .checkbox-label-box{
 	width: 16px;
 	height: 16px;
 	cursor: help;
+	-moz-transition-duration: 0.7s;
+	-moz-transition-property: opacity,background;
+	opacity:1;
 }
-.plugin-status[status=""]{
+.plugin-status[status="instant"]{
 	background:url(chrome://instantfox/content/skin/instant.png)
 }
 .plugin-status[status="not-instant"]{
-	display:none
+	opacity:0;
+	pointer-events: none;	
 }
 .plugin-status[status="invalid"]{
 	background:url(chrome://instantfox/content/skin/invalid.png)
@@ -487,7 +491,9 @@ slidecheckbox:hover>slidecheck>check{
 			<image aID='image'/>
 		</hbox>
 			<spacer flex="1"/>
-			<slidecheckbox label='Instant page loading' aID='instant' id='instantLoad' class="animate"/>
+			<slidecheckbox label='Instant page loading' aID='instant' id='instantLoad' class="animate" 
+				oncommand="this.nextSibling.setAttribute('status',this.checked?'instant':'not-instant')"/>
+			<hbox class="plugin-status" status="instant" style="cursor:default"/>
 			<spacer flex="1"/>
 	</hbox>
 	<grid >
@@ -502,7 +508,7 @@ slidecheckbox:hover>slidecheck>check{
 					<textbox aID='name' flex='1' oninput="this.nextSibling.hidden = !canResetProp(this);"/>
 					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
 					<label value='Shortcut:'/>
-					<textbox aID='key'/>
+					<textbox aID='key' class="key"/>
 				</hbox>
 				
 			</row>

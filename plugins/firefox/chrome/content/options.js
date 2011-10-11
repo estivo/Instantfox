@@ -147,6 +147,11 @@ function formatString(string, options){
 		var x = x.slice(1,-1)
 		if(x[0]=='!')
 			return options[x.substr(1)]?'false':'true'
+		if(x[0]=='_'){
+			x = x.substr(1)
+			var strName = options[x]
+			return escapeHTML(i18n[x+"_"+strName]||"")
+		}
 		if(typeof options[x]!='string')
 			return options[x]?options[x].toString():''
 		return escapeHTML(options[x]||'')
@@ -215,6 +220,7 @@ initEditPopup = function(plugin, panel){
 		gPlugin = createEmptyPlugin(plugin)
 
 	$t(panel, 'instant').checked = !gPlugin.disableInstant
+	$t(panel, 'instant').doCommand()
 	$t(panel, 'image').src = gPlugin.iconURI
 	$t(panel, 'key').value = gPlugin.key
 
@@ -650,7 +656,7 @@ xmlFragment =
 		</hbox>
 		<label value="$name$"/>
 		<hbox flex='1' pack='start' align='top'>
-			<hbox class="plugin-status" status="$status$" aID='edit-link' tooltiptext="$status$"/>
+			<hbox class="plugin-status" status="$status$" aID='edit-link' tooltiptext="$_status$"/>
 		</hbox>
 		<hbox align="center" class='key'>
 			<textbox class='key' aID='key' value='$key$' tooltiptext='Edit Plugin Shortcut'
@@ -721,7 +727,7 @@ function updatePluginStatus(p){
 	} else if(p.disableInstant) {
 		p.status = "not-instant"
 	} else
-		p.status = ""
+		p.status = "instant"
 }
 
 window.addEventListener("DOMContentLoaded", function() {
@@ -906,3 +912,9 @@ slideCheckbox = {
 		return val
 	}
 }
+
+i18n = {
+	status_instant: 'Instant-loading on',
+	status_invalid: 'invalid'
+}
+
