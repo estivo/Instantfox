@@ -1,8 +1,4 @@
 content   instantfox chrome/content/
-resource  instantfox modules/
-
-style     chrome://browser/content/browser.xul   chrome://instantfox/content/skin/instantfox.css
-overlay   chrome://browser/content/browser.xul   chrome://instantfox/content/instantfox.xul
 
 locale    instantfox de       chrome/locale/de-DE/
 locale    instantfox de-AT    chrome/locale/de-DE/
@@ -37,3 +33,7 @@ locale    instantfox zh-CN    chrome/locale/zh-CN/
 #FF4
 #component {c541b971-0729-4f5d-a5c4-1f4dadef365e} components/instantfox_search.js
 #contract @mozilla.org/autocomplete/search;1?name=instantFoxAutoComplete {c541b971-0729-4f5d-a5c4-1f4dadef365e}
+#resource  instantfox modules/
+
+#style     chrome://browser/content/browser.xul   chrome://instantfox/content/skin/instantfox.css
+#overlay   chrome://browser/content/browser.xul   chrome://instantfox/content/instantfox.xul
