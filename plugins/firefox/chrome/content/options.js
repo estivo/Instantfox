@@ -171,7 +171,6 @@ initContextMenu = function(popup){
 			'checked',
 			!selectedItems.some(function(x){
 				var p = InstantFoxModule.Plugins[x.id]
-				dump(x.id)
 				return !p || p[aID]
 			})
 		)
@@ -741,6 +740,7 @@ window.addEventListener("DOMContentLoaded", function() {
 	// check if we are inside popup
 	var InstantFox = top.InstantFox
 	if (InstantFox) {
+		dump(1,"*********")
 		window.close = InstantFox.closeOptionsPopup
 		InstantFox.updatePopupSize(size)
 		// don't let clicks inside options window to close popup
@@ -755,17 +755,19 @@ onOptionsPopupShowing = function(){
 	updateBrowserEngines()
 }
 updateBrowserEngines = function(){
-	var win = Services.wm.getMostRecentWindow("navigator:browser")
-	var hide = true
-	if(win){
-		for each(var b in win.gBrowser.browsers){
-			if(b.engines && b.engines.length){
-				hide = false
-				break
+	try{
+		var win = Services.wm.getMostRecentWindow("navigator:browser")
+		var hide = true
+		if(win){
+			for each(var b in win.gBrowser.browsers){
+				if(b.engines && b.engines.length){
+					hide = false
+					break
+				}
 			}
 		}
-	}
-	$("add-from-browser").hidden = hide
+		$("add-from-browser").hidden = hide
+	}catch(e){}
 }
 
 function onTabSelect(){
@@ -849,7 +851,6 @@ addPluginsFromClipboard = function(){
 			InstantFoxModule.Plugins = {}
 		}
 		InstantFoxModule.pluginLoader.onPluginsLoaded(str)
-		dump(InstantFoxModule.pluginLoader.google)
 	}catch(e){
 		InstantFoxModule.Plugins = origPlugins
 		Cu.reportError(e)
