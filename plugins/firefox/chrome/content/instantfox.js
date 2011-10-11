@@ -115,7 +115,7 @@ var InstantFox = {
 			return document.getElementById("searchbar") || document.getElementById("urlbar")
 		})
 
-		InstantFox.prepareAutoSearch()
+		InstantFox.hookUrlbarCommand()
 	},
 
 	destroy: function(event) {
@@ -125,7 +125,7 @@ var InstantFox = {
 		gURLBar.removeEventListener('blur', this.onblur, false);
 
 		this.finishSearch()
-		this.prepareAutoSearch('off')
+		this.hookUrlbarCommand('off')
 		
 		InstantFox.modifyContextMenu(false)
 	},
@@ -318,10 +318,6 @@ var InstantFox = {
 			InstantFoxModule.currentQuery = null;
 		}
 		
-		if(!q && InstantFoxModule.autoSearch.instant != "off"){
-			InstantFox._isOwnQuery = true
-			InstantFox.schedulePreload(500)
-		}
 		InstantFox.updateShadowLink(q);
 	},
 	onblur: function(e) {
@@ -886,7 +882,7 @@ InstantFox.modifyContextMenu = function(enable){
 
 }
 
-InstantFox.prepareAutoSearch = function(off){
+InstantFox.hookUrlbarCommand = function(off){
 	if (off && InstantFox.handleCommand_orig) {
 		gURLBar.handleCommand = InstantFox.handleCommand_orig
 	} else {
@@ -925,9 +921,15 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
 			// let firefox to handle builtin shortcuts if any
 			var shortcutURL = getShortcutOrURI(url, {}, {})
 			//
-			if (shortcutURL == url && (url[0] != '/' && url.indexOf(':') == -1 && url.indexOf('.') == -1))
+			if (shortcutURL == url && (
+				    url.indexOf(' ') != -1 // contains space or doesn't contain any url characters \:/.
+				 || url.indexOf('\\') == -1
+				 && url.indexOf(':') == -1
+				 && url.indexOf('/') == -1
+				 && url.indexOf('.') == -1
+			)){
 				url = InstantFoxModule.urlFromQuery(InstantFoxModule.autoSearch, url);
-
+			}
 		} else {
 			// fallback to default behaviour
 			[url, postData, mayInheritPrincipal] = this._canonizeURL(aTriggeringEvent)
@@ -981,16 +983,6 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
 	}
 }
 
-
-// search without shortcuts
-// todo: integrate with plugin system?
-InstantFox.defaultSearch = {
-	doPreload: function(){
-		
-		//InstantFox.pageLoader.addPreview(url2go);
-	}
-	
-}
 
 InstantFox.modifyContextMenu()
 

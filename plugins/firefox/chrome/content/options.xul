@@ -367,6 +367,7 @@ slidecheckbox:hover>slidecheck>check{
 					<dropmarker type='button' onmousedown='enginesPopup.show(this, "Url", "url")'/>
 				</hbox>
 			</row>
+			<row hidden="true">
 			<row>
 				<label value='Instant Loading:'/>
 				<menulist aID="instant" sizetopopup='none' oncommand = ''>
@@ -404,6 +405,7 @@ slidecheckbox:hover>slidecheck>check{
 					<textbox type='number' aID='minQChars' flex='1'/>
 				</hbox>
 				<hbox align="center" class='image animate'/>
+			</row>
 			</row>
 		</rows>
 	</grid>
@@ -475,6 +477,7 @@ slidecheckbox:hover>slidecheck>check{
 	<menuitem label='suggest' type='checkbox' aID='disableSuggest'/>
 	<menuitem label='show on context' type='checkbox' aID='hideFromContextMenu'/>
 	<menuseparator/>
+	<menuitem label='enabled' type='checkbox' aID='disabled'/>
 	<menuitem label='edit' aID='edit'/>
 </menupopup>
 

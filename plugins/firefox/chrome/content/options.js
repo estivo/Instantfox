@@ -161,18 +161,19 @@ initContextMenu = function(popup){
 	item = $parent(item)
 	var selectedItems = $('shortcuts').selectedItems
 
-	$t(popup, 'disableInstant').setAttribute('checked', !selectedItems.some(function(x){
-		return InstantFoxModule.Plugins[x.id].disableInstant
-	}))
-	$t(popup, 'disableSuggest').setAttribute('checked', !selectedItems.some(function(x){
-		return InstantFoxModule.Plugins[x.id].disableSuggest
-	}))
-	$t(popup, 'hideFromContextMenu').setAttribute('checked', !selectedItems.some(function(x){
-		return InstantFoxModule.Plugins[x.id].hideFromContextMenu
-	}))
+	for each(var aID in ['disableInstant', 'disableSuggest', 'hideFromContextMenu', 'disabled'])
+		$t(popup, aID).setAttribute(
+			'checked',
+			!selectedItems.some(function(x){
+				var p = InstantFoxModule.Plugins[x.id]
+				dump(x.id)
+				return !p || p[aID]
+			})
+		)
+		
 	var editItem = $t(popup, 'edit')
 	var visible = selectedItems.length == 1 && !InstantFoxModule.Plugins[selectedItems[0].id].disabled
-	editItem.hidden = editItem.previousSibling.hidden = !visible
+	editItem.hidden = !visible
 }
 onContextMenuCommand = function(e){
 	var menu = e.target
@@ -563,7 +564,7 @@ rbSelect=function(e, rbox){
 rbKeyPress = function(e, rbox){
 	var c
 	var el = e.target
-		dump(e.keyCode,e.charCode,e.which)
+
 	if(e.ctrlKey && e.charCode==102){
 		$("pluginFilter").focus()
 		return
@@ -608,7 +609,10 @@ rbMouseup = function(e, rbox){
 		while((item = item.nextSibling) && ( item.nodeName == 'richlistitem')  ){
 			end = item
 		}
-		start.parentNode.selectItemRange(start, end)
+		if(start && end && start.className != 'separator')
+			start.parentNode.selectItemRange(start, end)
+		else
+			start.parentNode.clearSelection()
 	}
 
 	//**********

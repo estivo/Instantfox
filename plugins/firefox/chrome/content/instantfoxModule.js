@@ -818,11 +818,6 @@ SimpleAutoCompleteResult.prototype = {
 
 	removeValueAt: function(index, removeFromDb) {
 		dump(index, removeFromDb)
-		if(removeFromDb && this.originalHistoryResult){
-			var item = this.list[index]
-			if(item && item.origIndex != null)
-				this.originalHistoryResult.removeValueAt(item.origIndex, removeFromDb)
-		}
 		this.list.splice(index, 1);
 	},
 	QueryInterface: function(aIID) {
@@ -842,68 +837,8 @@ InstantFoxSearch.prototype = {
 
 	// implement searchListener for historyAutoComplete
 	onSearchResult: function(search, result) {
-		dump('this.$searchingHistory', this.$searchingHistory, result.matchCount)
-		if(this.$waitingForAutoSearch){
-			this.onHistoryReady(result)
-			return
-		}
-
-		if (result.matchCount < 3 && InstantFoxModule.autoSearch.suggest)
-			this.startAutoSearch()
 		this.listener.onSearchResult(this, result)
 	},
-	// handle autoSearch
-	startAutoSearch: function(){
-		this.autoSearchResult = null
-		var url = InstantFoxModule.autoSearch.json
-		if(!url)
-			return
-		url = url.replace('%q', encodeURIComponent(this.searchString))
-		this.parser = parseSimpleJson // support only general results, not maps or imdb
-		this.startReq(url)
-	},
-	onAutoSearchReady: function(resultArray){
-		dump("onAutoSearchReady", resultArray.map(function(x)x.title).join("\n"))
-		for each(var i in resultArray){
-			i.icon = "chrome://instantfox/content/skin/pin-icon.png"
-		}
-		this.autoSearchResult = resultArray
-		this.combineResults()
-	},
-	onHistoryReady:function(historyResult){
-		this.originalHistoryResult = historyResult
-		this.historyResults = AutoCompleteResultToArray(historyResult)
-		dump("history ready", this.historyResults.map(function(x)x.title).join("\n"))
-		//this.combineResults()
-	},
-	combineResults:function(){
-	results = this.autoSearchResult || []
-//dump(results, this.historyResults, this.autoSearchResult)
-		var newResult = new SimpleAutoCompleteResult(results, this.searchString+Math.random());
-		//newResult.originalHistoryResult = this.originalHistoryResult
-		this.listener.onSearchResult(this, newResult);
-		return
-	
-		if(!this.autoSearchResult){
-			this.listener.onSearchResult(this, this.originalHistoryResult)
-			return
-		}
-		if(!this.historyResults)
-			this.historyResults = []
-		
-		var pos = this.searchString.length>5?0:4
-		var results = Array.concat(
-			this.historyResults.slice(0, pos),
-			this.autoSearchResult,
-			this.historyResults.slice(pos)
-		)
-		results = this.autoSearchResult
-dump(results, this.historyResults, this.autoSearchResult)
-		var newResult = new SimpleAutoCompleteResult(results, this.searchString);
-		newResult.originalHistoryResult = this.originalHistoryResult
-		this.listener.onSearchResult(this, newResult);
-	},
-
 
 	// implement nsIAutoCompleteSearch
 	startSearch: function(searchString, searchParam, previousResult, listener) {
@@ -923,13 +858,6 @@ dump(results, this.historyResults, this.autoSearchResult)
 			this.searchString = searchString;
 			dump(searchParam)
 			this.historyAutoComplete.startSearch(searchString, "", previousResult, this);
-			if(InstantFoxModule.autoSearch.suggest){
-				if(this.searchString.length > InstantFoxModule.autoSearch.minQChars){
-					this.startAutoSearch()
-					this.$waitingForAutoSearch = true
-				}else
-					this.$waitingForAutoSearch = false
-			}
 			return
 		} else if(this.$searchingHistory)
 			this.historyAutoComplete.stopSearch()
@@ -1025,10 +953,7 @@ dump(results, this.historyResults, this.autoSearchResult)
 			var newResult = new SimpleAutoCompleteResult(q.results, q.value);
 			this.listener.onSearchResult(this, newResult);
 			q.onSearchReady()
-		}else{
-			this.onAutoSearchReady(this.parser(json, "", ""))
 		}
-		//this.listener = null;
 	},
 
 	stopOldRequests: function(req){
