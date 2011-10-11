@@ -37,6 +37,7 @@ function updateLocaleList(){
 			'</menuitem>')
 
 		var menulist = $('locale')
+		clean(menulist.firstChild)
 		appendXML(menulist.firstChild, xml.join(''))
 
 		// find selected index
@@ -806,18 +807,50 @@ var gClipboardHelper = {
 
 copyPluginsToClipboard = function(){
 	var str = InstantFoxModule.pluginLoader.getPluginString(true)
+	str = "--metadata-- version:" + "--instantfox--plugin--data--" + "\n" + str
 	gClipboardHelper.copyString(str)
 }
 
 addPluginsFromClipboard = function(){
 	var str = gClipboardHelper.getData()
+	var i = str.indexOf("\n")
+	var metadata = str.substring(0,i)
+	str = str.substr(i)
 	try{
-		var js = JSON.parse(str)
+		if(metadata.indexOf("--instantfox--plugin--data--")==-1)
+			throw "no metadata"
+		JSON.parse(str) // check for valid json
 	}catch(e){
 		alert('invalid plugin data')
 		return
 	}
-	InstantFoxModule.pluginLoader.addPlugins(js)
+	var arr = ["replace existing plugins (can't be undone)", "merge with existing plugins"]
+	var sel={}
+	var proceed = Services.prompt.select(
+		window, "Instantfox ", 'What do you want to do?',
+		arr.length, arr,
+		sel
+	)
+	if(!proceed)
+		return
+	try{
+		var origPlugins = InstantFoxModule.Plugins
+		if(sel.value == 0){//"replace"
+			InstantFoxModule.Plugins = {}
+		}
+		InstantFoxModule.pluginLoader.onPluginsLoaded(str)
+		dump(InstantFoxModule.pluginLoader.google)
+	}catch(e){
+		InstantFoxModule.Plugins = origPlugins
+		Cu.reportError(e)
+	}
+	InstantFoxModule.pluginLoader.onInstantfoxUpdate()
+	
+	gPluginsChanged = true
+	
+	updateLocaleList()
+	rebuild()
+	autoSearchUI.init()
 }
 
 

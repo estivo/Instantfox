@@ -208,10 +208,10 @@ var pluginLoader = {
 		InstantFoxModule.ShortcutConflicts = conflicts
 	},
 
-	onRawPluginsLoaded: function(js){
+	onRawPluginsLoaded: function(jsonString){
 		try {
 			// eval(js)
-			var rawPluginData = JSON.parse(js)
+			var rawPluginData = JSON.parse(jsonString)
 		} catch(e) {
 			Cu.reportError('malformed locale')
 			Cu.reportError(e)
@@ -223,9 +223,9 @@ var pluginLoader = {
 		importBrowserPlugins(true)
 		this.initShortcuts()
 	},
-	onPluginsLoaded: function(js){
+	onPluginsLoaded: function(jsonString){
 		try{
-			var pluginData = JSON.parse(js)
+			var pluginData = JSON.parse(jsonString)
 		}catch(e){
 			// settings in user profile were corrupted, load default plugins
 			this.loadPlugins(true)
