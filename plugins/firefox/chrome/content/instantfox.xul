@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<overlay id="instantfox-browser-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<overlay id="instantfox-browser-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" xmlns:svg='http://www.w3.org/2000/svg'>
   <!-- devel__( -->
   <script type="text/javascript" src="__devel__.js"></script>
   <statusbar id="status-bar" ordinal="1000" hideresizer="true">
@@ -10,8 +10,9 @@
     <menupopup>
       <menuitem action="build" label="build"/>
        <!--<menuitem action="build-d" label="build-debug"/>-->
+      <menuitem action="buildLocales" label="buildLocales+copyManifest"/>
+      <menuitem action="delete-plugin-file" label="delete-plugin-file"/>
       <menuitem action="test-first-run" label="test first run"/>
-      <menuitem action="copyLocaleManifest" label="copyLocaleManifest"/>
       <menuitem action="show-folder" label="show folder"/>
     </menupopup>
   </toolbarbutton>
@@ -27,20 +28,35 @@
 
   <!-- devel__) -->
   <script type="text/javascript" src="chrome://instantfox/content/instantfox.js"></script>
+  <script type="text/javascript" src="chrome://instantfox/content/contentHandler.js"></script>
 
   <toolbarpalette id="BrowserToolbarPalette">
 	<toolbarbutton type="menu" id='instantFox-options' class='toolbarbutton-1 chromeclass-toolbar-additional'
 	style='list-style-image:url(chrome://instantfox/content/skin/button-logo.png)' label='InstantFox'>
-		<panel onpopupshowing="if(event.target==this)HH.onPopupShowing(this)"  onpopuphiding="if(event.target==this)HH.onPopupHiding(this)"
-			noautohide='true'/>
+		<panel onpopupshowing="if(event.target==this)InstantFox.onPopupShowing(this)"  onpopuphiding="if(event.target==this)InstantFox.onPopupHiding(this)"
+			noautohide='true' position='after_end' id='instantfox-popup' persist='width,height' width='400' height='600'>
+			<stack flex='1'>
+				<resizer element='instantfox-popup' dir='bottomleft' left='0' bottom='0' width='16' height='16' style='-moz-transform: rotate(90deg);'/>
+			</stack>
+		</panel>
 	</toolbarbutton>
+	
+	
+	<!-- devel__( -->
+	<toolbarbutton type="menu" id='instantFox-icons' class='toolbarbutton-1 chromeclass-toolbar-additional'
+		style='list-style-image:url(chrome://instantfox/content/skin/button-logo.png)' label='InstantFox'>
+<svg:svg height="0">
+    <svg:filter id="gray">
+      <svg:feColorMatrix values="0.3333 0.3333 0.3333 0 0 
+                                 0.3333 0.3333 0.3333 0 0 
+                                 0.3333 0.3333 0.3333 0 0 
+                                 0      0      0      1 0"/>
+    </svg:filter>
+</svg:svg>	
+		<panel onpopupshowing="if(event.target==this)InstantFox.onPopupShowing(this)"  onpopuphiding="if(event.target==this)InstantFox.onPopupHiding(this)"
+			noautohide='true' position='after_end'/>
+	</toolbarbutton>
+	 <!-- devel__) -->
   </toolbarpalette>
   
-  <menupopup id="contentAreaContextMenu">
-	<menuitem id="context-searchselect" removeelement="true"/>
-	<menu id="context-searchselect" type='splitmenu' label=""  iconic="true" 
-			onclick='gContextMenu.doSearch(event)' insertbefore='context-sep-open'>
-		<menupopup 	onpopupshowing="gContextMenu.fillSearchSubmenu(this)"/>
-	</menu>	  
-  </menupopup>
 </overlay>

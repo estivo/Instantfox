@@ -1,7 +1,7 @@
-var Cc	= Components.classes;
-var Ci	= Components.interfaces;
-var Cr	= Components.results;
-var Cu	= Components.utils;
+var Cc  = Components.classes;
+var Ci  = Components.interfaces;
+var Cr  = Components.results;
+var Cu  = Components.utils;
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
@@ -12,27 +12,27 @@ function debug(aMessage) {
 	try {
 		var objects = [];
 		objects.push.apply(objects, arguments);
-		Firebug.Console.logFormatted(objects,
-		TabWatcher.getContextByWindow
-		(content.document.defaultView.wrappedJSObject));
+		Firebug.Console.logFormatted(
+			objects,
+			TabWatcher.getContextByWindow(content.document.defaultView.wrappedJSObject)
+		);
 	}
 	catch (e) {
 	}
 
-	var consoleService = Components.classes["@mozilla.org/consoleservice;1"].getService
-		(Components.interfaces.nsIConsoleService);
+	var consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
 	if (aMessage === "") consoleService.logStringMessage("(empty string)");
 	else if (aMessage != null) consoleService.logStringMessage(aMessage.toString());
 	else consoleService.logStringMessage("null");
 }
 function dump() {
-    var aMessage = "aMessage: ";
-    for (var i = 0; i < arguments.length; ++i) {
-        var a = arguments[i];
-        aMessage += (a && !a.toString ? "[object call]" : a) + " , ";
-    }
-    var consoleService = Components.classes['@mozilla.org/consoleservice;1'].getService(Components.interfaces.nsIConsoleService);
-    consoleService.logStringMessage("" + aMessage);
+	var aMessage = "aMessage: ";
+	for (var i = 0; i < arguments.length; ++i) {
+		var a = arguments[i];
+		aMessage += (a && !a.toString ? "[object call]" : a) + " , ";
+	}
+	var consoleService = Components.classes['@mozilla.org/consoleservice;1'].getService(Components.interfaces.nsIConsoleService);
+	consoleService.logStringMessage("" + aMessage);
 }
 /** devel__) **/
 /*************************************************************************
@@ -50,69 +50,101 @@ function dump() {
  *        type:
  *        name:
  *        id:
- *    } 
+ *    }
  ***************/
+function extendedDomainFromURL(url){
+	var match = url.match(/\w+:\/\/[^#?]*/);
+	return match ? match[0].replace(/\/?[^\/]*?%q.*$/,'').replace(/\/$/, '') :'';
+}
+// used for new plugins only
 function fixupPlugin(p){
-	domainRe = /:\/\/([^#?]*)/;
 	if(p.url){
-		var match = p.url.match(domainRe)
-		p.domain = match ?match[1] :''
-		p.name = p.name||p.id
+		p.domain = extendedDomainFromURL(p.url)
+
 		p.id = p.id.toLowerCase()
 		p.iconURI = p.iconURI || getFavicon(p.url);
+
+		if(!p.name){
+			try{
+				p.name = Services.io.newURI(p.url,null,null).host
+			}catch(e){}
+			p.name = p.name || p.id
+		}
 	}
+	// try to find best matching json`  FS#156 - Wikipedia - Suggest Rules
+	if(!p.json && p.domain){
+		var jRe = p.domain.split(/[\/\.\?#]/)
+		jRe.shift()
+		jRe = jRe.filter(function(x)x)
+		var ans = []
+		for each(var plugin in InstantFoxModule.Plugins){
+			if(!plugin.json)
+				continue
+			var match = 0, count = 0
+			for each(var i in jRe){
+				if(plugin.domain.indexOf(i)>0){
+					match += i.length * i.length
+					count++
+				}
+			}
+			if(match >= 9)
+				ans.push({match:match, D:plugin.domain, json:plugin.json})
+		}
+		ans.sort(function(a, b) b.match-a.match)
+
+		if(ans[0])
+			p.json = ans[0].json
+	}
+	// in case nothing better is found use google
 	if(!p.json)
 		p.json = InstantFoxModule.Plugins.google.json
 }
-function cleanCopyPlugin(p){
-	var p1 = {}
-	p1.url = p.url;
-	p1.json = p.json;
-	p1.domain = p.domain;
-	//
-	p1.iconURI = p.iconURI;
-	p1.type = p.type;
-	p1.name = p.name;
-	p1.id = p.id;
-	p1.key = p.key
-	//
-	p.disabled && (p1.disabled = true)
-	p.disableInstant && (p1.disableInstant = true)
-	p.disableSuggest && (p1.disableSuggest = true)
-	p.hideFromContextMenu && (p1.hideFromContextMenu = true)
-	return p1
-}
+
 var pluginLoader = {
+	// properties with default values
+	defPropNames: ['key','url','name','json'],
+
+
 	preprocessRawData: function (pluginData){
-		var localeRe=/%l(?:s|l|d)/g,
-			domainRe = /:\/\/([^#?]*)/;
+		var localeRe=/%l(?:s|l|d)/g;
+
 		function replacer(m) pluginData.localeMap[m]
-		
+
 		var newPlugins = {}
 
-		for(var i in pluginData.plugins){
+		for(var i in pluginData.plugins) {
 			var p = pluginData.plugins[i];
-			if(!p)
+			if(!p || !p.url)
 				continue
 
-			if(p.url){
-				p.url = p.url.replace(localeRe, replacer)
-				p.domain = p.url.match(domainRe)[1]
-				p.name = p.name||i
-				p.id = i.toLowerCase()
-				p.iconURI = p.iconURI || getFavicon(p.url);
-			}
+			p.url = p.url.replace(localeRe, replacer)
+			p.domain = extendedDomainFromURL(p.url)
+
+			p.name = p.name||i
+			p.id = i.toLowerCase()
+			p.iconURI = p.iconURI || getFavicon(p.url);
 
 			if(p.json)
 				p.json = p.json.replace(localeRe, replacer)
 			else
-				p.json = false
-			
+				p.json = ''
+
 			p.type = 'default'
-			
+
+			// handle user modifiable props
+			this.defPropNames.forEach(function(propName){
+				p['def_'+propName] = p[propName]
+			})
+
 			newPlugins[p.id] = p
 		}
 		pluginData.plugins = newPlugins
+		//-------
+		var p = pluginData.autoSearch
+		if(p){
+			p.json = p.json.replace(localeRe, replacer)
+			p.url = p.url.replace(localeRe, replacer)
+		}
 		return pluginData
 	},
 	addPlugins: function(pluginData){
@@ -122,77 +154,84 @@ var pluginLoader = {
 			var mP = InstantFoxModule.Plugins[id]
 			//copy user modified values
 			if(mP){
-				if('key' in mP)
-					p.key = mP.key
-				if('hideFromContextMenu' in mP)
-					p.hideFromContextMenu = mP.hideFromContextMenu;
-				if('disableInstant' in mP)
-					p.disableInstant = mP.disableInstant;
-				if('disableSuggest' in mP)
-					p.disableSuggest = mP.disableSuggest;
-				if('disabled' in mP)
-					p.disabled = mP.disabled;
+				// add properties
+				['hideFromContextMenu', 'disableInstant',
+					'disableSuggest', 'disabled'].forEach(function(n){
+					if(n in mP)
+						p[n] = mP[n]
+				});
+				// add this properties if user modified them
+				this.defPropNames.forEach(function(propName){
+					if(mP['def_'+propName] != null && mP['def_'+propName] != mP[propName])
+						p[propName] = mP[propName]
+				});
+				// change iconURI to match url
+				if(p.url != p.def_url)
+					p.iconURI = getFavicon(p.url);
 			}
 			InstantFoxModule.Plugins[id] = p;
 		}
 		// remove default plugins from other locale
 		for (var pn in InstantFoxModule.Plugins){
 			var p = InstantFoxModule.Plugins[pn]
-			if (p.type == 'default' && !pluginData.plugins[pn])
+			if (p.type == 'default' && !pluginData.plugins[pn] && !this.isUserModified(p))
 				delete InstantFoxModule.Plugins[pn]
 		}
+
 		InstantFoxModule.defaultPlugin = InstantFoxModule.defaultPlugin||'google'
+		//---------
+		var p = pluginData.autoSearch
+		if(!p)
+			return
+		if(!InstantFoxModule.autoSearch){
+			InstantFoxModule.autoSearch = p
+			return
+		}
+		InstantFoxModule.autoSearch.def_json = p.json
+		InstantFoxModule.autoSearch.def_url = p.url
 	},
+
 	initShortcuts: function(){
 		InstantFoxModule.Shortcuts = {}
 		var conflicts={}
-		
+
 		for each(var  p in InstantFoxModule.Plugins){
 			if(p.url && p.key && !p.disabled) {
 				if(InstantFoxModule.Shortcuts[p.key])
 					conflicts[InstantFoxModule.Plugins[InstantFoxModule.Shortcuts[p.key]].id] =
 						conflicts[p.id] = true
-					
+
 				InstantFoxModule.Shortcuts[p.key] = p.id
 			}
 		}
 
 		InstantFoxModule.ShortcutConflicts = conflicts
 	},
-	
-	onRawPluginsLoaded: function(e){
-		e.target.onload=null
-		var js = e.target.responseText
-		try{
-			eval(js)
-		}catch(e){
+
+	onRawPluginsLoaded: function(jsonString){
+		try {
+			// eval(js)
+			var rawPluginData = JSON.parse(jsonString)
+		} catch(e) {
 			Cu.reportError('malformed locale')
 			Cu.reportError(e)
 			return
 		}
 		this.preprocessRawData(rawPluginData)
 		this.addPlugins(rawPluginData)
-		// add data from browser searches
-		var browserPlugins = Services.search.getEngines().map(pluginFromNsiSearch)
-		for each(var p in browserPlugins){
-			if(!InstantFoxModule.Plugins[p.id])
-				InstantFoxModule.Plugins[p.id] = p
-			else if(p.key)
-				InstantFoxModule.Plugins[p.id].key = p.key
-		}
+		// add data from browser search engines
+		importBrowserPlugins(true)
 		this.initShortcuts()
-	},	
-	onPluginsLoaded: function(e){
-		e.target.onload=null
-		var js = e.target.responseText
+	},
+	onPluginsLoaded: function(jsonString){
 		try{
-			var pluginData = JSON.parse(js)
+			var pluginData = JSON.parse(jsonString)
 		}catch(e){
+			// settings in user profile were corrupted, load default plugins
 			this.loadPlugins(true)
 			return
 		}
-		InstantFoxModule.selectedLocale = pluginData.selectedLocale
-		InstantFoxModule.defaultPlugin = pluginData.defaultPlugin
+
 		for each(var p in pluginData.plugins){
 			var id = p.id
 			var mP = InstantFoxModule.Plugins[id]
@@ -200,85 +239,136 @@ var pluginLoader = {
 				p.key = mP.key
 			InstantFoxModule.Plugins[id] = p;
 		}
+		// add data from browser search engines
+		importBrowserPlugins(false)
+
+		InstantFoxModule.selectedLocale = pluginData.selectedLocale
+		InstantFoxModule.defaultPlugin = pluginData.defaultPlugin
+		if("autoSearch" in pluginData)
+			InstantFoxModule.autoSearch = pluginData.autoSearch
+
 		this.initShortcuts()
 	},
-	
-	savePlugins: function(){
+
+	getPluginString: function(forUser){
 		var ob={}
 		for each(var p in InstantFoxModule.Plugins)
 			if(p.url)
-				ob[p.id]=cleanCopyPlugin(p)
-				
+				ob[p.id] = this.cleanCopyPlugin(p, forUser)
+
 		var pluginData = {
 			selectedLocale: InstantFoxModule.selectedLocale,
 			defaultPlugin: InstantFoxModule.defaultPlugin,
+			autoSearch: InstantFoxModule.autoSearch,
 			plugins: ob
 		}
 
-		var js = JSON.stringify(pluginData, null, 1)
+		return JSON.stringify(pluginData, null, forUser?4:1)
+	},
+	savePlugins: function(){
+		var js = this.getPluginString(false)
 
 		writeToFile(getUserFile('instantFoxPlugins.js'), js)
 	},
 	loadPlugins: function(locale, callback){
-		if(this.req)
-			this.req.abort()
-		else
-			this.req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
-
 		var file = getUserFile('instantFoxPlugins.js')
 		if(!locale && file.exists()){
 			var spec = Services.io.newFileURI(file).spec
 			var onload = this.onPluginsLoaded.bind(this)
 		}else{
-			spec = 'chrome://instantfox/locale/plugins.js'
-			if(typeof locale == 'string'){
-				var upre=/\/[^\/]*$/
-				spec = getFileUri('chrome://instantfox/locale/plugins.js').replace(upre,'').replace(upre,'')
-				spec += '/'+ locale + '/plugins.js';
-			}
+			spec = this.getPluginFileSpec(locale)
 			var onload = this.onRawPluginsLoaded.bind(this)
 		}
-		var self = this
-		this.req.onload=function(e){
-			this.onload = null;
-			onload(e)
-			callback&&callback()
-		}
-		callback
-		this.req.overrideMimeType("text/plain");
-		this.req.open("GET", spec, true);
-		this.req.send(null)
+		dump(spec)
+
+		if(this.req)
+			this.req.abort()
+
+		this.req = fetchAsync(spec, [onload, callback])
 	},
-	
+
 	getAvaliableLocales: function(callback){
 		var upre=/\/[^\/]*$/
-		var href = getFileUri('chrome://instantfox/locale/plugins.js').replace(upre,'').replace(upre,'') + '/'
-		makeReqAsync(href, function(t){
+		var href = getFileUri('chrome://instantfox/locale/plugins.json').replace(upre,'').replace(upre,'') + '/'
+		fetchAsync(href, function(t){
 			callback(t.match(/201\: [^ ]* /g).map(function(x)x.slice(5,-1).replace(/\/$/, '')))
 		})
 	},
+	getPluginFileSpec: function(locale){
+		var spec = 'chrome://instantfox/locale/plugins.json'
+		if (typeof locale == 'string') {
+			var upre=/\/[^\/]*$/
+			spec = getFileUri(spec).replace(upre,'').replace(upre,'')
+			spec += '/'+ locale + '/plugins.json';
+		}
+		return spec
+	},
+	isUserModified: function(plugin){
+		for each(var i in this.defPropNames){
+			if(plugin['def_'+i] != null && plugin['def_'+i] != plugin[i])
+				return true
+		}
+		return false
+	},
 
+	// utils
+	cleanCopyPlugin: function(p, forUser){
+		var p1 = {}
+		p1.url = p.url;
+		p1.json = p.json;
+		p1.domain = p.domain;
+		//
+		p1.iconURI = p.iconURI;
+		p1.type = p.type;
+		p1.name = p.name;
+		p1.id = p.id;
+		p1.key = p.key
+		//
+		p.disabled && (p1.disabled = true)
+		p.disableInstant && (p1.disableInstant = true)
+		p.disableSuggest && (p1.disableSuggest = true)
+		p.hideFromContextMenu && (p1.hideFromContextMenu = true)
+		//
+		if(p.type=='default' || p.type == 'browserSearch'){
+			for each(var i in this.defPropNames){
+				var prop = 'def_'+i
+				p[prop] != null && (p1[prop] = p[prop])
+			}
+		}
+		return p1
+	},
+	// add new plugins when instantfox is updated
+	onInstantfoxUpdate: function(){
+		this.loadPlugins(InstantFoxModule.selectedLocale, this.savePlugins.bind(this))
+	}
 }
- 
+
 function getFileUri(mPath) {
-    var uri = Services.io.newURI(mPath, null, null), file;
+	var uri = Services.io.newURI(mPath, null, null), file;
 	var gChromeReg = Cc["@mozilla.org/chrome/chrome-registry;1"].getService(Ci.nsIXULChromeRegistry);
-    while (uri.schemeIs("chrome")) {
-        uri = gChromeReg.convertChromeURL(uri);
-    }
+	while (uri.schemeIs("chrome")) {
+		uri = gChromeReg.convertChromeURL(uri);
+	}
 	return uri.spec
 }
 
-function makeReqAsync(href,callback){
-    var req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
-    req.open('GET', href, true);
+function fetchAsync(href, callback){
+	var req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
 	req.overrideMimeType('text/plain')
+	req.open('GET', href, true);
 
-    req.onload = function() {
-		callback(req.responseText);
-	}
+	req.addEventListener('load', function() {
+		req.removeEventListener('load', arguments.callee)
+		if(typeof callback == 'function')
+			callback(req.responseText);
+		else for each(var func in callback){
+			(typeof func == 'function') && func(req.responseText);
+		}
+		delete req
+	})
 
-    req.send(null);
+	req.send(null);
+	return req
 }
 
 function getUserFile(name, dir){
@@ -300,7 +390,7 @@ function writeToFile(file, text){
 //************** favicon utils
 var faviconService;
 function makeURI(aURL, aOriginCharset, aBaseURI) {
-    return Services.io.newURI(aURL, aOriginCharset, aBaseURI);
+	return Services.io.newURI(aURL, aOriginCharset, aBaseURI);
 }
 
 function getFavicon(url){
@@ -309,7 +399,7 @@ function getFavicon(url){
 		var host = url.match(/^[a-z]*:\/\/([^\/#?]*)/)[1];
 		var icon = faviconService.getFaviconImageForPage(makeURI('http://'+host)).spec
 		if(icon != faviconService.defaultFavicon.spec)
-			return icon		
+			return icon
 	}catch(e){}
 	return 'http://g.etfv.co/http://'+host
 }
@@ -318,17 +408,16 @@ function getFavicon(url){
  ***************/
 function pluginFromNsiSearch(bp){
 	var url = bp.getSubmission('%qqq',"text/html")
-	var domainRe = /:\/\/([^#?]*)/;
 	if(!url)
 		return
 	url = url.uri.spec.replace('%25qqq','%q')
-	
+
 	var json = bp.getSubmission('%qqq',"application/x-suggestions+json")
 	if(json)
 		json = json.uri.spec.replace('%25qqq','%q')
 	else
 		json = false
-	
+
 	var name = bp.name
 	var iconURI = bp.iconURI && bp.iconURI.spec
 	return {
@@ -337,21 +426,57 @@ function pluginFromNsiSearch(bp){
 		iconURI:iconURI,
 		name:name,
 		id:name.toLowerCase(),
-		domain: url.match(domainRe)[1],
-		disabled:true,
+		domain: extendedDomainFromURL(url),
+		disabled:false,
 		key: bp.alias,
 		type:'browserSearch'
-	}	
+	}
+}
+function importBrowserPlugins(importKeys) {
+	var browserPlugins = Services.search.getEngines().map(pluginFromNsiSearch)
+	for each(var p in browserPlugins){
+		if(!InstantFoxModule.Plugins[p.id])
+			InstantFoxModule.Plugins[p.id] = p
+		else if(importKeys && p.key)
+			InstantFoxModule.Plugins[p.id].key = p.key
+
+		// handle default plugins
+		var p1 = InstantFoxModule.Plugins[p.id]
+		if(p1.type == 'browserSearch')
+			pluginLoader.defPropNames.forEach(function(propName){
+				p1['def_'+propName] = p[propName]
+			})
+	}
 }
 
+searchEngineObserver = {
+	observe: function(subject, topic, j){
+		dump(subject, topic,'+++++++++++++**********+++++++',j)
+		importBrowserPlugins(false)
+	},
+	QueryInterface: function() this
+}
+Services.obs.addObserver(searchEngineObserver, "engine-added", true)
+Services.obs.addObserver(searchEngineObserver, "engine-loaded", true)
+Services.obs.addObserver(searchEngineObserver, "engine-removed", true)
+Services.obs.addObserver(searchEngineObserver, "browser-search-engine-modified", true)
 
 /*****************************************************
  * main object
  ***********/
 InstantFoxModule = {
-    _version: '1.0.3',
 	helpURL: 'http://www.instantfox.net/help/',
 	editingHelpURL: 'http://www.instantfox.net/help/#add-plugin',
+	uninstallURL: 'http://www.instantfox.net/uninstall',
+
+	bp: this,
+
+	//
+	get openSearchInNewTab(){
+		delete this.openSearchInNewTab
+		this.openSearchInNewTab = Services.prefs.getBoolPref("browser.search.openintab")
+		return this.openSearchInNewTab
+	},
 
 	initialize: function(){
 		this.pluginLoader.loadPlugins()
@@ -362,25 +487,35 @@ InstantFoxModule = {
 			return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 		}
 
-		var match=false;
+		var match=false, localizedMatchingPlugin;
 		for(var key in this.Shortcuts){
 			var i = this.Shortcuts[key]
 			var p = this.Plugins[i]
 			if(p && p.url){
-				if(url.indexOf(p.domain)!=-1){
+				var dom = p.domain.replace(/\w+\:\/\/(www\.)?/, '')
+				if(url.indexOf(dom)!=-1){
 					match=true;
 					break;
 				}
+				dom = dom.replace(/\.\w{1,3}(\.\w{1,3})?\//, '.@@@@/')
+				if(dom == '.')
+					continue
+				// test in other locales
+				dom = escapeRegexp(dom).replace('@@@@','\\w{1,3}(?:\.\\w{1,3})?')
+				if(RegExp(dom).test(url))
+					localizedMatchingPlugin = p
 			}
 		}
 		if(!match){
 			if(url.indexOf('.wikipedia.') > 0){
 				var regexp=/\/([^\/#]*)(?:#|$)/
 				p = this.Plugins.wikipedia
-			}else if(url.indexOf('weather.instantfox.net') > 0){
+			}else if(url.indexOf('weather.instantfox.net') != -1){
 				var regexp=/\/([^\/#]*)(?:#|$)/
 				p = this.Plugins.weather
-			}else
+			}else if(localizedMatchingPlugin)
+				p = localizedMatchingPlugin
+			else
 				return null;
 		}
 
@@ -395,8 +530,28 @@ InstantFoxModule = {
 
 		return p.key + ' ' + decodeURIComponent(queryString);
 	},
-	URLFromQuery: function(q) {
-		//todo
+	urlFromQuery: function(plugin, query) {
+		if (typeof plugin == 'string') {
+			plugin = InstantFoxModule.Plugins[plugin]
+		} else if (plugin.plugin){
+			var q = plugin
+			plugin = q.plugin
+			query = q.shadow || q.query //ignoreShadow
+		}
+
+
+		if (!query && q) {
+			var url2go = q.plugin.domain || ''
+			return url2go
+		}
+
+		// encode query
+		if (plugin.id == 'imdb')
+			query = escape(query.replace(/ /g, '+'));
+		else
+			query = encodeURIComponent(query);
+
+		return plugin.url.replace('%q', query);
 	},
 	parse: function(q) {
 		// We assume that the sting before the space indicates a InstantFox-Plugin
@@ -407,16 +562,27 @@ InstantFoxModule = {
 			keyindex: index,
 			keylength: q.length
 		};
-    },
+	},
 	Plugins: {},
 	Shortcuts: {},
 	pluginLoader: pluginLoader,
-	
+
 	getBestPluginMatch: function(key){
 		if(!key)
 			return this.Plugins[this.defaultPlugin]
 		return filter(InstantFoxModule.Plugins, key.replace('\xB7', ' ', 'g'))[0]||this.Plugins[this.defaultPlugin]
+	},
+	setAutoSearch: function(val){
+		// todo
+		this.autoSearch = val
+	},
+	modifyContextMenu: function(val){
+		var e = Services.wm.getEnumerator("navigator:browser")
+		while(e.hasMoreElements()){
+			e.getNext().InstantFox.modifyContextMenu(val)
+		}
 	}
+
 }
 
 /*******************************************************
@@ -457,6 +623,19 @@ var parseMapsJson = function(json, key, splitSpace){
 		})
 	}
 	return results
+}
+var parseGeoJson = function(json, key, splitSpace){
+	var city = json.match(/"city":"(.*?)"/)
+	// sometimes city can be '(null)': why?
+	if (!city || /\(?null\)?/.test())
+		return
+	var result = city[1]
+	// side effect
+	return InstantFoxModule.geoResult = [{
+		icon: '',
+		title: result,
+		url: key + splitSpace + result
+	}]
 }
 var getMatchingPlugins = function(key, tail){
 	var results=[];
@@ -508,7 +687,7 @@ var parseImdbJson = function(json, key, splitSpace){
 	for(var i = 0; i < xhrReturn.length; i++){
 		var result = xhrReturn[i];
 		results.push({
-			icon: '',
+			icon: '',//result.i||'http://i.media-imdb.com/images/mobile/film-40x54.png',
 			title: result.l,
 			url: key + splitSpace + result.l,
 			comment: result.s
@@ -565,19 +744,46 @@ function filter(data, text) {
 	});
 	return table;
 }
+
+function getAboutUrls(){
+	var l="@mozilla.org/network/protocol/about;1?what=", ans=[];
+	for(var i in Cc)
+		if(i.indexOf(l)==0){
+			var name = i.substr(l.length)
+			ans.push({
+				url: 'about:'+ name,
+				title: 'about:'+ name,
+				name: name
+			})
+		}
+	return ans.sort()
+}
 /*************************************************************************
  *    search component
  ***************/
+function AutoCompleteResultToArray(r){
+	var ans = [];
+	for(var i = 0;i<r.matchCount;i++)
+		ans.push({
+			icon: r.getImageAt(i),
+			type: r.getStyleAt(i),
+			comment: r.getCommentAt(i),
+			label: r.getLabelAt(i),
+			url: r.getValueAt(i),
+			origIndex: i
+		})
+	return ans
+}
 function SimpleAutoCompleteResult(list, searchString, defaultIndex) {
 	this._searchString = searchString;
 	this._defaultIndex = defaultIndex || 0;
 	if (list){
-		this._searchResult = (list.length?'SUCCESS':'NOMATCH')
+		var status = (list.length?'SUCCESS':'NOMATCH')
 		this.list = list;
 	} else
-		this._searchResult = 'FAILURE';
+		var status = 'FAILURE';
 
-	this._searchResult = Ci.nsIAutoCompleteResult['RESULT_' + this._searchResult]
+	this._searchResult = Ci.nsIAutoCompleteResult['RESULT_' + status];
 }
 SimpleAutoCompleteResult.prototype = {
 	/**
@@ -599,13 +805,24 @@ SimpleAutoCompleteResult.prototype = {
 	get errorDescription() this._errorDescription,
 	get matchCount() this.list.length,
 
-	getCommentAt: function(index) this.list[index].title,//title attribute on richlistitem in popup
-	getLabelAt: function(index) this.list[index].url,//url attribute on richlistitem in popup
-	getValueAt: function(index) this.list[index].url,//displayed in urlbar
-	getImageAt: function(index) this.list[index].icon,
-	getStyleAt: function(index) "InstantFoxSuggest",
+	getCommentAt: function(index) 
+		this.list[index] && this.list[index].title || "",//title attribute on richlistitem in popup
+	getLabelAt: function(index) 
+		this.list[index] && this.list[index].url || "",//url attribute on richlistitem in popup
+	getValueAt: function(index) 
+		this.list[index] && this.list[index].url || "",//displayed in urlbar
+	getImageAt: function(index) 
+		this.list[index] && this.list[index].icon || "chrome://instantfox/content/skin/button-logo.png", //pin-icon.png",  "",//
+	getStyleAt: function(index) 
+		this.list[index] && this.list[index].type || "InstantFoxSuggest",
 
 	removeValueAt: function(index, removeFromDb) {
+		dump(index, removeFromDb)
+		if(removeFromDb && this.originalHistoryResult){
+			var item = this.list[index]
+			if(item && item.origIndex != null)
+				this.originalHistoryResult.removeValueAt(item.origIndex, removeFromDb)
+		}
 		this.list.splice(index, 1);
 	},
 	QueryInterface: function(aIID) {
@@ -615,103 +832,223 @@ SimpleAutoCompleteResult.prototype = {
 	}
 };
 
+
 function InstantFoxSearch(){}
 InstantFoxSearch.prototype = {
 	classDescription: "Autocomplete 4 InstantFox",
-	historyAutoComplete: null,
 	classID: Components.ID("c541b971-0729-4f5d-a5c4-1f4dadef365e"),
 	contractID: "@mozilla.org/autocomplete/search;1?name=instantFoxAutoComplete",
-	QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIAutoCompleteSearch]),
+	QueryInterface: XPCOMUtils.generateQI([Ci.nsIAutoCompleteSearch]),
 
+	// implement searchListener for historyAutoComplete
+	onSearchResult: function(search, result) {
+		dump('this.$searchingHistory', this.$searchingHistory, result.matchCount)
+		if(this.$waitingForAutoSearch){
+			this.onHistoryReady(result)
+			return
+		}
+
+		if (result.matchCount < 3 && InstantFoxModule.autoSearch.suggest)
+			this.startAutoSearch()
+		this.listener.onSearchResult(this, result)
+	},
+	// handle autoSearch
+	startAutoSearch: function(){
+		this.autoSearchResult = null
+		var url = InstantFoxModule.autoSearch.json
+		if(!url)
+			return
+		url = url.replace('%q', encodeURIComponent(this.searchString))
+		this.parser = parseSimpleJson // support only general results, not maps or imdb
+		this.startReq(url)
+	},
+	onAutoSearchReady: function(resultArray){
+		dump("onAutoSearchReady", resultArray.map(function(x)x.title).join("\n"))
+		for each(var i in resultArray){
+			i.icon = "chrome://instantfox/content/skin/pin-icon.png"
+		}
+		this.autoSearchResult = resultArray
+		this.combineResults()
+	},
+	onHistoryReady:function(historyResult){
+		this.originalHistoryResult = historyResult
+		this.historyResults = AutoCompleteResultToArray(historyResult)
+		dump("history ready", this.historyResults.map(function(x)x.title).join("\n"))
+		//this.combineResults()
+	},
+	combineResults:function(){
+	results = this.autoSearchResult || []
+//dump(results, this.historyResults, this.autoSearchResult)
+		var newResult = new SimpleAutoCompleteResult(results, this.searchString+Math.random());
+		//newResult.originalHistoryResult = this.originalHistoryResult
+		this.listener.onSearchResult(this, newResult);
+		return
+	
+		if(!this.autoSearchResult){
+			this.listener.onSearchResult(this, this.originalHistoryResult)
+			return
+		}
+		if(!this.historyResults)
+			this.historyResults = []
+		
+		var pos = this.searchString.length>5?0:4
+		var results = Array.concat(
+			this.historyResults.slice(0, pos),
+			this.autoSearchResult,
+			this.historyResults.slice(pos)
+		)
+		results = this.autoSearchResult
+dump(results, this.historyResults, this.autoSearchResult)
+		var newResult = new SimpleAutoCompleteResult(results, this.searchString);
+		newResult.originalHistoryResult = this.originalHistoryResult
+		this.listener.onSearchResult(this, newResult);
+	},
+
+
+	// implement nsIAutoCompleteSearch
 	startSearch: function(searchString, searchParam, previousResult, listener) {
-		//win = Services.wm.getMostRecentWindow("navigator:browser");
-		var self = this
-		if(!InstantFoxModule.currentQuery){
+		if (searchString.slice(0, 6) == 'about:'){
+			searchString = searchString.substr(6)
+			var results = filter(getAboutUrls(), searchString)
+			if(results && results.length){
+				var newResult = new SimpleAutoCompleteResult(results, searchString);
+				listener.onSearchResult(this, newResult);
+				return
+			}
+		}
+		if (!InstantFoxModule.currentQuery) {
 			//Search user's history
-			this.historyAutoComplete = this.historyAutoComplete ||
-					Cc["@mozilla.org/autocomplete/search;1?name=history"].getService(Ci.nsIAutoCompleteSearch);
 			this.$searchingHistory = true
-			this.historyAutoComplete.startSearch(searchString, searchParam, previousResult, {
-				onSearchResult: function(search, result) {
-					self.$searchingHistory = false;
-					listener.onSearchResult(self, result)
-				}
-			});
+			this.listener = listener;
+			this.searchString = searchString;
+			dump(searchParam)
+			this.historyAutoComplete.startSearch(searchString, "", previousResult, this);
+			if(InstantFoxModule.autoSearch.suggest){
+				if(this.searchString.length > InstantFoxModule.autoSearch.minQChars){
+					this.startAutoSearch()
+					this.$waitingForAutoSearch = true
+				}else
+					this.$waitingForAutoSearch = false
+			}
 			return
 		} else if(this.$searchingHistory)
 			this.historyAutoComplete.stopSearch()
-		var api = InstantFoxModule.currentQuery.plugin
 
-		if (api.suggestPlugins) {
-			var plugins = getMatchingPlugins(api.key, api.tail)
-			var newResult = new SimpleAutoCompleteResult(plugins, searchString);
-			listener.onSearchResult(self, newResult);
-			//InstantFoxModule.currentQuery.onSearchReady()
-			return true;
+		var q = InstantFoxModule.currentQuery
+		var plugin = q.plugin
+		var results, url, callOnSearchReady;
+
+		var isMaps = plugin && plugin.json && plugin.json.indexOf('http://maps.google') == 0
+
+		if (plugin.suggestPlugins) {
+			// handle ` searches
+			var results = getMatchingPlugins(plugin.key, plugin.tail)
+		} else if (!plugin.json || plugin.disableSuggest){
+			// suggest is dissabled
+			url = null
+			callOnSearchReady = true
+		} else if(!q.query) {
+			// in some cases we can provide suggestions even before user started typing
+			if (isMaps) {
+				if (!InstantFoxModule.geoResult){
+					url = 'http://geoiplookup.wikia.com/'
+					this.parser = parseGeoJson
+				} else {
+					url = null
+					results = InstantFoxModule.geoResult
+					callOnSearchReady = true
+				}
+			} else {
+				// nop
+			}
+		} else if (plugin.id == 'imdb') {
+			// imdb needs special handling
+			url = imdbJsonUrl(q.query, plugin.json)
+			this.parser = parseImdbJson
+		} else {
+			// **********************
+			url = plugin.json.replace('%q', encodeURIComponent(q.query))
+			this.parser = isMaps ? parseMapsJson : parseSimpleJson
 		}
 
-		if(!api.json || api.disableSuggest){
-			var newResult = new SimpleAutoCompleteResult(null, searchString);
-			listener.onSearchResult(self, newResult);
-			InstantFoxModule.currentQuery.onSearchReady()
+
+		if (url) {
+			this.listener = listener;
+			this.startReq(url)
+		} else { // no need for xhr
+			q.results = results;
+			var newResult = new SimpleAutoCompleteResult(results, searchString);
+			listener.onSearchResult(this, newResult);
+			if (callOnSearchReady)
+				InstantFoxModule.currentQuery.onSearchReady()
 			return true;
 		}
-
-		this.listener = listener;
-		this.startReq()
 	},
 
 	stopSearch: function(){
-		if(this.historyAutoComplete) this.historyAutoComplete.stopSearch();
-		if(this._req)
-			this._req.abort();
+		if(this.historyAutoComplete)
+			this.historyAutoComplete.stopSearch();
+		//stopping _req here leads to slow suggestions
 
 		this.listener = null;
+	},
+
+	// handle xhr
+	startReq: function(url){
+		if(!this._reqList){
+			this._reqList = []
+			this.onSearchReady = this.onSearchReady.bind(this)
+		}
+
+		var _req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
+		_req.addEventListener("load", this.onSearchReady);
+
+		this._reqList.push(_req)
+
+		_req.open("GET", url, true);
+		_req.send(null);
 	},
 
 	onSearchReady: function(e){
+		dump('end',e.target.channel.name, this._reqList[0] == e.target)
+		if(!this.listener)
+			return
+		// don't let older requests completing later mess with suggestions
+		this.stopOldRequests(e.target)
+
 		var json = e.target.responseText;
+
 		var q = InstantFoxModule.currentQuery
-		var key = q.plugin.key
-		
-		if(q.plugin.id == 'imdb')
-			q.results = parseImdbJson(json, key, q.splitSpace)
-		else if(q.plugin.json.indexOf('http://maps.google') == 0)
-			q.results = parseMapsJson(json, key, q.splitSpace)
-		else
-			q.results = parseSimpleJson(json, key, q.splitSpace)
-
-		var newResult = new SimpleAutoCompleteResult(q.results, q.value);
-
-		this.listener.onSearchResult(this, newResult);
-		this.listener = null;
-		
-		q.onSearchReady()
+		if(q){
+			var key = q.key || q.plugin.key
+			q.results = this.parser(json, key, q.splitSpace)
+			var newResult = new SimpleAutoCompleteResult(q.results, q.value);
+			this.listener.onSearchResult(this, newResult);
+			q.onSearchReady()
+		}else{
+			this.onAutoSearchReady(this.parser(json, "", ""))
+		}
+		//this.listener = null;
 	},
 
-	startReq: function(){
-		if(this._req)
-			this._req.abort()
-		else{
-			this._req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
-			this._req.onload = this.onSearchReady.bind(this)
-		}
-		var q = InstantFoxModule.currentQuery
-		
-		if (q.plugin.id == 'imdb')
-			var url = imdbJsonUrl(q.query, q.plugin.json)
-		else
-			var url = q.plugin.json.replace('%q', encodeURIComponent(q.query))
-		this._req.open("GET", url, true);
+	stopOldRequests: function(req){
+		var i = this._reqList.indexOf(req)
+		if(i==-1)
+			return
 
-		this._req.send(null);
+		while(i--)
+			this._reqList.shift().abort()
+
+		this._reqList.shift()
 	}
 };
+XPCOMUtils.defineLazyServiceGetter(InstantFoxSearch.prototype, "historyAutoComplete",
+					"@mozilla.org/autocomplete/search;1?name=history", "nsIAutoCompleteSearch")
+
 
 /*******************************************************
  *  component registration
  *************/
-
 ;(function(component){
 	var reg = Components.manager.QueryInterface(Components.interfaces.nsIComponentRegistrar)
 	var CONTRACT_ID = component.prototype.contractID
@@ -726,5 +1063,25 @@ InstantFoxSearch.prototype = {
 	reg.registerFactory(cp.classID, cp.classDescription, cp.contractID, factory);
 })(InstantFoxSearch);
 
-
 InstantFoxModule.initialize()
+
+
+/***************************************************
+ * uninstall listener
+ * see https://developer.mozilla.org/en/Addons/Add-on_Manager/AddonListener
+ * todo: will not be needed for restartless addon
+ ***********************/
+var addonListener = addonListener || {
+	onUninstalling: function(addon){
+		if(addon.id=='searchy@searchy'){
+			Services.wm.getMostRecentWindow('navigator:browser')
+				.InstantFox.addTab(InstantFoxModule.uninstallURL + '?version=' + addon.version + '&face=:(')
+			// open page only once
+			Cu.import('resource://gre/modules/AddonManager.jsm', {}).AddonManager.removeAddonListener(this)
+		}
+	}
+	// onDisabled
+}
+
+Cu.import('resource://gre/modules/AddonManager.jsm', {}).AddonManager.addAddonListener(addonListener)
+

@@ -8,18 +8,28 @@
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns:svg='http://www.w3.org/2000/svg'
 	title="instantfox options"
+	width="450" height="600" persist='width height' id='instantfox_options'
 	resizable='yes' onunload='savePlugins()'>
-
+<script>
+Components.utils.import("resource://gre/modules/Services.jsm");
+try{
+	if(window.opener.location.href=='about:addons'){
+		Services.wm.getMostRecentWindow('navigator:browser').openDialog(window.location, '', 'dialog=no,centerscreen')//top='+screenY+',left='+screenX)
+		window.close()
+		savePlugins = function(){}
+	}
+}catch(e){}
+</script>
 
 <svg:svg height="0">
     <svg:filter id="gray">
-      <svg:feColorMatrix values="0.3333 0.3333 0.3333 0 0 
-                                 0.3333 0.3333 0.3333 0 0 
-                                 0.3333 0.3333 0.3333 0 0 
+      <svg:feColorMatrix values="0.3333 0.3333 0.3333 0 0
+                                 0.3333 0.3333 0.3333 0 0
+                                 0.3333 0.3333 0.3333 0 0
                                  0      0      0      1 0"/>
     </svg:filter>
-</svg:svg>	
-	
+</svg:svg>
+
 <html:style>
 .link {
 	color:blue;
@@ -27,6 +37,9 @@
 }
 .link:hover {
 	text-decoration:underline;
+}
+.link.help {
+	text-shadow: 2px 2px 6px #FFF,  -2px -2px 6px #FFF, 0pt 0px 6px #FFF;
 }
 richlistbox {
 	overflow-y:auto;
@@ -39,24 +52,30 @@ richlistitem:nth-child(odd) {
 richlistitem[selected="true"] {
 	background-color: #EEF9FF;
 	color:#0500A0
-} 
-textbox{
+}
+/* ======================/*\======/*\====================== */
+textbox:not(.normal){
 	-moz-appearance: none;
 	border: none;
 	background: #EEF9FF;
-	color: #777;
+	color: #556;
 	width: 5ch;
 	box-shadow: 0pt 0pt 1.5px 1px gray;
 }
 textbox.key{
 	padding: 1px 1px 2px 1px;
 	border: none;
+	text-align: center;
 }
-.key.hidden{
-	opacity: 0;
-	pointer-events: none;
+.longbox{
+	width: 50ch;
 }
-textbox[conflict=true]{
+textbox:not(.normal)[focused='true']{
+	color:-moz-fieldtext;
+	background:-moz-field;
+	box-shadow: 0pt 0pt 1.5px 1px gray, 0pt 0pt 2.5px 1px yellow;
+}
+textbox[conflict=true], label[conflict=true]{
 	color: darkred!important;
 	text-shadow: -1px -1px 2px #FFFFFF, 0pt -1px 6px red;
 }
@@ -64,6 +83,7 @@ textbox[conflict=maybe]{
 	color:darkred!important;
 	text-shadow: 0pt -1px 3px gold;//#ffd700;
 }
+/* ======================/*\======/*\====================== */
 richlistitem[disabled="true"]>label:not(.link){
 	color: graytext;
 	text-decoration: line-through;
@@ -80,42 +100,60 @@ richlistitem:hover{
 richlistbox[seltype="multiple"]:focus > richlistitem[current="true"]{
 	outline: 0px solid highlight!important;
 	outline-offset: -2px!important;
-} 
+}
 splitter {
 	-moz-appearance: none;
 }
 /* close button */
-.close-button {
+resetbutton {
 	-moz-appearance: none;
-	-moz-image-region: rect(0, 64px, 16px, 48px);
-	border: none;
-	padding: 0px;
-	list-style-image: url("chrome://global/skin/icons/close.png");
+	-moz-image-region: rect(0, 16px, 16px, 0px);
+
+	border: none;	margin: 0px;	padding: 0px;
+	-moz-margin-start: -4px;
+	-moz-margin-end: 4px;
+
+	border-radius: 4px;
+	background: #EEF9FF;
+	box-shadow: 0pt 0pt 1.5px 1px gray;
+
+	list-style-image: url("chrome://instantfox/content/skin/search-close.png");
+	-moz-binding: url("chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton");
+
+	width:16px;
+	height:16px;
 }
 
-.tab-close-button:hover {
+resetbutton:hover {
 	-moz-image-region: rect(0, 32px, 16px, 16px);
 }
 
-.tab-close-button:hover:active {
-	-moz-image-region: rect(0, 48px, 16px, 32px);
+resetbutton:hover:active {
+	-moz-image-region: rect(0, 32px, 16px, 16px);
 }
 
 slickbutton {
-  -moz-binding: url("chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton");
-  background: -moz-linear-gradient(#F3F3ED, #CECEC3);
-  color: #000000;
-  box-shadow: 0 0 2px #CECEC3;
-  border: solid 1px #ACA899;
-  -moz-border-radius: 8px;
-  padding:1px;
-  margin:4px;
+	-moz-binding: url("chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton");
+	background: -moz-linear-gradient(#F3F3ED, #CECEC3);
+	color: #000000;
+	box-shadow: 0 0 2px #CECEC3;
+	border: solid 1px #ACA899;
+	-moz-border-radius: 8px;
+	padding:1px 4px;
+	margin:4px;
+	cursor:pointer;
+}
+slickbutton .toolbarbutton-icon{
+	display: none;
+}
+slickbutton.attention{
+	background: -moz-linear-gradient(#a3F3FD, #aEFEC3);
 }
 slickbutton:hover {
-  background: -moz-linear-gradient(#F3F3ED, #DEDED3);
+	background: -moz-linear-gradient(#F3F3ED, #DEDED3);
 }
 slickbutton:hover:active {
-  background: -moz-linear-gradient(#ACA899, #FFFFFF);
+	background: -moz-linear-gradient(#ACA899, #FFFFFF);
 }
 
 label[control='opacity-scale']{
@@ -124,14 +162,17 @@ label[control='opacity-scale']{
 }
 
 #add {
-	cursor:pointer;
+	background: -moz-linear-gradient(#91BD09, #749A02);
+	color: #FFFFFF;
 }
-#pinbox{
-	position:fixed;
-	top:0;
-	right:0;
-	list-style-image: url(chrome://instantfox/content/skin/pin-icon.png)!important;
+#add:hover {
+	background: -moz-linear-gradient(#749A02, #91BD09);
 }
+#add:hover:active {
+	background: -moz-linear-gradient(#749A02, #91BD09);
+}
+
+
 #highlight {
 	font-weight:bold;
 	font-size: 14px;
@@ -139,600 +180,386 @@ label[control='opacity-scale']{
 #standard-shortcuts,#user-shortcuts{
 	text-align:center;
 }
+.separator{
+	font-size:80%;
+	color: graytext;
+	-moz-border-bottom-colors:threedshadow threedhighlight;
+	-moz-border-top-colors: threedshadow;
+	border-bottom: 2px solid ;
+	border-top: 1px solid ;
+	margin:0px;
+
+}
+.image{
+	width:16px
+}
+.shiftTop{
+	margin-top:-5px;
+	margin-bottom:5px;
+}
+#instantLoad{
+	-moz-appearance:none;
+}
+#instantLoad[checked]{
+	text-shadow: -1px -1px 3px gold, 0pt -1px 3px gold;
+}
+checkbox:-moz-focusring > .checkbox-label-box{
+	border: 1px dotted transparent;
+}
+
+.plugin-status{
+	width: 16px;
+	height: 16px;
+	cursor: help;
+}
+.plugin-status[status=""]{
+	background:url(chrome://instantfox/content/skin/instant.png)
+}
+.plugin-status[status="not-instant"]{
+	display:none
+}
+.plugin-status[status="invalid"]{
+	background-color:red;
+	border-radius:50%;
+}
+
+dropmarker[type="button"]{
+	-moz-appearance: toolbarbutton;
+} 
+.animate{	
+	-moz-transition-duration: 0.8s;
+	-moz-transition-property: opacity, text-shadow;
+}
+.invisible{
+	opacity:0;
+	pointer-events: none;
+}
+row{
+	-moz-box-align: center;
+}
+
+
+slidecheckbox{
+	-moz-box-align:center
+}
+slidecheck {
+	display: block;	
+	background: -moz-linear-gradient(19% 75% 90deg,#3095C7, #14539C); 
+	border-radius: 4px;
+	border: 1px solid #555555;
+	width: 5em;
+	position: relative;
+	cursor:pointer;
+	text-shadow: #093B5C 0px -1px 1px;
+	color: #fff;
+	text-align: center
+}
+slidecheck::before {
+	content: "ON";
+	width: 50%;display: inline-block;	
+}
+slidecheck::after {
+	content: "OFF";
+	width: 50%;
+	right:0;display: inline-block;	
+}
+slidecheck>check { 
+	display: block;
+	width: 48%;
+	height: 98%;
+	border-radius: 3px;
+	background: -moz-linear-gradient(19% 75% 90deg,#FAFAFA, #A1A1A1);
+	box-shadow: 0 0 1.5px #e5e5e5 inset;
+	position: absolute;
+	top: 1%;
+	left: 1%;
+	-moz-transition-duration: 0.1s;
+	-moz-transition-property: left,right,width;
+	pointer-events:none
+}
+slidecheckbox:hover>slidecheck>check{
+	background: -moz-linear-gradient(19% 75% 90deg,#FFF, #B1B1B1);	
+	box-shadow: 0 0 1.5px #FFF;
+}
+.checked>slidecheck >check {
+	left: 50%
+}
 </html:style>
 
-
-<!-- devel__( -->
-<shadiaglue id='status-bar'/>
-<!-- devel__) -->
-
 <tabbox flex='1'>
-  <hbox id='pinbox' hidden='true'>
-	<toolbarbutton type='checkbox' tooltiptext='pin' oncommand='window.top.HH.popupPinned=this.checked'/>
-  </hbox>
-  <tabs onselect="if(!this.pane1Ready &amp;&amp; this.selectedIndex==1){
-			this.pane1Ready=true;
-			this.parentNode.selectedPanel.firstChild.hidden=false;gPrefChanged=true;
-		}else if(!this.pane2Ready &amp;&amp; this.selectedIndex==2){
-			this.pane2Ready=true;
-			var iframe = document.createElement('iframe');
-			iframe.setAttribute('type', 'content');
-			iframe.setAttribute('src', 'resource://instantfox/about.html');
-			iframe.setAttribute('flex', '1');
-			this.parentNode.selectedPanel.appendChild(iframe);
-		}
-		if(this.pane1Ready &amp;&amp; this.pane2Ready)
-			this.removeAttribute('onselect');">
-	<tab label='engines'/>
-	<tab label='appearance'/>
-	<tab label='about'/>
-  </tabs>
-  <tabpanels  flex='1'>
-	<tabpanel orient='vertical'  flex='1'>
-		<hbox>
+	<tabs onselect="onTabSelect.call(this)">
+		<tab label='Engines'/>
+		<tab label='Advanced'/>
+		<tab label='Style'/>
+		<tab label='About'/>
+	</tabs>
+	<tabpanels  flex='1'>
+		<tabpanel orient='vertical'  flex='1'>
 			<vbox>
-				<label value="Choose language:" id="highlight"></label>
-				<menulist id="locale" sizetopopup='none'
-					oncommand = 'gPluginsChanged=true;InstantFoxModule.pluginLoader.loadPlugins(event.target.label, rebuild)'>
-					<menupopup/>
-				</menulist>
-				<spacer flex='1'/>
-				<label value="standard shortcuts"></label>
-			</vbox>
-			<spacer flex='1'/>
-			<image src='skin/logo.png' onclick='open(InstantFoxModule.helpURL)' class='link' tooltiptext='open help'/>
-		</hbox>
-		<richlistbox id='standard-shortcuts' flex='1'
-			seltype='multiple' context='context' onselect='onSelect(this)' onmouseup='openEditLigthbox(event)'/>
+				<hbox pack='center'>
+					<vbox flex='1'>
+						<label value="Choose Language:" id="highlight" flex='1'/>
+						<menulist id="locale" sizetopopup='none'
+							oncommand = 'gPluginsChanged=true;InstantFoxModule.pluginLoader.loadPlugins(event.target.value, rebuild)'>
+							<menupopup/>
+						</menulist>
+						<spacer flex='1'/>
+					</vbox>
+					<spacer flex='100'/>
+					<vbox flex='1'>
+						<label value="Enable Instant:" id="highlight" flex='1'/>
+						<menulist id="global-instant" sizetopopup='none' oncommand = 'globalInstant.onCommand(event);'>
+							<menupopup>
+								<menuitem label='all plugins' value='all'/>
+								<menuitem label='recommended' value='recomended'/>
+								<menuitem label='none' value='none'/>
+								<menuitem label='manual' value='manual'/>
+							</menupopup>
+						</menulist>
+						<spacer flex='1'/>
+					</vbox>
+				</hbox>
+				<!--<image src='skin/logo.png' onclick='open(InstantFoxModule.helpURL)' class='link' tooltiptext='open help'/>-->
 
-		<splitter>
-			<label value="your shortcuts"></label>
-			<spacer flex="1"></spacer>
-			<slickbutton id="add" label='add +' oncommand='addPlugin(event)'/>
-		</splitter>
-		<richlistbox id='user-shortcuts' flex='1'
-			seltype='multiple' context='context'  onselect='onSelect(this)' onmouseup='openEditLigthbox(event)'/>
-	</tabpanel>
-	<tabpanel orient='vertical'  flex='1' >
-	  <prefpane align='center' hidden='true'>
-	    <label value='fontsize of suggest:' control='fontsize-text'/>
-	    <textbox preference="fontsize"  id='fontsize-text'/>
-	    <label value='opacity of suggest dropdown:' control='opacity-scale'/>
-		<hbox pack='center' align='center'>
-			<scale value='20' min='10' max='100' flex='1' id='opacity-scale' preference-editable="true" preference="opacity" />
-			<textbox preference="opacity" id='opacity-text'/>
-			<label value='%'/>
-		</hbox>
-	   
-	    <label value='standard search without shortcuts:' control='keyword-URL-menu'/>
-	    <menulist editable="true" preference="keyword-URL" id="keyword-URL-menu">
-		  <menupopup >
-		    <menuitem label="http://www.google.com/search?q="/>
-		    <menuitem label="http://www.bing.com/search?q="/>
-		    <menuitem label=""/>
-		  </menupopup>
-	    </menulist>
-		
-		<preferences>
-          <preference id="keyword-URL" name="keyword.URL" type="string" />
-          <preference id="fontsize" name="extensions.InstantFox.fontsize" type="string" />
-          <preference id="opacity" name="extensions.InstantFox.opacity" type="int" />
-        </preferences>
-	  </prefpane>
-	</tabpanel>
-	<tabpanel orient='vertical'  flex='1'>
-	</tabpanel>
-  </tabpanels>
+				<hbox align='center'>
+					<hbox align='center' flex='1'>
+						<textbox placeholder="Search Plugins" flex='1' class='normal' width='0' id='pluginFilter'
+							oninput="rebuild();this.nextSibling.hidden = !this.value;"/>
+						<resetbutton hidden='true' onclick='var t = this.previousSibling;t.value="";t.oninput()' />
+					</hbox>
+					<spacer flex='1'/>
+					<slickbutton id="add-from-browser" label='add +' class='attention' hidden="dtrue"
+						onmouseup='enginesPopup.show(this, "Browser")'/>
+					<slickbutton id="add" label='Add +' onmouseup='openEditPopup(this)'/>
+				</hbox>
+			</vbox>
+			<richlistbox id='shortcuts' flex='1' onkeypress='rbKeyPress(event, this)'
+				seltype='multiple' context='context' onselect='rbSelect(event, this)' onmouseup='rbMouseup(event, this)'/>
+		</tabpanel>
+		<tabpanel orient='vertical'  flex='1' >
+			<prefpane align='center' hidden='true' flex='1'>
+				<preferences>
+					<preference id="openintab" name="browser.search.openintab" type="bool" />
+					<preference id="maxRichResults" name="browser.urlbar.maxRichResults" type="int" />
+					<preference id="context-usedefault" name="extensions.InstantFox.context.usedefault" type="bool" />
+				</preferences>
+
+<groupbox id="autoSearch" oncommand="autoSearchUI.onChange(event)" onkeypress="autoSearchUI.onChange(event)">
+<caption>
+	<slidecheckbox  aID="disabled" label='Standard search without shortcuts'
+		oncommand="toggleVisibility(this.parentNode.parentNode, 'grid.animate', this.checked)"/>
+</caption>
+	<grid class="animate">
+		<columns>
+			<column flex="0"/>
+			<column flex="1"/>
+		</columns>
+		<rows>
+			<row>
+				<label value='Search URL:'/>
+				<hbox align='center' flex='1' class='longbox'>
+					<textbox type='url' aID='url' flex='1'  oninput="
+						this.nextSibling.hidden = !canResetProp(this, InstantFoxModule.autoSearch);
+						"/>
+					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
+				</hbox>
+				<hbox align="center" class='image'>
+					<dropmarker type='button' onmousedown='enginesPopup.show(this, "Url", "url")'/>
+				</hbox>
+			</row>
+			<row>
+				<label value='Instant Loading:'/>
+				<menulist aID="instant" sizetopopup='none' oncommand = ''>
+					<menupopup>
+						<menuitem aID='off'     label='off' />
+						<menuitem aID='history' label='only for history results' />
+						<menuitem aID='search'  label='only for search engine results' />
+						<menuitem aID='all'     label='always' />
+					</menupopup>
+				</menulist>
+			</row>
+			<row>
+				<label value='Suggest URL:'/>
+				<hbox align='center' flex='1' class='longbox'>
+					<checkbox aID='suggest' oncommand='toggleVisibility(this.parentNode.parentNode.parentNode, ".animate", this.checked)'/>
+					<textbox type='url' aID='json' flex='1' class='longbox animate' oninput="
+						this.nextSibling.hidden = !canResetProp(this, InstantFoxModule.autoSearch);
+						"/>
+					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default' class="animate"/>
+				</hbox>
+				<hbox align="center" class='image animate'>
+					<dropmarker type='button' onmousedown='enginesPopup.show(this, "Url", "json")'/>
+				</hbox>
+			</row>
+			<row class='animate'>
+				<label value=''/>
+				<hbox align='center' flex='1' class='longbox'>
+					<label value='start showing remote results if:'/>
+				</hbox>
+				<hbox align="center" class='image animate'/>
+			</row><row class='animate'>
+				<label value=''/>
+				<hbox align='center' flex='1' class='longbox'>
+					<label value='query is longer than'/>
+					<textbox type='number' aID='minQChars' flex='1'/>
+				</hbox>
+				<hbox align="center" class='image animate'/>
+			</row>
+		</rows>
+	</grid>
+<separator/>
+<hbox align='center'>
+	<label value='max urlbar results' control='maxRichResults-textbox'/>
+	<textbox id='maxRichResults-textbox' preference="maxRichResults"/>
+</hbox>
+</groupbox>
+<separator/>
+<hbox align='center'>
+	<label value='Open search in new tab' control='openintab-checkbox'/>
+	<checkbox id='openintab-checkbox' preference="openintab" oncommand='InstantFoxModule.openSearchInNewTab=this.checked'/>
+</hbox>
+<hbox align='center'>
+	<label value='Use default contextmenu item' control='context-usedefault-checkbox'/>
+	<checkbox id='context-usedefault-checkbox' preference="context-usedefault" oncommand='InstantFoxModule.modifyContextMenu(!this.checked)'/>
+</hbox>
+
+<spacer flex="1"/>
+<vbox align='center'>
+	<slickbutton label='copyPluginsToClipboard' oncommand='copyPluginsToClipboard()'/>
+	<slickbutton label='addPluginDataFromClipboard' oncommand='addPluginsFromClipboard()'/>
+	<spacer flex='1'/>
+</vbox>
+			</prefpane>
+		</tabpanel>
+		<tabpanel orient='vertical'  flex='1' >
+			<prefpane align='center' hidden='true' flex='1'>
+				<preferences>
+					<preference id="fontsize" name="extensions.InstantFox.fontsize" type="string" />
+					<preference id="opacity" name="extensions.InstantFox.opacity" type="int" />
+				</preferences>
+				<label value='fontsize of suggest:' control='fontsize-text'/>
+				<textbox preference="fontsize"  id='fontsize-text' placeholder="auto"/>
+				<label value='opacity of suggest dropdown:' control='opacity-scale'/>
+				<hbox pack='center' align='center'>
+					<scale value='20' min='10' max='100' flex='1' id='opacity-scale' preference-editable="true" preference="opacity" />
+					<textbox preference="opacity" id='opacity-text'  placeholder="auto"/>
+					<label value='%'/>
+				</hbox>
+
+				<spacer flex='1'/>
+			</prefpane>
+		</tabpanel>
+		<tabpanel orient='vertical'  flex='1'>
+		</tabpanel>
+	</tabpanels>
 </tabbox>
-  <hbox>
+
+<hbox>
 	<toolbarbutton id='' label='add plugin' type='menu' oncommand='' hidden='true'>
 		<menupopup>
 		</menupopup>
 	</toolbarbutton>
-
+	<!-- devel__( -->
+		<shadiaglue id='status-bar'/>
+	<!-- devel__) -->
 	<spacer flex='1'/>
-	<button label='ok' oncommand='resultOK=true;close()'/>
-  </hbox>
+	<slickbutton label='ok' oncommand='resultOK=true;close()'/>
+</hbox>
 
+
+<menupopup id="engine-list" onpopupshowing='enginesPopup.onShowing(this)' oncommand='enginesPopup.onCommand(event)'>
+
+</menupopup>
 <menupopup id="context" onpopupshowing='initContextMenu(this)' oncommand='onContextMenuCommand(event)'>
 	<menuitem label='instant' type='checkbox' aID='disableInstant'/>
-	<menuitem label='enabled' type='checkbox' aID='disabled'/>
+	<menuitem label='suggest' type='checkbox' aID='disableSuggest'/>
 	<menuitem label='show on context' type='checkbox' aID='hideFromContextMenu'/>
 	<menuseparator/>
 	<menuitem label='edit' aID='edit'/>
 </menupopup>
-<panel id="edit-box" ignorekeys='true' type="arrow" orient='vertical' onpopuphiding='editPopupSave(this)'>
-	<hbox align='center'>
-		<label value='name:'/>
-		<textbox aID='name' flex='1'/>
-		<hbox align="center" class='image'>
+
+<panel id="edit-box" ignorekeys='true' type="arrow"
+		orient='vertical' onpopuphiding='if(event.target==this)editPopupSave(this)' position='start_before'>
+	<hbox flex="1" align="top" class="shiftTop">	
+					<hbox align="center" class='image'>
 			<image aID='image'/>
 		</hbox>
+			<spacer flex="1"/>
+			<slidecheckbox label='Instant page loading' aID='instant' id='instantLoad' class="animate"/>
+			<spacer flex="1"/>
 	</hbox>
-	<hbox align='center'>
-		<label value='url:'/>
-		<textbox type='url' aID='url' flex='1'/>
-	</hbox>
-	<hbox align='center'>
-		<label value='key:'/>
-		<textbox aID='key'/>
-	</hbox>
-	<hbox>
-		<checkbox label='load page instantly' aID='instant'/>
-		<checkbox label='suggest' aID='suggest'/>
-	</hbox>
+	<grid >
+		<columns>
+			<column flex="0"/>
+			<column flex="1"/>
+		</columns>
+		<rows>
+			<row>
+				<label value='Short Name:'/>
+				<hbox align='center' flex='1'>
+					<textbox aID='name' flex='1' oninput="this.nextSibling.hidden = !canResetProp(this);"/>
+					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
+					<label value='Shortcut:'/>
+					<textbox aID='key'/>
+				</hbox>
+				
+			</row>
+			<row>
+				<label value='Search URL:'/>
+				<hbox align='center' flex='1' class='longbox'>
+					<textbox type='url' aID='url' flex='1'  oninput="
+						this.nextSibling.hidden = !canResetProp(this);
+						if(this.timeout==null)
+							this.timeout=setTimeout(function(a){
+								a.timeout=null;
+								$t($('edit-box'), 'image').src='http://g.etfv.co/'+a.value;
+							}, 500, this)
+						"/>
+					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
+				</hbox>
+			</row>
+			<row>
+				<label value='Suggest URL:'/>
+				<hbox align='center' flex='1' class='longbox'>
+					<checkbox aID='suggest' oncommand='toggleVisibility(this.parentNode.parentNode, ".animate", this.checked)'/>
+					<textbox type='url' aID='json' flex='1' class='longbox animate' oninput="
+						this.nextSibling.hidden = !canResetProp(this);
+						"/>
+					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default' class="animate"/>
+				</hbox>
+				<hbox align="center" class='image animate'>
+					<dropmarker type='button' onmousedown='enginesPopup.show(this, "Url", "json")'/>
+				</hbox>
+			</row>
+			<row>
+				<hbox/>
+				<hbox flex='1' align='center'>
+					<label id='qWarn' value='replace the searchword with %q'/>
+					<spacer flex='1'/>
+				</hbox>
+			</row>
+			<row>
+				<hbox/>
+				<hbox flex='1' align='center'>
+					<spacer flex='1'/>
+					<label value=' '/>
+				</hbox>
+			</row>
+
+		</rows>
+	</grid>
+
 	<hbox align='center'>
 		<slickbutton label='remove' aID='remove' oncommand="removePlugin(gPlugin);$('edit-box').hidePopup();"/>
 		<toolbarbutton label='more' hidden='true'/>
-		<description class='link' value='Help?' onclick='open(InstantFoxModule.editingHelpURL)'/>
+		<description class='help link' value='Help?' onclick='open(InstantFoxModule.editingHelpURL)'/>
 		<spacer flex='1'/>
 		<slickbutton label='ok' onclick="$('edit-box').hidePopup()"/>
 	</hbox>
 </panel>
-  <!-- <script type="text/javascript" src="__devel__.js"></script> -->
 
 
-<script type="application/x-javascript" ><![CDATA[
-var Cc = Components.classes
-var Ci = Components.interfaces
-
-Components.utils.import("resource://gre/modules/Services.jsm");
-ibp = Components.utils.import('chrome://instantfox/content/instantfoxModule.js')
-
-//************** find all avaliable locales
-
-function updateLocaleList(){
-	ibp.pluginLoader.getAvaliableLocales(function(locales)  {
-		var sbs = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService);
-		var langNames = sbs.createBundle("chrome://global/locale/languageNames.properties");
-		var regNames  = sbs.createBundle("chrome://global/locale/regionNames.properties");
-		
-		function addDisplayName(locale) {
-			var parts = locale.split(/-/); 
-			var displayName;
-			try {
-				displayName = langNames.GetStringFromName(parts[0]);
-				try {
-					displayName += " (" + regNames.GetStringFromName((parts[1]||parts[0]).toLowerCase()) + ")";
-				} catch (e) {}
-			} catch (e) {
-				displayName = '';
-			}
-			return {displayName: displayName, id: locale}
-		}
-		
-		var locales = locales.map(addDisplayName)
-		
-		locales.sort(function(x, y)x.displayName > y.displayName)
-		
-		var xml = []
-		for each(var i in locales)
-			xml.push('<menuitem label="', i.id, '">',
-				'<label value="', i.displayName, '"/><hbox flex="1"/><label value="', i.id, '"/>',
-			'</menuitem>')
-		
-		var menulist = $('locale')
-		appendXML(menulist.firstChild, xml.join(''))
-		
-		// find selected index
-		var sl = InstantFoxModule.selectedLocale
-		var slPart = sl.substring(0, sl.indexOf('-'))
-		var si = -1, siPart = -1;
-		for (var i in locales){
-			var loc = locales[i]
-			if(loc.id == sl){
-				si = i
-				break
-			}
-			if(loc.id == slPart){
-				siPart = i
-			}
-		}
-		if(si == -1)
-			si = siPart
-
-		menulist.selectedIndex = si
-	})
-}
-//************* dom utils
-function $(id)document.getElementById(id)
-function $t(el, aID)el.getElementsByAttribute('aID', aID)[0]
-function $parent(el){
-	while(el){
-		if(el.id)
-			return el
-		el=el.parentNode
-	}
-}
-
-function clean(el){
-	var ch
-	while(ch=el.lastChild)
-		el.removeChild(ch)
-}
-function appendXML(element, xml){
-	var range = document.createRange()
-	range.selectNode(element)
-	range.collapse(true)
-	var fragment = range.createContextualFragment(xml)
-
-	return element.appendChild(fragment)
-}
-function replaceXML(element, xml){
-	var range = document.createRange()
-	range.selectNode(element)	
-	var fragment = range.createContextualFragment(xml)
-
-	return element.parentNode.replaceChild(fragment, element)
-}
-function formatString(string, options){	
-	return string.replace(/\$[^\$]*\$/g, function(x){
-		var x = x.slice(1,-1)
-		if(x[0]=='!')
-			return options[x.substr(1)]?'false':'true'
-		if(typeof options[x]!='string')
-			return options[x]?options[x].toString():''
-		return escapeHTML(options[x]||'')
-	})
-}
-function escapeHTML(str) str.replace(/[&"<>]/g, function(m)"&"+escapeMap[m]+";");
-var escapeMap = { "&": "amp", '"': "quot", "<": "lt", ">": "gt" }
-
-//************************
-initContextMenu = function(popup){
-	var item = document.popupNode	
-	item = $parent(item)
-	var selectedItems = item.parentNode.selectedItems
-
-	$t(popup, 'disableInstant').setAttribute('checked', !selectedItems.some(function(x){
-		return InstantFoxModule.Plugins[x.id].disableInstant
-	}))
-	$t(popup, 'disabled').setAttribute('checked', !selectedItems.some(function(x){
-		return InstantFoxModule.Plugins[x.id].disabled
-	}))
-	$t(popup, 'hideFromContextMenu').setAttribute('checked', !selectedItems.some(function(x){
-		return InstantFoxModule.Plugins[x.id].hideFromContextMenu
-	}))
-	var editItem = $t(popup, 'edit')
-	var visible = selectedItems.length == 1 && !InstantFoxModule.Plugins[selectedItems[0].id].disabled
-	editItem.hidden = editItem.previousSibling.hidden = !visible
-}
-onContextMenuCommand = function(e){
-	var menu = e.target
-	var name = menu.getAttribute('aID')
-	var item = document.popupNode	
-	item = $parent(item)
-	if (name=='edit'){
-		openEditLigthbox({target: item.lastChild})
-		return
-	}
-	
-	var selectedItems = item.parentNode.selectedItems	
-	var value = menu.getAttribute('checked')!='true'
-	selectedItems.forEach(function(x){
-
-		InstantFoxModule.Plugins[x.id][name] = value
-	})
-	if (name == 'disabled')
-		rebuild(true)
-}
-//************************ 
-var gPlugin, gPluginsChanged, gPrefChanged, resultOK=true;
-openEditLigthbox = function(e){
-	var item = e.target;
-	var aID = item.getAttribute('aID')
-	//**********
-	if (aID == 'enable-link') {
-		var item = $parent(e.target)
-		gPlugin = InstantFoxModule.Plugins[item.id]
-		gPlugin.disabled = false
-		saveGPlugin()
-		return
-	}
-	//**********
-	if (aID!='edit-link')
-		return;
-
-	var panel = $('edit-box')
-	panel.hidePopup()
-	
-	var item = $parent(e.target)
-	gPlugin = InstantFoxModule.Plugins[item.id]
-	
-	$t(panel, 'suggest').checked = !gPlugin.disableSuggest
-	$t(panel, 'instant').checked = !gPlugin.disableInstant
-	$t(panel, 'name').value = gPlugin.name
-	$t(panel, 'key').value = gPlugin.key
-	var urlBox = $t(panel, 'url')
-	urlBox.value = gPlugin.url
-	urlBox.readOnly = gPlugin.type=='default'
-	$t(panel, 'image').src = gPlugin.iconURI
-	var rem =  $t(panel, 'remove')
-	rem.label = gPlugin.type == 'user' ? 'remove': 'disable';
-	rem.hidden = false;
-	
-
-	var popupBoxObject = panel.popupBoxObject;
-	popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
-	panel.openPopup(item.firstElementChild,'before_start',0,0,false,true)
-	
-}
-editPopupSave = function(panel){
-	if(!gPlugin)
-		return
-	if(gPlugin=='createNew'){
-		var createNew = true
-		gPlugin = createEmptyPlugin()
-	}
-	gPlugin.disableSuggest = !$t(panel, 'suggest').checked
-	gPlugin.disableInstant = !$t(panel, 'instant').checked
-
-	gPlugin.name = $t(panel, 'name').value
-	gPlugin.url = $t(panel, 'url').value
-	gPlugin.key = $t(panel, 'key').value
-	//gPlugin.iconURI = $t(panel, 'image').src
-	
-	saveGPlugin(createNew)
-}
-saveGPlugin = function(createNew){
-	if (createNew) {
-		ibp.fixupPlugin(gPlugin)
-		if(!gPlugin.url)
-			return
-		InstantFoxModule.Plugins[gPlugin.id] = gPlugin;
-		appendXML($("user-shortcuts"), plugin2XML(gPlugin))
-	} else {
-		var el = $(gPlugin.id)
-		if (!el)
-			return;
-		var container = el.parentNode
-		var si = container.selectedIndex
-		replaceXML(el, plugin2XML(gPlugin))
-		container.selectedIndex = si
-	}
-	ibp.pluginLoader.initShortcuts()
-	markConflicts()
-	
-	gPluginsChanged = true
-}
-createEmptyPlugin=function(){
-	var i=0
-	while(InstantFoxModule.Plugins['user'+i])
-		i++
-	return {
-		type: 'user',
-		id: 'user'+i
-	}	
-}
-addPlugin=function(e){
-	var panel = $('edit-box')
-		
-	var item = $parent(e.target)
-	gPlugin = 'createNew'
-	
-	$t(panel, 'suggest').checked = true
-	$t(panel, 'instant').checked = false
-	$t(panel, 'name').value = ''
-	$t(panel, 'key').value = ''
-	
-	var urlBox = $t(panel, 'url')
-	urlBox.value = ''
-	urlBox.readOnly = false
-	$t(panel, 'image').src = ''	
-	var rem =  $t(panel, 'remove')
-	rem.label = 'cancel';
-	rem.hidden = false;
-
-	var popupBoxObject = panel.popupBoxObject;
-	popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
-	panel.openPopup(item,'before_start',0,0,false,true)
-}
-removePlugin=function(p) {
-	if (p == 'createNew') {
-		gPlugin = null
-	}else if (p.type != 'user' ) {
-		p.disabled = true		
-	} else {
-		delete InstantFoxModule.Plugins[p.id];
-		ibp.pluginLoader.initShortcuts()
-		markConflicts()
-		
-		var item = $(p.id)
-		item.parentNode.removeChild(item)
-	}
-	
-	gPluginsChanged = true
-}
-//*************************
-
-function markConflicts(){
-	var cf = InstantFoxModule.ShortcutConflicts || {}
-
-	for (var id in InstantFoxModule.Plugins){
-		var key = $t($(id), 'key')
-
-		if(cf[id])
-			key.setAttribute('conflict', cf[id])
-		else
-			key.removeAttribute('conflict')
-	}
-}
-onTextboxInput = function(el){
-	var id = $parent(el).id
-	var orig = InstantFoxModule.Plugins[id].key
-	InstantFoxModule.Plugins[id].key = el.value
-	dump(id,InstantFoxModule.Plugins[id].key)
-	ibp.pluginLoader.initShortcuts()
-	markConflicts()
-	InstantFoxModule.Plugins[id].key = orig
-}
-onTextboxEnter = function(el){
-	var id = $parent(el).id
-	InstantFoxModule.Plugins[id].key = el.value
-	ibp.pluginLoader.initShortcuts()
-	markConflicts()
-	
-	gPluginsChanged = true
-}
-onTextboxEscape = function(el){
-	var id = $parent(el).id
-	el.value = InstantFoxModule.Plugins[id][el.className]
-	el.blur()
-}
-window.addEventListener('keydown', function(e){
-	var el = e.target
-	if(el.className == 'key'){
-		dump(e.keyCode)
-		if(e.keyCode=='27'){
-			onTextboxEscape(el)
-		}
-		if(e.keyCode=='13'){
-			el.blur()
-			$parent(el).parentNode.focus()
-		}
-		if(e.keyCode=='40'||e.keyCode=='38'){
-			dump($parent(el).parentNode.selectedItem.id)
-			$t($parent(el).parentNode.selectedItem,'key').focus()
-		}
-	}
-	
-
-}, false)
-onSelect=function(rbox){
-	var el=document.activeElement
-	if(el.localName=='input'&&el.parentNode.parentNode.className=='key'){
-		$t(rbox.selectedItem,'key').focus()
-	}
-}
-
-
-
-//************* 
-function savePlugins(){
-	if(gPrefChanged)
-		document.getElementsByTagName('prefpane')[0].writePreferences(false)
-
-	var em = Services.wm.getEnumerator('navigator:browser')
-	while(em.hasMoreElements())
-		em.getNext().HH.updateUserStyle()
-
-	if(!gPluginsChanged)
-		return
-	if(resultOK)
-		InstantFoxModule.pluginLoader.savePlugins()
-	else
-		InstantFoxModule.pluginLoader.loadPlugins()
-	gPluginsChanged = false
-}
-//************* 
-xmlFragment = 
-	  <richlistitem align="center" id='$id$'>
-		<hbox align="center" class='image'>
-			<image src="$iconURI$" width="16" height="16"/>
-		</hbox>
-		<label value="$name$"/>
-		<spacer flex='1' />
-		<hbox align="center" class='key'>
-			<textbox class='key' aID='key' value='$key$' tooltiptext='edit plugin key'
-				onblur='onTextboxEnter(this)' oninput='onTextboxInput(this)'/>
-		</hbox>
-		<label class='link' value='edit' aID='edit-link'/>
-	  </richlistitem>.toXMLString().replace(/>\s*</g,'><')
-xmlFragmentDis = 
-	  <richlistitem align="center" id='$id$' disabled="true">
-		<hbox align="center" class='image'>
-			<image src="$iconURI$" width="16" height="16"/>
-		</hbox>
-		<label value="$name$"/>
-		<spacer flex='1' />
-		<textbox class='key hidden' aID='key'/>
-		<label class='link' value='enable' aID='enable-link'/>
-	  </richlistitem>.toXMLString().replace(/>\s*</g,'><')
-
-function plugin2XML(p){
-	return formatString(p.disabled?xmlFragmentDis:xmlFragment, p)
-}
-
-rebuild = function(all){
-	var xml=[], userxml = []
-	var activePlugins = InstantFoxModule.Plugins
-	for each(var p in activePlugins){
-		if(p.url){
-			(p.type=='default'?xml:userxml).push(plugin2XML(p))
-		}
-	}
-	el = $("standard-shortcuts");
-	clean(el)
-	appendXML(el, xml.join(''))
-	if (all) {
-		el = $("user-shortcuts");
-		clean(el)
-		appendXML(el, userxml.join(''))
-	}
-	markConflicts()
-
-	return userxml.length
-}
-
-var l = rebuild(true)
-
-window.addEventListener('load', function() {
-	window.removeEventListener('load', arguments.callee, false)
-	// this must be called after menulists' binding is loaded 
-	updateLocaleList()
-	// if box is too short scrollbar can't be shown
-	if (l < 4) {
-		var el1 = $("standard-shortcuts")
-		var el2 = $("user-shortcuts")
-		var h0 = el2.firstChild.getBoundingClientRect().height 
-		var h = (l || 1) * h0 + 5 
-		var h1 = el1.getBoundingClientRect().height 
-		var h2 = el2.getBoundingClientRect().height 
-		el2.height = h
-		el1.height = h1 + h2 - h
-	}
-	// check if we are inside popup
-	var HH = top.HH
-	if (HH) {
-		window.close = HH.closeOptionsPopup
-		var el = document.getElementById('pinbox')
-		el.hidden = false
-		el.firstChild.checked = !!HH.popupPinned
-
-		HH.updatePopupSize(document)
-	}
-
-}, false)
-
-/*
-gBrowser.mCurrentBrowser.engines[0].uri
-
-if (target.getAttribute("class").indexOf("addengine-item") != -1) {
-	var searchService =
-		Cc["@mozilla.org/browser/search-service;1"]
-			  .getService(Ci.nsIBrowserSearchService);
-	// We only detect OpenSearch files
-	var type = Components.interfaces.nsISearchEngine.DATA_XML;
-	searchService.addEngine(target.getAttribute("uri"), type,
-							target.getAttribute("src"), false);
-}
-*/
-
-
-]]></script>
+<script type="application/x-javascript" src="options.js"></script>
 
 
 </window>
-
-
-<!-- 
-
-InstantFox.Shortcuts
-
-
-for each(var i in InstantFox.Plugins){
-		if(typeof i.url == 'string')
-			jn.say()
-	}//jn.say(m=i.url.match(/(.[^&?#\/]*)%q(.?)/))
- -->
-

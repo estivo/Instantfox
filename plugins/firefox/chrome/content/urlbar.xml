@@ -13,7 +13,10 @@
         <children includes="image|deck|stack|box">
           <xul:image class="autocomplete-icon" allowevents="true"/>
         </children>
-		<xul:stack flex="1">
+		<xul:stack class="urlbar-stack" flex="1">
+			<xul:vbox class="urlbar-progress-layer" xbl:inherits="pack=pmpack" flex="1">
+			  <children includes="progressmeter"/>
+			</xul:vbox>
 			<xul:hbox class="instantfox-box" align='center'>
 			  <xul:hbox anonid="instantFoxKey" class="instantfox-key"><html:div/></xul:hbox>
 			  <xul:hbox anonid="instantFoxSpacer" class="instantfox-spacer"><html:div/></xul:hbox>
@@ -28,7 +31,7 @@
 						  allowevents="true"
 						  xbl:inherits="tooltiptext=inputtooltiptext,onfocus,onblur,value,type,maxlength,disabled,size,readonly,placeholder,tabindex,accesskey"/>
 			</xul:hbox>
-			<xul:hbox class='instantfox-box' right='0' align='center' onclick='HH.openHelp()'>
+			<xul:hbox class='instantfox-box' align='center' pack='end' onclick='HH.openHelp()'>
 				<xul:hbox class='instantfox-tip'><html:div/></xul:hbox>
 			</xul:hbox>
 		</xul:stack>
@@ -130,7 +133,7 @@
           <![CDATA[
             var title = this.getAttribute("title");
             var url = this.getAttribute("url");
-           
+
 		   dump(title, url)
             return title + " " + url;
           ]]>
@@ -143,6 +146,7 @@
         <parameter name="aSearchTokens"/>
         <body>
           <![CDATA[
+		  //dump(aText, aSearchTokens)
           if (aSearchTokens == "")
             return [0, aText.length];
 
@@ -207,14 +211,15 @@
         <body>
           <![CDATA[
           let search = aSearch.toLowerCase();
+		 // dump(aSearch)
 		  if(search[0]=='`'){
-			//InstantFoxModule.currentQuery.plugin.key
 		    var i = search.indexOf(' ')
 			if(i==-1)i=search.length
 		    return [search.slice(1, i)]
 		  }
 		  search = search.split(/\s+/)
-		  search.shift()
+		  if(InstantFoxModule.currentQuery)
+			search.shift()
           return search;
           ]]>
         </body>
@@ -283,25 +288,26 @@
 	<handlers>
       <handler event="mouseup">
         <![CDATA[
-		// var q=InstantFoxModule.currentQuery		
+		// var q=InstantFoxModule.currentQuery
 		var search = this.getAttribute("title")
 
-		HH.onEnter(search)
+		InstantFox.onEnter(search, event.ctrlKey||event.altKey||event.metaKey)
         event.preventDefault()
 		event.stopPropagation()
       ]]>
       </handler>
     </handlers>
   </binding>
-
-
-  <binding id="splitmenu" extends="chrome://global/content/bindings/menu.xml#menuitem-base">
+  
+   <binding id="splitmenu" extends="chrome://global/content/bindings/menu.xml#menuitem-base">
     <content align='stretch'>
-        <xul:menuitem anonid="item" flex="1"
-                    class="menuitem-tooltip split-menuitem-item"
-                    xbl:inherits="label,key,image,value,closemenu,disabled" allowevents='true'/>
-        <xul:hbox class="split-menu-right-image" xbl:inherits="_moz-menuactive" >
-            <xul:hbox align="center" class="menu-right" xbl:inherits="_moz-menuactive,disabled">
+		<xul:hbox anonid="item" flex="1" allowevents='true'>
+			<xul:menuitem anonid="menuitem" flex="1"
+                    class="menuitem-iconic-tooltip menuitem-iconic split-menuitem-item"
+                    xbl:inherits="label,key,image,value,closemenu,disabled" />
+        </xul:hbox>
+		<xul:hbox anonid="menu" xbl:inherits="_moz-menuactive" allowevents='true' class="split-menu-right-image" >
+            <xul:hbox align="center" class="menu-right" xbl:inherits="_moz-menuactive,disabled" style='pointer-events:none'>
                 <xul:image/>
             </xul:hbox>
         </xul:hbox>
@@ -309,19 +315,48 @@
     </content>
 
     <implementation implements="nsIDOMXULSelectControlItemElement, nsIDOMXULContainerItemElement, nsIAccessibleProvider">
-        <constructor><![CDATA[
-            if (this.getAttribute("iconic") == "true") {
-                this.item.classList.remove("menuitem-tooltip");
-                this.item.classList.add("menuitem-iconic-tooltip");
-                this.item.classList.add("menuitem-iconic");
-            }
-      ]]></constructor>
-	  <!-- <property name="value"
-                onget="return (this.hasAttribute('isempty') || this.hasAttribute('empty')) ? '' : this.inputField.value;"> -->
+      
       <field name="item" readonly="true">
             document.getAnonymousElementByAttribute(this, "anonid", "item");
       </field>
+      <field name="menuitem" readonly="true">
+            document.getAnonymousElementByAttribute(this, "anonid", "menuitem");
+      </field>
+      <field name="menu" readonly="true">
+            document.getAnonymousElementByAttribute(this, "anonid", "menu");
+      </field>
+      
+      
     </implementation>
+	<handlers>
+      <handler event="mouseover" phase="target"><![CDATA[
+      //this.menuitem.setAttribute("_moz-menuactive", true)
+      if(event.target!=this||event.originalTarget==this)  
+        return
+      if(event.originalTarget==this.menu){
+          this.menu.style.pointerEvents="none"
+          this.menuitem.removeAttribute("_moz-menuactive")
+          this.item.style.pointerEvents="" 
+      }else if(event.originalTarget==this.item){
+          if(this.hasAttribute("_moz-menuactive"))
+            this.menuitem.setAttribute("_moz-menuactive", true)
+          this.menu.style.pointerEvents=""
+          this.item.style.pointerEvents="none"
+      }
+      ]]></handler>
+      <handler event="mouseout" phase="target"><![CDATA[  
+      if(event.originalTarget==this){
+        this.menuitem.removeAttribute("_moz-menuactive")
+        this.item.style.pointerEvents="" 
+      }
+      ]]></handler>
+      <handler event="DOMMenuItemInactive" phase="target"><![CDATA[
+        this.menuitem.setAttribute("_moz-menuactive", false)
+      ]]></handler>
+      <handler event="DOMMenuItemActive" phase="target"><![CDATA[
+        if(this.item.style.pointerEvents=="none")
+            this.menuitem.setAttribute("_moz-menuactive", true)
+      ]]></handler>
+	  </handlers>
   </binding>
-
 </bindings>

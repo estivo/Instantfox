@@ -42,15 +42,14 @@ richlistbox[type='InstantFoxSuggest'] {
 	color: transparent;
 	text-shadow: 0 -1px 1px #fff, 0 -1px 6px #0099CC
 }
-.instantfox-shadow{	 
+.instantfox-shadow{
 	color: graytext;
 }
-.instantfox-spacer{	 
+.instantfox-spacer{
 	visibility:hidden;
 }
 .instantfox-tip{
 	color:graytext;
-	right:0px;
 	background:rgb(255,246,171);
 	border-radius: 4px;
 	padding: 0px 2px;
@@ -66,15 +65,17 @@ menuitem.split-menuitem-item[_moz-menuactive="true"], .split-menu-right-image[_m
     background-color: -moz-menuhover;
     color: -moz-menuhovertext;
 }
-menuitem.split-menuitem-item{/*for mac*/
-	padding: 0!important;
+menuitem.split-menuitem-item{
+    padding: 0!important;/*for mac*/
+    pointer-events:none;
+    -moz-margin-end:1px;/*for xp*/
 }
 .split-menu-right-image {
     -moz-appearance: menuitem;
     -moz-box-pack: end;
 }
 menu[type=splitmenu] {
-    -moz-binding: url(chrome://instantfox/content/urlbar.xml#splitmenu);
+    -moz-binding: url(chrome://instantfox/content/urlbar.xml#splitmenu)!important;
     -moz-box-orient: horizontal;
     -moz-appearance: none !important;
     color: menutext;
@@ -84,4 +85,37 @@ menu[type=splitmenu] {
 .popup-notification-icon[popupid="instant-fox-installed"] {
 	list-style-image: url("chrome://instantfox/content/skin/logo.png");
 }
+
+/** mouseUI      ************************************/
+.instantFox-mouseUI{
+	/filter: url("#instantFox-gray");
+	background:white;
+	position:fixed;
+	opacity:0.5
+}
+.instantFox-mouseUI:hover{
+	filter: none;
+	opacity: 1
+}
+.instantFox-plugin{
+	background: white -moz-linear-gradient(white, yellow) no-repeat;
+	background-size: 0% 100%;
+	-moz-transition-property: background-size;
+	-moz-transition-duration: 1s;
+	padding:2px;
+	border:1px solid transparent;
+	border-radius:3px;
+	/max-width: 50px;
+}
+.instantFox-plugin[selected]{
+	border:1px solid blue;
+}
+.instantFox-plugin:hover{
+	-moz-transgorm:translate(-0px -2px);
+	background-size: 100% 100%;
+	border:1px solid lightblue;
+}
+
+
+
 
