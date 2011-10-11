@@ -219,8 +219,7 @@ checkbox:-moz-focusring > .checkbox-label-box{
 	display:none
 }
 .plugin-status[status="invalid"]{
-	background-color:red;
-	border-radius:50%;
+	background:url(chrome://instantfox/content/skin/invalid.png)
 }
 
 dropmarker[type="button"]{
