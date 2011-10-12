@@ -306,7 +306,7 @@
                     class="menuitem-iconic-tooltip menuitem-iconic split-menuitem-item"
                     xbl:inherits="label,key,image,value,closemenu,disabled" />
         </xul:hbox>
-		<xul:hbox anonid="menu" xbl:inherits="_moz-menuactive" allowevents='true' class="split-menu-right-image" >
+		<xul:hbox anonid="menu" xbl:inherits="_moz-menuactive" allowevents='true' class="split-menu-right-image splitmenu-menu" >
             <xul:hbox align="center" class="menu-right" xbl:inherits="_moz-menuactive,disabled" style='pointer-events:none'>
                 <xul:image/>
             </xul:hbox>
