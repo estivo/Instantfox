@@ -206,6 +206,17 @@ var InstantFox = {
 				if (document.dir == 'rtl'){
 					s.cssRules[5].style.backgroundPosition = '5% bottom';
 				}
+				
+							
+				// fix splitmenu styling on mac
+				if (navigator.platform.indexOf("mac") != -1){
+					s.cssRules[14].style.MozAppearance="none"
+					s.cssRules[15].style.MozAppearance="none"
+					s.cssRules[15].style.background="menu"
+					s.cssRules[15].style.color="menutext"
+					s.cssRules[16].style.MozAppearance="none"
+					s.cssRules[17].style.MozAppearance=""
+				}
 				break
 			}
 		}
