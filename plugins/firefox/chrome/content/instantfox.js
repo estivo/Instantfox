@@ -209,13 +209,16 @@ var InstantFox = {
 				
 							
 				// fix splitmenu styling on mac
-				if (navigator.platform.indexOf("mac") != -1){
+				if (navigator.platform.toLowerCase().indexOf("mac") != -1){
+					dump("applying mac specific styles-----------------------------------------")
 					s.cssRules[14].style.MozAppearance="none"
 					s.cssRules[15].style.MozAppearance="none"
 					s.cssRules[15].style.background="menu"
 					s.cssRules[15].style.color="menutext"
 					s.cssRules[16].style.MozAppearance="none"
 					s.cssRules[17].style.MozAppearance=""
+					s.cssRules[17].style.paddingTop=
+					s.cssRules[17].style.paddingBottom="1px"
 				}
 				break
 			}
