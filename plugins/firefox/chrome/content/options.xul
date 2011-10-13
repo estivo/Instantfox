@@ -13,12 +13,14 @@
 <script>
 Components.utils.import("resource://gre/modules/Services.jsm");
 try{
-	if(window.opener.location.href=='about:addons'){
-		Services.wm.getMostRecentWindow('navigator:browser').openDialog(window.location, '', 'dialog=no,centerscreen')//top='+screenY+',left='+screenX)
-		window.close()
-		savePlugins = function(){}
+	if(window.opener &amp;&amp; window.opener.location.href=='about:addons'){
+		Services.ww.openWindow(null, window.location, "_blank", 'dialog=no,centerscreen', null)
+		savePlugins = onTabSelect = function(){}
+		setTimeout(window.close)
 	}
-}catch(e){}
+}catch(e){
+	dump(e)
+}
 </script>
 
 <svg:svg height="0">

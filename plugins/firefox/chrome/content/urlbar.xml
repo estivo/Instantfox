@@ -277,12 +277,6 @@
           var url = this.getAttribute("url");
 		  if (url)
 			this._setUpDescription(this._title, title);
-		  if(InstantFox.shadowkeyOffset == null){
-			setTimeout(InstantFox.computeShadowOffset)
-			InstantFox.shadowkeyOffset = false
-		  }
-		  if(InstantFox.shadowkeyOffset != false)
-			this._titleBox.style.paddingLeft = InstantFox.getShadowKeyWidth()+InstantFox.shadowkeyOffset+"px"
 		  return;
           ]]>
         </body>

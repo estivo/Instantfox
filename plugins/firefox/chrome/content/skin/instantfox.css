@@ -71,7 +71,7 @@ menuitem.split-menuitem-item{
     -moz-margin-end:1px;/*for xp*/
 }
 .split-menu-right-image {
-    padding: 0!important;/*for mac*/
+   /* padding: 0!important;for mac*/
     -moz-appearance: menuitem;
     -moz-box-pack: end;
 }

@@ -454,30 +454,6 @@ var InstantFox = {
 		gURLBar.instantFoxTipNode.textContent = "TAB to complete"; //\u21B9 \u21C4
 		this.$urlBarModified = true
 	},
-	getShadowKeyWidth: function(){
-		if(!gURLBar.currentShadow)
-			return 0;
-		if(gURLBar.currentShadow.width == null)
-			gURLBar.currentShadow.width = Math.min(gURLBar.instantFoxKeyNode.offsetWidth, 30)
-		return gURLBar.currentShadow.width;
-	},
-	computeShadowOffset: function(){
-		dump("sddddddddddddddddddddddddddddddd")
-		if(!document.getElementById("identity-box").classList.contains("unknownIdentity"))
-			return InstantFox.shadowkeyOffset = null
-		var item = document.getAnonymousElementByAttribute(gURLBar.popup, "type", "InstantFoxSuggest")
-		item = item && item.firstChild && item.firstChild._titleBox
-		if(!item)
-			return InstantFox.shadowkeyOffset = null
-		var b1 = gURLBar.instantFoxKeyNode.parentNode.getBoundingClientRect()
-		var b2 = gURLBar.getBoundingClientRect()
-		var b3 = item.getBoundingClientRect()
-		if(b1.left - b2.left>100){ // rtl
-			InstantFox.shadowkeyOffset = false
-			return;
-		}
-		InstantFox.shadowkeyOffset = b1.left - b3.left
-	},
 
 	// ****** instant preview ****************************************
 	minLoadTime: 50,
@@ -942,6 +918,7 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
 			url = InstantFoxModule.urlFromQuery(InstantFoxModule.currentQuery);
 			InstantFox.finishSearch()
 		} else if (!InstantFoxModule.autoSearch.disabled) {
+			url = url.trimRight() // remove spaces at the end
 			// let firefox to handle builtin shortcuts if any
 			var shortcutURL = getShortcutOrURI(url, {}, {})
 			//
