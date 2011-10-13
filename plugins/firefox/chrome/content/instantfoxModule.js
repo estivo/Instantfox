@@ -812,7 +812,7 @@ SimpleAutoCompleteResult.prototype = {
 	getValueAt: function(index) 
 		this.list[index] && this.list[index].url || "",//displayed in urlbar
 	getImageAt: function(index) 
-		this.list[index] && this.list[index].icon || "chrome://instantfox/content/skin/button-logo.png", //pin-icon.png",  "",//
+		this.list[index] && this.list[index].icon || "",// "chrome://instantfox/content/skin/button-logo.png", //pin-icon.png", 
 	getStyleAt: function(index) 
 		this.list[index] && this.list[index].type || "InstantFoxSuggest",
 

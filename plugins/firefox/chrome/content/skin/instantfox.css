@@ -60,7 +60,7 @@ richlistbox[type='InstantFoxSuggest'] {
 .instantfox-box{
 	pointer-events: none
 }
-/** splitmenu (rule 14: keep in sync with js) ************************************/
+/** splitmenu ************************************/
 menuitem.split-menuitem-item[_moz-menuactive="true"], .split-menu-right-image[_moz-menuactive="true"] {/*for xp*/
     background-color: -moz-menuhover;
     color: -moz-menuhovertext;
@@ -71,6 +71,7 @@ menuitem.split-menuitem-item{
     -moz-margin-end:1px;/*for xp*/
 }
 .split-menu-right-image {
+    padding: 0!important;/*for mac*/
     -moz-appearance: menuitem;
     -moz-box-pack: end;
 }

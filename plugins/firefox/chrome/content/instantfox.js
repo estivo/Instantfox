@@ -206,20 +206,6 @@ var InstantFox = {
 				if (document.dir == 'rtl'){
 					s.cssRules[5].style.backgroundPosition = '5% bottom';
 				}
-				
-							
-				// fix splitmenu styling on mac
-				if (navigator.platform.toLowerCase().indexOf("mac") != -1){
-					dump("applying mac specific styles-----------------------------------------")
-					s.cssRules[14].style.MozAppearance="none"
-					s.cssRules[15].style.MozAppearance="none"
-					s.cssRules[15].style.background="menu"
-					s.cssRules[15].style.color="menutext"
-					s.cssRules[16].style.MozAppearance="none"
-					s.cssRules[17].style.MozAppearance=""
-					s.cssRules[17].style.paddingTop=
-					s.cssRules[17].style.paddingBottom="1px"
-				}
 				break
 			}
 		}
@@ -467,6 +453,30 @@ var InstantFox = {
 		gURLBar.instantFoxTipNode.parentNode.hidden = false;
 		gURLBar.instantFoxTipNode.textContent = "TAB to complete"; //\u21B9 \u21C4
 		this.$urlBarModified = true
+	},
+	getShadowKeyWidth: function(){
+		if(!gURLBar.currentShadow)
+			return 0;
+		if(gURLBar.currentShadow.width == null)
+			gURLBar.currentShadow.width = Math.min(gURLBar.instantFoxKeyNode.offsetWidth, 30)
+		return gURLBar.currentShadow.width;
+	},
+	computeShadowOffset: function(){
+		dump("sddddddddddddddddddddddddddddddd")
+		if(!document.getElementById("identity-box").classList.contains("unknownIdentity"))
+			return InstantFox.shadowkeyOffset = null
+		var item = document.getAnonymousElementByAttribute(gURLBar.popup, "type", "InstantFoxSuggest")
+		item = item && item.firstChild && item.firstChild._titleBox
+		if(!item)
+			return InstantFox.shadowkeyOffset = null
+		var b1 = gURLBar.instantFoxKeyNode.parentNode.getBoundingClientRect()
+		var b2 = gURLBar.getBoundingClientRect()
+		var b3 = item.getBoundingClientRect()
+		if(b1.left - b2.left>100){ // rtl
+			InstantFox.shadowkeyOffset = false
+			return;
+		}
+		InstantFox.shadowkeyOffset = b1.left - b3.left
 	},
 
 	// ****** instant preview ****************************************
