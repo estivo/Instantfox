@@ -14,12 +14,12 @@
 Components.utils.import("resource://gre/modules/Services.jsm");
 try{
 	if(window.opener &amp;&amp; window.opener.location.href=='about:addons'){
-		Services.ww.openWindow(null, window.location, "_blank", 'dialog=no,centerscreen', null)
+		Services.ww.openWindow(null, window.location, "_blank", 'dialog=no,centerscreen,resizable', null)
 		savePlugins = onTabSelect = function(){}
-		setTimeout(window.close)
+		setTimeout(window.close, 20)
 	}
 }catch(e){
-	dump(e)
+	Components.utils.reportError(e)
 }
 </script>
 
@@ -83,7 +83,7 @@ textbox[conflict=true], label[conflict=true]{
 }
 textbox[conflict=maybe]{
 	color:darkred!important;
-	text-shadow: 0pt -1px 3px gold;//#ffd700;
+	text-shadow: 0pt -1px 3px gold;
 }
 /* ======================/*\======/*\====================== */
 richlistitem[disabled="true"]>label:not(.link){
