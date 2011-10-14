@@ -147,7 +147,7 @@ var pluginLoader = {
 		}
 		return pluginData
 	},
-	addPlugins: function(pluginData){
+	addDefaultPlugins: function(pluginData){
 		InstantFoxModule.selectedLocale = pluginData.localeMap['%ll']
 		for each(var p in pluginData.plugins){
 			var id = p.id
@@ -180,9 +180,8 @@ var pluginLoader = {
 
 		InstantFoxModule.defaultPlugin = InstantFoxModule.defaultPlugin||'google'
 		//---------
-		var p = pluginData.autoSearch
-		if(!p)
-			return
+		var p = pluginData.autoSearch || {}
+
 		if(!InstantFoxModule.autoSearch){
 			InstantFoxModule.autoSearch = p
 			return
@@ -208,9 +207,8 @@ var pluginLoader = {
 		InstantFoxModule.ShortcutConflicts = conflicts
 	},
 
-	onRawPluginsLoaded: function(jsonString){
+	addFromAddonString: function(jsonString){
 		try {
-			// eval(js)
 			var rawPluginData = JSON.parse(jsonString)
 		} catch(e) {
 			Cu.reportError('malformed locale')
@@ -218,18 +216,16 @@ var pluginLoader = {
 			return
 		}
 		this.preprocessRawData(rawPluginData)
-		this.addPlugins(rawPluginData)
+		this.addDefaultPlugins(rawPluginData)
 		// add data from browser search engines
 		importBrowserPlugins(true)
 		this.initShortcuts()
 	},
-	onPluginsLoaded: function(jsonString){
+	addFromUserString: function(jsonString){
 		try{
 			var pluginData = JSON.parse(jsonString)
-		}catch(e){
-			// settings in user profile were corrupted, load default plugins
-			this.loadPlugins(true)
-			return
+		}catch(e){			
+			return false
 		}
 
 		for each(var p in pluginData.plugins){
@@ -246,8 +242,11 @@ var pluginLoader = {
 		InstantFoxModule.defaultPlugin = pluginData.defaultPlugin
 		if("autoSearch" in pluginData)
 			InstantFoxModule.autoSearch = pluginData.autoSearch
+		else 
+			return false
 
 		this.initShortcuts()
+		return true;
 	},
 
 	getPluginString: function(forUser){
@@ -274,10 +273,18 @@ var pluginLoader = {
 		var file = getUserFile('instantFoxPlugins.js')
 		if(!locale && file.exists()){
 			var spec = Services.io.newFileURI(file).spec
-			var onload = this.onPluginsLoaded.bind(this)
+			var onload = (function(str){
+				try{
+					if(!this.addFromUserString(str))
+						throw("error")
+				}catch(e){
+					// settings in user profile were corrupted, load default plugins
+					this.loadPlugins(true)
+				}
+			}).bind(this)
 		}else{
 			spec = this.getPluginFileSpec(locale)
-			var onload = this.onRawPluginsLoaded.bind(this)
+			var onload = this.addFromAddonString.bind(this)
 		}
 		dump(spec)
 
@@ -433,19 +440,22 @@ function pluginFromNsiSearch(bp){
 	}
 }
 function importBrowserPlugins(importKeys) {
-	var browserPlugins = Services.search.getEngines().map(pluginFromNsiSearch)
-	for each(var p in browserPlugins){
-		if(!InstantFoxModule.Plugins[p.id])
-			InstantFoxModule.Plugins[p.id] = p
-		else if(importKeys && p.key)
-			InstantFoxModule.Plugins[p.id].key = p.key
+	try{
+		var browserPlugins = Services.search.getEngines().map(pluginFromNsiSearch)
+		for each(var p in browserPlugins){
+			if(!InstantFoxModule.Plugins[p.id])
+				InstantFoxModule.Plugins[p.id] = p
+			else if(importKeys && p.key)
+				InstantFoxModule.Plugins[p.id].key = p.key
 
-		// handle default plugins
-		var p1 = InstantFoxModule.Plugins[p.id]
-		if(p1.type == 'browserSearch')
-			pluginLoader.defPropNames.forEach(function(propName){
-				p1['def_'+propName] = p[propName]
-			})
+			// handle default plugins
+			var p1 = InstantFoxModule.Plugins[p.id]
+			if(p1.type == 'browserSearch')
+				pluginLoader.defPropNames.forEach(function(propName){
+					p1['def_'+propName] = p[propName]
+				})
+		}
+	}catch(e){
 	}
 }
 

@@ -850,7 +850,7 @@ addPluginsFromClipboard = function(){
 		if(sel.value == 0){//"replace"
 			InstantFoxModule.Plugins = {}
 		}
-		InstantFoxModule.pluginLoader.onPluginsLoaded(str)
+		InstantFoxModule.pluginLoader.addFromUserString(str)
 	}catch(e){
 		InstantFoxModule.Plugins = origPlugins
 		Cu.reportError(e)
