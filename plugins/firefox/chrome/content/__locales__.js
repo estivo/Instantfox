@@ -97,7 +97,7 @@ var commonAutoSearch = {
 /****************************** data *************************
  * locale(name, map:['%ls', '%ll', '%ld'], plugins)
  *****/
-locale("de", ["de","de-DE","de"], {
+locale(["de","de-DE","de"], {
 	Google: true,
 	GoogleImages: true,
 	GoogleMaps: true,
@@ -121,7 +121,7 @@ locale("de", ["de","de-DE","de"], {
 	GoogleTranslate: true
 })
 
-locale("de-AT", ["de","de-AT","at"], {
+locale(["de","de-AT","at"], {
 	Google: true,
 	GoogleImages: true,
 	GoogleMaps: true,
@@ -145,7 +145,7 @@ locale("de-AT", ["de","de-AT","at"], {
 	GoogleTranslate: true
 })
 
-locale("de-CH", ["de","de-CH","ch"], {
+locale(["de","de-CH","ch"], {
 	Google: true,
 	GoogleImages: true,
 	GoogleMaps: true,
@@ -169,7 +169,7 @@ locale("de-CH", ["de","de-CH","ch"], {
 	GoogleTranslate: true
 })
 
-locale("en-AU", ["en","en-AU","com.au"], {
+locale(["en","en-AU","com.au"], {
 	Google: true,
 	GoogleImages: {
 		url: "http://www.google.%ld/images?q=%q",
@@ -199,7 +199,7 @@ locale("en-AU", ["en","en-AU","com.au"], {
 	GoogleTranslate: true
 })
 
-locale("en-CA", ["en","en-CA","ca"], {
+locale(["en","en-CA","ca"], {
 	Google: true,
 	GoogleImages: {
 		url: "http://www.google.%ld/images?q=%q",
@@ -229,7 +229,7 @@ locale("en-CA", ["en","en-CA","ca"], {
 	GoogleTranslate: true
 })
 
-locale("en-GB", ["en","en-GB","co.uk"], {
+locale(["en","en-GB","co.uk"], {
 	Google: {
 		url: "http://www.google.%ld/#q=%q&fp=1&cad=b"
 	},
@@ -259,7 +259,7 @@ locale("en-GB", ["en","en-GB","co.uk"], {
 	GoogleTranslate: true
 })
 
-locale("en-US", ["en","en-US","com"], {
+locale(["en","en-US","com"], {
 	Google: {
 		url: "http://www.google.%ld/#q=%q&fp=1&cad=b"
 	},
@@ -289,7 +289,7 @@ locale("en-US", ["en","en-US","com"], {
 	GoogleTranslate: true
 })
 
-locale("es-AR", ["es","es-AR","com.ar"], {
+locale(["es","es-AR","com.ar"], {
 	Google: true,
 	GoogleImages: {
 		url: "http://www.google.%ld/images?q=%q",
@@ -326,7 +326,7 @@ locale("es-AR", ["es","es-AR","com.ar"], {
 	GoogleTranslate: true
 })
 
-locale("es-ES", ["es","es-ES","es"], {
+locale(["es","es-ES","es"], {
 	Google: true,
 	GoogleImages: {
 		url: "http://www.google.%ld/images?q=%q",
@@ -365,7 +365,7 @@ locale("es-ES", ["es","es-ES","es"], {
 	GoogleTranslate: true
 })
 
-locale("es-MX", ["es","es-MX","com.mx"], {
+locale(["es","es-MX","com.mx"], {
 	Google: true,
 	GoogleImages: {
 		url: "http://www.google.%ld/images?q=%q",
@@ -402,7 +402,7 @@ locale("es-MX", ["es","es-MX","com.mx"], {
 	GoogleTranslate: true
 })
 
-locale("es-CL", ["es","es-CL","cl"], {
+locale(["es","es-CL","cl"], {
 	Google: true,
 	GoogleImages: {
 		url: "http://www.google.%ld/images?q=%q",
@@ -440,7 +440,7 @@ locale("es-CL", ["es","es-CL","cl"], {
 	GoogleTranslate: true
 })
 
-locale("fr", ["fr","fr-FR","fr"], {
+locale(["fr","fr-FR","fr"], {
 	Google: true,
 	GoogleImages: {
 		url: "http://www.google.%ld/images?q=%q",
@@ -476,7 +476,7 @@ locale("fr", ["fr","fr-FR","fr"], {
 	GoogleTranslate: true
 })
 
-locale("it", ["it","it-IT","it"], {
+locale(["it","it-IT","it"], {
 	Google: true,
 	GoogleImages: {
 		url: "http://www.google.%ld/images?q=%q",
@@ -506,7 +506,7 @@ locale("it", ["it","it-IT","it"], {
 	GoogleTranslate: true
 })
 
-locale("nl", ["nl","nl","nl"], {
+locale(["nl","nl","nl"], {
 	Google: true,
 	GoogleImages: {
 		url: "http://www.google.%ld/images?q=%q",
@@ -539,7 +539,7 @@ locale("nl", ["nl","nl","nl"], {
 	GoogleTranslate: true
 })
 
-locale("pl", ["pl","pl","pl"], {
+locale(["pl","pl","pl"], {
 	Google: true,
 	GoogleImages: {
 		url: "http://www.google.%ld/images?q=%q",
@@ -574,7 +574,7 @@ locale("pl", ["pl","pl","pl"], {
 	GoogleTranslate: true
 })
 
-locale("pt", ["pt","pt","pt"], {
+locale(["pt","pt","pt"], {
 	Google: true,
 	GoogleImages: {
 		url: "http://www.google.%ld/images?q=%q",
@@ -604,7 +604,7 @@ locale("pt", ["pt","pt","pt"], {
 	GoogleTranslate: true
 })
 
-locale("pt-BR", ["pt","pt-BR","com.br"], {
+locale(["pt","pt-BR","com.br"], {
 	Google: true,
 	GoogleImages: {
 		url: "http://www.google.%ld/images?q=%q",
@@ -633,7 +633,7 @@ locale("pt-BR", ["pt","pt-BR","com.br"], {
 	GoogleTranslate: true
 })
 
-locale("ru", ["ru","ru","ru"], {
+locale(["ru","ru","ru"], {
 	"Яндекс": {
 		key: "y",
 		url: "http://yandex.ru/yandsearch?text=%q&lr=99",
@@ -671,7 +671,7 @@ locale("ru", ["ru","ru","ru"], {
 	GoogleTranslate: true
 })
 
-locale("tr", ["tr","tr","com.tr"], {
+locale(["tr","tr","com.tr"], {
 	Google: true,
 	GoogleImages: {
 		url: "http://www.google.%ld/images?q=%q",
@@ -690,7 +690,8 @@ locale("tr", ["tr","tr","com.tr"], {
 	GoogleTranslate: true
 })
 /*************************end of data  section *************************
- * locale(name, map:['%ls', '%ll', '%ld'], plugins)
+ * locale(namemap:['%ls', '%ll', '%ld'], plugins)
+ * folder name must be '%ll'
  *****/
 function extend(a, b){
 	var o = {}
@@ -700,9 +701,9 @@ function extend(a, b){
 		o[i] = b[i]
 	return o
 }
-function locale(name, mapArray, plugins, autoSearch){
+function locale(localeNames, plugins, autoSearch){
 	var loc = {}
-	var spec = InstantFoxModule.pluginLoader.getPluginFileSpec(name)
+	var spec = InstantFoxModule.pluginLoader.getPluginFileSpec(localeNames[1])
 	dump(spec)
 	var file = makeURI(spec).QueryInterface(Ci.nsIFileURL).file
 	if(!file.exists())
@@ -715,7 +716,7 @@ function locale(name, mapArray, plugins, autoSearch){
 
 	//============================
 	loc.localeMap = {}
-	;['%ls', '%ll', '%ld'].forEach(function(x, i)loc.localeMap[x] = mapArray[i])
+	;['%ls', '%ll', '%ld'].forEach(function(x, i)loc.localeMap[x] = localeNames[i])
 	
 	loc.autoSearch = autoSearch || commonAutoSearch
 

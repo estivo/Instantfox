@@ -239,7 +239,8 @@ var pluginLoader = {
 
 		InstantFoxModule.selectedLocale = pluginData.selectedLocale
 		InstantFoxModule.defaultPlugin = pluginData.defaultPlugin
-		if("autoSearch" in pluginData)
+
+		if(pluginData.autoSearch)
 			InstantFoxModule.autoSearch = pluginData.autoSearch
 		else 
 			return false

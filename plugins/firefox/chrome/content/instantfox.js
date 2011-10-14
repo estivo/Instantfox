@@ -917,7 +917,7 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
 		if (InstantFoxModule.currentQuery) {
 			url = InstantFoxModule.urlFromQuery(InstantFoxModule.currentQuery);
 			InstantFox.finishSearch()
-		} else if (!InstantFoxModule.autoSearch.disabled) {
+		} else if (InstantFoxModule.autoSearch && !InstantFoxModule.autoSearch.disabled) {
 			url = url.trimRight() // remove spaces at the end
 			// let firefox to handle builtin shortcuts if any
 			var shortcutURL = getShortcutOrURI(url, {}, {})
