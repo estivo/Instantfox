@@ -180,12 +180,11 @@ var pluginLoader = {
 
 		InstantFoxModule.defaultPlugin = InstantFoxModule.defaultPlugin||'google'
 		//---------
-		var p = pluginData.autoSearch || {}
+		var p = pluginData.autoSearch;
 
-		if(!InstantFoxModule.autoSearch){
+		if(!InstantFoxModule.autoSearch)
 			InstantFoxModule.autoSearch = p
-			return
-		}
+
 		InstantFoxModule.autoSearch.def_json = p.json
 		InstantFoxModule.autoSearch.def_url = p.url
 	},
@@ -259,6 +258,7 @@ var pluginLoader = {
 			selectedLocale: InstantFoxModule.selectedLocale,
 			defaultPlugin: InstantFoxModule.defaultPlugin,
 			autoSearch: InstantFoxModule.autoSearch,
+			version: Services.prefs.getCharPref("extensions.instantfox.version"),
 			plugins: ob
 		}
 
@@ -279,7 +279,7 @@ var pluginLoader = {
 						throw("error")
 				}catch(e){
 					// settings in user profile were corrupted, load default plugins
-					this.loadPlugins(true)
+					this.onInstantfoxUpdate()
 				}
 			}).bind(this)
 		}else{
@@ -346,7 +346,7 @@ var pluginLoader = {
 	},
 	// add new plugins when instantfox is updated
 	onInstantfoxUpdate: function(){
-		this.loadPlugins(InstantFoxModule.selectedLocale, this.savePlugins.bind(this))
+		this.loadPlugins(InstantFoxModule.selectedLocale||true, this.savePlugins.bind(this))
 	}
 }
 
