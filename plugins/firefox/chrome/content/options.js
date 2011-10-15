@@ -150,7 +150,7 @@ function formatString(string, options){
 		if(x[0]=='_'){
 			x = x.substr(1)
 			var strName = options[x]
-			return escapeHTML(i18n[x+"_"+strName]||"")
+			return escapeHTML(i18n.get(x+"_"+strName))
 		}
 		if(typeof options[x]!='string')
 			return options[x]?options[x].toString():''
@@ -236,10 +236,10 @@ initEditPopup = function(plugin, panel){
 
 	var rem =  $t(panel, 'remove')
 	if(plugin){
-		rem.label = gPlugin.type == 'user' ? 'remove': 'disable';
+		rem.label = i18n.get(gPlugin.type == 'user' ? 'remove': 'disable');
 		rem.hidden = false;
 	}else{
-		rem.label = 'cancel';
+		rem.label = i18n.get('cancel');
 		rem.hidden = false;
 	}
 }
@@ -658,10 +658,10 @@ xmlFragment =
 			<hbox class="plugin-status" status="$status$" aID='edit-link' tooltiptext="$_status$"/>
 		</hbox>
 		<hbox align="center" class='key'>
-			<textbox class='key' aID='key' value='$key$' tooltiptext='Edit Plugin Shortcut'
+			<textbox class='key' aID='key' value='$key$' tooltiptext='$i18n_key_tooltip$'
 				onblur='onTextboxEnter(this)' oninput='onTextboxInput(this)'/>
 		</hbox>
-		<label class='link' value='edit' aID='edit-link'/>
+		<label class='link' value='$i18n_edit$' aID='edit-link'/>
 	  </richlistitem>.toXMLString().replace(/>\s*</g,'><')
 xmlFragmentDis =
 	  <richlistitem align="center" id='$id$' disabled="true">
@@ -671,7 +671,7 @@ xmlFragmentDis =
 		<label value="$name$"/>
 		<spacer flex='1' />
 		<textbox class='key invisible' aID='key'/>
-		<label class='link' value='enable' aID='enable-link'/>
+		<label class='link' value='$i18n_enable$' aID='enable-link'/>
 	  </richlistitem>.toXMLString().replace(/>\s*</g,'><')
 
 function plugin2XML(p){
@@ -696,14 +696,14 @@ rebuild = function(){
 			(def ? xml : userxml).push(px)
 
 	}
-	var sepXML1 = "<label class='separator' value='   ", sepXML2 =" Search Plugins'/>"
+	var sepXML1 = "<label class='separator' value='   ", sepXML2 ="'/>"
 
-	xml.unshift(sepXML1 + "Standard" + sepXML2)
+	xml.unshift(sepXML1 + i18n.get("separator_standard") + sepXML2)
 	if(userxml.length)
-		xml.push(sepXML1 + "Your" + sepXML2)
+		xml.push(sepXML1 + i18n.get("separator_your") + sepXML2)
 
 	if(disabledxml.length)
-		userxml.push(sepXML1 + "Inactive" + sepXML2)
+		userxml.push(sepXML1 + i18n.get("separator_inactive") + sepXML2)
 
 	var el = $("shortcuts");
 	//it's important to clear selection of richbox before removing its' children
@@ -724,7 +724,7 @@ function updatePluginStatus(p){
 		(p.json && p.json.indexOf('%q') == -1 )	) {
 		p.status = "invalid"
 	} else if(p.disableInstant) {
-		p.status = "not-instant"
+		p.status = "not_instant"
 	} else
 		p.status = "instant"
 }
@@ -915,7 +915,45 @@ slideCheckbox = {
 }
 
 i18n = {
-	status_instant: 'Instant-loading on',
-	status_invalid: 'invalid'
+	init: function(){
+		var stringBundleService = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService);
+		/**devel__(*/
+			stringBundleService.flushBundles()
+		/**devel__)*/
+		this.$bundle = stringBundleService.createBundle("chrome://instantfox/locale/options.properties");
+
+	},
+	get: function(name){
+		try{
+			dump("name: ", name, this.$bundle.GetStringFromName(name))
+			return this.$bundle.GetStringFromName(name)
+		}catch(e){
+			dump("name: ", name, "error->'' returned")
+			return ""
+		}
+	},
+	localize: function(){
+		var elList = document.querySelectorAll("label.i18n,description.i18n")
+		for(var i=elList.length;i--;){
+			var el = elList[i]
+			el.setAttribute("value", this.get(el.getAttribute("value")))
+		}
+		var elList = document.querySelectorAll(".i18n[label]")
+		for(var i=elList.length;i--;){
+			var el = elList[i]
+			el.setAttribute("label", this.get(el.getAttribute("label")))
+		}
+		
+		xmlFragment = this.localizeString(xmlFragment)
+		xmlFragmentDis = this.localizeString(xmlFragmentDis)
+	},
+	localizeString: function(str){
+		return str.replace(/\$i18n_[^\$]*\$/g, function(x){
+				var x = x.slice(6,-1)		
+				return escapeHTML(i18n.get(x))
+			})
+	}
 }
+i18n.init()
+i18n.localize()
 
