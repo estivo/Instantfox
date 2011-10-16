@@ -886,6 +886,17 @@ slideCheckbox = {
 		el.checkbox = document.createElement("slidecheck")
 		el.check = document.createElement("check")
 		
+		var on = i18n.get("ON"), off = i18n.get("OFF")
+		var d = document.createElement("div")
+		d.textContent = on
+		d.className = "slidecheck-before"
+		el.checkbox.appendChild(d)
+		var d = document.createElement("div")
+		d.textContent = off
+		d.className = "slidecheck-after"
+		el.checkbox.appendChild(d)
+		el.checkbox.style.width = (on+off).length +'em';
+		
 		el.checkbox.appendChild(el.check)
 		
 		el.appendChild(el.label)

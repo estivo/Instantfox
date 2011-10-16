@@ -252,21 +252,22 @@ slidecheck {
 	background: -moz-linear-gradient(19% 75% 90deg,#3095C7, #14539C); 
 	border-radius: 4px;
 	border: 1px solid #555555;
-	width: 5em;
 	position: relative;
 	cursor:pointer;
 	text-shadow: #093B5C 0px -1px 1px;
 	color: #fff;
 	text-align: center
 }
-slidecheck::before {
-	content: "ON";
-	width: 50%;display: inline-block;	
-}
-slidecheck::after {
-	content: "OFF";
+.slidecheck-before {
 	width: 50%;
-	right:0;display: inline-block;	
+	display: inline-block;	
+	pointer-events: none;
+}
+.slidecheck-after {
+	width: 50%;
+	right:0;
+	display: inline-block;
+	pointer-events: none;
 }
 slidecheck>check { 
 	display: block;
@@ -333,9 +334,9 @@ slidecheckbox:hover>slidecheck>check{
 						<resetbutton hidden='true' onclick='var t = this.previousSibling;t.value="";t.oninput()' />
 					</hbox>
 					<spacer flex='1'/>
-					<slickbutton id="add-from-browser" label='add engine from site' class='attention' hidden="dtrue"
+					<slickbutton class="i18n attention" id="add-from-browser" label='add_engine_from_site'
 						onmouseup='enginesPopup.show(this, "Browser")'/>
-					<slickbutton id="add" label='Add +' onmouseup='openEditPopup(this)'/>
+					<slickbutton class="i18n" id="add" label='add_new' onmouseup='openEditPopup(this)'/>
 				</hbox>
 			</vbox>
 			<richlistbox id='shortcuts' flex='1' onkeypress='rbKeyPress(event, this)'
