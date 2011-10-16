@@ -459,9 +459,30 @@ enginesPopup = {
 		var id = event.target.value
 		var e = gBrowserEngineList[id]
 		var type = Ci.nsISearchEngine.DATA_XML;
-		Services.search.addEngine(
-			e.uri, type, e.iconURI, false
-		)
+		InstantFoxModule.bp.searchEngineObserver.addListener(this.scheduleBrowserEngineListUpdate.bind(this))
+		Services.search.addEngine(e.uri, type, e.iconURI, false)
+	},
+	scheduleBrowserEngineListUpdate: function(){
+		if(this.$pending)
+			return
+		this.$pending = true
+		setTimeout(function(self){
+			self.$pending = false;
+			self.updateBrowserEngineList()
+		}, 100, this)
+	},
+	updateBrowserEngineList: function(){
+		var win = Services.wm.getMostRecentWindow("navigator:browser")
+		var hide = true
+		if(win){
+			for each(var b in win.gBrowser.browsers){
+				if(b.engines && b.engines.length){
+					hide = false
+					break
+				}
+			}
+		}
+		$("add-from-browser").hidden = hide
 	}
 }
 
@@ -746,28 +767,13 @@ window.addEventListener("DOMContentLoaded", function() {
 		// don't let clicks inside options window to close popup
 		window.addEventListener('mousedown', InstantFox.popupClickListener, false)
 	}
-	updateBrowserEngines()
+	enginesPopup.scheduleBrowserEngineListUpdate()
 }, false)
 
 // called when popup containing this window is opened
 onOptionsPopupShowing = function(){
 	rebuild()
-	updateBrowserEngines()
-}
-updateBrowserEngines = function(){
-	try{
-		var win = Services.wm.getMostRecentWindow("navigator:browser")
-		var hide = true
-		if(win){
-			for each(var b in win.gBrowser.browsers){
-				if(b.engines && b.engines.length){
-					hide = false
-					break
-				}
-			}
-		}
-		$("add-from-browser").hidden = hide
-	}catch(e){}
+	enginesPopup.updateBrowserEngineList()
 }
 
 function onTabSelect(){
