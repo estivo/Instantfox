@@ -464,6 +464,12 @@ searchEngineObserver = {
 	observe: function(subject, topic, j){
 		dump(subject, topic,'+++++++++++++**********+++++++',j)
 		importBrowserPlugins(false)
+		if(this.$listener){
+			this.$listener.get()()
+		}
+	},
+	addListener: function(w){
+		this.$listener = Components.utils.getWeakReference(w)
 	},
 	QueryInterface: function() this
 }

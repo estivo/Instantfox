@@ -333,7 +333,7 @@ slidecheckbox:hover>slidecheck>check{
 						<resetbutton hidden='true' onclick='var t = this.previousSibling;t.value="";t.oninput()' />
 					</hbox>
 					<spacer flex='1'/>
-					<slickbutton id="add-from-browser" label='add +' class='attention' hidden="dtrue"
+					<slickbutton id="add-from-browser" label='add engine from site' class='attention' hidden="dtrue"
 						onmouseup='enginesPopup.show(this, "Browser")'/>
 					<slickbutton id="add" label='Add +' onmouseup='openEditPopup(this)'/>
 				</hbox>
