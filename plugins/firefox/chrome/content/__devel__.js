@@ -77,10 +77,11 @@ var instantFoxDevel = {
 		try{InstantFox.destroy()}catch(e){}
 
 		try{
-			var p = document.getElementById('instantFox-options').firstChild
-			while(p.hasChildNodes())
-				p.removeChild(p.firstChild.firstChild)
-		}catch(e){}
+			var p = document.querySelector('#instantFox-options iframe')
+			p.parentNode.removeChild(p)			
+		}catch(e){
+			Cu.reportError(e)
+		}
 
 		var i = this.loadedScriptsCount = 0
 		this.loadScript(this.sourceList[i], i)
