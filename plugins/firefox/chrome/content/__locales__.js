@@ -87,7 +87,7 @@ var commonPlugins = {
 }
 
 var commonAutoSearch = {
-	json: 'http://clients1.google.de/complete/search?client=chrome&hl=%ls&q=%q',
+	json: 'http://clients1.google.com/complete/search?client=chrome&hl=%ls&q=%q',
 	url: commonPlugins.Google.url,
 	instant: "off",
 	suggest: false,
@@ -674,6 +674,7 @@ locale(["ru","ru","ru"], {
 locale(["tr","tr","com.tr"], {
 	Google: true,
 	GoogleImages: {
+		name: "Google Görseller",
 		url: "http://www.google.%ld/images?q=%q",
 		json: "http://suggestqueries.google.com/complete/search?json&ds=i&q=%q"
 	},
@@ -681,14 +682,77 @@ locale(["tr","tr","com.tr"], {
 		url: "http://maps.google.com/maps?q=%q&hl=%ls"
 	},
 	Wikipedia: true,
+	Youtube: true,
 	Twitter: true,
-	Weather: true,
+	Weather: {
+		name: "Hava durumu"
+	},
 	IMDb: {
 		name: "IMDb"
 	},
 	Calculator: true,
 	GoogleTranslate: true
 })
+
+locale(["ja","ja","co.jp"], {
+	Google: true,
+	GoogleImages: {
+		name: "Google 画像検索"
+	},
+	GoogleMaps: {
+		name: "Google マップ - 地図検索",
+		url: "http://maps.google.co.jp/maps?q=%q&hl=%ls"
+	},
+	Wikipedia: true,
+	Youtube: true,
+	Amazon: {
+		url: "http://www.amazon.co.jp/s?ie=UTF8&x=17&ref_=nb_sb_noss&y=11&field-keywords=%q&url=search-alias%3Daps&_encoding=UTF8&tag=7098-22&linkCode=ur2&camp=247&creative=7399"
+	},
+	Twitter: true,
+	Weather: {
+		name: "湿潤剤"
+	},
+	Calculator: {
+		name: "ポケット電卓"
+	},	
+	GoogleTranslate: {
+		name: "Google 翻訳"
+	}
+})
+
+locale(["zh","zh-CN","cn"], {
+	Google: {
+		name: "Google 主页"
+	},
+	GoogleImages: {
+		name: "Google 图片"
+	},
+	GoogleMaps: {
+		name: "Google 地图"
+	},
+	Baidu: {
+		key: "b",
+		url: "http://www.baidu.com/s?wd=%q&rsv_bp=0&rsv_spt=3&inputT=625",
+		json: "http://suggestion.baidu.com/su?wd=%q&p=3&cb=window.bdsug.sug",
+		name: "Baidu"
+	},
+	Wikipedia: true,
+	Youtube: true,
+	Amazon: {
+		url: "http://www.amazon.cn/s?ie=UTF8&x=0&ref_=nb_sb_noss&y=0&field-keywords=%q&url=search-alias%3Daps&_encoding=UTF8&tag=80e0-23&linkCode=ur2&camp=536&creative=3132"
+	},
+	Twitter: true,
+	Weather: {
+		name: "天气"
+	},
+	Calculator: {
+		name: "袖珍计算器"
+	},	
+	GoogleTranslate: {
+		name: "Google 翻译"
+	}
+})
+
 /*************************end of data  section *************************
  * locale(namemap:['%ls', '%ll', '%ld'], plugins)
  * folder name must be '%ll'
