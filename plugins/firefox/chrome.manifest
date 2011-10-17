@@ -20,6 +20,7 @@ locale    instantfox es-ES    chrome/locale/es-ES/
 locale    instantfox es-MX    chrome/locale/es-MX/
 locale    instantfox fr       chrome/locale/fr-FR/
 locale    instantfox it       chrome/locale/it-IT/
+locale    instantfox ja       chrome/locale/ja/
 locale    instantfox nl       chrome/locale/nl/
 locale    instantfox pl       chrome/locale/pl/
 locale    instantfox pt       chrome/locale/pt/
@@ -27,8 +28,6 @@ locale    instantfox pt-BR    chrome/locale/pt-BR/
 locale    instantfox ru       chrome/locale/ru/
 locale    instantfox ru-RU    chrome/locale/ru/
 locale    instantfox tr       chrome/locale/tr/
+locale    instantfox zh       chrome/locale/zh/
+locale    instantfox zh-CN    chrome/locale/zh-CN/
 
-
-#FF4
-#component {c541b971-0729-4f5d-a5c4-1f4dadef365e} components/instantfox_search.js
-#contract @mozilla.org/autocomplete/search;1?name=instantFoxAutoComplete {c541b971-0729-4f5d-a5c4-1f4dadef365e}
