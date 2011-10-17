@@ -86,7 +86,7 @@
         "%ld": "co.uk"
     },
     "autoSearch": {
-        "json": "http://clients1.google.de/complete/search?client=chrome&hl=%ls&q=%q",
+        "json": "http://clients1.google.com/complete/search?client=chrome&hl=%ls&q=%q",
         "url": "http://www.google.%ld/#hl=%ls&q=%q&fp=1&cad=b",
         "instant": "off",
         "suggest": false,
