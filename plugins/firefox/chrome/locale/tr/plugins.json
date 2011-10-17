@@ -10,7 +10,7 @@
             "key": "i",
             "url": "http://www.google.%ld/images?q=%q",
             "json": "http://suggestqueries.google.com/complete/search?json&ds=i&q=%q",
-            "name": "Google Images"
+            "name": "Google Görseller"
         },
         "GoogleMaps": {
             "key": "m",
@@ -24,6 +24,12 @@
             "json": "http://%ls.wikipedia.org/w/api.php?action=opensearch&search=%q",
             "name": "Wikipedia"
         },
+        "Youtube": {
+            "key": "y",
+            "url": "http://www.youtube.com/results?search_query=%q",
+            "json": "http://suggestqueries.google.com/complete/search?json&hl=%ls&ds=yt&q=%q",
+            "name": "Youtube"
+        },
         "Twitter": {
             "key": "t",
             "url": "http://twitter.com/#!/search/%q",
@@ -34,7 +40,7 @@
             "url": "http://weather.instantfox.net/%q",
             "json": "http://maps.google.com/maps/suggest?q=%q&cp=999&hl=%ls&gl=%ls&v=2&json=b",
             "hideFromContextMenu": true,
-            "name": "Weather"
+            "name": "Hava durumu"
         },
         "IMDb": {
             "key": "im",
@@ -61,7 +67,7 @@
         "%ld": "com.tr"
     },
     "autoSearch": {
-        "json": "http://clients1.google.de/complete/search?client=chrome&hl=%ls&q=%q",
+        "json": "http://clients1.google.com/complete/search?client=chrome&hl=%ls&q=%q",
         "url": "http://www.google.%ld/#hl=%ls&q=%q&fp=1&cad=b",
         "instant": "off",
         "suggest": false,
