@@ -366,14 +366,14 @@ function fetchAsync(href, callback){
 	req.open('GET', href, true);
 
 	req.addEventListener('load', function() {
-		req.removeEventListener('load', arguments.callee)
+		req.removeEventListener('load', arguments.callee, false)
 		if(typeof callback == 'function')
 			callback(req.responseText);
 		else for each(var func in callback){
 			(typeof func == 'function') && func(req.responseText);
 		}
 		delete req
-	})
+	}, false)
 
 	req.send(null);
 	return req
@@ -946,7 +946,7 @@ InstantFoxSearch.prototype = {
 		}
 
 		var _req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
-		_req.addEventListener("load", this.onSearchReady);
+		_req.addEventListener("load", this.onSearchReady, false);
 
 		this._reqList.push(_req)
 
