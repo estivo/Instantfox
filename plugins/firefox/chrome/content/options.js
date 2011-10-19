@@ -905,7 +905,7 @@ slideCheckbox = {
 		el.__defineGetter__("checked", this.getChecked)
 		el.__defineSetter__("checked", this.setChecked)
 		
-		el.addEventListener("click", this.onClick)
+		el.addEventListener("click", this.onClick, false)
 	},
 	initAll: function(el){
 		var all = (el||document).querySelectorAll("slidecheckbox")
