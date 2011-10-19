@@ -38,10 +38,16 @@ InstantFox.contentHandlers = {
 			var el = win.document.getElementById("lst-ib")
 			if(!el)
 				return false
-			el.value = q.query;
+			el.value = q.shadow || q.query;
 			var e = document.createEvent('UIEvent')
 			e.initUIEvent('input',true, true, win, 1)
 			el.dispatchEvent(e)
+			
+			var evt = document.createEvent("KeyboardEvent");
+			evt.initKeyEvent ("keypress", true, true, window,
+								0, 0, 0, 0,
+								13, "\n".charCodeAt(0))
+			el.dispatchEvent(evt)
 			
 			return true
 		},
