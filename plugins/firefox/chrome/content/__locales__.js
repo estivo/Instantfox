@@ -722,12 +722,18 @@ locale(["ja","ja","co.jp"], {
 
 locale(["zh","zh-CN","cn"], {
 	Google: {
+		url: "http://www.google.com.hk/#hl=%ls&q=%q&fp=1&cad=b",
+		json: "http://www.google.com.hk/complete/search?json&q=%q&hl=%ls",
 		name: "Google 主页"
 	},
 	GoogleImages: {
+		url: "http://www.google.com.hk/images?q=%q&hl=%ls",
+		json: "http://suggestqueries.google.com/complete/search?json&ds=i&hl=%ls&q=%q",
 		name: "Google 图片"
 	},
 	GoogleMaps: {
+		url: "http://ditu.google.cn/maps?q=%q",
+		json: "http://ditu.google.%ld/maps/suggest?q=%q&cp=999&hl=%ll&gl=%ll&v=2&json=b",
 		name: "Google 地图"
 	},
 	Baidu: {

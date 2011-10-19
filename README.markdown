@@ -13,6 +13,7 @@ Useful Links:
 Latest Firefox Versions: **<https://addons.mozilla.org/en-US/firefox/pages/appversions/>**  
 Compatibility Reports: **<https://addons.mozilla.org/en-US/firefox/compatibility/reporter/searchy@searchy>**  
 Mozilla Add-On Validator: **<https://addons.mozilla.org/en-US/developers/addon/validate>**
+Older Firefox Versions: **<ftp://ftp.mozilla.org/pub/firefox/releases/>**
 
 Found something about Instantfox that makes you unhappy? » <mailto:message@instantfox.net>
 
