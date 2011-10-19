@@ -456,17 +456,17 @@ var InstantFox = {
 	},
 
 	// ****** instant preview ****************************************
-	minLoadTime: 50,
+	minLoadTime: 100,
 	maxLoadTime: 200,
 	doPreload: function(q) {
 		if (this.timeout)
 			this._timeout = clearTimeout(this._timeout)
 
 		var url2go = InstantFoxModule.urlFromQuery(q);
+		var contentHandler = this.contentHandlers[q.plugin.id];
 
 		if(q.query && q.preloadURL && url2go.toLowerCase() == q.preloadURL.toLowerCase()){
-			if(q.plugin.id == 'google')
-				InstantFox.pageLoader.checkPreview(500)
+			contentHandler && contentHandler.onLoad(q, true)			
 			return url2go
 		}
 
@@ -480,11 +480,10 @@ var InstantFox = {
 				this.schedulePreload(this.minLoadTime)
 				return
 			}
-			//fixme:
-			if(q.plugin.id == 'google'){
-				//InstantFox.pageLoader.preview.contentDocument.getElementById("lst-ib").value=query;
-				InstantFox.pageLoader.checkPreview(800)
-			}
+			var mustBreak = contentHandler && contentHandler.onLoad(q)
+
+			if(mustBreak)
+				return url2go
 		}else{
 			this._isOwnQuery = true;
 		}
