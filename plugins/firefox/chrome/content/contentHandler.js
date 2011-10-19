@@ -1,8 +1,5 @@
 InstantFox.contentHandlers = {
 	"google":{
-		onLoadSame: function(q){
-			this.checkPreview(800)
-		},
 		onLoad: function(q){
 			this.checkPreview(800)
 		},
@@ -35,18 +32,28 @@ InstantFox.contentHandlers = {
 			}
 		},
 	},
-	setGoogleLocation: function(){
-		content.document.getElementById("lst-ib").value='opera ';
-		content.document.getElementById("gac_scont").style.display='none';
-		content.document.getElementById("gray").style.display='none';
-	},
-	finishGoogleLocation: function(){
-		content.document.getElementById("gac_scont").style.display='';
-		content.document.getElementById("gray").style.display=''
-	},
-	setURL: function(url){
-		// todo:
-		InstantFox.pageLoader.addPreview(url)
+	"google":{
+		onLoad: function(q, samePage){
+			var win = InstantFox.pageLoader.previewIsActive ? InstantFox.pageLoader.preview.contentWindow : content
+			var el = win.document.getElementById("lst-ib")
+			if(!el)
+				return false
+			el.value = q.query;
+			var e = document.createEvent('UIEvent')
+			e.initUIEvent('input',true, true, win, 1)
+			el.dispatchEvent(e)
+			
+			return true
+		},
+		hideItems: function(doc){
+			doc.getElementById("lst-ib").value='opera ';
+			doc.getElementById("gac_scont").style.display='none';
+			doc.getElementById("gray").style.display='none';
+		},
+		finishSearch: function(){
+			content.document.getElementById("gac_scont").style.display='';
+			content.document.getElementById("gray").style.display=''
+		},
 	}
 }
 

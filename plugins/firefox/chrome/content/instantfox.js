@@ -466,7 +466,7 @@ var InstantFox = {
 		var contentHandler = this.contentHandlers[q.plugin.id];
 
 		if(q.query && q.preloadURL && url2go.toLowerCase() == q.preloadURL.toLowerCase()){
-			contentHandler && contentHandler.onLoadSame(q)			
+			contentHandler && contentHandler.onLoad(q, true)			
 			return url2go
 		}
 
