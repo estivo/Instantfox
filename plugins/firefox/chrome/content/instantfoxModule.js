@@ -609,7 +609,13 @@ var parseSimpleJson = function(json, key, splitSpace){
 	try{
 		var xhrReturn = JSON.parse(json)[1];
 	}catch(e){
-		return
+		Cu.reportError(e);
+		try{
+			xhrReturn = json.substring(json.indexOf("[\"")+2,json.lastIndexOf("\"]")).split('","')
+		}catch(e){
+			Cu.reportError(e)
+			return
+		}
 	}
 	if(!xhrReturn)
 		return
