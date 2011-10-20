@@ -721,42 +721,41 @@ InstantFox._urlbarCutCommand =  function(aCommand){
  * contextMenu
  *******/
 InstantFox.modifyContextMenu = function(enable){
-	if(enable == undefined){
+	if (enable == undefined) {
 		let pname = "extensions.InstantFox.context.usedefault"
 		enable = !(Services.prefs.prefHasUserValue(pname) && Services.prefs.getBoolPref(pname))
 	}
 	let proto = nsContextMenu.prototype
-	if(enable && !proto.isTextSelection_orig){
+	if (enable && !proto.isTextSelection_orig) {
 		proto.isTextSelection_orig = proto.isTextSelection_orig || proto.isTextSelection 
 		proto.isTextSelection = function() {
 			var splitMenu = document.getElementById("ifox-context-searchselect") || this.createSearchItem()
 			var menuitem = splitMenu.menuitem
 
-			var selectedText = this.getSelectedText()
-
+			var selectedText = this.getSelectedText(), croppedText = selectedText
+			
 			if (!selectedText){
 				splitMenu.hidden = true
 				return false;
 			}
-
+			
 			if (selectedText.length > 15)
-			  selectedText = selectedText.substr(0,15) + this.ellipsis;
+				croppedText = selectedText.substr(0,15) + this.ellipsis;
 
 			var engine = InstantFoxModule.Plugins[InstantFoxModule.defaultPlugin];
 
 			// format "Search <engine> for <selection>" string to show in menu
 			var menuLabel = gNavigatorBundle.getFormattedString("contextMenuSearchText",
-																[engine.name, selectedText]);
-			if(menuitem){
+																[engine.name, croppedText]);
+			if (menuitem) {
 				menuitem.label = menuLabel;
 				menuitem.image = engine.iconURI
 				splitMenu.setAttribute('name', engine.id)
-				splitMenu.setAttribute('pluginType', "instantFox")
 				menuitem.accessKey = gNavigatorBundle.getString("contextMenuSearchText.accesskey");
 				splitMenu.hidden = false
 			}
-
-			return true;
+			// this caches the selected text in isTextSelected
+			return selectedText;
 		}
 
 		proto.createSearchItem = function(){
@@ -818,52 +817,39 @@ InstantFox.modifyContextMenu = function(enable){
 				menu.setAttribute('label', engine.name)
 				menu.setAttribute('image', engine.iconURI)
 				menu.setAttribute('class', "menuitem-iconic")
-				//todo: main search must be instantfox search too
-				menu.setAttribute('pluginType', "instantFox")
 				popup.appendChild(menu)
 			}
 		}
 		proto.doSearch = function(e) {
-			var mustClosePopup = false
-			dump(e.type, e.target.menuitem)
-			if(e.type == "click"){
-				if(e.target.menuitem){
-					if(e.target.menuitem.hasAttribute("_moz-menuactive"))
-						mustClosePopup = e.button != 1
-					else
-						return // click on menu
-				}			
-			}
-			mustClosePopup = e.button != 1
-			if(e.type == "command"){
-				
-			}
-			
-			var name = e.target.getAttribute('name')
-			if(!name)
+			var name = e.target.getAttribute('name'), href;
+			if (!name)
 				return;
 			var selectedText = this.getSelectedText()
-			if(name == 'open as link'){
-				openLinkIn(selectedText, e.button>1?"current":"tab", {relatedToCurrent: true});
-				return
+			if (name == '__open_as_link__') {
+				href = selectedText
+			} else if (name == 'search_site'){
+				href  = InstantFoxModule.urlFromQuery("google", selectedText + 'site:' + gBrowser.currentURI.host)
+			} else {			
+				href  = InstantFoxModule.urlFromQuery(name, selectedText)
 			}
-
-			var type = e.target.getAttribute('pluginType')
-			if (type == "instantFox") {
-				var href  = InstantFoxModule.urlFromQuery(name, selectedText)
-			} else {
-				var engine = Services.search.getEngineByName(name);
-				var submission = engine.getSubmission(selectedText);
-				if (!submission) {
-					return;
-				}
-				var href = submission.uri.spec
-				var postData = submission.postData
-			}
-			openLinkIn(href, e.button>1 ?"current":"tab", {postData: postData, relatedToCurrent: true});
 			
-			if(mustClosePopup)
-				e.currentTarget.parentNode.hidePopup()
+			this.openLinkIn(href, e);
+		}
+		proto.openLinkIn = function(href, e, postData, fixup){			
+			var where = e.target.getAttribute('where') || "tab"
+			if(e.button == 1)
+				where = "tabshifted"
+			else if(e.button == 2)
+				where = "current"
+			if(e.ctrlKey || e.altKey){
+				if(where == 'tab')
+					where = 'tabshifted'
+				else if(where == 'tabshifted')
+					where = 'tab';
+			}else if(e.shiftKey && where != 'current')
+				where = 'current';
+			
+			openLinkIn(href, where, fixup||{postData: postData, relatedToCurrent: true});
 		}
 	}
 	else if(!enable && proto.isTextSelection_orig){
@@ -873,12 +859,12 @@ InstantFox.modifyContextMenu = function(enable){
 		delete proto.getSelectedText 
 		delete proto.fillSearchSubmenu 
 		delete proto.doSearch 
+		delete proto.openLinkIn 
 		let popup = document.getElementById("contentAreaContextMenu")
 		let node = document.getElementById("ifox-context-searchselect")
 		node && node.parentNode.removeChild(node)
 		popup.insertBefore(proto.oldNode, proto.oldNodePosId && document.getElementById(proto.oldNodePosId))
 	}
-
 }
 
 InstantFox.hookUrlbarCommand = function(off){

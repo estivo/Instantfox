@@ -78,7 +78,7 @@ InstantFox.pageLoader = {
         }
     },
 
-    // Provide a way to replace the current tab with the preview
+    // Provide a way to replace the current tab with the preview	
     persistPreview: function(tab, inBackground) {
 		if (!this.previewIsActive)
 			return;
@@ -101,6 +101,7 @@ InstantFox.pageLoader = {
         inBackground || browser.focus();
         this.removePreview();
 	},
+	// Mostly copied from mozillaLabs instantPreview
 	swapBrowsers: function(tab) {
 		let preview = this.preview
 

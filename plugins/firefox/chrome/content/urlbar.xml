@@ -356,6 +356,9 @@
         if(this.item.style.pointerEvents=="none")
             this.menuitem.setAttribute("_moz-menuactive", true)
       ]]></handler>
+	  <handler event="click"><![CDATA[        	
+			event.button != 1 && this.parentNode.hidePopup();
+      ]]></handler>
 	  </handlers>
   </binding>
 </bindings>
