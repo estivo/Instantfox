@@ -149,9 +149,10 @@ var pluginLoader = {
 	},
 	addDefaultPlugins: function(pluginData){
 		InstantFoxModule.selectedLocale = pluginData.localeMap['%ll']
+		var newPlugins = {}, oldPlugins = InstantFoxModule.Plugins;
 		for each(var p in pluginData.plugins){
 			var id = p.id
-			var mP = InstantFoxModule.Plugins[id]
+			var mP = oldPlugins[id]
 			//copy user modified values
 			if(mP){
 				// add properties
@@ -169,15 +170,18 @@ var pluginLoader = {
 				if(p.url != p.def_url)
 					p.iconURI = getFavicon(p.url);
 			}
-			InstantFoxModule.Plugins[id] = p;
+			newPlugins[id] = p;
 		}
 		// remove default plugins from other locale
-		for (var pn in InstantFoxModule.Plugins){
-			var p = InstantFoxModule.Plugins[pn]
-			if (p.type == 'default' && !pluginData.plugins[pn] && !this.isUserModified(p))
-				delete InstantFoxModule.Plugins[pn]
+		for each(var p in oldPlugins) {
+			if (newPlugins[p.id])
+				continue
+			if (p.type != 'default' || this.isUserModified(p))
+				newPlugins[p.id] = p
 		}
-
+		
+		InstantFoxModule.Plugins = newPlugins;
+		
 		InstantFoxModule.defaultPlugin = InstantFoxModule.defaultPlugin||'google'
 		//---------
 		var p = pluginData.autoSearch;
