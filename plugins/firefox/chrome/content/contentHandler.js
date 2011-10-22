@@ -30,36 +30,7 @@ InstantFox.contentHandlers = {
 				InstantFox.pageLoader.addPreview(InstantFoxModule.currentQuery.preloadURL)
 				self.checkPreview(800)
 			}
-		},
-	},
-	"google":{
-		onLoad: function(q, samePage){
-			var win = InstantFox.pageLoader.previewIsActive ? InstantFox.pageLoader.preview.contentWindow : content
-			var el = win.document.getElementById("lst-ib")
-			if(!el)
-				return false
-			el.value = q.shadow || q.query;
-			var e = document.createEvent('UIEvent')
-			e.initUIEvent('input',true, true, win, 1)
-			el.dispatchEvent(e)
-			
-			var evt = document.createEvent("KeyboardEvent");
-			evt.initKeyEvent ("keypress", true, true, window,
-								0, 0, 0, 0,
-								13, "\n".charCodeAt(0))
-			el.dispatchEvent(evt)
-			
-			return true
-		},
-		hideItems: function(doc){
-			doc.getElementById("lst-ib").value='opera ';
-			doc.getElementById("gac_scont").style.display='none';
-			doc.getElementById("gray").style.display='none';
-		},
-		finishSearch: function(){
-			content.document.getElementById("gac_scont").style.display='';
-			content.document.getElementById("gray").style.display=''
-		},
+		}
 	}
 }
 
@@ -273,27 +244,3 @@ InstantFox.pageLoader = {
     },
 };
 
-
-
-// google test
-/*p=document.getElementById("grey")//.value
-p=document.getElementById("lst-ib")//.value
-
-#>>
-document.activeElement
-
-#>>
-yui=['hys','hystot','hysoiy','hystr','hystt opi']
-i=0
-cont = true
-function x(){
-    p.value =yui[i]
-    i++
-    if(i>=yui.length)
-        i=0
-    cont && setTimeout(x, 100)
-	console.log(p.value)
-}
-x()
-#>>
-*/
