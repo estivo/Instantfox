@@ -34,6 +34,12 @@ function dump() {
 	var consoleService = Components.classes['@mozilla.org/consoleservice;1'].getService(Components.interfaces.nsIConsoleService);
 	consoleService.logStringMessage("" + aMessage);
 }
+try{
+dump('old dump')
+dump = Cu.import("resource://shadia/main.js").dump
+dump('new dump')
+}catch(e){}
+
 /** devel__) **/
 /*************************************************************************
  *    load and save customized plugins
@@ -117,7 +123,10 @@ var pluginLoader = {
 			if(!p || !p.url)
 				continue
 
+			dump(p.id)
+			dump(p.url)
 			p.url = p.url.replace(localeRe, replacer)
+			dump(p.url)
 			p.domain = extendedDomainFromURL(p.url)
 
 			p.name = p.name||i
