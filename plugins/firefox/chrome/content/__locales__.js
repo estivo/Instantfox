@@ -636,7 +636,7 @@ locale(["pt","pt-BR","com.br"], {
 locale(["ru","ru","ru"], {
 	"Яндекс": {
 		key: "y",
-		url: "http://yandex.ru/yandsearch?text=%q&lr=99",
+		url: "http://yandex.ru/yandsearch?text=%q",
 		json: "http://suggest.yandex.net/suggest-ff.cgi?part=%q",
 		name: "Яндекс"
 	},
