@@ -821,6 +821,9 @@ InstantFox.modifyContextMenu = function(enable){
 			}
 		}
 		proto.doSearch = function(e) {
+			if(e.target.menuitem && !e.target.isMenuitemActive)
+				return;
+
 			var name = e.target.getAttribute('name'), href;
 			if (!name)
 				return;
