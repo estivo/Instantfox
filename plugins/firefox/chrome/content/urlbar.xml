@@ -326,7 +326,7 @@
       </field>
       <property name="isMenuitemActive">
         <getter><![CDATA[            
-            return this.menuitem.hasAttribute("moz-menuactive")&&this.menuitem.getAttribute("_moz-menuactive")=="true"
+            return this.menuitem.hasAttribute("_moz-menuactive")&&this.menuitem.getAttribute("_moz-menuactive")=="true"
         ]]></getter>
       </property>
       

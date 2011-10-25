@@ -823,6 +823,9 @@ InstantFox.modifyContextMenu = function(enable){
 		proto.doSearch = function(e) {
 			if(e.target.menuitem && !e.target.isMenuitemActive)
 				return;
+			// needed to prevent calling command listener after click listener
+			if(e.button != 1)
+				gContextMenu = null
 
 			var name = e.target.getAttribute('name'), href;
 			if (!name)
