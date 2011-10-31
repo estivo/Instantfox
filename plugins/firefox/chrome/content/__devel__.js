@@ -78,7 +78,7 @@ var instantFoxDevel = {
 
 		try{
 			var p = document.querySelector('#instantFox-options iframe')
-			p.parentNode.removeChild(p)			
+			p.parentNode.removeChild(p)
 		}catch(e){
 			Cu.reportError(e)
 		}

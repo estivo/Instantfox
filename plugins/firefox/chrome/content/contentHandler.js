@@ -1,16 +1,36 @@
-InstantFox.contentHandler = {
-	setGoogleLocation: function(){
-		content.document.getElementById("lst-ib").value='opera ';
-		content.document.getElementById("gac_scont").style.display='none';
-		content.document.getElementById("gray").style.display='none';
-	},
-	finishGoogleLocation: function(){
-		content.document.getElementById("gac_scont").style.display='';
-		content.document.getElementById("gray").style.display=''
-	},
-	setURL: function(url){
-		// todo:
-		InstantFox.pageLoader.addPreview(url)
+InstantFox.contentHandlers = {
+	"google":{
+		onLoad: function(q){
+			this.checkPreview(800)
+		},
+		// workaround for google bug
+		gre: /[&?#]q=([^&]*)/,
+		checkPreview: function(delay){
+			var q = InstantFoxModule.currentQuery
+			if(!q)
+				return
+
+			var self = InstantFox.contentHandlers.google
+			if(delay){
+				if(self.timeout)
+					clearTimeout(self.timeout)
+
+				self.timeout = setTimeout(self.checkPreview, delay, 0)
+				return
+			}
+
+			self.timeout = null
+
+			var url = InstantFox.pageLoader.preview.contentDocument.location.href
+			var m1 = url.match(self.gre), m2 = q.preloadURL.match(self.gre)
+			dump('***************', url, q.preloadURL)
+			dump('***************', m1, m2, self.gre)
+			if(!m1 || !m2 || m1[1] != m2[1]){
+				Cu.reportError(url + "\n!=\n" + q.preloadURL)
+				InstantFox.pageLoader.addPreview(InstantFoxModule.currentQuery.preloadURL)
+				self.checkPreview(800)
+			}
+		}
 	}
 }
 
@@ -29,7 +49,7 @@ InstantFox.pageLoader = {
         }
     },
 
-    // Provide a way to replace the current tab with the preview
+    // Provide a way to replace the current tab with the preview	
     persistPreview: function(tab, inBackground) {
 		if (!this.previewIsActive)
 			return;
@@ -52,6 +72,7 @@ InstantFox.pageLoader = {
         inBackground || browser.focus();
         this.removePreview();
 	},
+	// Mostly copied from mozillaLabs instantPreview
 	swapBrowsers: function(tab) {
 		let preview = this.preview
 
@@ -176,37 +197,6 @@ InstantFox.pageLoader = {
         preview.webNavigation.loadURI(url, nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE, null, null, null);
     },
 
-	// workaround for google bug
-	gre: /[&?#]q=([^&]*)/,
-	checkPreview: function(delay){
-
-		var q = InstantFoxModule.currentQuery
-		dump(q,'-----------', delay)
-		if(!q)
-			return
-
-		var self = InstantFox.pageLoader
-		if(delay){
-			if(self.timeout)
-				clearTimeout(self.timeout)
-
-			self.timeout = setTimeout(self.checkPreview, delay, 0)
-			return
-		}
-
-		self.timeout = null
-
-		var url = self.preview.contentDocument.location.href
-		var m1 = url.match(self.gre), m2 = q.preloadURL.match(self.gre)
-		dump('***************', url, q.preloadURL)
-		dump('***************', m1, m2, self.gre)
-		if(!m1 || !m2 || m1[1] != m2[1]){
-			Cu.reportError(url + "\n!=\n" + q.preloadURL)
-			self.addPreview(InstantFoxModule.currentQuery.preloadURL)
-			self.checkPreview(800)
-		}
-	},
-
 	//
 	addProgressListener: function(browser) {
         // Listen for webpage loads
@@ -254,27 +244,3 @@ InstantFox.pageLoader = {
     },
 };
 
-
-
-// google test
-/*p=document.getElementById("grey")//.value
-p=document.getElementById("lst-ib")//.value
-
-#>>
-document.activeElement
-
-#>>
-yui=['hys','hystot','hysoiy','hystr','hystt opi']
-i=0
-cont = true
-function x(){
-    p.value =yui[i]
-    i++
-    if(i>=yui.length)
-        i=0
-    cont && setTimeout(x, 100)
-	console.log(p.value)
-}
-x()
-#>>
-*/

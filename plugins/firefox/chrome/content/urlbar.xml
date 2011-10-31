@@ -324,7 +324,11 @@
       <field name="menu" readonly="true">
             document.getAnonymousElementByAttribute(this, "anonid", "menu");
       </field>
-      
+      <property name="isMenuitemActive">
+        <getter><![CDATA[            
+            return this.menuitem.hasAttribute("_moz-menuactive")&&this.menuitem.getAttribute("_moz-menuactive")=="true"
+        ]]></getter>
+      </property>
       
     </implementation>
 	<handlers>
@@ -355,6 +359,9 @@
       <handler event="DOMMenuItemActive" phase="target"><![CDATA[
         if(this.item.style.pointerEvents=="none")
             this.menuitem.setAttribute("_moz-menuactive", true)
+      ]]></handler>
+	  <handler event="click" phase="target"><![CDATA[
+			event.button != 1 && this.isMenuitemActive && this.parentNode.hidePopup();
       ]]></handler>
 	  </handlers>
   </binding>

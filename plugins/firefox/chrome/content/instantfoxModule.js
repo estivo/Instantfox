@@ -34,6 +34,12 @@ function dump() {
 	var consoleService = Components.classes['@mozilla.org/consoleservice;1'].getService(Components.interfaces.nsIConsoleService);
 	consoleService.logStringMessage("" + aMessage);
 }
+try{
+dump('old dump')
+dump = Cu.import("resource://shadia/main.js").dump
+dump('new dump')
+}catch(e){}
+
 /** devel__) **/
 /*************************************************************************
  *    load and save customized plugins
@@ -117,7 +123,10 @@ var pluginLoader = {
 			if(!p || !p.url)
 				continue
 
+			dump(p.id)
+			dump(p.url)
 			p.url = p.url.replace(localeRe, replacer)
+			dump(p.url)
 			p.domain = extendedDomainFromURL(p.url)
 
 			p.name = p.name||i
@@ -149,9 +158,10 @@ var pluginLoader = {
 	},
 	addDefaultPlugins: function(pluginData){
 		InstantFoxModule.selectedLocale = pluginData.localeMap['%ll']
+		var newPlugins = {}, oldPlugins = InstantFoxModule.Plugins;
 		for each(var p in pluginData.plugins){
 			var id = p.id
-			var mP = InstantFoxModule.Plugins[id]
+			var mP = oldPlugins[id]
 			//copy user modified values
 			if(mP){
 				// add properties
@@ -169,15 +179,18 @@ var pluginLoader = {
 				if(p.url != p.def_url)
 					p.iconURI = getFavicon(p.url);
 			}
-			InstantFoxModule.Plugins[id] = p;
+			newPlugins[id] = p;
 		}
 		// remove default plugins from other locale
-		for (var pn in InstantFoxModule.Plugins){
-			var p = InstantFoxModule.Plugins[pn]
-			if (p.type == 'default' && !pluginData.plugins[pn] && !this.isUserModified(p))
-				delete InstantFoxModule.Plugins[pn]
+		for each(var p in oldPlugins) {
+			if (newPlugins[p.id])
+				continue
+			if (p.type != 'default' || this.isUserModified(p))
+				newPlugins[p.id] = p
 		}
-
+		
+		InstantFoxModule.Plugins = newPlugins;
+		
 		InstantFoxModule.defaultPlugin = InstantFoxModule.defaultPlugin||'google'
 		//---------
 		var p = pluginData.autoSearch;
@@ -609,7 +622,13 @@ var parseSimpleJson = function(json, key, splitSpace){
 	try{
 		var xhrReturn = JSON.parse(json)[1];
 	}catch(e){
-		return
+		Cu.reportError(e);
+		try{
+			xhrReturn = json.substring(json.indexOf("[\"")+2,json.lastIndexOf("\"]")).split('","')
+		}catch(e){
+			Cu.reportError(e)
+			return
+		}
 	}
 	if(!xhrReturn)
 		return
