@@ -937,16 +937,21 @@ i18n = {
 		/**devel__(*/
 			stringBundleService.flushBundles()
 		/**devel__)*/
-		this.$bundle = stringBundleService.createBundle("chrome://instantfox/locale/options.properties");
-
+		var getSpec = InstantFoxModule.pluginLoader.getPluginFileSpec
+		this.$bundle = stringBundleService.createBundle(getSpec(null, 'options.properties'));
+		this.$defaultBundle = stringBundleService.createBundle(getSpec("en-US", 'options.properties'));
 	},
 	get: function(name){
 		try{
 			dump("name: ", name, this.$bundle.GetStringFromName(name))
 			return this.$bundle.GetStringFromName(name)
 		}catch(e){
-			dump("name: ", name, "error->'' returned")
-			return ""
+			try{
+				return this.$defaultBundle.GetStringFromName(name)
+			}catch(e1){
+				dump("name: ", name, "error->'' returned", e, e1)				
+				return ""				
+			}
 		}
 	},
 	localize: function(){
@@ -959,6 +964,12 @@ i18n = {
 		for(var i=elList.length;i--;){
 			var el = elList[i]
 			el.setAttribute("label", this.get(el.getAttribute("label")))
+		}
+		
+		var elList = document.querySelectorAll("textbox.i18n[placeholder]")
+		for(var i=elList.length;i--;){
+			var el = elList[i]
+			el.setAttribute("placeholder", this.get(el.getAttribute("placeholder")))
 		}
 		
 		xmlFragment = this.localizeString(xmlFragment)

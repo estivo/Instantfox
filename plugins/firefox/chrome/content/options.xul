@@ -21,6 +21,13 @@ try{
 }catch(e){
 	Components.utils.reportError(e)
 }
+/**devel__(*/
+	try{
+		dump('old dump')
+		dump = Cu.import("resource://shadia/main.js").dump
+		dump('new dump')
+	}catch(e){}
+/**devel__)*/
 </script>
 
 <svg:svg height="0">
@@ -329,7 +336,7 @@ slidecheckbox:hover>slidecheck>check{
 
 				<hbox align='center'>
 					<hbox align='center' flex='1'>
-						<textbox placeholder="Search Plugins" flex='1' class='normal' width='0' id='pluginFilter'
+						<textbox placeholder="search_plugins" flex='1' class='normal i18n' width='0' id='pluginFilter'
 							oninput="rebuild();this.nextSibling.hidden = !this.value;"/>
 						<resetbutton hidden='true' onclick='var t = this.previousSibling;t.value="";t.oninput()' />
 					</hbox>
@@ -373,15 +380,15 @@ slidecheckbox:hover>slidecheck>check{
 					<dropmarker type='button' onmousedown='enginesPopup.show(this, "Url", "url")'/>
 				</hbox>
 			</row>
-			<row hidden="true">
+			
 			<row>
-				<label value='Instant Loading:'/>
+				<label class="i18n" value='instant_loading'/>
 				<menulist aID="instant" sizetopopup='none' oncommand = ''>
 					<menupopup>
-						<menuitem aID='off'     label='off' />
-						<menuitem aID='history' label='only for history results' />
-						<menuitem aID='search'  label='only for search engine results' />
-						<menuitem aID='all'     label='always' />
+						<menuitem class="i18n" aID='off'     label='instant.off' />
+						<menuitem class="i18n" aID='history' label='instant.only_for_history' />
+						<menuitem class="i18n" aID='search'  label='instant.only_for_search' />
+						<menuitem class="i18n" aID='all'     label='instant.always' />
 					</menupopup>
 				</menulist>
 			</row>
@@ -397,21 +404,6 @@ slidecheckbox:hover>slidecheck>check{
 				<hbox align="center" class='image animate'>
 					<dropmarker type='button' onmousedown='enginesPopup.show(this, "Url", "json")'/>
 				</hbox>
-			</row>
-			<row class='animate'>
-				<label value=''/>
-				<hbox align='center' flex='1' class='longbox'>
-					<label value='start showing remote results if:'/>
-				</hbox>
-				<hbox align="center" class='image animate'/>
-			</row><row class='animate'>
-				<label value=''/>
-				<hbox align='center' flex='1' class='longbox'>
-					<label value='query is longer than'/>
-					<textbox type='number' aID='minQChars' flex='1'/>
-				</hbox>
-				<hbox align="center" class='image animate'/>
-			</row>
 			</row>
 		</rows>
 	</grid>
@@ -463,10 +455,6 @@ slidecheckbox:hover>slidecheck>check{
 </tabbox>
 
 <hbox>
-	<toolbarbutton id='' label='add plugin' type='menu' oncommand='' hidden='true'>
-		<menupopup>
-		</menupopup>
-	</toolbarbutton>
 	<!-- devel__( -->
 		<shadiaglue id='status-bar'/>
 	<!-- devel__) -->
@@ -475,9 +463,7 @@ slidecheckbox:hover>slidecheck>check{
 </hbox>
 
 
-<menupopup id="engine-list" onpopupshowing='enginesPopup.onShowing(this)' oncommand='enginesPopup.onCommand(event)'>
-
-</menupopup>
+<menupopup id="engine-list" onpopupshowing='enginesPopup.onShowing(this)' oncommand='enginesPopup.onCommand(event)'/>
 <menupopup id="context" onpopupshowing='initContextMenu(this)' oncommand='onContextMenuCommand(event)'>
 	<menuitem class="i18n" label='menu_instant' type='checkbox' aID='disableInstant'/>
 	<menuitem class="i18n" label='menu_show_suggest' type='checkbox' aID='disableSuggest'/>
