@@ -481,19 +481,24 @@ var InstantFox = {
 
 		var now = Date.now()
 
-		if(this._isOwnQuery){
+		if (this._isOwnQuery) {
 			// gBrowser.docShell.isLoadingDocument
 			if(now - this.loadTime < this.minLoadTime){
 				this.schedulePreload(this.minLoadTime)
 				return
 			}
-			var mustBreak = contentHandler && contentHandler.onLoad(q)
-
-			if(mustBreak)
-				return url2go
-		}else{
+			if (contentHandler) {
+				if (contentHandler.transformURL) {
+					q.preloadURL = url2go = contentHandler.transformURL(q, url2go)
+				}
+				if (contentHandler.onLoad(q, url2go))
+					return url2go
+			}
+		} else {
 			this._isOwnQuery = true;
 		}
+		dump("//////////////////////////", url2go)
+
 		this.pageLoader.addPreview(url2go);
 
 		this.loadTime = q.loadTime = now
@@ -555,7 +560,7 @@ var InstantFox = {
 		//
 		if (value)
 			q.shadow = q.query = value
-		else if(q.shadow)
+		else if (q.shadow)
 			q.query = q.shadow
 
 		//
