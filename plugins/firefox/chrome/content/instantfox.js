@@ -27,12 +27,18 @@ var InstantFox = {
 				return;
 
 			Services.prefs.setCharPref(prefName, newVersion);
-			if(oldVersion == "0.0.0"){
+			// don't bother user with minor updates
+			if (oldVersion.slice(0,-1) == newVersion.slice(0,-1)) {
+				InstantFoxModule.pluginLoader.onInstantfoxUpdate()
+				return 
+			}
+			
+			if (oldVersion == "0.0.0") {
 				var url = InstantFox.install_url + '?to=' + newVersion;
 				// add options button only on first install
 				InstantFox.updateToolbarItems();
 				setTimeout(InstantFox.showInstallNotification, 600);
-			}else{
+			} else {
 				var url = InstantFox.update_url + '?to=' + newVersion + '&from=' +oldVersion
 				if (oldVersion<'2.5.0')
 					InstantFox.updateToolbarItems();
@@ -126,7 +132,7 @@ var InstantFox = {
 
 		this.finishSearch()
 		this.hookUrlbarCommand('off')
-		
+
 		InstantFox.modifyContextMenu(false)
 	},
 
@@ -234,6 +240,7 @@ var InstantFox = {
 			}
 			else if (key == 13 && !meta && !ctrl) { // 13 == ENTER
 				if (InstantFox.pageLoader.previewIsActive) {
+					q.shadow = ""
 					InstantFox.onEnter(null, alt)
 					event.preventDefault();
 				}
@@ -317,7 +324,7 @@ var InstantFox = {
 		} else if (InstantFoxModule.currentQuery) {
 			InstantFoxModule.currentQuery = null;
 		}
-		
+
 		InstantFox.updateShadowLink(q);
 	},
 	onblur: function(e) {
@@ -466,7 +473,7 @@ var InstantFox = {
 		var contentHandler = this.contentHandlers[q.plugin.id];
 
 		if(q.query && q.preloadURL && url2go.toLowerCase() == q.preloadURL.toLowerCase()){
-			contentHandler && contentHandler.onLoad(q, true)			
+			contentHandler && contentHandler.onLoad(q, true)
 			return url2go
 		}
 
@@ -474,19 +481,24 @@ var InstantFox = {
 
 		var now = Date.now()
 
-		if(this._isOwnQuery){
+		if (this._isOwnQuery) {
 			// gBrowser.docShell.isLoadingDocument
 			if(now - this.loadTime < this.minLoadTime){
 				this.schedulePreload(this.minLoadTime)
 				return
 			}
-			var mustBreak = contentHandler && contentHandler.onLoad(q)
-
-			if(mustBreak)
-				return url2go
-		}else{
+			if (contentHandler) {
+				if (contentHandler.transformURL) {
+					q.preloadURL = url2go = contentHandler.transformURL(q, url2go)
+				}
+				if (contentHandler.onLoad(q, url2go))
+					return url2go
+			}
+		} else {
 			this._isOwnQuery = true;
 		}
+		dump("//////////////////////////", url2go)
+
 		this.pageLoader.addPreview(url2go);
 
 		this.loadTime = q.loadTime = now
@@ -548,7 +560,7 @@ var InstantFox = {
 		//
 		if (value)
 			q.shadow = q.query = value
-		else if(q.shadow)
+		else if (q.shadow)
 			q.query = q.shadow
 
 		//
@@ -727,18 +739,18 @@ InstantFox.modifyContextMenu = function(enable){
 	}
 	let proto = nsContextMenu.prototype
 	if (enable && !proto.isTextSelection_orig) {
-		proto.isTextSelection_orig = proto.isTextSelection_orig || proto.isTextSelection 
+		proto.isTextSelection_orig = proto.isTextSelection_orig || proto.isTextSelection
 		proto.isTextSelection = function() {
 			var splitMenu = document.getElementById("ifox-context-searchselect") || this.createSearchItem()
 			var menuitem = splitMenu.menuitem
 
 			var selectedText = this.getSelectedText(), croppedText = selectedText
-			
+
 			if (!selectedText){
 				splitMenu.hidden = true
 				return false;
 			}
-			
+
 			if (selectedText.length > 15)
 				croppedText = selectedText.substr(0,15) + this.ellipsis;
 
@@ -835,13 +847,13 @@ InstantFox.modifyContextMenu = function(enable){
 				href = selectedText
 			} else if (name == 'search_site'){
 				href  = InstantFoxModule.urlFromQuery("google", selectedText + 'site:' + gBrowser.currentURI.host)
-			} else {			
+			} else {
 				href  = InstantFoxModule.urlFromQuery(name, selectedText)
 			}
-			
+
 			this.openLinkIn(href, e);
 		}
-		proto.openLinkIn = function(href, e, postData, fixup){			
+		proto.openLinkIn = function(href, e, postData, fixup){
 			var where = e.target.getAttribute('where') || "tab"
 			if(e.button == 1)
 				where = "tabshifted"
@@ -854,18 +866,18 @@ InstantFox.modifyContextMenu = function(enable){
 					where = 'tab';
 			}else if(e.shiftKey && where != 'current')
 				where = 'current';
-			
+
 			openLinkIn(href, where, fixup||{postData: postData, relatedToCurrent: true});
 		}
 	}
 	else if(!enable && proto.isTextSelection_orig){
 		proto.isTextSelection = proto.isTextSelection_orig
-		delete proto.isTextSelection_orig 
-		delete proto.createSearchItem 
-		delete proto.getSelectedText 
-		delete proto.fillSearchSubmenu 
-		delete proto.doSearch 
-		delete proto.openLinkIn 
+		delete proto.isTextSelection_orig
+		delete proto.createSearchItem
+		delete proto.getSelectedText
+		delete proto.fillSearchSubmenu
+		delete proto.doSearch
+		delete proto.openLinkIn
 		let popup = document.getElementById("contentAreaContextMenu")
 		let node = document.getElementById("ifox-context-searchselect")
 		node && node.parentNode.removeChild(node)
@@ -907,8 +919,10 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
 		// instantfox shortcuts have the highest priority
 		if (InstantFoxModule.currentQuery) {
 			url = InstantFoxModule.urlFromQuery(InstantFoxModule.currentQuery);
+			InstantFoxModule.currentQuery.shadow = "" // remove this line to get to the first suggest
 			InstantFox.finishSearch()
-		} else if (InstantFoxModule.autoSearch && !InstantFoxModule.autoSearch.disabled) {
+		} else if (InstantFoxModule.autoSearch && !InstantFoxModule.autoSearch.disabled &&
+				!aTriggeringEvent.altKey && !aTriggeringEvent.ctrlKey && !aTriggeringEvent.shiftKey) {
 			url = url.trimRight() // remove spaces at the end
 			// let firefox to handle builtin shortcuts if any
 			var shortcutURL = getShortcutOrURI(url, {}, {})
