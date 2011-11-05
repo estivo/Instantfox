@@ -915,14 +915,17 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
 			return;
 		}
 	} else {
+		var isModifierPressed = function(e) {
+			return e && (e.altKey || e.ctrlKey || e.shiftKey || e.metaKey)
+		}
+
 		InstantFox.onInput()
 		// instantfox shortcuts have the highest priority
 		if (InstantFoxModule.currentQuery) {
 			url = InstantFoxModule.urlFromQuery(InstantFoxModule.currentQuery);
 			InstantFoxModule.currentQuery.shadow = "" // remove this line to get to the first suggest
 			InstantFox.finishSearch()
-		} else if (InstantFoxModule.autoSearch && !InstantFoxModule.autoSearch.disabled &&
-				!aTriggeringEvent.altKey && !aTriggeringEvent.ctrlKey && !aTriggeringEvent.shiftKey) {
+		} else if (InstantFoxModule.autoSearch && !InstantFoxModule.autoSearch.disabled && !isModifierPressed(aTriggeringEvent)) {
 			url = url.trimRight() // remove spaces at the end
 			// let firefox to handle builtin shortcuts if any
 			var shortcutURL = getShortcutOrURI(url, {}, {})
@@ -937,7 +940,7 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
 				url = InstantFoxModule.urlFromQuery(InstantFoxModule.autoSearch, url);
 			}
 		} else {
-			// fallback to default behaviour
+			// fallback to default behaviour of adding .com/.net/.org
 			[url, postData, mayInheritPrincipal] = this._canonizeURL(aTriggeringEvent)
 		}
 
