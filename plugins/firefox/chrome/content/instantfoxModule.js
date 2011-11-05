@@ -834,6 +834,8 @@ SimpleAutoCompleteResult.prototype = {
 	_defaultIndex: 0,
 	_errorDescription: "",
 	list: [],
+	setSearchResult: function(val) this._searchResult = val,
+	setDefaultIndex: function(val) this._defaultIndex = val,
 
 	get searchResult() this._searchResult,
 	get searchString() this._searchString,
