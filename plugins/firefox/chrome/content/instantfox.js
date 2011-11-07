@@ -918,6 +918,14 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
 		var isModifierPressed = function(e) {
 			return e && (e.altKey || e.ctrlKey || e.shiftKey || e.metaKey)
 		}
+		var canBeUrl = function(str) {
+			if (str[0] == " ")
+				return false
+			if (/^[\w\-]+:/.test(str))
+				return true
+			if (/[\.\/\\]/.test(str))
+				return true
+		}
 
 		InstantFox.onInput()
 		// instantfox shortcuts have the highest priority
@@ -928,17 +936,16 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
 		} else if (InstantFoxModule.autoSearch && !InstantFoxModule.autoSearch.disabled && !isModifierPressed(aTriggeringEvent)) {
 			url = url.trimRight() // remove spaces at the end
 			// let firefox to handle builtin shortcuts if any
+			var postData = {};
+			var mayInheritPrincipal = { value: false };
 			var shortcutURL = getShortcutOrURI(url, {}, {})
-			//
-			if (shortcutURL == url && (
-				    url.indexOf(' ') != -1 // contains space or doesn't contain any url characters \:/.
-				 || url.indexOf('\\') == -1
-				 && url.indexOf(':') == -1
-				 && url.indexOf('/') == -1
-				 && url.indexOf('.') == -1
-			)){
-				url = InstantFoxModule.urlFromQuery(InstantFoxModule.autoSearch, url);
-			}
+			postData = postData.value
+			mayInheritPrincipal = mayInheritPrincipal.value
+			
+			if (shortcutURL != url)
+				url = shortcutURL
+			else if (!canBeUrl(url))
+				url = InstantFoxModule.urlFromQuery(InstantFoxModule.autoSearch, url)
 		} else {
 			// fallback to default behaviour of adding .com/.net/.org
 			[url, postData, mayInheritPrincipal] = this._canonizeURL(aTriggeringEvent)
