@@ -348,7 +348,6 @@ slidecheckbox:hover>slidecheck>check{
 					<preference id="maxRichResults" name="browser.urlbar.maxRichResults" type="int" />
 					<preference id="context-usedefault" name="extensions.InstantFox.context.usedefault" type="bool" />
 					<preference id="removeSearchbar" name="extensions.InstantFox.removeSearchbar" type="bool" />
-					<preference id="removeOptions" name="extensions.InstantFox.removeOptions" type="bool" />
 				</preferences>
 
 <groupbox id="autoSearch" oncommand="autoSearchUI.onChange(event)" onkeypress="autoSearchUI.onChange(event)">
@@ -433,7 +432,6 @@ slidecheckbox:hover>slidecheck>check{
 </hbox>
 <separator/>
 <checkbox label="Hide Search box" oncommand="window.gToolbarsChanged=true" preference="removeSearchbar"/>
-<checkbox label="Hide Options button" oncommand="window.gToolbarsChanged=true" preference="removeOptions"/>
 <spacer flex="1"/>
 <vbox align='center'>
 	<slickbutton label='copyPluginsToClipboard' oncommand='copyPluginsToClipboard()'/>
