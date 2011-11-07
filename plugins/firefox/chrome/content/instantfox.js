@@ -973,17 +973,21 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
 			InstantFox.finishSearch()
 		} else if (InstantFoxModule.autoSearch && !InstantFoxModule.autoSearch.disabled && !isModifierPressed(aTriggeringEvent)) {
 			url = url.trimRight() // remove spaces at the end
-			// let firefox to handle builtin shortcuts if any
-			var postData = {};
-			var mayInheritPrincipal = { value: false };
-			var shortcutURL = getShortcutOrURI(url, {}, {})
-			postData = postData.value
-			mayInheritPrincipal = mayInheritPrincipal.value
-			
-			if (shortcutURL != url)
-				url = shortcutURL
-			else if (!canBeUrl(url))
-				url = InstantFoxModule.urlFromQuery(InstantFoxModule.autoSearch, url)
+			if (!url)
+				url = InstantFoxModule.autoSearch.url.replace(/[#\?].*/, "")
+			else {
+				// let firefox to handle builtin shortcuts if any
+				var postData = {};
+				var mayInheritPrincipal = { value: false };
+				var shortcutURL = getShortcutOrURI(url, {}, {})
+				postData = postData.value
+				mayInheritPrincipal = mayInheritPrincipal.value
+				
+				if (shortcutURL != url)
+					url = shortcutURL
+				else if (!canBeUrl(url))
+					url = InstantFoxModule.urlFromQuery(InstantFoxModule.autoSearch, url)
+			}
 		} else {
 			// fallback to default behaviour of adding .com/.net/.org
 			[url, postData, mayInheritPrincipal] = this._canonizeURL(aTriggeringEvent)
