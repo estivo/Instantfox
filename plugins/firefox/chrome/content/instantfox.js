@@ -925,6 +925,8 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
 				return true
 			if (/[\.\/\\]/.test(str))
 				return true
+			if (/^localhost/.test(str))
+				return true
 		}
 
 		InstantFox.onInput()
