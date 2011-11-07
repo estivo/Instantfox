@@ -213,7 +213,7 @@ onContextMenuCommand = function(e){
 }
 
 //************************ edit popup utils
-var gPlugin, gPluginsChanged, gPrefChanged, resultOK = true;
+var gPlugin, gPluginsChanged, gPrefChanged, gToolbarsChanged, resultOK = true;
 initEditPopup = function(plugin, panel){
 	if(plugin)
 		gPlugin = ibp.pluginLoader.cleanCopyPlugin(plugin)
@@ -660,9 +660,12 @@ function savePlugins(){
 	}
 
 	var em = Services.wm.getEnumerator('navigator:browser')
-	while(em.hasMoreElements())
-		em.getNext().InstantFox.updateUserStyle()
-
+	while(em.hasMoreElements()){
+		var iFox = em.getNext().InstantFox
+		iFox.updateUserStyle()
+		gToolbarsChanged && iFox.updateToolbarItems()
+	}
+	
 	if(!gPluginsChanged)
 		return
 	if(resultOK)

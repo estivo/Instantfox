@@ -36,15 +36,13 @@ var InstantFox = {
 			if (oldVersion == "0.0.0") {
 				var url = InstantFox.install_url + '?to=' + newVersion;
 				// add options button only on first install
-				InstantFox.updateToolbarItems();
 				setTimeout(InstantFox.showInstallNotification, 600);
 			} else {
 				var url = InstantFox.update_url + '?to=' + newVersion + '&from=' +oldVersion
-				if (oldVersion<'2.5.0')
-					InstantFox.updateToolbarItems();
 				// check if new plugins are added by this update
 				InstantFoxModule.pluginLoader.onInstantfoxUpdate()
 			}
+			InstantFox.updateToolbarItems();
 
 
 			setTimeout(InstantFox.addTab, 500, url);
@@ -109,6 +107,9 @@ var InstantFox = {
 		gURLBar._copyCutController.doCommand = InstantFox._urlbarCutCommand
 		gURLBar.addEventListener('blur', InstantFox.onblur, false);
 		gURLBar.addEventListener('focus', InstantFox.onfocus, false);
+		
+		// afterCustomization
+		gNavToolbox.addEventListener("aftercustomization", InstantFox.afterCustomization, false);
 
 		dump('instantFox initialized')
 		InstantFox.notifyTab()
@@ -129,6 +130,8 @@ var InstantFox = {
 		gURLBar.removeEventListener('input', this.onInput, false);
 		gURLBar.removeEventListener('focus', this.onfocus, false);
 		gURLBar.removeEventListener('blur', this.onblur, false);
+		
+		gNavToolbox.removeEventListener("aftercustomization", InstantFox.afterCustomization, false);
 
 		this.finishSearch()
 		this.hookUrlbarCommand('off')
@@ -640,13 +643,24 @@ InstantFox.openHelp = function() {
 }
 
 // todo: call this after window load on first install releted to FS#32
-InstantFox.updateToolbarItems = function(remove) {
-	var myId = "instantFox-options";
+InstantFox.updateToolbarItems = function(removeOptions, removeSearchbar) {
+	if (removeSearchbar == undefined)
+		removeSearchbar = Services.prefs.getBoolPref("extensions.InstantFox.removeSearchbar")
+	else
+		Services.prefs.setBoolPref("extensions.InstantFox.removeSearchbar", removeSearchbar)
+		
+	if (removeOptions == undefined)
+		removeOptions = Services.prefs.getBoolPref("extensions.InstantFox.removeOptions")
+	else
+		Services.prefs.setBoolPref("extensions.InstantFox.removeOptions", removeOptions)
+
+		
 	var navBar = document.getElementById("nav-bar");
 	var curSet = navBar.currentSet.split(",");
-	var i = curSet.indexOf(myId)
 
-	if (i == -1 && !remove) {
+	var myId = "instantFox-options";
+	var i = curSet.indexOf(myId)
+	if (i == -1 && !removeOptions) {
 		var pos = curSet.indexOf("urlbar-container") + 1;
 		if (pos) {
 			while ('reload-button,stop-button'.indexOf(curSet[pos]) != -1)
@@ -654,14 +668,21 @@ InstantFox.updateToolbarItems = function(remove) {
 		} else
 			pos = curSet.length;
 		curSet.splice(pos, 0, myId)
-	} else if (i != -1 && remove) {
+	} else if (i != -1 && removeOptions) {
 		curSet.splice(i, 1)
 	}
 
 	// remove searchbar
-	i = curSet.indexOf("search-container")
-	if(i != -1)
+	var myId = "search-container"
+	var i = curSet.indexOf(myId)
+	if (i == -1 && !removeSearchbar) {
+		var pos = curSet.indexOf("urlbar-container") + 1;
+		if (!pos)
+			pos = curSet.length;
+		curSet.splice(pos, 0, myId)
+	} else if (i != -1 && removeSearchbar) {
 		curSet.splice(i, 1)
+	}
 
 	curSet = curSet.join(",")
 	if (curSet != navBar.currentSet){
@@ -673,6 +694,21 @@ InstantFox.updateToolbarItems = function(remove) {
 		}catch (e) {}
 	}
 }
+InstantFox.afterCustomization = function(e){
+	var optionsButton = document.getElementById("instantFox-options")
+	var searchBar = optionsButton.querySelector('search-container')
+	var ifr = optionsButton.querySelector('iframe')
+	
+	if (ifr)
+		ifr.parentNode.removeChild(ifr)
+	
+	if (searchBar)
+		Services.prefs.setBoolPref("extensions.InstantFox.removeSearchbar", false)
+		
+	if (optionsButton)
+		Services.prefs.setBoolPref("extensions.InstantFox.removeOptions", false)	
+}
+
 //************************************************************************
 window.addEventListener('load', InstantFox.initialize, true);
 
