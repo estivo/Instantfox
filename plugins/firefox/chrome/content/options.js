@@ -152,9 +152,11 @@ function formatString(string, options){
 			var strName = options[x]
 			return escapeHTML(i18n[x+"_"+strName]||"")
 		}
-		if(typeof options[x]!='string')
-			return options[x]?options[x].toString():''
-		return escapeHTML(options[x]||'')
+		if(typeof options[x]=='string')
+			return escapeHTML(options[x])
+		if(typeof options[x]=='number')
+			return options[x].toString()
+		return options[x] ? options[x].toString() : ''
 	})
 }
 function escapeHTML(str) str.replace(/[&"<>]/g, function(m)"&"+escapeMap[m]+";");
@@ -428,36 +430,37 @@ enginesPopup = {
 		var uriList = []
 
 		for each(var e in gBrowser.mCurrentBrowser.engines){
-			if(uriList.indexOf(e.uri) == -1){
+			if(uriList.indexOf(e.uri) == -1 && e.title && e.uri){
 				uriList.push(e.uri)
 				gBrowserEngineList.push({
 					name: e.title,
 					iconURI: e.icon,
 					uri: e.uri,
-					id: gBrowserEngineList.length+''
+					id: gBrowserEngineList.length
 				})
 			}
 		}
-
-		for each(var b in gBrowser.browsers){
+		// todo add engines from background browsers
+		/*for each(var b in gBrowser.browsers){
 			for each(var e in b.engines){
-				if(uriList.indexOf(e.uri) == -1){
+				if(uriList.indexOf(e.uri) == -1 && e.title && e.uri){
 					uriList.push(e.uri)
 					gBrowserEngineList.push({
-						name: e.name,
+						name: e.title,
 						iconURI: e.icon,
 						uri: e.uri,
 						id: gBrowserEngineList.length
 					})
 				}
 			}
-		}
+		}*/
 
 		return gBrowserEngineList
 	},
 	command_Browser: function(event){
-		var id = event.target.value
+		var id = event.target.getAttribute("value")
 		var e = gBrowserEngineList[id]
+		dump(id, e)
 		var type = Ci.nsISearchEngine.DATA_XML;
 		InstantFoxModule.bp.searchEngineObserver.addListener(this.scheduleBrowserEngineListUpdate.bind(this))
 		Services.search.addEngine(e.uri, type, e.iconURI, false)

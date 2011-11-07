@@ -4,7 +4,7 @@ InstantFox.contentHandlers = {
 			var url = InstantFox.pageLoader.preview.contentDocument.location.href;
 			dump("//////////////////////////")
 			// 
-			var gDomain = url.match(/https?:\/\/(www\.)?google.([a-z\.]*)[^#]*/i)
+			var gDomain = url.match(/https?:\/\/((www|encrypted)\.)?google.([a-z\.]*)[^#]*/i)
 			if (!gDomain)
 				return url2go
 			var query = url2go.match(/#.*/)
