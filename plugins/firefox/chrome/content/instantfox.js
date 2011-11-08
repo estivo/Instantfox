@@ -673,7 +673,7 @@ InstantFox.updateToolbarItems = function(removeOptions, removeSearchbar) {
 
 	var myId = "instantFox-options";
 	var i = curSet.indexOf(myId)
-	if (i == -1 && !removeOptions) {
+	if (!removeOptions && i == -1 && !document.getElementById(myId)) {
 		var pos = curSet.indexOf("urlbar-container") + 1;
 		if (pos) {
 			while ('reload-button,stop-button'.indexOf(curSet[pos]) != -1)
