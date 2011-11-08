@@ -478,11 +478,9 @@ enginesPopup = {
 		var win = Services.wm.getMostRecentWindow("navigator:browser")
 		var hide = true
 		if(win){
-			for each(var b in win.gBrowser.browsers){
-				if(b.engines && b.engines.length){
-					hide = false
-					break
-				}
+			var b = win.gBrowser.mCurrentBrowser
+			if(b.engines && b.engines.length){
+				hide = false
 			}
 		}
 		$("add-from-browser").hidden = hide
