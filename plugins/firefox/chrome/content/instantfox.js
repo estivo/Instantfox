@@ -426,7 +426,10 @@ var InstantFox = {
 			return
 
 		var query = q.query.toLowerCase()
+		var maxIndex = 5 // do not pick shadow from invisible results
 		for each(var i in q.results) {
+			if (!maxIndex--)
+				break
 			var title = i.title.toLowerCase()
 			if (title == query) {
 				q.shadow = i.title
