@@ -433,11 +433,17 @@ slidecheckbox:hover>slidecheck>check{
 <separator/>
 <checkbox label="Hide Search box" oncommand="window.gToolbarsChanged=true;schedule(updateToolbarItems)" preference="removeSearchbar"/>
 <spacer flex="1"/>
-<vbox align='center'>
-	<slickbutton label='copyPluginsToClipboard' oncommand='copyPluginsToClipboard()'/>
-	<slickbutton label='addPluginDataFromClipboard' oncommand='addPluginsFromClipboard()'/>
-	<spacer flex='1'/>
-</vbox>
+<groupbox >
+	<hbox>
+		<slickbutton label='copy plugins to clipboard' oncommand='copyPluginsToClipboard()'/>
+		<spacer flex="1"/>		
+		<slickbutton label='reset all plugins' oncommand='resetAllPlugins()'/>
+	</hbox>
+	<hbox>
+		<slickbutton label='add plugin data from clipboard' oncommand='addPluginsFromClipboard()'/>
+		<spacer flex="1"/>		
+	</hbox>
+</groupbox>
 			</prefpane>
 		</tabpanel>
 		<tabpanel orient='vertical'  flex='1' >

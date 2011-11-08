@@ -595,15 +595,12 @@ var InstantFox = {
 InstantFox.popupCloser = function(e) {
 	var inPopup = InstantFox.clickedInPopup
 	InstantFox.clickedInPopup = false
-	if (e.target.id == 'instantFox-options') {
-		window.removeEventListener('mousedown', InstantFox.popupCloser, false)
-		e.target.firstChild.hidePopup()
-		e.stopPropagation()
-		e.preventDefault()
-		return
-	}
 	if (inPopup || e.target.nodeName == 'resizer')
 		return
+	if (e.target.id == 'instantFox-options') {
+		e.stopPropagation()
+		e.preventDefault()
+	}
 	window.removeEventListener('mousedown', InstantFox.popupCloser, false)
 	document.getElementById('instantfox-popup').hidePopup()
 }

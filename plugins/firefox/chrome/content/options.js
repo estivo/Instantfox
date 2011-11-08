@@ -843,13 +843,13 @@ var gClipboardHelper = {
 	}
 }
 
-copyPluginsToClipboard = function(){
+copyPluginsToClipboard = function() {
 	var str = InstantFoxModule.pluginLoader.getPluginString(true)
 	str = "--metadata-- version:" + "--instantfox--plugin--data--" + "\n" + str
 	gClipboardHelper.copyString(str)
 }
 
-addPluginsFromClipboard = function(){
+addPluginsFromClipboard = function() {
 	var str = gClipboardHelper.getData()
 	var i = str.indexOf("\n")
 	var metadata = str.substring(0,i)
@@ -888,6 +888,21 @@ addPluginsFromClipboard = function(){
 	updateLocaleList()
 	rebuild()
 	autoSearchUI.init()
+}
+
+resetAllPlugins = function() {
+	var proceed = Services.prompt.confirm(window, "InstantFox", "are you sure you want to reset all plugins to default values?")
+	if (!proceed)
+		return
+	InstantFoxModule.Plugins = {}
+	InstantFoxModule.selectedLocale = null
+	InstantFoxModule.autoSearch = null
+	InstantFoxModule.defaultPlugin = null
+
+	InstantFoxModule.pluginLoader.loadPlugins(true, function(){
+		updateLocaleList()
+		rebuild()
+	})		
 }
 
 

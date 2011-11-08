@@ -1043,10 +1043,12 @@ InstantFoxModule.initialize()
 var addonListener = addonListener || {
 	onUninstalling: function(addon){
 		if(addon.id=='searchy@searchy'){
-			Services.wm.getMostRecentWindow('navigator:browser')
-				.InstantFox.addTab(InstantFoxModule.uninstallURL + '?version=' + addon.version + '&face=:(')
+			var iFox = Services.wm.getMostRecentWindow('navigator:browser').InstantFox
+			iFox.addTab(InstantFoxModule.uninstallURL + '?version=' + addon.version + '&face=:(')
 			// open page only once
 			Cu.import('resource://gre/modules/AddonManager.jsm', {}).AddonManager.removeAddonListener(this)
+			// restore searchbar
+			iFox.updateToolbarItems(false, false);
 		}
 	}
 	// onDisabled
