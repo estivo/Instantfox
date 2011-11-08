@@ -374,7 +374,8 @@ var InstantFox = {
 		}else{
 			if (i == -1)
 				return this.defQ
-			var id = InstantFoxModule.Shortcuts[val.substr(0, i)]
+			key = val.substr(0, i)
+			var id = InstantFoxModule.Shortcuts[key]
 			if (!id)
 				return this.defQ;
 			plugin = InstantFoxModule.Plugins[id]
@@ -389,7 +390,8 @@ var InstantFox = {
 				shadow: ''
 			}
 		}
-		oldQ.key = key || plugin.key
+
+		oldQ.key = key
 		oldQ.plugin = plugin
 		oldQ.query = val.substr(i+j)
 		oldQ.splitSpace = val.substr(i,j)

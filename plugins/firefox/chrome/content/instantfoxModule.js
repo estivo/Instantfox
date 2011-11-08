@@ -206,13 +206,19 @@ var pluginLoader = {
 		InstantFoxModule.Shortcuts = {}
 		var conflicts={}
 
-		for each(var  p in InstantFoxModule.Plugins){
-			if(p.url && p.key && !p.disabled) {
-				if(InstantFoxModule.Shortcuts[p.key])
-					conflicts[InstantFoxModule.Plugins[InstantFoxModule.Shortcuts[p.key]].id] =
-						conflicts[p.id] = true
+		for each (var  p in InstantFoxModule.Plugins) {
+			if (p.url && p.key && !p.disabled) {
+				var keys = p.key.split(/\s+/)
+				for each (var k in keys) {
+					if (!k)
+						continue
+						
+					if (InstantFoxModule.Shortcuts[k])
+						conflicts[InstantFoxModule.Plugins[InstantFoxModule.Shortcuts[k]].id] =
+							conflicts[p.id] = true
 
-				InstantFoxModule.Shortcuts[p.key] = p.id
+					InstantFoxModule.Shortcuts[k] = p.id
+				}
 			}
 		}
 
@@ -558,7 +564,7 @@ InstantFoxModule = {
 		if(!queryString)
 			return null;
 
-		return p.key + ' ' + decodeURIComponent(queryString);
+		return p.key.replace(/ .*/, "") + ' ' + decodeURIComponent(queryString);
 	},
 	urlFromQuery: function(plugin, query) {
 		if (typeof plugin == 'string') {
