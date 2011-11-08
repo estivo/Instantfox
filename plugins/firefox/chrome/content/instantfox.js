@@ -709,13 +709,15 @@ InstantFox.updateToolbarItems = function(removeOptions, removeSearchbar) {
 }
 InstantFox.afterCustomization = function(e){
 	var optionsButton = document.getElementById("instantFox-options")
-	var searchBar = optionsButton.querySelector('search-container')
+	var searchBar = document.getElementById('search-container')
 	
 	if (searchBar)
 		Services.prefs.setBoolPref("extensions.InstantFox.removeSearchbar", false)
 		
 	if (optionsButton)
-		Services.prefs.setBoolPref("extensions.InstantFox.removeOptions", false)	
+		Services.prefs.setBoolPref("extensions.InstantFox.removeOptions", false)
+	
+	dump(searchBar, optionsButton, "************************************")
 }
 
 //************************************************************************
