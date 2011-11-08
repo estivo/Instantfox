@@ -658,10 +658,13 @@ function schedule(fn, delay){
 }
 
 updateToolbarItems = function(){
+	var InstantFox = top.InstantFox
+	if (!InstantFox)
+		return
 	var panes = document.querySelectorAll('prefpane')
 	for (var i=panes.length;i--;)
 		panes[i].writePreferences(false)
-	Services.wm.getMostRecentWindow('navigator:browser').InstantFox.updateToolbarItems()
+	InstantFox.updateToolbarItems()
 }
 function saveChanges(){
 	if(gPrefChanged){

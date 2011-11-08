@@ -711,11 +711,8 @@ InstantFox.afterCustomization = function(e){
 	var optionsButton = document.getElementById("instantFox-options")
 	var searchBar = document.getElementById('search-container')
 	
-	if (searchBar)
-		Services.prefs.setBoolPref("extensions.InstantFox.removeSearchbar", false)
-		
-	if (optionsButton)
-		Services.prefs.setBoolPref("extensions.InstantFox.removeOptions", false)
+	Services.prefs.setBoolPref("extensions.InstantFox.removeSearchbar", !searchBar)
+	Services.prefs.setBoolPref("extensions.InstantFox.removeOptions", !optionsButton)
 	
 	dump(searchBar, optionsButton, "************************************")
 }
