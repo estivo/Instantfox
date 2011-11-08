@@ -27,11 +27,22 @@ var InstantFox = {
 				return;
 
 			Services.prefs.setCharPref(prefName, newVersion);
-			// don't bother user with minor updates
-			if (oldVersion.slice(0,-1) == newVersion.slice(0,-1)) {
+			try {
+				// check if new plugins are added by this update
 				InstantFoxModule.pluginLoader.onInstantfoxUpdate()
-				return 
+			} catch(e) {
+				Cu.reportError(e)
 			}
+			try {
+				InstantFox.updateToolbarItems();
+			} catch(e) {
+				Cu.reportError(e)
+			}
+			
+			
+			// don't bother user with minor updates
+			if (oldVersion.slice(0,-1) == newVersion.slice(0,-1))
+				return 
 			
 			if (oldVersion == "0.0.0") {
 				var url = InstantFox.install_url + '?to=' + newVersion;
@@ -39,10 +50,7 @@ var InstantFox = {
 				setTimeout(InstantFox.showInstallNotification, 600);
 			} else {
 				var url = InstantFox.update_url + '?to=' + newVersion + '&from=' +oldVersion
-				// check if new plugins are added by this update
-				InstantFoxModule.pluginLoader.onInstantfoxUpdate()
 			}
-			InstantFox.updateToolbarItems();
 
 
 			setTimeout(InstantFox.addTab, 500, url);
@@ -58,7 +66,7 @@ var InstantFox = {
 			action: 'document.getElementById("instantFox-options").open=true;',
 			a: {
 				label: 'remove this button',
-				action: 'InstantFox.updateToolbarItems(true)'
+				action: 'InstantFox.updateToolbarItems(false, false)'
 			}
 		}
 
@@ -597,10 +605,10 @@ InstantFox.popupCloser = function(e) {
 	if (inPopup || e.target.nodeName == 'resizer')
 		return
 	window.removeEventListener('mousedown', InstantFox.popupCloser, false)
-	document.getElementById('instantFox-options').firstChild.hidePopup()
+	document.getElementById('instantfox-popup').hidePopup()
 }
 InstantFox.onPopupShowing = function(p) {
-	if (p.parentNode.id != 'instantFox-options')
+	if (p.id != 'instantfox-popup')
 		return
 
 	window.addEventListener('mousedown', InstantFox.popupCloser, false)
@@ -623,12 +631,12 @@ InstantFox.onPopupShowing = function(p) {
 	st.insertBefore(i, st.firstChild)
 }
 InstantFox.onPopupHiding = function(p) {
-	var i = document.getElementById('instantFox-options').querySelector('iframe')
-	i.contentWindow.savePlugins()
+	var ifr = p.querySelector('iframe')
+	ifr.contentWindow.saveChanges()
 	window.removeEventListener('mousedown', InstantFox.popupCloser, false)
 }
 InstantFox.updatePopupSize = function(size) {
-	var p = document.getElementById('instantFox-options').firstChild
+	var p = document.getElementById('instantfox-popup')
 
 	if (p.wrongSize){
 		delete p.wrongSize
@@ -639,7 +647,7 @@ InstantFox.popupClickListener = function(e) {
 	InstantFox.clickedInPopup = true
 }
 InstantFox.closeOptionsPopup = function(p) {
-	p = p || document.getElementById('instantFox-options').firstChild
+	p = p || document.getElementById('instantfox-popup')
 	p.hidePopup()
 }
 InstantFox.openHelp = function() {
@@ -702,10 +710,6 @@ InstantFox.updateToolbarItems = function(removeOptions, removeSearchbar) {
 InstantFox.afterCustomization = function(e){
 	var optionsButton = document.getElementById("instantFox-options")
 	var searchBar = optionsButton.querySelector('search-container')
-	var ifr = optionsButton.querySelector('iframe')
-	
-	if (ifr)
-		ifr.parentNode.removeChild(ifr)
 	
 	if (searchBar)
 		Services.prefs.setBoolPref("extensions.InstantFox.removeSearchbar", false)

@@ -9,13 +9,13 @@
 	xmlns:svg='http://www.w3.org/2000/svg'
 	title="instantfox options"
 	width="450" height="600" persist='width height' id='instantfox_options'
-	resizable='yes' onunload='savePlugins()'>
+	resizable='yes' onunload='saveChanges()'>
 <script>
 Components.utils.import("resource://gre/modules/Services.jsm");
 try{
 	if(window.opener &amp;&amp; window.opener.location.href=='about:addons'){
 		Services.ww.openWindow(null, window.location, "_blank", 'dialog=no,centerscreen,resizable', null)
-		savePlugins = onTabSelect = function(){}
+		saveChanges = onTabSelect = function(){}
 		setTimeout(window.close, 20)
 	}
 }catch(e){
@@ -431,7 +431,7 @@ slidecheckbox:hover>slidecheck>check{
 	<checkbox id='context-usedefault-checkbox' preference="context-usedefault" oncommand='InstantFoxModule.modifyContextMenu(!this.checked)'/>
 </hbox>
 <separator/>
-<checkbox label="Hide Search box" oncommand="window.gToolbarsChanged=true" preference="removeSearchbar"/>
+<checkbox label="Hide Search box" oncommand="window.gToolbarsChanged=true;schedule(updateToolbarItems)" preference="removeSearchbar"/>
 <spacer flex="1"/>
 <vbox align='center'>
 	<slickbutton label='copyPluginsToClipboard' oncommand='copyPluginsToClipboard()'/>

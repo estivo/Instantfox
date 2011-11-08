@@ -77,8 +77,8 @@ var instantFoxDevel = {
 		try{InstantFox.destroy()}catch(e){}
 
 		try{
-			var p = document.querySelector('#instantFox-options iframe')
-			p.parentNode.removeChild(p)
+			var p = document.querySelector('#instantfox-popup iframe')
+			p && p.parentNode.removeChild(p)
 		}catch(e){
 			Cu.reportError(e)
 		}
@@ -103,13 +103,19 @@ var instantFoxDevel = {
 	},
 	clearFirstRunPref: function(update){
 		try{
+			var prefs = Services.prefs
 			// debug initialization
 			if (update)
-				Services.prefs.setCharPref("extensions.instantfox.version", 'oldVersion')
+				prefs.setCharPref("extensions.instantfox.version", 'oldVersion')
 			else
-				Services.prefs.clearUserPref("extensions.instantfox.version")
+				prefs.clearUserPref("extensions.instantfox.version")
 
-			InstantFox.updateOptionsButton(true)
+			//Services.prefs.resetBranch("extensions.InstantFox.")//not implemented:(
+			//Services.prefs.deleteBranch("extensions.InstantFox.")
+			//InstantFox.updateOptionsButton(true)
+			prefs.getChildList("extensions.InstantFox.",{},{}).forEach(function(x){
+				prefs.clearUserPref(x)
+			})
 		}catch(e){}
 	},
 	onClick: function(e){

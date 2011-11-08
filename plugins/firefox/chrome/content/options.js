@@ -652,9 +652,22 @@ rbMouseup = function(e, rbox){
 }
 
 //*************
-function savePlugins(){
+function schedule(fn, delay){
+	if (fn._timeout != null)
+		clearTimeout(fn._timeout)
+		
+	fn._timeout = setTimeout(fn, delay||200)
+}
+
+updateToolbarItems = function(){
+	var panes = document.querySelectorAll('prefpane')
+	for (var i=panes.length;i--;)
+		panes[i].writePreferences(false)
+	Services.wm.getMostRecentWindow('navigator:browser').InstantFox.updateToolbarItems()
+}
+function saveChanges(){
 	if(gPrefChanged){
-		var panes = document.getElementsByTagName('prefpane')
+		var panes = document.querySelectorAll('prefpane')
 		for (var i=panes.length;i--;)
 			panes[i].writePreferences(false)
 	}
@@ -734,7 +747,7 @@ rebuild = function(){
 
 	var el = $("shortcuts");
 	//it's important to clear selection of richbox before removing its' children
-	el.clearSelection()
+	el.clearSelection && el.clearSelection()
 
 	clean(el)
 	appendXML(el, xml.join('') + userxml.join('')+ disabledxml.join('')	)
