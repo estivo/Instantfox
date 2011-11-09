@@ -442,6 +442,8 @@ slidecheckbox:hover>slidecheck>check{
 	<hbox>
 		<slickbutton label='add plugin data from clipboard' oncommand='addPluginsFromClipboard()'/>
 		<spacer flex="1"/>		
+		<slickbutton label='report a bug'
+			oncommand='Services.wm.getMostRecentWindow("navigator:browser").addTab("chrome://instantfox/content/report-a-bug.html")'/>
 	</hbox>
 </groupbox>
 			</prefpane>

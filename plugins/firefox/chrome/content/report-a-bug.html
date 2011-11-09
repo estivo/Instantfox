@@ -116,13 +116,20 @@ setTimeout(function(){
 setTimeout(function(){
 	var win = Services.wm.getMostRecentWindow("navigator:browser")
 	report.status.push("win ok")
+	
+	report.autocompletesearch = win.gURLBar.getAttribute("autocompletesearch")
+	report.status.push("gURLBar ok")
+		
 	var k = InstantFoxModule.Plugins.google.key.replace(/ .*/,"")
-	win.gURLBar.value = k +" "+"io"
+	win.gURLBar.value = k +" "+"thank you for using instantfox!"
 	win.InstantFox.onInput()
 	report.status.push("input ok")
 
+	report.shortcuts = JSON.stringify(InstantFoxModule.Shortcuts,null,1)
+
 	report.shadow = JSON.stringify(win.gURLBar.currentShadow,null,1)
 	report.query = JSON.stringify(win.InstantFoxModule.currentQuery,null,1)
+	
 	updateUI()
 })
 setTimeout(function(){

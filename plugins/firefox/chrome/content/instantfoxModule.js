@@ -225,7 +225,7 @@ var pluginLoader = {
 		InstantFoxModule.ShortcutConflicts = conflicts
 	},
 
-	addFromAddonString: function(jsonString){
+	addFromDefaultString: function(jsonString){
 		try {
 			var rawPluginData = JSON.parse(jsonString)
 		} catch(e) {
@@ -236,8 +236,7 @@ var pluginLoader = {
 		this.preprocessRawData(rawPluginData)
 		this.addDefaultPlugins(rawPluginData)
 		// add data from browser search engines
-		importBrowserPlugins(true)
-		this.initShortcuts()
+		importBrowserPlugins(true)		
 	},
 	addFromUserString: function(jsonString){
 		try{
@@ -264,7 +263,6 @@ var pluginLoader = {
 		else 
 			return false
 
-		this.initShortcuts()
 		return true;
 	},
 
@@ -304,14 +302,14 @@ var pluginLoader = {
 			}).bind(this)
 		}else{
 			spec = this.getPluginFileSpec(locale)
-			var onload = this.addFromAddonString.bind(this)
+			var onload = this.addFromDefaultString.bind(this)
 		}
 		dump(spec)
 
 		if(this.req)
 			this.req.abort()
 
-		this.req = fetchAsync(spec, [onload, callback])
+		this.req = fetchAsync(spec, [onload, this.initShortcuts.bind(this), callback])
 	},
 
 	getAvaliableLocales: function(callback){
@@ -365,7 +363,7 @@ var pluginLoader = {
 		return p1
 	},
 	// add new plugins when instantfox is updated
-	onInstantfoxUpdate: function(){
+	onInstantfoxUpdate: function() {
 		this.loadPlugins(InstantFoxModule.selectedLocale||true, this.savePlugins.bind(this))
 	}
 }
@@ -386,12 +384,14 @@ function fetchAsync(href, callback){
 
 	req.addEventListener('load', function() {
 		req.removeEventListener('load', arguments.callee, false)
+		var reqText = req = req.responseText
+		
 		if(typeof callback == 'function')
-			callback(req.responseText);
-		else for each(var func in callback){
-			(typeof func == 'function') && func(req.responseText);
-		}
-		delete req
+			callback(reqText);
+		else for each(var func in callback)
+			if (typeof func == 'function') try {
+				func(reqText);
+			} catch(e){Cu.reportError(e)}	
 	}, false)
 
 	req.send(null);
