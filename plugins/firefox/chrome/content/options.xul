@@ -350,100 +350,99 @@ slidecheckbox:hover>slidecheck>check{
 					<preference id="removeSearchbar" name="extensions.InstantFox.removeSearchbar" type="bool" />
 				</preferences>
 
-<groupbox id="autoSearch" oncommand="autoSearchUI.onChange(event)" onkeypress="autoSearchUI.onChange(event)">
-<caption>
-	<slidecheckbox  aID="disabled" label='Standard search without shortcuts'
-		oncommand="toggleVisibility(this.parentNode.parentNode, 'grid.animate', this.checked)"/>
-</caption>
-	<grid class="animate">
-		<columns>
-			<column flex="0"/>
-			<column flex="1"/>
-		</columns>
-		<rows>
-			<row>
-				<label value='Search URL:'/>
-				<hbox align='center' flex='1' class='longbox'>
-					<textbox type='url' aID='url' flex='1'  oninput="
-						this.nextSibling.hidden = !canResetProp(this, InstantFoxModule.autoSearch);
-						"/>
-					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
-				</hbox>
-				<hbox align="center" class='image'>
-					<dropmarker type='button' onmousedown='enginesPopup.show(this, "Url", "url")'/>
-				</hbox>
-			</row>
-			<row hidden="true">
-			<row>
-				<label value='Instant Loading:'/>
-				<menulist aID="instant" sizetopopup='none' oncommand = ''>
-					<menupopup>
-						<menuitem aID='off'     label='off' />
-						<menuitem aID='history' label='only for history results' />
-						<menuitem aID='search'  label='only for search engine results' />
-						<menuitem aID='all'     label='always' />
-					</menupopup>
-				</menulist>
-			</row>
-			<row>
-				<label value='Suggest URL:'/>
-				<hbox align='center' flex='1' class='longbox'>
-					<checkbox aID='suggest' oncommand='toggleVisibility(this.parentNode.parentNode.parentNode, ".animate", this.checked)'/>
-					<textbox type='url' aID='json' flex='1' class='longbox animate' oninput="
-						this.nextSibling.hidden = !canResetProp(this, InstantFoxModule.autoSearch);
-						"/>
-					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default' class="animate"/>
-				</hbox>
-				<hbox align="center" class='image animate'>
-					<dropmarker type='button' onmousedown='enginesPopup.show(this, "Url", "json")'/>
-				</hbox>
-			</row>
-			<row class='animate'>
-				<label value=''/>
-				<hbox align='center' flex='1' class='longbox'>
-					<label value='start showing remote results if:'/>
-				</hbox>
-				<hbox align="center" class='image animate'/>
-			</row><row class='animate'>
-				<label value=''/>
-				<hbox align='center' flex='1' class='longbox'>
-					<label value='query is longer than'/>
-					<textbox type='number' aID='minQChars' flex='1'/>
-				</hbox>
-				<hbox align="center" class='image animate'/>
-			</row>
-			</row>
-		</rows>
-	</grid>
-<separator/>
-<hbox align='center'>
-	<label value='max urlbar results' control='maxRichResults-textbox'/>
-	<textbox id='maxRichResults-textbox' preference="maxRichResults"/>
-</hbox>
-</groupbox>
-<separator/>
-<hbox align='center'>
-	<checkbox label="Open search in new tab" id='openintab-checkbox' preference="openintab" oncommand='InstantFoxModule.openSearchInNewTab=this.checked'/>
-</hbox>
-<hbox align='center'>
-	<checkbox label="Use default contextmenu item" id='context-usedefault-checkbox' preference="context-usedefault" oncommand='InstantFoxModule.modifyContextMenu(!this.checked)'/>
-</hbox>
-<separator/>
-<checkbox label="Hide Search box" oncommand="window.gToolbarsChanged=true;schedule(updateToolbarItems)" preference="removeSearchbar"/>
-<spacer flex="1"/>
-<groupbox >
-	<hbox>
-		<slickbutton label='copy plugins to clipboard' oncommand='copyPluginsToClipboard()'/>
-		<spacer flex="1"/>		
-		<slickbutton label='reset all plugins' oncommand='resetAllPlugins()'/>
-	</hbox>
-	<hbox>
-		<slickbutton label='add plugin data from clipboard' oncommand='addPluginsFromClipboard()'/>
-		<spacer flex="1"/>		
-		<slickbutton label='report a bug'
-			oncommand='Services.wm.getMostRecentWindow("navigator:browser").addTab("chrome://instantfox/content/report-a-bug.html")'/>
-	</hbox>
-</groupbox>
+				<groupbox id="autoSearch" oncommand="autoSearchUI.onChange(event)" onkeypress="autoSearchUI.onChange(event)">
+					<caption>
+						<slidecheckbox  aID="disabled" label='Standard search without shortcuts'
+							oncommand="toggleVisibility(this.parentNode.parentNode, 'grid.animate', this.checked)"/>
+					</caption>
+					<grid class="animate">
+						<columns>
+							<column flex="0"/>
+							<column flex="1"/>
+						</columns>
+						<rows>
+							<row>
+								<label value='Search URL:'/>
+								<hbox align='center' flex='1' class='longbox'>
+									<textbox type='url' aID='url' flex='1'  oninput="
+										this.nextSibling.hidden = !canResetProp(this, InstantFoxModule.autoSearch);
+										"/>
+									<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
+								</hbox>
+								<hbox align="center" class='image'>
+									<dropmarker type='button' onmousedown='enginesPopup.show(this, "Url", "url")'/>
+								</hbox>
+							</row>
+							<row hidden="true">
+							<row>
+								<label value='Instant Loading:'/>
+								<menulist aID="instant" sizetopopup='none' oncommand = ''>
+									<menupopup>
+										<menuitem aID='off'     label='off' />
+										<menuitem aID='history' label='only for history results' />
+										<menuitem aID='search'  label='only for search engine results' />
+										<menuitem aID='all'     label='always' />
+									</menupopup>
+								</menulist>
+							</row>
+							<row>
+								<label value='Suggest URL:'/>
+								<hbox align='center' flex='1' class='longbox'>
+									<checkbox aID='suggest' oncommand='toggleVisibility(this.parentNode.parentNode.parentNode, ".animate", this.checked)'/>
+									<textbox type='url' aID='json' flex='1' class='longbox animate' oninput="
+										this.nextSibling.hidden = !canResetProp(this, InstantFoxModule.autoSearch);
+										"/>
+									<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default' class="animate"/>
+								</hbox>
+								<hbox align="center" class='image animate'>
+									<dropmarker type='button' onmousedown='enginesPopup.show(this, "Url", "json")'/>
+								</hbox>
+							</row>
+							<row class='animate'>
+								<label value=''/>
+								<hbox align='center' flex='1' class='longbox'>
+									<label value='start showing remote results if:'/>
+								</hbox>
+								<hbox align="center" class='image animate'/>
+							</row><row class='animate'>
+								<label value=''/>
+								<hbox align='center' flex='1' class='longbox'>
+									<label value='query is longer than'/>
+									<textbox type='number' aID='minQChars' flex='1'/>
+								</hbox>
+								<hbox align="center" class='image animate'/>
+							</row>
+							</row>
+						</rows>
+					</grid>
+					<separator/>
+					<hbox align='center'>
+						<label value='max urlbar results' control='maxRichResults-textbox'/>
+						<textbox id='maxRichResults-textbox' preference="maxRichResults"/>
+					</hbox>
+				</groupbox>
+				<separator/>
+				<checkbox label="Open search in new tab" id='openintab-checkbox' preference="openintab" 
+						oncommand='InstantFoxModule.openSearchInNewTab=this.checked'/>
+				<checkbox label="Use default contextmenu item" id='context-usedefault-checkbox' preference="context-usedefault" 
+						oncommand='InstantFoxModule.modifyContextMenu(!this.checked)'/>
+				<separator/>
+				<checkbox label="Hide Search box" preference="removeSearchbar" 
+						oncommand="window.gToolbarsChanged=true;schedule(updateToolbarItems)"/>
+				<spacer flex="1"/>
+				<groupbox >
+					<hbox>
+						<slickbutton label='copy plugins to clipboard' oncommand='copyPluginsToClipboard()'/>
+						<spacer flex="1"/>		
+						<slickbutton label='reset all plugins' oncommand='resetAllPlugins()'/>
+					</hbox>
+					<hbox>
+						<slickbutton label='add plugin data from clipboard' oncommand='addPluginsFromClipboard()'/>
+						<spacer flex="1"/>		
+						<slickbutton label='report a bug'
+							oncommand='Services.wm.getMostRecentWindow("navigator:browser").addTab("chrome://instantfox/content/report-a-bug.html")'/>
+					</hbox>
+				</groupbox>
 			</prefpane>
 		</tabpanel>
 		<tabpanel orient='vertical'  flex='1' >
