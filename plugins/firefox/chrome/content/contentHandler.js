@@ -1,17 +1,22 @@
 InstantFox.contentHandlers = {
 	"google":{
-		transformURL: function(q, url2go){
-			var url = InstantFox.pageLoader.preview.contentDocument.location.href;
-			dump("//////////////////////////")
-			// 
-			var gDomain = url.match(/https?:\/\/((www|encrypted)\.)?google.([a-z\.]*)[^#]*/i)
-			if (!gDomain)
+		transformURL: function(q, url2go) {
+			try{
+				var url = InstantFox.pageLoader.preview.contentDocument.location.href;
+				dump("//////////////////////////")
+				// 
+				var gDomain = url.match(/https?:\/\/((www|encrypted)\.)?google.([a-z\.]*)[^#]*/i)
+				if (!gDomain)
+					return url2go
+				var query = url2go.match(/#.*/)
+				if (!query)
+					return url2go
+				dump(gDomain[0] + query[0], url2go, q.preloadURL)
+				return gDomain[0] + query[0]
+			}catch(e){
+				Cu.reportError(e)
 				return url2go
-			var query = url2go.match(/#.*/)
-			if (!query)
-				return url2go
-			dump(gDomain[0] + query[0], url2go, q.preloadURL)
-			return gDomain[0] + query[0]
+			}
 		},
 		onLoad: function(q){
 			this.checkPreview(800)
@@ -35,6 +40,8 @@ InstantFox.contentHandlers = {
 			self.timeout = null
 
 			var url = InstantFox.pageLoader.preview.contentDocument.location.href
+			if (url == "about:blank")
+				return;
 			var m1 = url.match(self.gre), m2 = q.preloadURL.match(self.gre)
 			//dump('***************', url, q.preloadURL)
 			//dump('***************', m1, m2, self.gre)

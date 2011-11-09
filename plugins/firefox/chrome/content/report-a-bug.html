@@ -1,0 +1,143 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+		<title>report a bug.</title>
+		<link rel="stylesheet" href="resource://instantfox/style.css">
+    </head>
+ 
+	<body>
+		<div id="container" style="overflow: auto;">
+			<div  class=env>
+				please send description of the bug with technical data bellow to <a href="mailto:feedback@instantfox.net">feedback@instantfox.net</a>
+				<br>
+				thanks!
+			</div>
+			<div  class=env>
+				<button onclick="copyToClipboard()">copy technical data</button>
+				<pre id="data"></pre>
+			</div>
+		</div>
+	</body>
+  	<script type='text/javascript'><!--
+
+function $(id)document.getElementById(id)
+function readEntireFile(file) {
+    var data = "", str = {}, fstream = Cc['@mozilla.org/network/file-input-stream;1'].createInstance(Ci.nsIFileInputStream), converter = Cc['@mozilla.org/intl/converter-input-stream;1'].createInstance(Ci.nsIConverterInputStream);
+    const replacementChar = Ci.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER;
+    fstream.init(file, -1, 0, 0);
+    converter.init(fstream, "UTF-8", 1024, replacementChar);
+    while (converter.readString(4096, str) != 0) {
+        data += str.value;
+    }
+    converter.close();
+    return data;
+}
+function getPref(prefName, type) {
+    var prefBranch = Services.prefs;
+    try {
+        switch (type || prefBranch.getPrefType(prefName)) {
+          case "string":
+          case prefBranch.PREF_STRING:
+            return prefBranch.getCharPref(prefName);
+          case "int":
+          case prefBranch.PREF_INT:
+            return prefBranch.getIntPref(prefName);
+          case "bool":
+          case prefBranch.PREF_BOOL:
+            return prefBranch.getBoolPref(prefName);
+          default:;
+        }
+    } catch (e) {
+    }
+}
+
+/*********************************************************/
+
+
+
+
+var Cc  = Components.classes;
+var Ci  = Components.interfaces;
+var Cu  = Components.utils;
+Cu.import("resource://gre/modules/Services.jsm");
+Components.utils.import("resource://gre/modules/AddonManager.jsm");
+
+
+var report = {
+	status: [],
+	prefs: "",
+	addons: "",
+	pluginFile: "",
+	currentJSON: "",
+}
+updateUI = function(){
+	var text = ""
+	for (var i in report){
+		text += "#>>" + Array(40).join("-") + "\n"
+		text += "#>>" + i + "\n"
+		text += report[i] + "\n"
+	}
+	
+	$('data').textContent=text
+	return text
+}
+copyToClipboard = function(){
+	Cc["@mozilla.org/widget/clipboardhelper;1"].getService(Ci.nsIClipboardHelper).copyString(updateUI())
+}
+
+setTimeout(updateUI, 500)
+// getAddons
+AddonManager.getAllAddons(function(addons){
+    var ans = ""
+    addons.forEach(function(x){
+        if(x.isActive)
+            ans += x.name+ "\t"+ x.version+"\t#"+x.id+"\n"
+    })
+    report.addons = ans
+	updateUI()
+})
+
+setTimeout(function(){
+	var bp = Components.utils.import('chrome://instantfox/content/instantfoxModule.js')
+	var userFile = bp.getUserFile('instantFoxPlugins.js')
+	report.status.push("module ok")
+	if (userFile.exists()){
+		report.status.push("file ok")
+		report.pluginFile = readEntireFile(userFile)
+	}
+	InstantFoxModule.pluginLoader.loadPlugins(false, function(str){
+		if(str != report.pluginFile)
+			report.str = str
+		updateUI()
+	})
+	updateUI()
+})
+
+setTimeout(function(){
+	var win = Services.wm.getMostRecentWindow("navigator:browser")
+	report.status.push("win ok")
+	var k = InstantFoxModule.Plugins.google.key.replace(/ .*/,"")
+	win.gURLBar.value = k +" "+"io"
+	win.InstantFox.onInput()
+	report.status.push("input ok")
+
+	report.shadow = JSON.stringify(win.gURLBar.currentShadow,null,1)
+	report.query = JSON.stringify(win.InstantFoxModule.currentQuery,null,1)
+	updateUI()
+})
+setTimeout(function(){
+	var prefs = Services.prefs
+	var names = prefs.getChildList("extensions.InstantFox.",{},{})
+	names.push("extensions.instantfox.version")
+	names.forEach(function(x){
+		report.prefs+=x + ":  " + getPref(x) + "\n"
+	})
+	updateUI()
+})
+
+Components.utils.import('chrome://instantfox/content/instantfoxModule.js')
+report.currentJSON = InstantFoxModule.pluginLoader.getPluginString()
+updateUI()
+
+	 --></script>
+</html>
