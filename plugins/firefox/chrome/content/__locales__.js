@@ -54,11 +54,6 @@ var commonPlugins = {
 		hideFromContextMenu: true,
 		name: "Weather"
 	},
-	LEO: {
-		key: "d",
-		url: "http://dict.leo.org/?search=%q",
-		name: "LEO Eng-Deu Dictionary"
-	},
 	IMDb: {
 		key: "im",
 		url: "http://www.imdb.com/find?s=all&q=%q",
@@ -112,7 +107,11 @@ locale(["de","de-DE","de"], {
 	Weather: {
 		name: "Wetter"
 	},
-	LEO: true,
+	LEO: {
+		key: "d",
+		url: "http://dict.leo.org/?search=%q",
+		name: "LEO Eng-Deu Dictionary"
+	},
 	IMDb: true,
 	GoogleLuck: {
 		name: "Google Glück"
@@ -136,7 +135,11 @@ locale(["de","de-AT","at"], {
 	Weather: {
 		name: "Wetter"
 	},
-	LEO: true,
+	LEO: {
+		key: "d",
+		url: "http://dict.leo.org/?search=%q",
+		name: "LEO Eng-Deu Dictionary"
+	},
 	IMDb: true,
 	GoogleLuck: {
 		name: "Google Glück"
@@ -160,7 +163,6 @@ locale(["de","de-CH","ch"], {
 	Weather: {
 		name: "Wetter"
 	},
-	LEO: true,
 	IMDb: true,
 	GoogleLuck: {
 		name: "Google Glück"
@@ -757,6 +759,25 @@ locale(["zh","zh-CN","cn"], {
 	GoogleTranslate: {
 		name: "Google 翻译"
 	}
+})
+
+locale(["sv","sv-SE","se"], {
+	Google: true,
+	GoogleImages: {
+		name: "Google Bilder"
+	},
+	GoogleMaps: {
+		name: "Google Kartor"
+	},	
+	Wikipedia: true,
+	Youtube: true,
+	Amazon: true,
+	Twitter: true,
+	Weather: true,
+	IMDb: true,
+	GoogleLuck: true,
+	Calculator: true,
+	GoogleTranslate: true
 })
 
 /*************************end of data  section *************************
