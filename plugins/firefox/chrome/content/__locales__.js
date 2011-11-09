@@ -160,7 +160,6 @@ locale(["de","de-CH","ch"], {
 	Weather: {
 		name: "Wetter"
 	},
-	LEO: true,
 	IMDb: true,
 	GoogleLuck: {
 		name: "Google Glück"
@@ -757,6 +756,25 @@ locale(["zh","zh-CN","cn"], {
 	GoogleTranslate: {
 		name: "Google 翻译"
 	}
+})
+
+locale(["sv","sv-SE","se"], {
+	Google: true,
+	GoogleImages: {
+		name: "Google Bilder"
+	},
+	GoogleMaps: {
+		name: "Google Kartor"
+	},	
+	Wikipedia: true,
+	Youtube: true,
+	Amazon: true,
+	Twitter: true,
+	Weather: true,
+	IMDb: true,
+	GoogleLuck: true,
+	Calculator: true,
+	GoogleTranslate: true
 })
 
 /*************************end of data  section *************************
