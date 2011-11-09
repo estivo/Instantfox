@@ -18,19 +18,26 @@ calculator = {
   scope: "0123456789.+-*/%(, )",
   
   script: function(query) {
-	var ret = this.parse(query);
-	if (ret) {
+	var input = this.parse(query);
+	if (input) {
 	  try {
 		// .. Calculate ..
-		var vlr = eval('('+ret+')').toString();		
+		var result = eval('('+input+')');		
+		
+		var s = result.toString();
+        if(s.indexOf('.') != -1 && s.indexOf('e') == -1) {
+          result = Math.round(result * 10000000000000) / 10000000000000;
+        }
+        result = result.toString();
+		
 	  } catch(ex) {
-	    vlr = ''
+	    result = ''
 	  }
-	  if (vlr == ret) {
-		  vlr = 'error'
+	  if (result == input) {
+		  result = 'error'
 	  }
-	  setContent('\<div class="env calculator">'+ret+' = \<span class="result">'+vlr+'\<\/span>\<\/div>');
-	  setTitle(ret+' = '+vlr);
+	  setContent('\<div class="env calculator">'+input+' = \<span class="result">'+result+'\<\/span>\<\/div>');
+	  setTitle(input+' = '+result);
 	}
   },
 
