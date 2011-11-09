@@ -58,14 +58,10 @@ dump('new dump')
  *        id:
  *    }
  ***************/
-function extendedDomainFromURL(url){
-	var match = url.match(/\w+:\/\/[^#?]*/);
-	return match ? match[0].replace(/\/?[^\/]*?%q.*$/,'').replace(/\/$/, '') :'';
-}
 // used for new plugins only
 function fixupPlugin(p){
 	if(p.url){
-		p.domain = extendedDomainFromURL(p.url)
+		p.domain = pluginLoader.extendedDomainFromURL(p.url)
 
 		p.id = p.id.toLowerCase()
 		p.iconURI = p.iconURI || getFavicon(p.url);
@@ -110,52 +106,6 @@ var pluginLoader = {
 	// properties with default values
 	defPropNames: ['key','url','name','json'],
 
-
-	preprocessRawData: function (pluginData){
-		var localeRe=/%l(?:s|l|d)/g;
-
-		function replacer(m) pluginData.localeMap[m]
-
-		var newPlugins = {}
-
-		for(var i in pluginData.plugins) {
-			var p = pluginData.plugins[i];
-			if(!p || !p.url)
-				continue
-
-			dump(p.id)
-			dump(p.url)
-			p.url = p.url.replace(localeRe, replacer)
-			dump(p.url)
-			p.domain = extendedDomainFromURL(p.url)
-
-			p.name = p.name||i
-			p.id = i.toLowerCase()
-			p.iconURI = p.iconURI || getFavicon(p.url);
-
-			if(p.json)
-				p.json = p.json.replace(localeRe, replacer)
-			else
-				p.json = ''
-
-			p.type = 'default'
-
-			// handle user modifiable props
-			this.defPropNames.forEach(function(propName){
-				p['def_'+propName] = p[propName]
-			})
-
-			newPlugins[p.id] = p
-		}
-		pluginData.plugins = newPlugins
-		//-------
-		var p = pluginData.autoSearch
-		if(p){
-			p.json = p.json.replace(localeRe, replacer)
-			p.url = p.url.replace(localeRe, replacer)
-		}
-		return pluginData
-	},
 	addDefaultPlugins: function(pluginData){
 		InstantFoxModule.selectedLocale = pluginData.localeMap['%ll']
 		var newPlugins = {}, oldPlugins = InstantFoxModule.Plugins;
@@ -225,16 +175,8 @@ var pluginLoader = {
 		InstantFoxModule.ShortcutConflicts = conflicts
 	},
 
-	addFromDefaultString: function(jsonString){
-		try {
-			var rawPluginData = JSON.parse(jsonString)
-		} catch(e) {
-			Cu.reportError('malformed locale')
-			Cu.reportError(e)
-			return
-		}
-		this.preprocessRawData(rawPluginData)
-		this.addDefaultPlugins(rawPluginData)
+	addDefaultPluginData: function(pluginData){
+		this.addDefaultPlugins(pluginData)
 		// add data from browser search engines
 		importBrowserPlugins(true)		
 	},
@@ -289,35 +231,46 @@ var pluginLoader = {
 	},
 	loadPlugins: function(locale, callback){
 		var file = getUserFile('instantFoxPlugins.js')
-		if(!locale && file.exists()){
+		if (!locale && file.exists()) {
 			var spec = Services.io.newFileURI(file).spec
-			var onload = (function(str){
-				try{
-					if(!this.addFromUserString(str))
-						throw("error")
-				}catch(e){
-					// settings in user profile were corrupted, load default plugins
-					this.onInstantfoxUpdate()
-				}
-			}).bind(this)
-		}else{
-			spec = this.getPluginFileSpec(locale)
-			var onload = this.addFromDefaultString.bind(this)
+			var onload = [			
+				(function(str){
+					try{
+						if(!this.addFromUserString(str))
+							throw("error")
+					}catch(e){
+						// settings in user profile were corrupted, load default plugins
+						this.loadPlugins(true)
+					}
+					delete this.req
+				}).bind(this),
+				this.initShortcuts.bind(this),
+				callback
+			];
+			if(this.req)
+				this.req.abort()
+			this.req = fetchAsync(spec, onload)
+			return
 		}
-		dump(spec)
-
-		if(this.req)
-			this.req.abort()
-
-		this.req = fetchAsync(spec, [onload, this.initShortcuts.bind(this), callback])
+		var defList = Cu.import("chrome://instantfox/content/defaultPluginList.js")
+		
+		if (typeof locale == "string")
+			InstantFoxModule.selectedLocale = locale
+		var data = defList.getData(InstantFoxModule)
+		this.addDefaultPluginData(data)
+		this.initShortcuts()
+		
+		callback()
 	},
 
 	getAvaliableLocales: function(callback){
-		var upre=/\/[^\/]*$/
-		var href = getFileUri('chrome://instantfox/locale/plugins.json').replace(upre,'').replace(upre,'') + '/'
-		fetchAsync(href, function(t){
-			callback(t.match(/201\: [^ ]* /g).map(function(x)x.slice(5,-1).replace(/\/$/, '')))
-		})
+		// keep in sync with default plugin list
+		callback([
+			"de-DE","de-AT","de-CH",
+			"en-AU","en-CA","en-GB","en-US",
+			"es-AR","es-ES","es-MX","es-CL",
+			"fr-FR","it-IT","nl","pl","pt","pt-BR","ru","tr","ja","zh-CN","sv-SE"
+		])
 	},
 	getPluginFileSpec: function(locale){
 		var spec = 'chrome://instantfox/locale/plugins.json'
@@ -365,8 +318,27 @@ var pluginLoader = {
 	// add new plugins when instantfox is updated
 	onInstantfoxUpdate: function() {
 		this.loadPlugins(InstantFoxModule.selectedLocale||true, this.savePlugins.bind(this))
+	},
+
+	extendedDomainFromURL: function(url){
+		var match = url.match(/\w+:\/\/[^#?]*/);
+		return match ? match[0].replace(/\/?[^\/]*?%q.*$/,'').replace(/\/$/, '') :'';
+	},
+	//************** favicon utils
+	getFavicon: function(url){
+		if (!this.faviconService)
+			this.faviconService = Cc["@mozilla.org/browser/favicon-service;1"].getService(Ci.nsIFaviconService);
+		try{
+			var host = url.match(/^[a-z]*:\/\/([^\/#?]*)/)[1];
+			var icon = this.faviconService.getFaviconImageForPage(makeURI('http://'+host)).spec
+			if(icon != this.faviconService.defaultFavicon.spec)
+				return icon
+		}catch(e){}
+		return 'http://g.etfv.co/http://'+host
 	}
+	
 }
+
 
 function getFileUri(mPath) {
 	var uri = Services.io.newURI(mPath, null, null), file;
@@ -376,7 +348,6 @@ function getFileUri(mPath) {
 	}
 	return uri.spec
 }
-
 function fetchAsync(href, callback){
 	var req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
 	req.overrideMimeType('text/plain')
@@ -397,13 +368,11 @@ function fetchAsync(href, callback){
 	req.send(null);
 	return req
 }
-
 function getUserFile(name, dir){
 	var file = Services.dirsvc.get(dir||"ProfD", Ci.nsIFile);
 	file.append(name)
 	return file
 }
-
 function writeToFile(file, text){
 	var ostream = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
 	ostream.init(file, 0x02 | 0x08 | 0x20, 0664, 0);
@@ -413,23 +382,11 @@ function writeToFile(file, text){
 	converter.writeString(text);
 	converter.close();
 }
-
-//************** favicon utils
-var faviconService;
 function makeURI(aURL, aOriginCharset, aBaseURI) {
 	return Services.io.newURI(aURL, aOriginCharset, aBaseURI);
 }
 
-function getFavicon(url){
-	faviconService = faviconService || Cc["@mozilla.org/browser/favicon-service;1"].getService(Ci.nsIFaviconService);
-	try{
-		var host = url.match(/^[a-z]*:\/\/([^\/#?]*)/)[1];
-		var icon = faviconService.getFaviconImageForPage(makeURI('http://'+host)).spec
-		if(icon != faviconService.defaultFavicon.spec)
-			return icon
-	}catch(e){}
-	return 'http://g.etfv.co/http://'+host
-}
+
 /*************************************************************************
  *    search service
  ***************/

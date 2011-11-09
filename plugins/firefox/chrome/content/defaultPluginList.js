@@ -1,6 +1,6 @@
-﻿// firefox modules can't handle unicode charactters
-// to keep lovely look of unicode character "\u2665" -> "♥" 
-// this file is converted into defaultPluginList.js by __devel__.js ☺
+// firefox modules can't handle unicode charactters
+// to keep lovely look of unicode character "\u2665" -> "\u2665" 
+// this file is converted into defaultPluginList.js by __devel__.js \u263a
 
 // list of all firefox locales
 // http://mxr.mozilla.org/mozilla-central/source/mobile/chrome/content/languages.properties
@@ -570,7 +570,7 @@ locale(["pl","pl","pl"], {
 	},
 	GoogleLuck: {
 		url: "http://www.google.com/search?q=%q&btnI=1",
-		name: "Google Szczęścia"
+		name: "Google Szcz\u0119\u015bcia"
 	},
 	Calculator: true,
 	GoogleTranslate: true
@@ -636,11 +636,11 @@ locale(["pt","pt-BR","com.br"], {
 })
 
 locale(["ru","ru","ru"], {
-	"Яндекс": {
+	"\u042f\u043d\u0434\u0435\u043a\u0441": {
 		key: "y",
 		url: "http://yandex.ru/yandsearch?text=%q",
 		json: "http://suggest.yandex.net/suggest-ff.cgi?part=%q",
-		name: "Яндекс"
+		name: "\u042f\u043d\u0434\u0435\u043a\u0441"
 	},
 	Google: true,
 	GoogleImages: {
@@ -661,7 +661,7 @@ locale(["ru","ru","ru"], {
 	},
 	Twitter: true,
 	Weather: {
-		name: "Погода"
+		name: "\u041f\u043e\u0433\u043e\u0434\u0430"
 	},
 	IMDb: {
 		name: "IMDb"
@@ -699,10 +699,10 @@ locale(["tr","tr","com.tr"], {
 locale(["ja","ja","co.jp"], {
 	Google: true,
 	GoogleImages: {
-		name: "Google 画像検索"
+		name: "Google \u753b\u50cf\u691c\u7d22"
 	},
 	GoogleMaps: {
-		name: "Google マップ - 地図検索",
+		name: "Google \u30de\u30c3\u30d7 - \u5730\u56f3\u691c\u7d22",
 		url: "http://maps.google.co.jp/maps?q=%q&hl=%ls"
 	},
 	Wikipedia: true,
@@ -712,13 +712,13 @@ locale(["ja","ja","co.jp"], {
 	},
 	Twitter: true,
 	Weather: {
-		name: "湿潤剤"
+		name: "\u6e7f\u6f64\u5264"
 	},
 	Calculator: {
-		name: "ポケット電卓"
+		name: "\u30dd\u30b1\u30c3\u30c8\u96fb\u5353"
 	},	
 	GoogleTranslate: {
-		name: "Google 翻訳"
+		name: "Google \u7ffb\u8a33"
 	}
 })
 
@@ -726,17 +726,17 @@ locale(["zh","zh-CN","cn"], {
 	Google: {
 		url: "http://www.google.com.hk/#hl=%ls&q=%q&fp=1&cad=b",
 		json: "http://www.google.com.hk/complete/search?json&q=%q&hl=%ls",
-		name: "Google 主页"
+		name: "Google \u4e3b\u9875"
 	},
 	GoogleImages: {
 		url: "http://www.google.com.hk/images?q=%q&hl=%ls",
 		json: "http://suggestqueries.google.com/complete/search?json&ds=i&hl=%ls&q=%q",
-		name: "Google 图片"
+		name: "Google \u56fe\u7247"
 	},
 	GoogleMaps: {
 		url: "http://ditu.google.cn/maps?q=%q",
 		json: "http://ditu.google.%ld/maps/suggest?q=%q&cp=999&hl=%ll&gl=%ll&v=2&json=b",
-		name: "Google 地图"
+		name: "Google \u5730\u56fe"
 	},
 	Baidu: {
 		key: "b",
@@ -751,13 +751,13 @@ locale(["zh","zh-CN","cn"], {
 	},
 	Twitter: true,
 	Weather: {
-		name: "天气"
+		name: "\u5929\u6c14"
 	},
 	Calculator: {
-		name: "袖珍计算器"
+		name: "\u8896\u73cd\u8ba1\u7b97\u5668"
 	},	
 	GoogleTranslate: {
-		name: "Google 翻译"
+		name: "Google \u7ffb\u8bd1"
 	}
 })
 

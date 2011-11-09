@@ -201,20 +201,17 @@ var instantFoxDevel = {
 
 	},
 	buildLocales: function(){
-		Services.scriptloader.loadSubScript('chrome://instantfox/content/__locales__.js?'+Date.now(), window, 'UTF-8')
-		var self = this
-		// and copy manifest
-		InstantFoxModule.pluginLoader.getAvaliableLocales(function(locales) {
-			var decl = 'locale    instantfox %n%s chrome/locale/%n/'
-			var ans = locales.map(function(x){
-				return decl.replace('%n', x, 'g').replace('%s', Array(9-x.length).join(' '), 'g')
-			}).join('\n')
-			//alert(ans)
-			gClipboardHelper.copyString(ans)
-
-			self.getContainingFolder().reveal()
+		var str = makeReq("chrome://instantfox/content/__locales__.js")
+		str = str.replace(/[\u00FF-\uFFFF]/g, function(x){
+			x = x.charCodeAt(0).toString(16)
+			return "\\u"+ Array(5-x.length).join("0") + x
 		})
-
+		
+		var spec = "chrome://instantfox/content/defaultPluginList.js"
+		writeToFile(getLocalFile(spec), str)
+	
+		this.reloadModule(spec).getString(InstantFoxModule)
+		gClipboardHelper.copyString(JSON.stringify(InstantFoxModule.avaliableLocaleNames))
 	}
 
 }
