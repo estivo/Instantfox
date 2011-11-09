@@ -996,9 +996,8 @@ getData = function(InstantFoxModule){
 		name = "en-US"
 		pluginData = avaliableLocales[name]
 	}
-	Components.utils.reportError(name)
 	preprocessRawData(pluginData, InstantFoxModule.pluginLoader)
-	Components.utils.reportError(pluginData)
+	//Components.utils.reportError(name)
 	return pluginData
 }
 

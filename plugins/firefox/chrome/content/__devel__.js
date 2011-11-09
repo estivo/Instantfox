@@ -206,7 +206,7 @@ var instantFoxDevel = {
 			x = x.charCodeAt(0).toString(16)
 			return "\\u"+ Array(5-x.length).join("0") + x
 		})
-		
+
 		var spec = "chrome://instantfox/content/defaultPluginList.js"
 		writeToFile(getLocalFile(spec), str)
 	

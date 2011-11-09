@@ -260,7 +260,7 @@ var pluginLoader = {
 		this.addDefaultPluginData(data)
 		this.initShortcuts()
 		
-		callback()
+		callback && callback()
 	},
 
 	getAvaliableLocales: function(callback){
