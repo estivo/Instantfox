@@ -423,12 +423,10 @@ slidecheckbox:hover>slidecheck>check{
 </groupbox>
 <separator/>
 <hbox align='center'>
-	<label value='Open search in new tab' control='openintab-checkbox'/>
-	<checkbox id='openintab-checkbox' preference="openintab" oncommand='InstantFoxModule.openSearchInNewTab=this.checked'/>
+	<checkbox label="Open search in new tab" id='openintab-checkbox' preference="openintab" oncommand='InstantFoxModule.openSearchInNewTab=this.checked'/>
 </hbox>
 <hbox align='center'>
-	<label value='Use default contextmenu item' control='context-usedefault-checkbox'/>
-	<checkbox id='context-usedefault-checkbox' preference="context-usedefault" oncommand='InstantFoxModule.modifyContextMenu(!this.checked)'/>
+	<checkbox label="Use default contextmenu item" id='context-usedefault-checkbox' preference="context-usedefault" oncommand='InstantFoxModule.modifyContextMenu(!this.checked)'/>
 </hbox>
 <separator/>
 <checkbox label="Hide Search box" oncommand="window.gToolbarsChanged=true;schedule(updateToolbarItems)" preference="removeSearchbar"/>
