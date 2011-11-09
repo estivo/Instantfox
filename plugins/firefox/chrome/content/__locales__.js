@@ -101,7 +101,9 @@ var commonPlugins = {
  *****/
 locale(["de","de-DE","de"], {
 	Google: true,
-	GoogleImages: true,
+	GoogleLuck: {
+		name: "Google Bilder"
+	},
 	GoogleMaps: true,
 	Wikipedia: true,
 	Youtube: true,
@@ -125,7 +127,9 @@ locale(["de","de-DE","de"], {
 
 locale(["de","de-AT","at"], {
 	Google: true,
-	GoogleImages: true,
+	GoogleLuck: {
+		name: "Google Bilder"
+	},
 	GoogleMaps: true,
 	Wikipedia: true,
 	Youtube: true,
@@ -149,7 +153,9 @@ locale(["de","de-AT","at"], {
 
 locale(["de","de-CH","ch"], {
 	Google: true,
-	GoogleImages: true,
+	GoogleLuck: {
+		name: "Google Bilder"
+	},
 	GoogleMaps: true,
 	Wikipedia: true,
 	Youtube: true,
