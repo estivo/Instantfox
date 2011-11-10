@@ -144,7 +144,7 @@ var instantFoxDevel = {
 			case 'build-d':
 				break
 			case 'buildLocales':
-				this.buildLocales()
+				this.encodePluginList(e.button == 2)
 				break
 			case 'delete-plugin-file':
 				this.deletePluginFile(e.button)
@@ -200,18 +200,33 @@ var instantFoxDevel = {
 		})
 
 	},
-	buildLocales: function(){
-		var str = makeReq("chrome://instantfox/content/__locales__.js")
-		str = str.replace(/[\u0080-\uFFFF]/g, function(x){
-			x = x.charCodeAt(0).toString(16)
-			return "\\u"+ Array(5-x.length).join("0") + x
-		})
-
+	encodePluginList: function(utf){
 		var spec = "chrome://instantfox/content/defaultPluginList.js"
+		
+		var str = makeReq(spec)
+		if (utf)	
+			str = str.replace(/\\u[\da-fA-F]{4}/g, function(x, i, str) {
+				if (str[i-1]=="\\")
+					return x
+				return String.fromCharCode(parseInt(x.substr(2),16))
+			})
+		else
+			str = str.replace(/[\u0080-\uFFFF]/g, function(x) {
+				x = x.charCodeAt(0).toString(16)
+				return "\\u"+ Array(5-x.length).join("0") + x
+			})
+
 		writeToFile(getLocalFile(spec), str)
 	
-		this.reloadModule(spec).getString(InstantFoxModule)
-		gClipboardHelper.copyString(JSON.stringify(InstantFoxModule.avaliableLocaleNames))
+		var oldLocales = JSON.stringify(InstantFoxModule.pluginLoader.getAvaliableLocales())
+		var pluginList = this.reloadModule(spec)
+		pluginList.getString(InstantFoxModule)
+		
+		var newLocales = JSON.stringify(pluginList.avaliableLocaleNames)
+		if (oldLocales != newLocales){
+			gClipboardHelper.copyString(newLocales)
+			alert("new locales added!, add clipboard text to InstantFoxModule")
+		}
 	}
 
 }

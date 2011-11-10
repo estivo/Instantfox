@@ -265,12 +265,14 @@ var pluginLoader = {
 
 	getAvaliableLocales: function(callback){
 		// keep in sync with default plugin list
-		callback([
+		var a = [
 			"de-DE","de-AT","de-CH",
-			"en-AU","en-CA","en-GB","en-US",
-			"es-AR","es-ES","es-MX","es-CL",
+			"en-US","en-AU","en-CA","en-GB",
+			"es-ES","es-AR","es-MX","es-CL",
 			"fr-FR","it-IT","nl","pl","pt","pt-BR","ru","tr","ja","zh-CN","sv-SE"
-		])
+		]
+		callback && callback(a)
+		return a
 	},
 	getPluginFileSpec: function(locale){
 		var spec = 'chrome://instantfox/locale/plugins.json'

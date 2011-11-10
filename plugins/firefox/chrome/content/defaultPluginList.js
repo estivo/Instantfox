@@ -1,6 +1,6 @@
 // firefox modules can't handle unicode charactters
-// to keep lovely look of unicode character "\u2665" -> "\u2665" 
-// this file is converted into defaultPluginList.js by __devel__.js \u263a
+// to get lovely look of unicode characters "\u2665"
+// convert this file using __devel__.js \u263a
 
 // list of all firefox locales
 // http://mxr.mozilla.org/mozilla-central/source/mobile/chrome/content/languages.properties
