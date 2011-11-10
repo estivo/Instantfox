@@ -360,7 +360,7 @@ slidecheckbox:hover>slidecheck>check{
 
 				<groupbox id="autoSearch" oncommand="autoSearchUI.onChange(event)" onkeypress="autoSearchUI.onChange(event)">
 					<caption>
-	<slidecheckbox  aID="disabled" label='standard_search_label' class="i18n" 
+						<slidecheckbox  aID="disabled" label='standard_search_label' class="i18n" 
 							oncommand="toggleVisibility(this.parentNode.parentNode, 'grid.animate', this.checked)"/>
 					</caption>
 					<grid class="animate">
@@ -370,7 +370,7 @@ slidecheckbox:hover>slidecheck>check{
 						</columns>
 						<rows>
 							<row>
-				<label class="i18n" value='search_url'/>
+								<label class="i18n" value='search_url'/>
 								<hbox align='center' flex='1' class='longbox'>
 									<textbox type='url' aID='url' flex='1'  oninput="
 										this.nextSibling.hidden = !canResetProp(this, InstantFoxModule.autoSearch);
@@ -381,58 +381,68 @@ slidecheckbox:hover>slidecheck>check{
 									<dropmarker type='button' onmousedown='enginesPopup.show(this, "Url", "url")'/>
 								</hbox>
 							</row>
-			
-							<row>
-				<label class="i18n" value='instant_loading'/>
-								<menulist aID="instant" sizetopopup='none' oncommand = ''>
-									<menupopup>
-						<menuitem class="i18n" aID='off'     label='instant.off' />
-						<menuitem class="i18n" aID='history' label='instant.only_for_history' />
-						<menuitem class="i18n" aID='search'  label='instant.only_for_search' />
-						<menuitem class="i18n" aID='all'     label='instant.always' />
-									</menupopup>
-								</menulist>
-							</row>
-							<row>
-				<label class="i18n" value='suggest_url'/>
-								<hbox align='center' flex='1' class='longbox'>
-									<checkbox aID='suggest' oncommand='toggleVisibility(this.parentNode.parentNode.parentNode, ".animate", this.checked)'/>
-									<textbox type='url' aID='json' flex='1' class='longbox animate' oninput="
-										this.nextSibling.hidden = !canResetProp(this, InstantFoxModule.autoSearch);
-										"/>
-									<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default' class="animate"/>
-								</hbox>
-								<hbox align="center" class='image animate'>
-									<dropmarker type='button' onmousedown='enginesPopup.show(this, "Url", "json")'/>
-								</hbox>
+							
+							<row hidden="true">
+								<row>
+									<label class="i18n" value='instant_loading'/>
+									<menulist aID="instant" sizetopopup='none' oncommand = ''>
+										<menupopup>
+											<menuitem class="i18n" aID='off'     label='instant.off' />
+											<menuitem class="i18n" aID='history' label='instant.only_for_history' />
+											<menuitem class="i18n" aID='search'  label='instant.only_for_search' />
+											<menuitem class="i18n" aID='all'     label='instant.always' />
+										</menupopup>
+									</menulist>
+								</row>
+								<row>
+									<label class="i18n" value='suggest_url'/>
+									<hbox align='center' flex='1' class='longbox'>
+										<checkbox aID='suggest' oncommand='toggleVisibility(this.parentNode.parentNode.parentNode, ".animate", this.checked)'/>
+										<textbox type='url' aID='json' flex='1' class='longbox animate' oninput="
+											this.nextSibling.hidden = !canResetProp(this, InstantFoxModule.autoSearch);
+											"/>
+										<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default' class="animate"/>
+									</hbox>
+									<hbox align="center" class='image animate'>
+										<dropmarker type='button' onmousedown='enginesPopup.show(this, "Url", "json")'/>
+									</hbox>
+								</row>
+								<row class='animate'>
+									<label value=''/>
+									<hbox align='center' flex='1' class='longbox'>
+										<label value='start showing remote results if:'/>
+									</hbox>
+									<hbox align="center" class='image animate'/>
+								</row><row class='animate'>
+									<label value=''/>
+									<hbox align='center' flex='1' class='longbox'>
+										<label value='query is longer than'/>
+										<textbox type='number' aID='minQChars' flex='1'/>
+									</hbox>
+									<hbox align="center" class='image animate'/>
+								</row>
 							</row>
 						</rows>
 					</grid>
 					<separator/>
 					<hbox align='center'>
-	<label class="i18n" value='pref_maxUrlbarResults' control='maxRichResults-textbox'/>
+						<label class="i18n" value='pref_maxUrlbarResults' control='maxRichResults-textbox'/>
 						<textbox id='maxRichResults-textbox' preference="maxRichResults"/>
 					</hbox>
 				</groupbox>
 				<separator/>
-				<checkbox label="Open search in new tab" id='openintab-checkbox' preference="openintab" 
+				<checkbox class="i18n" label="pref_openSearchInNewTab" id='openintab-checkbox' preference="openintab" 
 						oncommand='InstantFoxModule.openSearchInNewTab=this.checked'/>
-				<checkbox label="Use default contextmenu item" id='context-usedefault-checkbox' preference="context-usedefault" 
+				<checkbox class="i18n" label="pref_defaultContext" id='context-usedefault-checkbox' preference="context-usedefault" 
 						oncommand='InstantFoxModule.modifyContextMenu(!this.checked)'/>
 				<separator/>
 				<checkbox label="Hide Search box" preference="removeSearchbar" 
 						oncommand="window.gToolbarsChanged=true;schedule(updateToolbarItems)"/>
 				<spacer flex="1"/>
-				<groupbox >
-					<hbox>
-						<slickbutton label='copy plugins to clipboard' oncommand='copyPluginsToClipboard()'/>
-						<spacer flex="1"/>		
-						<slickbutton label='reset all plugins' oncommand='resetAllPlugins()'/>
-					</hbox>
-					<hbox>
-						<slickbutton label='add plugin data from clipboard' oncommand='addPluginsFromClipboard()'/>
-						<spacer flex="1"/>
-					</hbox>
+				<groupbox pack="start">
+					<slickbutton class="i18n" label='copyPluginsToClipboard' oncommand='copyPluginsToClipboard()'/>					
+					<slickbutton class="i18n" label='addPluginDataFromClipboard' oncommand='addPluginsFromClipboard()'/>
+					<slickbutton label='reset all plugins' oncommand='resetAllPlugins()'/>
 				</groupbox>
 			</prefpane>
 		</tabpanel>
