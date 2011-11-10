@@ -838,7 +838,9 @@ InstantFox.modifyContextMenu = function(enable){
 			return m
 		}
 		proto.getSelectedText = function() {
-			var selectedText = getBrowserSelection();
+			// getBrowserSelection crops to 150
+		    var focusedWindow = document.commandDispatcher.focusedWindow;
+			var selectedText = focusedWindow.getSelection().toString();
 
 			if (selectedText)
 				return selectedText

@@ -277,6 +277,8 @@ var pluginLoader = {
 	getPluginFileSpec: function(locale, fileName) {
 		if (!fileName)
 			fileName = 'plugins.json'
+		if (locale == "default")
+			locale = "en-US"
 		var spec = 'chrome://instantfox/locale/' + fileName
 		if (typeof locale == 'string') {
 			var upre=/\/[^\/]*$/
@@ -1021,5 +1023,31 @@ Cu.import('resource://gre/modules/AddonManager.jsm', {}).AddonManager.addAddonLi
  * localization
  ***********************/
 
-InstantFoxModule.localizer = {
+getBundle = function(name, locale){
+	var sbs = Cc["@mozilla.org/intl/stringbundle;1"]
+		.getService(Ci.nsIStringBundleService);
+	/**devel__(*/ sbs.flushBundles() /**devel__)*/
+	return sbs.createBundle(
+		pluginLoader.getPluginFileSpec(locale, name)
+	);
+}
+
+XPCOMUtils.defineLazyGetter("InstantFoxModule", "$bundle", function(){
+	return getBundle('instantfox.properties');
+})
+XPCOMUtils.defineLazyGetter("InstantFoxModule", "$defaultBundle", function(){
+	return getBundle('instantfox.properties', "default");
+})
+
+InstantFoxModule.getString = function(name) {
+	try{
+		return this.$bundle.GetStringFromName(name)
+	}catch(e){
+		try{
+			return this.$defaultBundle.GetStringFromName(name)
+		}catch(e1){
+			Cu.reportError("no string for" + name)
+			return ""
+		}
+	}
 }

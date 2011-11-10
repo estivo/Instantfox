@@ -108,19 +108,29 @@ globalInstant = {
 	}
 }
 //************* dom utils
-function $(id){
+function $(id) {
 	return document.getElementById(id)
 }
 function $t(el, aID) {
 	return el && el.getElementsByAttribute('aID', aID)[0]
 }
-function $parent(el){
+function $parent(el) {
 	while(el){
 		if(el.id)
 			return el
 		el=el.parentNode
 	}
 }
+function $el(name, att, parent) {
+	var el = document.createElement(name)
+	for (var a in att)
+		el.setAttribute(a, att[a])
+	if (parent)
+		parent.appendChild(el)
+	
+	return el
+}
+
 
 function clean(el){
 	var ch
@@ -160,7 +170,7 @@ function formatString(string, options){
 	})
 }
 function escapeHTML(str) str.replace(/[&"<>]/g, function(m)"&"+escapeMap[m]+";");
-var escapeMap = { "&": "amp", '"': "quot", "<": "lt", ">": "gt" }
+var escapeMap = { "&": "amp", '"': "quot", '"': "#39", "<": "lt", ">": "gt" }
 
 //************************ context menu
 initContextMenu = function(popup){
@@ -305,7 +315,6 @@ saveGPlugin = function(createNew){
 		if(!gPlugin.url)
 			return
 		InstantFoxModule.Plugins[gPlugin.id] = gPlugin;
-		//appendXML($("shortcuts"), plugin2XML(gPlugin))
 	} else {
 		// todo: is this needed
 		var el = $(gPlugin.id)
@@ -391,11 +400,12 @@ enginesPopup = {
 	},
 	fillPopup: function(popup, items){
 		var xml=[]
-		var str = "<menuitem class='menuitem-iconic' label='$name$' image='$iconURI$' value='$id$'/>"
+		clean(popup)
+		var str = '<menuitem class="menuitem-iconic" label="$name$" image="$iconURI$" value="$id$"/>'
 		for each(var p in items)
 			xml.push(formatString(str, p))
 
-		clean(popup)
+		dump(xml.join(''))
 		appendXML(popup, xml.join(''))
 	},
 	getItems_Url: function(t){
@@ -691,9 +701,10 @@ function saveChanges(){
 		InstantFoxModule.pluginLoader.loadPlugins()
 	gPluginsChanged = false
 }
-//*************
+
+/**********************************************///{
 xmlFragment =
-	  <richlistitem align="center" id='$id$'>
+	  <richlistitem align="center" id="$id$">
 		<hbox align="center" class='image'>
 			<image src="$iconURI$" width="16" height="16"/>
 		</hbox>
@@ -705,18 +716,19 @@ xmlFragment =
 			<textbox class='key' aID='key' value='$key$' tooltiptext='$i18n_key_tooltip$'
 				onblur='onTextboxEnter(this)' oninput='onTextboxInput(this)'/>
 		</hbox>
-		<label class='link' value='$i18n_edit$' aID='edit-link'/>
+		<label class='link' value="$i18n_edit$" aID='edit-link'/>
 	  </richlistitem>.toXMLString().replace(/>\s*</g,'><')
 xmlFragmentDis =
-	  <richlistitem align="center" id='$id$' disabled="true">
+	  <richlistitem align="center" id="$id$" disabled="true">
 		<hbox align="center" class='image'>
 			<image src="$iconURI$" width="16" height="16"/>
 		</hbox>
 		<label value="$name$"/>
 		<spacer flex='1' />
 		<textbox class='key invisible' aID='key'/>
-		<label class='link' value='$i18n_enable$' aID='enable-link'/>
+		<label class='link' value="$i18n_enable$" aID='enable-link'/>
 	  </richlistitem>.toXMLString().replace(/>\s*</g,'><')
+//}
 
 function plugin2XML(p){
 	updatePluginStatus(p)
@@ -740,7 +752,7 @@ rebuild = function(){
 			(def ? xml : userxml).push(px)
 
 	}
-	var sepXML1 = "<label class='separator' value='   ", sepXML2 ="'/>"
+	var sepXML1 = '<label class="separator" value="   ', sepXML2 ='"/>'
 
 	xml.unshift(sepXML1 + i18n.get("separator_standard") + sepXML2)
 	if(userxml.length)
@@ -973,13 +985,9 @@ slideCheckbox = {
 
 i18n = {
 	init: function(){
-		var stringBundleService = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService);
-		/**devel__(*/
-			stringBundleService.flushBundles()
-		/**devel__)*/
-		var getSpec = InstantFoxModule.pluginLoader.getPluginFileSpec
-		this.$bundle = stringBundleService.createBundle(getSpec(null, 'options.properties'));
-		this.$defaultBundle = stringBundleService.createBundle(getSpec("en-US", 'options.properties'));
+		var getSpec = 
+		this.$bundle = InstantFoxModule.bp.getBundle('options.properties')
+		this.$defaultBundle = InstantFoxModule.bp.getBundle('options.properties', "en-US");
 	},
 	get: function(name){
 		try{
