@@ -896,7 +896,7 @@ addPluginsFromClipboard = function(){
 }
 
 resetAllPlugins = function() {
-	var proceed = Services.prompt.confirm(window, "InstantFox", "are you sure you want to reset all plugins to default values?")
+	var proceed = Services.prompt.confirm(window, "InstantFox", "Are you sure you want to reset all search plugins to default values?")
 	if (!proceed)
 		return
 	InstantFoxModule.Plugins = {}
