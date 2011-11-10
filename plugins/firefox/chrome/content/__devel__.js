@@ -202,7 +202,7 @@ var instantFoxDevel = {
 	},
 	buildLocales: function(){
 		var str = makeReq("chrome://instantfox/content/__locales__.js")
-		str = str.replace(/[\u00FF-\uFFFF]/g, function(x){
+		str = str.replace(/[\u0080-\uFFFF]/g, function(x){
 			x = x.charCodeAt(0).toString(16)
 			return "\\u"+ Array(5-x.length).join("0") + x
 		})

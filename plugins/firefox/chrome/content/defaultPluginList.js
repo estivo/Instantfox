@@ -117,7 +117,7 @@ locale(["de","de-DE","de"], {
 	LEO: true,
 	IMDb: true,
 	GoogleLuck: {
-		name: "Google Glück"
+		name: "Google Gl\u00fcck"
 	},
 	Calculator: true,
 	GoogleTranslate: true
@@ -141,7 +141,7 @@ locale(["de","de-AT","at"], {
 	LEO: true,
 	IMDb: true,
 	GoogleLuck: {
-		name: "Google Glück"
+		name: "Google Gl\u00fcck"
 	},
 	Calculator: true,
 	GoogleTranslate: true
@@ -164,7 +164,7 @@ locale(["de","de-CH","ch"], {
 	},
 	IMDb: true,
 	GoogleLuck: {
-		name: "Google Glück"
+		name: "Google Gl\u00fcck"
 	},
 	Calculator: true,
 	GoogleTranslate: true
@@ -296,7 +296,7 @@ locale(["es","es-ES","es"], {
 	GoogleImages: {
 		url: "http://www.google.%ld/images?q=%q",
 		json: "http://suggestqueries.google.com/complete/search?json&ds=i&q=%q",
-		name: "Google Imágenes"
+		name: "Google Im\u00e1genes"
 	},
 	GoogleMaps: {
 		url: "http://maps.google.com/maps?q=%q&hl=%ls",
@@ -335,7 +335,7 @@ locale(["es","es-AR","com.ar"], {
 	GoogleImages: {
 		url: "http://www.google.%ld/images?q=%q",
 		json: "http://suggestqueries.google.com/complete/search?json&ds=i&q=%q",
-		name: "Google Imágenes"
+		name: "Google Im\u00e1genes"
 	},
 	GoogleMaps: {
 		url: "http://maps.google.com/maps?q=%q&hl=%ls"
@@ -372,7 +372,7 @@ locale(["es","es-MX","com.mx"], {
 	GoogleImages: {
 		url: "http://www.google.%ld/images?q=%q",
 		json: "http://suggestqueries.google.com/complete/search?json&ds=i&q=%q",
-		name: "Google Imágenes"
+		name: "Google Im\u00e1genes"
 	},
 	GoogleMaps: {
 		url: "http://maps.google.com/maps?q=%q&hl=%ls"
@@ -409,7 +409,7 @@ locale(["es","es-CL","cl"], {
 	GoogleImages: {
 		url: "http://www.google.%ld/images?q=%q",
 		json: "http://suggestqueries.google.com/complete/search?json&ds=i&q=%q",
-		name: "Google Imágenes"
+		name: "Google Im\u00e1genes"
 	},
 	GoogleMaps: {
 		url: "http://maps.google.com/maps?q=%q&hl=%ls",
@@ -676,7 +676,7 @@ locale(["ru","ru","ru"], {
 locale(["tr","tr","com.tr"], {
 	Google: true,
 	GoogleImages: {
-		name: "Google Görseller",
+		name: "Google G\u00f6rseller",
 		url: "http://www.google.%ld/images?q=%q",
 		json: "http://suggestqueries.google.com/complete/search?json&ds=i&q=%q"
 	},
