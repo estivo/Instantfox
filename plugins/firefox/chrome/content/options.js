@@ -458,9 +458,8 @@ enginesPopup = {
 		return gBrowserEngineList
 	},
 	command_Browser: function(event){
-		var id = event.target.getAttribute("value")
+		var id = event.target.value
 		var e = gBrowserEngineList[id]
-		dump(id, e)
 		var type = Ci.nsISearchEngine.DATA_XML;
 		InstantFoxModule.bp.searchEngineObserver.addListener(this.scheduleBrowserEngineListUpdate.bind(this))
 		Services.search.addEngine(e.uri, type, e.iconURI, false)
@@ -494,10 +493,14 @@ autoSearchUI = {
 
 		var g = $("autoSearch")
 		var p = InstantFoxModule.autoSearch
-		
-		$t(g, "url").plugin = $t(g, "json").plugin = p
-		$t(g, "url").value = p.url
-		$t(g, "json").value = p.json
+
+		for each(var i in ['url', 'json']){
+			var box = $t(g, i)
+			box.plugin = p
+			box.value = p[i] || '';
+			box.nextSibling.hidden = !canResetProp(box)
+			dump(canResetProp(box))
+		}
 		
 		$t(g, "disabled").checked = !p.disabled
 		$t(g, "suggest").checked = !!p.suggest
@@ -781,7 +784,7 @@ window.addEventListener("DOMContentLoaded", function() {
 	// check if we are inside popup
 	var InstantFox = top.InstantFox
 	if (InstantFox) {
-		dump(1,"*********")
+		dump("load into popup*********")
 		window.close = InstantFox.closeOptionsPopup
 		InstantFox.updatePopupSize(size)
 		// don't let clicks inside options window to close popup
@@ -798,7 +801,10 @@ onOptionsPopupShowing = function(){
 
 function onTabSelect(){
 	var i = this.selectedIndex
-	//$("add").hidden = this.selectedIndex != 0
+	dump(i)
+	$("report-a-bug").hidden = i!=3
+	
+	i == 1 && autoSearchUI.init()
 	
 	if(this[i+"_paneReady"])
 		return;
@@ -807,7 +813,6 @@ function onTabSelect(){
 	if(i == 1 || i == 2){
 		this.parentNode.selectedPanel.firstChild.hidden = false;
 		gPrefChanged = true;
-		i == 1 && autoSearchUI.init()
 	}else if(i == 3){
 		var iframe = document.createElement('iframe');
 		iframe.setAttribute('type', 'content');
@@ -843,13 +848,13 @@ var gClipboardHelper = {
 	}
 }
 
-copyPluginsToClipboard = function() {
+copyPluginsToClipboard = function(){
 	var str = InstantFoxModule.pluginLoader.getPluginString(true)
 	str = "--metadata-- version:" + "--instantfox--plugin--data--" + "\n" + str
 	gClipboardHelper.copyString(str)
 }
 
-addPluginsFromClipboard = function() {
+addPluginsFromClipboard = function(){
 	var str = gClipboardHelper.getData()
 	var i = str.indexOf("\n")
 	var metadata = str.substring(0,i)

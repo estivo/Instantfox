@@ -21,6 +21,13 @@ try{
 }catch(e){
 	Components.utils.reportError(e)
 }
+/**devel__(*/
+	try{
+		dump('old dump')
+		dump = Cu.import("resource://shadia/main.js").dump
+		dump('new dump')
+	}catch(e){}
+/**devel__)*/
 </script>
 
 <svg:svg height="0">
@@ -438,9 +445,7 @@ slidecheckbox:hover>slidecheck>check{
 					</hbox>
 					<hbox>
 						<slickbutton label='add plugin data from clipboard' oncommand='addPluginsFromClipboard()'/>
-						<spacer flex="1"/>		
-						<slickbutton label='report a bug'
-							oncommand='Services.wm.getMostRecentWindow("navigator:browser").addTab("chrome://instantfox/content/report-a-bug.html")'/>
+						<spacer flex="1"/>
 					</hbox>
 				</groupbox>
 			</prefpane>
@@ -469,13 +474,11 @@ slidecheckbox:hover>slidecheck>check{
 </tabbox>
 
 <hbox>
-	<toolbarbutton id='' label='add plugin' type='menu' oncommand='' hidden='true'>
-		<menupopup>
-		</menupopup>
-	</toolbarbutton>
 	<!-- devel__( -->
 		<shadiaglue id='status-bar'/>
 	<!-- devel__) -->
+	<slickbutton id="report-a-bug" label='report a bug' oncommand='Services.wm.getMostRecentWindow("navigator:browser")
+							.InstantFox.addTab("chrome://instantfox/content/report-a-bug.html")' hidden='true'/>
 	<spacer flex='1'/>
 	<slickbutton label='ok' oncommand='resultOK=true;close()'/>
 </hbox>
