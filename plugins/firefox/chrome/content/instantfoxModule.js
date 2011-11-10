@@ -7,7 +7,7 @@ Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 EXPORTED_SYMBOLS = ['InstantFoxModule'];
 
-/**devel__(*********************************************/
+/**devel__(*********************************************///{
 function debug(aMessage) {
 	try {
 		var objects = [];
@@ -35,12 +35,12 @@ function dump() {
 	consoleService.logStringMessage("" + aMessage);
 }
 try{
-dump('old dump')
-dump = Cu.import("resource://shadia/main.js").dump
-dump('new dump')
+	dump('old dump')
+	dump = Cu.import("resource://shadia/main.js").dump
+	dump('new dump')
 }catch(e){}
 
-/** devel__) **/
+//}/** devel__) **/
 /*************************************************************************
  *    load and save customized plugins
  *    plugin={
@@ -274,12 +274,14 @@ var pluginLoader = {
 		callback && callback(a)
 		return a
 	},
-	getPluginFileSpec: function(locale){
-		var spec = 'chrome://instantfox/locale/plugins.json'
+	getPluginFileSpec: function(locale, fileName) {
+		if (!fileName)
+			fileName = 'plugins.json'
+		var spec = 'chrome://instantfox/locale/' + fileName
 		if (typeof locale == 'string') {
 			var upre=/\/[^\/]*$/
 			spec = getFileUri(spec).replace(upre,'').replace(upre,'')
-			spec += '/'+ locale + '/plugins.json';
+			spec += '/'+ locale + '/' + fileName;
 		}
 		return spec
 	},
@@ -1015,3 +1017,9 @@ var addonListener = addonListener || {
 
 Cu.import('resource://gre/modules/AddonManager.jsm', {}).AddonManager.addAddonListener(addonListener)
 
+/***************************************************
+ * localization
+ ***********************/
+
+InstantFoxModule.localizer = {
+}

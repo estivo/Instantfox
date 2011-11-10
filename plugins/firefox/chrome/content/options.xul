@@ -227,7 +227,7 @@ checkbox:-moz-focusring > .checkbox-label-box{
 .plugin-status[status="instant"]{
 	background:url(chrome://instantfox/content/skin/instant.png)
 }
-.plugin-status[status="not-instant"]{
+.plugin-status[status="not_instant"]{
 	opacity:0;
 	pointer-events: none;	
 }
@@ -259,21 +259,22 @@ slidecheck {
 	background: -moz-linear-gradient(19% 75% 90deg,#3095C7, #14539C); 
 	border-radius: 4px;
 	border: 1px solid #555555;
-	width: 5em;
 	position: relative;
 	cursor:pointer;
 	text-shadow: #093B5C 0px -1px 1px;
 	color: #fff;
 	text-align: center
 }
-slidecheck::before {
-	content: "ON";
-	width: 50%;display: inline-block;	
-}
-slidecheck::after {
-	content: "OFF";
+.slidecheck-before {
 	width: 50%;
-	right:0;display: inline-block;	
+	display: inline-block;	
+	pointer-events: none;
+}
+.slidecheck-after {
+	width: 50%;
+	right:0;
+	display: inline-block;
+	pointer-events: none;
 }
 slidecheck>check { 
 	display: block;
@@ -300,17 +301,17 @@ slidecheckbox:hover>slidecheck>check{
 
 <tabbox flex='1'>
 	<tabs onselect="onTabSelect.call(this)">
-		<tab label='Engines'/>
-		<tab label='Advanced'/>
-		<tab label='Style'/>
-		<tab label='About'/>
+		<tab class="i18n" label='tab.engines'/>
+		<tab class="i18n" label='tab.advanced'/>
+		<tab class="i18n" label='tab.style'/>
+		<tab class="i18n" label='tab.about'/>
 	</tabs>
 	<tabpanels  flex='1'>
 		<tabpanel orient='vertical'  flex='1'>
 			<vbox>
 				<hbox pack='center'>
 					<vbox flex='1'>
-						<label value="Choose Language:" id="highlight" flex='1'/>
+						<label class="i18n" value="choose_lang" id="highlight" flex='1'/>
 						<menulist id="locale" sizetopopup='none'
 							oncommand = 'gPluginsChanged=true;InstantFoxModule.pluginLoader.loadPlugins(event.target.value, rebuild)'>
 							<menupopup/>
@@ -319,13 +320,13 @@ slidecheckbox:hover>slidecheck>check{
 					</vbox>
 					<spacer flex='100'/>
 					<vbox flex='1'>
-						<label value="Enable Instant:" id="highlight" flex='1'/>
+						<label class="i18n" value="enable_instant" id="highlight" flex='1'/>
 						<menulist id="global-instant" sizetopopup='none' oncommand = 'globalInstant.onCommand(event);'>
 							<menupopup>
-								<menuitem label='all plugins' value='all'/>
-								<menuitem label='recommended' value='recomended'/>
-								<menuitem label='none' value='none'/>
-								<menuitem label='manual' value='manual'/>
+								<menuitem class="i18n" label='instant_all'         value='all'/>
+								<menuitem class="i18n" label='instant_recommended' value='recomended'/>
+								<menuitem class="i18n" label='instant_none'        value='none'/>
+								<menuitem class="i18n" label='instant_manual'      value='manual'/>
 							</menupopup>
 						</menulist>
 						<spacer flex='1'/>
@@ -335,14 +336,14 @@ slidecheckbox:hover>slidecheck>check{
 
 				<hbox align='center'>
 					<hbox align='center' flex='1'>
-						<textbox placeholder="Search Plugins" flex='1' class='normal' width='0' id='pluginFilter'
+						<textbox placeholder="search_plugins" flex='1' class='normal i18n' width='0' id='pluginFilter'
 							oninput="rebuild();this.nextSibling.hidden = !this.value;"/>
 						<resetbutton hidden='true' onclick='var t = this.previousSibling;t.value="";t.oninput()' />
 					</hbox>
 					<spacer flex='1'/>
-					<slickbutton id="add-from-browser" label='add engine from site' class='attention' hidden="dtrue"
+					<slickbutton class="i18n attention" id="add-from-browser" label='add_engine_from_site'
 						onmouseup='enginesPopup.show(this, "Browser")'/>
-					<slickbutton id="add" label='Add +' onmouseup='openEditPopup(this)'/>
+					<slickbutton class="i18n" id="add" label='add_new' onmouseup='openEditPopup(this)'/>
 				</hbox>
 			</vbox>
 			<richlistbox id='shortcuts' flex='1' onkeypress='rbKeyPress(event, this)'
@@ -359,7 +360,7 @@ slidecheckbox:hover>slidecheck>check{
 
 				<groupbox id="autoSearch" oncommand="autoSearchUI.onChange(event)" onkeypress="autoSearchUI.onChange(event)">
 					<caption>
-						<slidecheckbox  aID="disabled" label='Standard search without shortcuts'
+	<slidecheckbox  aID="disabled" label='standard_search_label' class="i18n" 
 							oncommand="toggleVisibility(this.parentNode.parentNode, 'grid.animate', this.checked)"/>
 					</caption>
 					<grid class="animate">
@@ -369,7 +370,7 @@ slidecheckbox:hover>slidecheck>check{
 						</columns>
 						<rows>
 							<row>
-								<label value='Search URL:'/>
+				<label class="i18n" value='search_url'/>
 								<hbox align='center' flex='1' class='longbox'>
 									<textbox type='url' aID='url' flex='1'  oninput="
 										this.nextSibling.hidden = !canResetProp(this, InstantFoxModule.autoSearch);
@@ -380,20 +381,20 @@ slidecheckbox:hover>slidecheck>check{
 									<dropmarker type='button' onmousedown='enginesPopup.show(this, "Url", "url")'/>
 								</hbox>
 							</row>
-							<row hidden="true">
+			
 							<row>
-								<label value='Instant Loading:'/>
+				<label class="i18n" value='instant_loading'/>
 								<menulist aID="instant" sizetopopup='none' oncommand = ''>
 									<menupopup>
-										<menuitem aID='off'     label='off' />
-										<menuitem aID='history' label='only for history results' />
-										<menuitem aID='search'  label='only for search engine results' />
-										<menuitem aID='all'     label='always' />
+						<menuitem class="i18n" aID='off'     label='instant.off' />
+						<menuitem class="i18n" aID='history' label='instant.only_for_history' />
+						<menuitem class="i18n" aID='search'  label='instant.only_for_search' />
+						<menuitem class="i18n" aID='all'     label='instant.always' />
 									</menupopup>
 								</menulist>
 							</row>
 							<row>
-								<label value='Suggest URL:'/>
+				<label class="i18n" value='suggest_url'/>
 								<hbox align='center' flex='1' class='longbox'>
 									<checkbox aID='suggest' oncommand='toggleVisibility(this.parentNode.parentNode.parentNode, ".animate", this.checked)'/>
 									<textbox type='url' aID='json' flex='1' class='longbox animate' oninput="
@@ -405,26 +406,11 @@ slidecheckbox:hover>slidecheck>check{
 									<dropmarker type='button' onmousedown='enginesPopup.show(this, "Url", "json")'/>
 								</hbox>
 							</row>
-							<row class='animate'>
-								<label value=''/>
-								<hbox align='center' flex='1' class='longbox'>
-									<label value='start showing remote results if:'/>
-								</hbox>
-								<hbox align="center" class='image animate'/>
-							</row><row class='animate'>
-								<label value=''/>
-								<hbox align='center' flex='1' class='longbox'>
-									<label value='query is longer than'/>
-									<textbox type='number' aID='minQChars' flex='1'/>
-								</hbox>
-								<hbox align="center" class='image animate'/>
-							</row>
-							</row>
 						</rows>
 					</grid>
 					<separator/>
 					<hbox align='center'>
-						<label value='max urlbar results' control='maxRichResults-textbox'/>
+	<label class="i18n" value='pref_maxUrlbarResults' control='maxRichResults-textbox'/>
 						<textbox id='maxRichResults-textbox' preference="maxRichResults"/>
 					</hbox>
 				</groupbox>
@@ -456,9 +442,9 @@ slidecheckbox:hover>slidecheck>check{
 					<preference id="fontsize" name="extensions.InstantFox.fontsize" type="string" />
 					<preference id="opacity" name="extensions.InstantFox.opacity" type="int" />
 				</preferences>
-				<label value='fontsize of suggest:' control='fontsize-text'/>
+				<label class="i18n" value='style.fontsize' control='fontsize-text'/>
 				<textbox preference="fontsize"  id='fontsize-text' placeholder="auto"/>
-				<label value='opacity of suggest dropdown:' control='opacity-scale'/>
+				<label class="i18n" value='dropdown_opacity' control='opacity-scale'/>
 				<hbox pack='center' align='center'>
 					<scale value='20' min='10' max='100' flex='1' id='opacity-scale' preference-editable="true" preference="opacity" />
 					<textbox preference="opacity" id='opacity-text'  placeholder="auto"/>
@@ -480,20 +466,18 @@ slidecheckbox:hover>slidecheck>check{
 	<slickbutton id="report-a-bug" label='report a bug' oncommand='Services.wm.getMostRecentWindow("navigator:browser")
 							.InstantFox.addTab("chrome://instantfox/content/report-a-bug.html")' hidden='true'/>
 	<spacer flex='1'/>
-	<slickbutton label='ok' oncommand='resultOK=true;close()'/>
+	<slickbutton class="i18n" label='ok' oncommand='resultOK=true;close()'/>
 </hbox>
 
 
-<menupopup id="engine-list" onpopupshowing='enginesPopup.onShowing(this)' oncommand='enginesPopup.onCommand(event)'>
-
-</menupopup>
+<menupopup id="engine-list" onpopupshowing='enginesPopup.onShowing(this)' oncommand='enginesPopup.onCommand(event)'/>
 <menupopup id="context" onpopupshowing='initContextMenu(this)' oncommand='onContextMenuCommand(event)'>
-	<menuitem label='instant' type='checkbox' aID='disableInstant'/>
-	<menuitem label='suggest' type='checkbox' aID='disableSuggest'/>
-	<menuitem label='show on context' type='checkbox' aID='hideFromContextMenu'/>
+	<menuitem class="i18n" label='menu_instant' type='checkbox' aID='disableInstant'/>
+	<menuitem class="i18n" label='menu_show_suggest' type='checkbox' aID='disableSuggest'/>
+	<menuitem class="i18n" label='show_on_context' type='checkbox' aID='hideFromContextMenu'/>
 	<menuseparator/>
-	<menuitem label='enabled' type='checkbox' aID='disabled'/>
-	<menuitem label='edit' aID='edit'/>
+	<menuitem class="i18n" label='is_enabled' type='checkbox' aID='disabled'/>
+	<menuitem class="i18n" label='edit' aID='edit'/>
 </menupopup>
 
 <panel id="edit-box" ignorekeys='true' type="arrow"
@@ -503,8 +487,8 @@ slidecheckbox:hover>slidecheck>check{
 			<image aID='image'/>
 		</hbox>
 			<spacer flex="1"/>
-			<slidecheckbox label='Instant page loading' aID='instant' id='instantLoad' class="animate" 
-				oncommand="this.nextSibling.setAttribute('status',this.checked?'instant':'not-instant')"/>
+			<slidecheckbox class="i18n animate" label='instant_page_loading' aID='instant' id='instantLoad'
+				oncommand="this.nextSibling.setAttribute('status',this.checked?'instant':'not_instant')"/>
 			<hbox class="plugin-status" status="instant" style="cursor:default"/>
 			<spacer flex="1"/>
 	</hbox>
@@ -515,7 +499,7 @@ slidecheckbox:hover>slidecheck>check{
 		</columns>
 		<rows>
 			<row>
-				<label value='Short Name:'/>
+				<label class="i18n" value='edit_name'/>
 				<hbox align='center' flex='1'>
 					<textbox aID='name' flex='1' oninput="this.nextSibling.hidden = !canResetProp(this);"/>
 					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
@@ -525,7 +509,7 @@ slidecheckbox:hover>slidecheck>check{
 				
 			</row>
 			<row>
-				<label value='Search URL:'/>
+				<label class="i18n" value='search_url'/>
 				<hbox align='center' flex='1' class='longbox'>
 					<textbox type='url' aID='url' flex='1'  oninput="
 						this.nextSibling.hidden = !canResetProp(this);
@@ -539,7 +523,7 @@ slidecheckbox:hover>slidecheck>check{
 				</hbox>
 			</row>
 			<row>
-				<label value='Suggest URL:'/>
+				<label class="i18n" value='suggest_url'/>
 				<hbox align='center' flex='1' class='longbox'>
 					<checkbox aID='suggest' oncommand='toggleVisibility(this.parentNode.parentNode, ".animate", this.checked)'/>
 					<textbox type='url' aID='json' flex='1' class='longbox animate' oninput="
@@ -554,7 +538,7 @@ slidecheckbox:hover>slidecheck>check{
 			<row>
 				<hbox/>
 				<hbox flex='1' align='center'>
-					<label id='qWarn' value='replace the searchword with %q'/>
+					<label id='qWarn' class="i18n" value='replace_with_q'/>
 					<spacer flex='1'/>
 				</hbox>
 			</row>
@@ -572,9 +556,9 @@ slidecheckbox:hover>slidecheck>check{
 	<hbox align='center'>
 		<slickbutton label='remove' aID='remove' oncommand="removePlugin(gPlugin);$('edit-box').hidePopup();"/>
 		<toolbarbutton label='more' hidden='true'/>
-		<description class='help link' value='Help?' onclick='open(InstantFoxModule.editingHelpURL)'/>
+		<description class='i18n help link' value='help' onclick='open(InstantFoxModule.editingHelpURL)'/>
 		<spacer flex='1'/>
-		<slickbutton label='ok' onclick="$('edit-box').hidePopup()"/>
+		<slickbutton class="i18n" label='ok' onclick="$('edit-box').hidePopup()"/>
 	</hbox>
 </panel>
 
