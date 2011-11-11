@@ -1,5 +1,15 @@
 //var currentTab = getWebNavigation().sessionHistory;.getEntryAtIndex(currentTab.count-1, false).URI.spec
 var InstantFox = {
+	$el: function(name, att, parent) {
+		var el = document.createElement(name)
+		for (var a in att)
+			el.setAttribute(a, att[a])
+		if (parent)
+			parent.appendChild(el)
+		
+		return el
+	},
+	$: function(x) document.getElementById(x), 
     // belong to notifyTab
 	install_url: "http://www.instantfox.net/welcome.php",
 	update_url:  "http://www.instantfox.net/update.php",
@@ -70,35 +80,31 @@ var InstantFox = {
 			}
 		}
 
-		var doc = document;
-		var p = doc.createElement('panel')
-		p.setAttribute('type', 'arrow')
-		doc.getElementById("mainPopupSet").appendChild(p)
+		var $el = InstantFox.$el
+		var $ = InstantFox.$
+		var p = $el('panel', {type: 'arrow'}, $("mainPopupSet"))
 
-
-		var popupnotification = doc.createElement("popupnotification");
-		popupnotification.setAttribute("label", n.label);
-		popupnotification.setAttribute("popupid", n.id);
-		popupnotification.setAttribute("closebuttoncommand", n.hide);
-
-		popupnotification.setAttribute("buttonlabel", n.mainActionLabel);
-		popupnotification.setAttribute("buttoncommand", n.hide + n.action);
-		popupnotification.setAttribute("menucommand", "event.target.action?" + n.a.action + ':' + n.hide);
-		popupnotification.setAttribute("closeitemcommand", n.hide);
+		var popupnotification = $el('popupnotification', {
+			label:              n.label,
+			popupid:            n.id,
+			closebuttoncommand: n.hide,
+			buttonlabel:        n.mainActionLabel,
+			buttoncommand:      n.hide + n.action,			
+			menucommand:        "event.target.hasAttribute(action)?" + n.a.action + ':' + n.hide,
+			closeitemcommand:   n.hide
+		}, p);
 
 		//secondary actions
-		var item = doc.createElement("menuitem");
-        item.setAttribute("label", n.a.label);
-        item.action = true;
-        popupnotification.appendChild(item);
-		var closeItemSeparator = doc.createElement("menuseparator");
-        popupnotification.appendChild(closeItemSeparator);
+		var item = $el("menuitem", {
+			label:    n.a.label,
+			action:   true
+        }, popupnotification);
+		var closeItemSeparator = $el("menuseparator", null, popupnotification);
 
-		// popupnotification.notification = n;
-		p.appendChild(popupnotification);
 		p.openPopup(doc.getElementById(n.anchor), "bottomcenter topleft");
 		
-		setTimeout(function(){
+		// 
+		setTimeout(function() {
 			gBrowser.userTypedValue = gURLBar.value = InstantFoxModule.Plugins.google.key + " " +
 				InstantFoxModule.getString("welcome.urlbar")
 			InstantFox.onInput()
@@ -617,21 +623,22 @@ InstantFox.onPopupShowing = function(p) {
 	window.addEventListener('mousedown', InstantFox.popupCloser, false)
 
 	var st = p.querySelector('stack')
-	var i = p.querySelector('iframe')
-	if (i){
+	var ifr = p.querySelector('iframe')
+	if (ifr){
 		// touch the stack, otherwise it isn't drawn in nightly
 		st.flex=0
 		st.flex=1
 		// rebuild in case user modified plugins by another options window instance
 		try{
-			i.contentWindow.onOptionsPopupShowing()
+			ifr.contentWindow.onOptionsPopupShowing()
 		}catch(e){Components.utils.reportError(e)}
 		return;
 	}
-	var i = document.createElement('iframe')
-	i.setAttribute('src', 'chrome://instantfox/content/options.xul')
-	i.setAttribute('flex', '1')
-	st.insertBefore(i, st.firstChild)
+	var ifr = InstantFox.$el('iframe', {
+		src: 'chrome://instantfox/content/options.xul',
+		flex: '1'
+	})
+	st.insertBefore(ifr, st.firstChild)
 }
 InstantFox.onPopupHiding = function(p) {
 	var ifr = p.querySelector('iframe')
@@ -825,20 +832,19 @@ InstantFox.modifyContextMenu = function(enable){
 				old.parentNode.removeChild(old)
 			}
 
-			var m = document.createElement('menu')
-			m.setAttribute('id', "ifox-context-searchselect")
-			m.setAttribute('type', "splitmenu")
-			m.setAttribute('onclick', "gContextMenu&&gContextMenu.doSearch(event)")
-			m.setAttribute('oncommand', "gContextMenu&&gContextMenu.doSearch(event)")
-			m.setAttribute('class', "menu-non-iconic")
+			var m = InstantFox.$el('menu', {
+				'id':         "ifox-context-searchselect",
+				'type':       "splitmenu",
+				'onclick':    "gContextMenu&&gContextMenu.doSearch(event)",
+				'oncommand':  "gContextMenu&&gContextMenu.doSearch(event)",
+				'class':      "menu-non-iconic"
+			})
 
-			var p = document.createElement('menupopup')
-			p.setAttribute('onpopupshowing', "gContextMenu.fillSearchSubmenu(this)")
-
-			m.appendChild(p)
+			var p = InstantFox.$el('menupopup', {
+				'onpopupshowing': "gContextMenu.fillSearchSubmenu(this)"
+			}, m)
 
 			var s = document.getElementById("context-sep-open")
-
 			var c = document.getElementById("contentAreaContextMenu")
 			c.insertBefore(m, s)
 			return m
@@ -868,18 +874,25 @@ InstantFox.modifyContextMenu = function(enable){
 			var menu
 			while(menu = popup.firstChild)
 				popup.removeChild(menu)
+			
+			var $el = InstantFox.$el
 
-			for each (engine in InstantFoxModule.Plugins){
-				if(engine.disabled||engine.hideFromContextMenu)
+			for each (engine in InstantFoxModule.Plugins) {
+				if(engine.disabled || engine.hideFromContextMenu)
 					continue
 
-				menu = document.createElement('menuitem')
-				menu.setAttribute('name', engine.id)
-				menu.setAttribute('label', engine.name)
-				menu.setAttribute('image', engine.iconURI)
-				menu.setAttribute('class', "menuitem-iconic")
-				popup.appendChild(menu)
+				menu = $el('menuitem', {
+					'name' : engine.id,
+					'label': engine.name,
+					'image': engine.iconURI,
+					'class': "menuitem-iconic",
+				}, popup)
 			}
+			menu = $el('menuseparator', null, popup)
+			menu = $el('menuitem', {
+				'name' :  "__search_site__",
+				'label':  InstantFoxModule.getString("context.searchSite")
+			}, popup)
 		}
 		proto.doSearch = function(e) {
 			if(e.target.menuitem && !e.target.isMenuitemActive)
@@ -894,8 +907,8 @@ InstantFox.modifyContextMenu = function(enable){
 			var selectedText = this.getSelectedText()
 			if (name == '__open_as_link__') {
 				href = selectedText
-			} else if (name == 'search_site'){
-				href  = InstantFoxModule.urlFromQuery("google", selectedText + 'site:' + gBrowser.currentURI.host)
+			} else if (name == '__search_site__'){
+				href  = InstantFoxModule.urlFromQuery("google", selectedText + ' site:' + gBrowser.currentURI.host)
 			} else {
 				href  = InstantFoxModule.urlFromQuery(name, selectedText)
 			}
