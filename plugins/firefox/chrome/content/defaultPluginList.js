@@ -831,20 +831,15 @@ function locale(localeNames, plugins, autoSearch){
 
 
 /*************************code from XPIProvider.jsm *************************/
+Components.utils.import("resource://gre/modules/Services.jsm");
+
 var PREF_MATCH_OS_LOCALE = "intl.locale.matchOS";
 var PREF_SELECTED_LOCALE = "general.useragent.locale";
 /**
- * A helpful wrapper around the prefs service that allows for default values
- * when requested values aren't set.
+ * An unhelpful wrapper around the prefs service that hides errors
+ * when something is wrong
  */
 var Prefs = {
-  getDefaultCharPref: function(aName, aDefaultValue) {
-    try {
-      return Services.prefs.getDefaultBranch("").getCharPref(aName);
-    } catch(e){}
-    return aDefaultValue;
-  },
-
   getCharPref: function(aName, aDefaultValue) {
     try {
       return Services.prefs.getCharPref(aName);
@@ -865,18 +860,6 @@ var Prefs = {
     } catch(e){}
     return aDefaultValue;
   },
-
-  getIntPref: function(aName, defaultValue) {
-    try {
-      return Services.prefs.getIntPref(aName);
-    } catch(e){}
-    return defaultValue;
-  },
-
-  clearUserPref: function(aName) {
-    if (Services.prefs.prefHasUserValue(aName))
-      Services.prefs.clearUserPref(aName);
-  }
 }
 /**
  * Gets the currently selected locale for display.

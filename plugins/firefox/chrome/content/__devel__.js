@@ -89,6 +89,7 @@ var instantFoxDevel = {
 	onLoad: function(e, script){
 		this.loadedScriptsCount++;
 		if(this.loadedScriptsCount == this.sourceList.length){
+			this.reloadModule("chrome://instantfox/content/defaultPluginList.js")
 			this.m = this.reloadModule(this.moduleHref)
 			if("$shadia" in window)
 				this.m.dump = $shadia.dump
