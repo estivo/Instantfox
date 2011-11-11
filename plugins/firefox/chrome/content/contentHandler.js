@@ -154,8 +154,8 @@ InstantFox.pageLoader = {
         filter.addProgressListener(tabListener, Ci.nsIWebProgress.NOTIFY_ALL);
         selectedBrowser.webProgress.addProgressListener(filter, Ci.nsIWebProgress.NOTIFY_ALL);
 
-		// rstore history
-		preview.docShell.useGlobalHistory = false
+		// restore history
+		// preview.docShell.useGlobalHistory = true
 
 		return selectedBrowser
     },
@@ -210,7 +210,7 @@ InstantFox.pageLoader = {
 		}
 		this.previewIsActive = true
 		// disable history
-		preview.docShell.useGlobalHistory = false
+		// preview.docShell.useGlobalHistory = false
 
 
         // Load the url i
