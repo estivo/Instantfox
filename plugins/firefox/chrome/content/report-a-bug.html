@@ -65,10 +65,6 @@ Components.utils.import("resource://gre/modules/AddonManager.jsm");
 
 var report = {
 	status: [],
-	prefs: "",
-	addons: "",
-	pluginFile: "",
-	currentJSON: "",
 }
 updateUI = function(){
 	var text = ""
@@ -86,6 +82,40 @@ copyToClipboard = function(){
 }
 
 setTimeout(updateUI, 500)
+// defaultLocale
+setTimeout(function(){
+	Components.utils.import("resource://gre/modules/Services.jsm")
+	var PREF_MATCH_OS_LOCALE = "intl.locale.matchOS";
+	var PREF_SELECTED_LOCALE = "general.useragent.locale";
+	var Prefs = {
+	  getCharPref: function(aName, aDefaultValue) {
+		try {
+		  return Services.prefs.getCharPref(aName);
+		} catch(e){}
+		return aDefaultValue;
+	  },
+	  getComplexValue: function(aName, aType, aDefaultValue) {
+		try {
+		  return Services.prefs.getComplexValue(aName, aType).data;
+		} catch(e){}
+		return aDefaultValue;
+	  },
+	  getBoolPref: function(aName, aDefaultValue) {
+		try {
+		  return Services.prefs.getBoolPref(aName);
+		} catch(e){}
+		return aDefaultValue;
+	  }
+	};
+	function getLocale() {
+	  return [Prefs.getBoolPref(PREF_MATCH_OS_LOCALE, false),
+		Services.locale.getLocaleComponentForUserAgent(),
+		Prefs.getComplexValue(PREF_SELECTED_LOCALE, Components.interfaces.nsIPrefLocalizedString),
+		Prefs.getCharPref(PREF_SELECTED_LOCALE, "en-US")]
+	};
+	report.defaultLocale = getLocale()
+})
+
 // getAddons
 AddonManager.getAllAddons(function(addons){
     var ans = ""
@@ -132,6 +162,13 @@ setTimeout(function(){
 	
 	updateUI()
 })
+setTimeout(function() {
+	var win = Services.wm.getMostRecentWindow("navigator:browser")
+		
+	report.contextmenu = "todo"
+	
+	updateUI()
+})
 setTimeout(function(){
 	var prefs = Services.prefs
 	var names = prefs.getChildList("extensions.InstantFox.",{},{})
@@ -141,6 +178,7 @@ setTimeout(function(){
 	})
 	updateUI()
 })
+
 
 Components.utils.import('chrome://instantfox/content/instantfoxModule.js')
 report.currentJSON = InstantFoxModule.pluginLoader.getPluginString()
