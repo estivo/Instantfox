@@ -876,13 +876,13 @@ addPluginsFromClipboard = function(){
 			throw "no metadata"
 		JSON.parse(str) // check for valid json
 	}catch(e){
-		alert('invalid plugin data')
+		alert(i18n.get('alert.invalid'))
 		return
 	}
-	var arr = ["replace existing plugins (can't be undone)", "merge with existing plugins"]
+	var arr = [i18n.get("alert.replace"), i18n.get("alert.merge")]
 	var sel={}
 	var proceed = Services.prompt.select(
-		window, "Instantfox ", 'What do you want to do?',
+		window, "Instantfox ", i18n.get("alert.what2do"),
 		arr.length, arr,
 		sel
 	)
@@ -908,7 +908,7 @@ addPluginsFromClipboard = function(){
 }
 
 resetAllPlugins = function() {
-	var proceed = Services.prompt.confirm(window, "InstantFox", "Are you sure you want to reset all search plugins to default values?")
+	var proceed = Services.prompt.confirm(window, "InstantFox", i18n.get("alert.reset"))
 	if (!proceed)
 		return
 	InstantFoxModule.Plugins = {}

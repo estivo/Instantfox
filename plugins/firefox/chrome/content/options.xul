@@ -341,7 +341,7 @@ slidecheckbox:hover>slidecheck>check{
 						<resetbutton hidden='true' onclick='var t = this.previousSibling;t.value="";t.oninput()' />
 					</hbox>
 					<spacer flex='1'/>
-					<slickbutton class="i18n attention" id="add-from-browser" label='add_engine_from_site'
+					<slickbutton class="i18n attention" id="add-from-browser" label='add_engine_from_site' hidden="true"
 						onmouseup='enginesPopup.show(this, "Browser")'/>
 					<slickbutton class="i18n" id="add" label='add_new' onmouseup='openEditPopup(this)'/>
 				</hbox>
@@ -453,11 +453,11 @@ slidecheckbox:hover>slidecheck>check{
 					<preference id="opacity" name="extensions.InstantFox.opacity" type="int" />
 				</preferences>
 				<label class="i18n" value='style.fontsize' control='fontsize-text'/>
-				<textbox preference="fontsize"  id='fontsize-text' placeholder="auto"/>
+				<textbox preference="fontsize"  id='fontsize-text' placeholder="auto" class="i18n"/>
 				<label class="i18n" value='dropdown_opacity' control='opacity-scale'/>
 				<hbox pack='center' align='center'>
 					<scale value='20' min='10' max='100' flex='1' id='opacity-scale' preference-editable="true" preference="opacity" />
-					<textbox preference="opacity" id='opacity-text'  placeholder="auto"/>
+					<textbox preference="opacity" id='opacity-text'  placeholder="auto" class="i18n"/>
 					<label value='%'/>
 				</hbox>
 
