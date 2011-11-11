@@ -474,7 +474,7 @@ slidecheckbox:hover>slidecheck>check{
 		<shadiaglue id='status-bar'/>
 	<!-- devel__) -->
 	<slickbutton id="report-a-bug" label='report a bug' oncommand='Services.wm.getMostRecentWindow("navigator:browser")
-							.InstantFox.addTab("chrome://instantfox/content/report-a-bug.html")' hidden='true'/>
+							.InstantFox.addTab("chrome://instantfox/content/report-a-bug.html")' hidden='true' style="margin-left:20px;"/>
 	<spacer flex='1'/>
 	<slickbutton class="i18n" label='ok' oncommand='resultOK=true;close()'/>
 </hbox>
@@ -513,7 +513,7 @@ slidecheckbox:hover>slidecheck>check{
 				<hbox align='center' flex='1'>
 					<textbox aID='name' flex='1' oninput="this.nextSibling.hidden = !canResetProp(this);"/>
 					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
-					<label value='Shortcut:'/>
+					<label class="i18n" value='edit_key'/>
 					<textbox aID='key' class="key"/>
 				</hbox>
 				
