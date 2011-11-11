@@ -904,11 +904,12 @@ function findClosestLocale(avaliableLocales, desiredLocale) {
   // The number of locale parts in the match
   var bestpartcount = 0;
 
-  var matchLocales = [desiredLocale.toLowerCase(), appLocale.toLowerCase()];
+  var matchLocales = [appLocale.toLowerCase()];
+  if (desiredLocale)
+    matchLocales.unshift(desiredLocale.toLowerCase())
   /* If the current locale is English then it will find a match if there is
      a valid match for en-US so no point searching that locale too. */
-  if (matchLocales[1].substring(0, 3) != "en-")
-    matchLocales.push("en-us");
+  matchLocales.push("en-us");
 
   for each (var locale in matchLocales) {
     var lparts = locale.split("-");
