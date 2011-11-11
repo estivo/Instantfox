@@ -985,13 +985,11 @@ slideCheckbox = {
 
 i18n = {
 	init: function(){
-		var getSpec = 
 		this.$bundle = InstantFoxModule.bp.getBundle('options.properties')
 		this.$defaultBundle = InstantFoxModule.bp.getBundle('options.properties', "en-US");
 	},
 	get: function(name){
 		try{
-			dump("name: ", name, this.$bundle.GetStringFromName(name))
 			return this.$bundle.GetStringFromName(name)
 		}catch(e){
 			try{

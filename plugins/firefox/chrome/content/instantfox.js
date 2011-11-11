@@ -60,7 +60,7 @@ var InstantFox = {
 		var n = {
 			id: 'instant-fox-installed',
 			anchor: "instantFox-options",
-			label: "NEW!\nYour Instantfox configuration menu & shortcuts!\nEdit your language settings and add your own search-plugins!",
+			label: InstantFoxModule.getString("welcome.notification"),
 			hide: 'document.getBindingParent(this).parentNode.hidePopup();',
 			mainActionLabel: 'ok',
 			action: 'document.getElementById("instantFox-options").open=true;',
@@ -97,6 +97,12 @@ var InstantFox = {
 		// popupnotification.notification = n;
 		p.appendChild(popupnotification);
 		p.openPopup(doc.getElementById(n.anchor), "bottomcenter topleft");
+		
+		setTimeout(function(){
+			gBrowser.userTypedValue = gURLBar.value = InstantFoxModule.Plugins.google.key + " " +
+				InstantFoxModule.getString("welcome.urlbar")
+			InstantFox.onInput()
+		}, 20)
 	},
 	// end belong to notifyTab
 
@@ -474,7 +480,7 @@ var InstantFox = {
 		gURLBar.currentShadow = s
 		this.rightShadow = s.shadow // fixme
 		gURLBar.instantFoxTipNode.parentNode.hidden = false;
-		gURLBar.instantFoxTipNode.textContent = "TAB to complete"; //\u21B9 \u21C4
+		gURLBar.instantFoxTipNode.textContent = InstantFoxModule.getString("hint.tabToComplete"); //\u21B9 \u21C4
 		this.$urlBarModified = true
 	},
 

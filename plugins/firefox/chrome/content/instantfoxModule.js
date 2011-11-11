@@ -1032,10 +1032,10 @@ getBundle = function(name, locale){
 	);
 }
 
-XPCOMUtils.defineLazyGetter("InstantFoxModule", "$bundle", function(){
+XPCOMUtils.defineLazyGetter(InstantFoxModule, "$bundle", function(){
 	return getBundle('instantfox.properties');
 })
-XPCOMUtils.defineLazyGetter("InstantFoxModule", "$defaultBundle", function(){
+XPCOMUtils.defineLazyGetter(InstantFoxModule, "$defaultBundle", function(){
 	return getBundle('instantfox.properties', "default");
 })
 
@@ -1046,7 +1046,7 @@ InstantFoxModule.getString = function(name) {
 		try{
 			return this.$defaultBundle.GetStringFromName(name)
 		}catch(e1){
-			Cu.reportError("no string for" + name)
+			Cu.reportError("no string for: " + name)
 			return ""
 		}
 	}
