@@ -101,7 +101,7 @@ var InstantFox = {
         }, popupnotification);
 		var closeItemSeparator = $el("menuseparator", null, popupnotification);
 
-		p.openPopup(doc.getElementById(n.anchor), "bottomcenter topleft");
+		p.openPopup($(n.anchor), "bottomcenter topleft");
 		
 		// 
 		setTimeout(function() {
