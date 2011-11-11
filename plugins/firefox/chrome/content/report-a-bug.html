@@ -3,6 +3,32 @@
     <head>
 		<title>report a bug.</title>
 		<link rel="stylesheet" href="resource://instantfox/style.css">
+		<style>
+			.data {
+				color: darkSlateBlue;
+				margin-left: 4ch;
+				white-space: pre-wrap;
+				word-wrap: break-word;
+				-moz-transition: all 0.2s ease 0s;
+			}
+			.head {
+				color:darkred;
+				cursor:pointer;
+			}
+			.head.closed {
+				border-bottom: 1px solid
+			}
+			.data.closed {
+				height: 0;
+				max-height: 0;
+				opacity: 0;
+				pointer-events:none;
+				font-size: 0;
+			}
+			:-moz-any(.head, .data):hover{
+				background: rgba(200, 220, 250, 0.5);
+			}
+		</style>
     </head>
  
 	<body>
@@ -14,12 +40,25 @@
 			</div>
 			<div  class=env>
 				<button onclick="copyToClipboard()">copy technical data</button>
-				<pre id="data"></pre>
+				<pre id="data" onclick="toggle(event)"></pre>
 			</div>
 		</div>
 	</body>
   	<script type='text/javascript'><!--
 
+function toggle(e){
+	var head = e.target
+	
+	if (e.target.className.indexOf("head") == -1){
+		if (e.detail == 2){
+			head = head.previousSibling
+		}else
+			return
+	}
+	
+	head.nextSibling.classList.toggle("closed")
+	head.classList.toggle("closed")
+}
 function $(id)document.getElementById(id)
 function readEntireFile(file) {
     var data = "", str = {}, fstream = Cc['@mozilla.org/network/file-input-stream;1'].createInstance(Ci.nsIFileInputStream), converter = Cc['@mozilla.org/intl/converter-input-stream;1'].createInstance(Ci.nsIConverterInputStream);
@@ -67,14 +106,22 @@ var report = {
 	status: [],
 }
 updateUI = function(){
-	var text = ""
+	var data = $('data'), text, div
+	data.textContent=""
 	for (var i in report){
-		text += "#>>" + Array(40).join("-") + "\n"
-		text += "#>>" + i + "\n"
-		text += report[i] + "\n"
+		div = document.createElement("div")
+		div.className = "head"
+		text = "#>>" + Array(40).join("-") + "\n"
+		     + "#>>" + i + "\n"
+		div.textContent = text
+		data.appendChild(div)
+		
+		var div = document.createElement("div")
+		div.className = "data"
+		div.textContent = report[i] + "\n"
+		data.appendChild(div)		
 	}
 	
-	$('data').textContent=text
 	return text
 }
 copyToClipboard = function(){
@@ -179,9 +226,10 @@ setTimeout(function(){
 	updateUI()
 })
 
-
+setTimeout(function(){
+	report.currentJSON = InstantFoxModule.pluginLoader.getPluginString()
+})
 Components.utils.import('chrome://instantfox/content/instantfoxModule.js')
-report.currentJSON = InstantFoxModule.pluginLoader.getPluginString()
 updateUI()
 
 	 --></script>
