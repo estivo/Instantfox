@@ -64,7 +64,7 @@ function fixupPlugin(p){
 		p.domain = pluginLoader.extendedDomainFromURL(p.url)
 
 		p.id = p.id.toLowerCase()
-		p.iconURI = p.iconURI || getFavicon(p.url);
+		p.iconURI = p.iconURI || pluginLoader.getFavicon(p.url);
 
 		if(!p.name){
 			try{
@@ -127,7 +127,7 @@ var pluginLoader = {
 				});
 				// change iconURI to match url
 				if(p.url != p.def_url)
-					p.iconURI = getFavicon(p.url);
+					p.iconURI = pluginLoader.getFavicon(p.url);
 			}
 			newPlugins[id] = p;
 		}
@@ -416,7 +416,7 @@ function pluginFromNsiSearch(bp){
 		iconURI:iconURI,
 		name:name,
 		id:name.toLowerCase(),
-		domain: extendedDomainFromURL(url),
+		domain: pluginLoader.extendedDomainFromURL(url),
 		disabled:false,
 		key: bp.alias,
 		type:'browserSearch'
@@ -439,6 +439,7 @@ function importBrowserPlugins(importKeys) {
 				})
 		}
 	}catch(e){
+		Cu.reportError(e)
 	}
 }
 
