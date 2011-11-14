@@ -1,17 +1,30 @@
 InstantFox.contentHandlers = {
+	"__default__":{
+		isSame: function(q, url2go){
+			return q.query && q.preloadURL && url2go.toLowerCase() == q.preloadURL.toLowerCase()
+		}
+	},
 	"google":{
+		isSame: function(q, url2go){
+			if (!q.query || !q.preloadURL)
+				return false
+			if (url2go.toLowerCase() == q.preloadURL.toLowerCase())
+				return true
+
+			var m1 = url2go.match(this.qRe), m2 = q.preloadURL.match(this.qRe)
+			return m1 && m2 && m1[1].toLowerCase() == m2[1].toLowerCase()
+		},
 		transformURL: function(q, url2go) {
 			try{
 				var url = InstantFox.pageLoader.preview.contentDocument.location.href;
-				dump("//////////////////////////")
+				dump("---", url, url2go, q.query)
 				// 
 				var gDomain = url.match(/https?:\/\/((www|encrypted)\.)?google.([a-z\.]*)[^#]*/i)
 				if (!gDomain)
 					return url2go
 				var query = url2go.match(/#.*/)
 				if (!query)
-					return url2go
-				dump(gDomain[0] + query[0], url2go, q.preloadURL)
+					return url2go					
 				return gDomain[0] + query[0]
 			}catch(e){
 				Cu.reportError(e)
@@ -22,7 +35,7 @@ InstantFox.contentHandlers = {
 			this.checkPreview(800)
 		},
 		// workaround for google bug
-		gre: /[&?#]q=([^&]*)/,
+		qRe: /[&?#]q=([^&]*)/,
 		checkPreview: function(delay){
 			var q = InstantFoxModule.currentQuery
 			if(!q)
@@ -42,12 +55,10 @@ InstantFox.contentHandlers = {
 			var url = InstantFox.pageLoader.preview.contentDocument.location.href
 			if (url == "about:blank")
 				return;
-			var m1 = url.match(self.gre), m2 = q.preloadURL.match(self.gre)
-			//dump('***************', url, q.preloadURL)
-			//dump('***************', m1, m2, self.gre)
-			if(!m1 || !m2 || m1[1] != m2[1]){
+
+			if (!self.isSame(q, url)) {
 				Cu.reportError(url + "\n!=\n" + q.preloadURL)
-				InstantFox.pageLoader.addPreview(InstantFoxModule.currentQuery.preloadURL)
+				InstantFox.pageLoader.addPreview(q.preloadURL)
 				self.checkPreview(800)
 			}
 		}

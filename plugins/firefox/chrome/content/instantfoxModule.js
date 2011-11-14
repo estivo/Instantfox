@@ -1,3 +1,4 @@
+
 var Cc  = Components.classes;
 var Ci  = Components.interfaces;
 var Cr  = Components.results;
@@ -782,12 +783,13 @@ function AutoCompleteResultToArray(r){
 }
 function SimpleAutoCompleteResult(list, searchString, defaultIndex) {
 	this._searchString = searchString;
-	this._defaultIndex = defaultIndex || 0;
 	if (list){
 		var status = (list.length?'SUCCESS':'NOMATCH')
 		this.list = list;
 	} else
 		var status = 'FAILURE';
+
+	this._defaultIndex = defaultIndex || 0;
 
 	this._searchResult = Ci.nsIAutoCompleteResult['RESULT_' + status];
 }
@@ -804,8 +806,14 @@ SimpleAutoCompleteResult.prototype = {
 	_defaultIndex: 0,
 	_errorDescription: "",
 	list: [],
+	/*********** nsIAutoCompleteSimpleResult *********/
 	setSearchResult: function(val) this._searchResult = val,
 	setDefaultIndex: function(val) this._defaultIndex = val,
+	setSearchString: function(aSearchString){},
+	setErrorDescription: function(aErrorDescription){},
+	appendMatch: function(aValue,aComment,aImage, aStyle){},
+	setListener: function(aListener){},
+	/********************/
 
 	get searchResult() this._searchResult,
 	get searchString() this._searchString,
@@ -828,11 +836,7 @@ SimpleAutoCompleteResult.prototype = {
 		dump(index, removeFromDb)
 		this.list.splice(index, 1);
 	},
-	QueryInterface: function(aIID) {
-		if (!aIID.equals(Ci.nsIAutoCompleteResult) && !aIID.equals(Ci.nsISupports))
-			throw Components.results.NS_ERROR_NO_INTERFACE;
-		return this;
-	}
+	QueryInterface: XPCOMUtils.generateQI([ Ci.nsIAutoCompleteResult, Ci.nsIAutoCompleteSimpleResult ])  
 };
 
 
@@ -841,7 +845,7 @@ InstantFoxSearch.prototype = {
 	classDescription: "Autocomplete 4 InstantFox",
 	classID: Components.ID("c541b971-0729-4f5d-a5c4-1f4dadef365e"),
 	contractID: "@mozilla.org/autocomplete/search;1?name=instantFoxAutoComplete",
-	QueryInterface: XPCOMUtils.generateQI([Ci.nsIAutoCompleteSearch]),
+	QueryInterface: XPCOMUtils.generateQI([Ci.nsIAutoCompleteSearch, Ci.nsIAutoCompleteObserver]),
 
 	// implement searchListener for historyAutoComplete
 	onSearchResult: function(search, result) {
@@ -850,7 +854,7 @@ InstantFoxSearch.prototype = {
 
 	// implement nsIAutoCompleteSearch
 	startSearch: function(searchString, searchParam, previousResult, listener) {
-		if (searchString.slice(0, 6) == 'about:'){
+		if (searchString[0] == ":" || searchString.slice(0, 6) == 'about:'){
 			searchString = searchString.substr(6)
 			var results = filter(getAboutUrls(), searchString)
 			if(results && results.length){
@@ -864,10 +868,10 @@ InstantFoxSearch.prototype = {
 			this.$searchingHistory = true
 			this.listener = listener;
 			this.searchString = searchString;
-			dump(searchParam)
-			this.historyAutoComplete.startSearch(searchString, "", previousResult, this);
+			this.historyAutoComplete.startSearch(searchString, searchParam, null, this);
 			return
-		} else if(this.$searchingHistory)
+		}
+		if (this.$searchingHistory)
 			this.historyAutoComplete.stopSearch()
 
 		var q = InstantFoxModule.currentQuery

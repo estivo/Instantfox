@@ -375,7 +375,7 @@ var InstantFox = {
 	get _url() InstantFoxModule.currentQuery,
 
 	getQuery: function(val, oldQ){
-		dump(val, oldQ)
+		//dump(val, oldQ)
 		var plugin, key
 		var i = val.indexOf(' ');
 		if(val[0]=='`'){
@@ -494,38 +494,39 @@ var InstantFox = {
 	minLoadTime: 100,
 	maxLoadTime: 200,
 	doPreload: function(q) {
-		if (this.timeout)
+		if (this._timeout != null)
 			this._timeout = clearTimeout(this._timeout)
 
 		var url2go = InstantFoxModule.urlFromQuery(q);
-		var contentHandler = this.contentHandlers[q.plugin.id];
+		var handler = this.contentHandlers[q.plugin.id] || this.contentHandlers.__default__;
+		if (this._isOwnQuery && handler.transformURL) {
+			url2go = handler.transformURL(q, url2go)
+		}
+dump("---1",  url2go, q.query)
 
-		if(q.query && q.preloadURL && url2go.toLowerCase() == q.preloadURL.toLowerCase()){
-			contentHandler && contentHandler.onLoad(q, true)
+		if (handler.isSame(q, url2go)) {
+			handler.onLoad && handler.onLoad(q, url2go)
 			return url2go
 		}
-
-		q.preloadURL = url2go
+dump("---2",  url2go, q.query)
 
 		var now = Date.now()
 
 		if (this._isOwnQuery) {
-			// gBrowser.docShell.isLoadingDocument
 			if(now - this.loadTime < this.minLoadTime){
 				this.schedulePreload(this.minLoadTime)
 				return
 			}
-			if (contentHandler) {
-				if (contentHandler.transformURL) {
-					q.preloadURL = url2go = contentHandler.transformURL(q, url2go)
-				}
-				if (contentHandler.onLoad(q, url2go))
+			if (handler.onLoad) {
+				if (handler.onLoad(q, url2go))
 					return url2go
 			}
 		} else {
 			this._isOwnQuery = true;
 		}
-		dump("//////////////////////////", url2go)
+dump("---3",  url2go, q.query)
+
+		q.preloadURL = url2go
 
 		this.pageLoader.addPreview(url2go);
 
@@ -533,7 +534,7 @@ var InstantFox = {
 		return url2go
 	},
 	schedulePreload: function(delay) {
-		if (this._timeout)
+		if (this._timeout != null)
 			return;
 
 		this._timeout = setTimeout(function(self){
@@ -573,7 +574,7 @@ var InstantFox = {
 		}
 
 		InstantFoxModule.currentQuery = null;
-		if(this.timeout)
+		if(this._timeout != null)
 			this._timeout = clearTimeout(this._timeout)
 		//
 		this.updateLogo(false)
