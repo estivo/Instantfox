@@ -616,11 +616,15 @@ InstantFox.popupCloser = function(e) {
 	}
 	window.removeEventListener('mousedown', InstantFox.popupCloser, false)
 	document.getElementById('instantfox-popup').hidePopup()
+	
+	document.getElementById('instantFox-options').removeAttribute("open")
 }
 InstantFox.onPopupShowing = function(p) {
 	if (p.id != 'instantfox-popup')
 		return
 
+	document.getElementById('instantFox-options').setAttribute("open", true)
+	
 	window.addEventListener('mousedown', InstantFox.popupCloser, false)
 
 	var st = p.querySelector('stack')

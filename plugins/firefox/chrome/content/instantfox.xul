@@ -10,7 +10,8 @@
 		<menupopup>
 		  <menuitem action="build" label="build"/>
 		   <!--<menuitem action="build-d" label="build-debug"/>-->
-		  <menuitem action="buildLocales" label="convert pluginList to (left:ascii/right:utf-8)"/>
+		  <menuitem action="encodePluginList" label="convert pluginList to (left:ascii/right:utf-8)"/>
+		  <menuitem action="copyLocaleManifest" label="copy Locales for Manifest"/>
 		  <menuitem action="delete-plugin-file" label="delete-plugin-file"/>
 		  <menuitem action="test-first-run" label="test first run"/>
 		  <menuitem action="show-folder" label="show folder"/>
