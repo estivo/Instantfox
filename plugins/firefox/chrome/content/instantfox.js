@@ -616,15 +616,12 @@ InstantFox.popupCloser = function(e) {
 	}
 	window.removeEventListener('mousedown', InstantFox.popupCloser, false)
 	document.getElementById('instantfox-popup').hidePopup()
-	
-	document.getElementById('instantFox-options').removeAttribute("open")
 }
 InstantFox.onPopupShowing = function(p) {
 	if (p.id != 'instantfox-popup')
 		return
 
-	document.getElementById('instantFox-options').setAttribute("open", true)
-	
+	document.getElementById('instantFox-options').setAttribute("open", true)	
 	window.addEventListener('mousedown', InstantFox.popupCloser, false)
 
 	var st = p.querySelector('stack')
@@ -649,6 +646,7 @@ InstantFox.onPopupHiding = function(p) {
 	var ifr = p.querySelector('iframe')
 	ifr.contentWindow.saveChanges()
 	window.removeEventListener('mousedown', InstantFox.popupCloser, false)
+	document.getElementById('instantFox-options').removeAttribute("open");
 }
 InstantFox.updatePopupSize = function(size) {
 	var p = document.getElementById('instantfox-popup')
