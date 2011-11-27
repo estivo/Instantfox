@@ -381,7 +381,7 @@ var InstantFox = {
 		if(val[0]=='`'){
 			if (i == -1)
 				i = val.length
-			key = val.substring(0, i)
+			key = val.substring(1, i)
 			if(gURLBar.selectionStart <= i)
 				plugin = {
 					suggestPlugins: true,
@@ -390,7 +390,7 @@ var InstantFox = {
 					disableInstant: true
 				}
 			else
-				plugin = InstantFoxModule.getBestPluginMatch(key.substr(1))
+				plugin = InstantFoxModule.getBestPluginMatch(key)
 		}else{
 			if (i == -1)
 				return this.defQ

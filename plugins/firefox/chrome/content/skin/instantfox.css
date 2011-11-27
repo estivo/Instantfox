@@ -16,12 +16,15 @@ richlistitem[type='InstantFoxSuggest'] {
 html|span.InstantFoxSuggest.ac-emphasize-text{
 	text-decoration:none !important;
 	font-weight:normal !important;
-	/color:#000 !important;
 }
 richlistbox[type='InstantFoxSuggest'] {
 	background-image:url(chrome://instantfox/content/skin/logo.png)!important;
 	background-repeat:no-repeat;
 	background-position: 95% bottom;
+}
+.InstantFoxSuggest-comment {
+	font-style: italic;
+	color: graytext
 }
 /** button ***************************************/
 #instantFox-options {

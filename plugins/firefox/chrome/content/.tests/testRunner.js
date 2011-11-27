@@ -2,7 +2,7 @@ itest = {}
 ;(function(){
 
 this.key = function(aKey, aEvent, aWindow) {
-	aEvent = aEvent || {};
+    aEvent = aEvent || {};
 	if (!aWindow)
 		aWindow = window;
 
@@ -10,7 +10,7 @@ this.key = function(aKey, aEvent, aWindow) {
  
     var keyCode = 0, charCode = 0;
     if (aKey.indexOf("VK_") == 0)
-		keyCode = getKeyEvent(aWindow)["DOM_" + aKey];
+		keyCode = KeyboardEvent["DOM_" + aKey];
     else
 		charCode = aKey.charCodeAt(0);
 
@@ -81,7 +81,7 @@ this.runNext = function(){
 	if(!test){
 		dump('all tests finished')
 		return	
-	}		
+	}
 	var name = test.name
 	try{
 		test.run()
@@ -89,7 +89,7 @@ this.runNext = function(){
 		Cu.reportError(name+":(Failed to run")		
 		Cu.reportError(e)		
 	}
-	setTimeout(function(){
+	setTimeout(function() {
 		try{
 			if(test.test())
 				dump(name, ':)Pass')
@@ -110,7 +110,7 @@ testList = [{
 		var p = InstantFoxModule.Plugins.google
 		p.key = 'g'
 		p.disableSuggest = true
-		p.disableInstant = false	
+		p.disableInstant = false
 		
 		window.focus()
 		itest.mouse(gURLBar)
@@ -119,26 +119,36 @@ testList = [{
 		itest.key(' ')
 		itest.key('-')
 		itest.key('-')
+                
+        p.disableSuggest = false
 	},
 	test: function(){
-		return content.location.href.indexOf('--')!=0
+        var pl = InstantFox.pageLoader
+		return pl.isActive&&pl.preview.contentDocument.location.href.indexOf('--')!=-1
+	},
+	delay:100
+}, {
+    name: "escape",
+    run: function(){
+        itest.key('VK_ESCAPE')        
+    },
+    test: function(){
+        var pl = InstantFox.pageLoader
+        if(!pl.isActive)
+            return true 
+    }
+}, {
+	name: 'click on popup',
+	run: function() {
+        
+	},
+	test: function(){
+		
 	},
 	delay:100
 },{
 	name: 'wikipedia suggest rules ',
-	run: function(){
-		var p = InstantFoxModule.Plugins.google
-		p.key = 'g'
-		p.disableSuggest = true
-		p.disableInstant = false	
-		
-		window.focus()
-		itest.mouse(gURLBar)
-		gURLBar.select()
-		itest.key('g')
-		itest.key(' ')
-		itest.key('-')
-		itest.key('-')
+	run: function() {
 	},
 	test: function(){
 		var p = {url:'http://am.wikipedia.org/%q', id:'id'}

@@ -105,10 +105,8 @@
         <xul:hbox anonid="title-box" class="ac-title" flex="1">
           <xul:description anonid="title" class="ac-normal-text ac-comment" xbl:inherits="selected"/>
         </xul:hbox>
-        <xul:hbox anonid="extra-box" class="ac-extra" align="center" hidden="true">
-          <xul:image class="ac-result-type-tag"/>
-          <xul:label class="ac-normal-text ac-comment" xbl:inherits="selected" value=":"/>
-          <xul:description anonid="extra" class="ac-normal-text ac-comment" xbl:inherits="selected"/>
+        <xul:hbox anonid="extra-box" class="" align="center" >
+          <xul:description anonid="extra" class="InstantFoxSuggest-comment" xbl:inherits="selected"/>
         </xul:hbox>
         <xul:image anonid="type-image" class="ac-type-icon"/>
       </xul:hbox>
@@ -272,11 +270,12 @@
       <method name="_adjustAcItem">
         <body>
           <![CDATA[
-          var title = this.getAttribute("title");
+          var comment = this.getAttribute("title");
 
-          var url = this.getAttribute("url");
-		  if (url)
-			this._setUpDescription(this._title, title);
+          var label = this.getAttribute("url");
+		  this._setUpDescription(this._title, label);
+		
+		  this._extra.value = comment
 		  return;
           ]]>
         </body>

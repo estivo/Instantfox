@@ -594,6 +594,7 @@ var parseSimpleJson = function(json, key, splitSpace){
 		var xhrReturn = JSON.parse(json)[1];
 	}catch(e){
 		Cu.reportError(e);
+		dump(json)
 		try{
 			xhrReturn = json.substring(json.indexOf("[\"")+2,json.lastIndexOf("\"]")).split('","')
 		}catch(e){
@@ -654,7 +655,8 @@ var getMatchingPlugins = function(key, tail){
 		results.push({
 			icon: p.iconURI,
 			title: p.name,
-			url: '`' + p.name.replace(' ', '\xB7', 'g') + tail
+			url: '`' + p.name.replace(' ', '\xB7', 'g') + tail,
+			comment: p.key
 		})
 	}
 	return results
@@ -775,7 +777,7 @@ function AutoCompleteResultToArray(r){
 			icon: r.getImageAt(i),
 			type: r.getStyleAt(i),
 			comment: r.getCommentAt(i),
-			label: r.getLabelAt(i),
+			title: r.getLabelAt(i),
 			url: r.getValueAt(i),
 			origIndex: i
 		})
@@ -822,9 +824,9 @@ SimpleAutoCompleteResult.prototype = {
 	get matchCount() this.list.length,
 
 	getCommentAt: function(index) 
-		this.list[index] && this.list[index].title || "",//title attribute on richlistitem in popup
+		this.list[index] && this.list[index].comment || "",//title attribute on richlistitem in popup
 	getLabelAt: function(index) 
-		this.list[index] && this.list[index].url || "",//url attribute on richlistitem in popup
+		this.list[index] && this.list[index].title || "",//url attribute on richlistitem in popup
 	getValueAt: function(index) 
 		this.list[index] && this.list[index].url || "",//displayed in urlbar
 	getImageAt: function(index) 
@@ -911,7 +913,8 @@ InstantFoxSearch.prototype = {
 			this.parser = isMaps ? parseMapsJson : parseSimpleJson
 		}
 
-
+		dump(url)
+		
 		if (url) {
 			this.listener = listener;
 			this.startReq(url)
