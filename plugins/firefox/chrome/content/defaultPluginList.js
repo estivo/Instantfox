@@ -13,13 +13,13 @@ var commonPlugins = {
 	Google: {
 		key: "g",
 		url: "http://www.google.%ld/#hl=%ls&q=%q&fp=1&cad=b",
-		json: "http://suggestqueries.google.com/complete/search?json&q=%q&hl=%ls",
+		json: "http://suggestqueries.google.com/complete/search?json&client=firefox&q=%q&hl=%ls",
 		name: "Google"
 	},
 	GoogleImages: {
 		key: "i",
 		url: "http://www.google.%ld/search?tbm=isch&q=%q&hl=%ls",
-		json: "http://suggestqueries.google.com/complete/search?json&ds=i&hl=%ls&q=%q",
+		json: "http://suggestqueries.google.com/complete/search?json&client=firefox&ds=i&hl=%ls&q=%q",
 		name: "Google Images"
 	},
 	GoogleMaps: {
@@ -37,7 +37,7 @@ var commonPlugins = {
 	Youtube: {
 		key: "y",
 		url: "http://www.youtube.com/results?search_query=%q",
-		json: "http://suggestqueries.google.com/complete/search?json&hl=%ls&ds=yt&q=%q",
+		json: "http://suggestqueries.google.com/complete/search?json&client=firefox&hl=%ls&ds=yt&q=%q",
 		name: "Youtube"
 	},
 	Amazon: {
@@ -79,7 +79,7 @@ var commonPlugins = {
 	GoogleLuck: {
 		key: "gg",
 		url: "http://www.google.%ld/search?hl=%ls&q=%q&btnI=1",
-		json: "http://suggestqueries.google.com/complete/search?json&q=%q&hl=%ls",
+		json: "http://suggestqueries.google.com/complete/search?json&client=firefox&q=%q&hl=%ls",
 		hideFromContextMenu: true,
 		name: "Google Luck"
 	},
@@ -193,12 +193,12 @@ locale(["en","en-US","com"], {
 	},
 	GoogleImages: {
 		url: "http://www.google.%ld/images?q=%q",
-		json: "http://suggestqueries.google.com/complete/search?json&ds=i&q=%q"
+		json: "http://suggestqueries.google.com/complete/search?json&client=firefox&ds=i&q=%q"
 	},
 	GoogleMaps: true,
 	Wikipedia: true,
 	Youtube: {
-		json: "http://suggestqueries.google.com/complete/search?json&ds=yt&q=%q"
+		json: "http://suggestqueries.google.com/complete/search?json&client=firefox&ds=yt&q=%q"
 	},
 	Amazon: true,
 	eBay: true,
@@ -660,7 +660,7 @@ locale(["zh","zh-CN","cn"], {
 	},
 	GoogleImages: {
 		url: "http://www.google.com.hk/images?q=%q&hl=%ls",
-		json: "http://suggestqueries.google.com/complete/search?json&ds=i&hl=%ls&q=%q",
+		json: "http://suggestqueries.google.com/complete/search?json&client=firefox&ds=i&hl=%ls&q=%q",
 		name: "Google \u56fe\u7247"
 	},
 	GoogleMaps: {
