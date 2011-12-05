@@ -105,45 +105,45 @@ InstantFox.pageLoader = {
 	},
 	// Mostly copied from mozillaLabs instantPreview
 	swapBrowsers: function(tab) {
-		let preview = this.preview
+    	var origin = this.preview;
 
         // Mostly copied from tabbrowser.xml swapBrowsersAndCloseOther
-        let browser = window.gBrowser;
-		let selectedTab = tab || browser.selectedTab;
-        let selectedBrowser = selectedTab.linkedBrowser;
-        selectedBrowser.stop();
+        var gBrowser = window.gBrowser;
+		var targetTab = tab || gBrowser.selectedTab;
+        var targetBrowser = targetTab.linkedBrowser;
+        targetBrowser.stop();
 
-        // Unhook our progress listener
-        let selectedIndex = selectedTab._tPos;
-        const filter = browser.mTabFilters[selectedIndex];
-        let tabListener = browser.mTabListeners[selectedIndex];
-        selectedBrowser.webProgress.removeProgressListener(filter);
+        // Unhook progress listener
+        var targetPos = targetTab._tPos;
+		var filter = gBrowser.mTabFilters[targetPos];
+		targetBrowser.webProgress.removeProgressListener(filter);
+		var tabListener = gBrowser.mTabListeners[targetPos]
         filter.removeProgressListener(tabListener);
-        let tabListenerBlank = tabListener.mBlank;
+		tabListener.destroy();
+        var tabListenerBlank = tabListener.mBlank;
 
-        // Pick out the correct interface for before/after Firefox 4b8pre
-        let openPage = browser.mBrowserHistory || browser._placesAutocomplete;
+        var openPage = gBrowser._placesAutocomplete;
 
         // Restore current registered open URI.
-        if (selectedBrowser.registeredOpenURI) {
-            openPage.unregisterOpenPage(selectedBrowser.registeredOpenURI);
-            delete selectedBrowser.registeredOpenURI;
+        if (targetBrowser.registeredOpenURI) {
+            openPage.unregisterOpenPage(targetBrowser.registeredOpenURI);
+            delete targetBrowser.registeredOpenURI;
         }
-        openPage.registerOpenPage(preview.currentURI);
-        selectedBrowser.registeredOpenURI = preview.currentURI;
+        openPage.registerOpenPage(origin.currentURI);
+        targetBrowser.registeredOpenURI = origin.currentURI;
 
         // Save the last history entry from the preview if it has loaded
-        let history = preview.sessionHistory.QueryInterface(Ci.nsISHistoryInternal);
-        let entry;
+        var history = origin.sessionHistory.QueryInterface(Ci.nsISHistoryInternal);
+        var entry;
         if (history.count > 0) {
             entry = history.getEntryAtIndex(history.index, false);
             history.PurgeHistory(history.count);
         }
 
         // Copy over the history from the current tab if it's not empty
-        let origHistory = selectedBrowser.sessionHistory;
-        for (let i = 0; i <= origHistory.index; i++) {
-            let origEntry = origHistory.getEntryAtIndex(i, false);
+        var origHistory = targetBrowser.sessionHistory;
+        for (var i = 0; i <= origHistory.index; i++) {
+            var origEntry = origHistory.getEntryAtIndex(i, false);
             if (origEntry.URI.spec != "about:blank") history.addEntry(origEntry, true);
         }
 
@@ -152,27 +152,27 @@ InstantFox.pageLoader = {
 			history.addEntry(entry, true);
 
         // Swap the docshells then fix up various properties
-        selectedBrowser.swapDocShells(preview);
-        selectedBrowser.attachFormFill();
-        browser.setTabTitle(selectedTab);
-        browser.updateCurrentBrowser(true);
-        browser.useDefaultIcon(selectedTab);
-        gURLBar.value = (selectedBrowser.currentURI.spec != "about:blank") ? selectedBrowser.currentURI.spec : preview.getAttribute("src");
+        targetBrowser.swapDocShells(origin);
+        targetBrowser.attachFormFill();
+        gBrowser.setTabTitle(targetTab);
+        gBrowser.updateCurrentBrowser(true);
+        gBrowser.useDefaultIcon(targetTab);
+        gURLBar.value = (targetBrowser.currentURI.spec != "about:blank") ? targetBrowser.currentURI.spec : origin.getAttribute("src");
 
         // Restore the progress listener
-        tabListener = browser.mTabProgressListener(selectedTab, selectedBrowser, tabListenerBlank);
-        browser.mTabListeners[selectedIndex] = tabListener;
+        tabListener = gBrowser.mTabProgressListener(targetTab, targetBrowser, tabListenerBlank);
+        gBrowser.mTabListeners[targetPos] = tabListener;
         filter.addProgressListener(tabListener, Ci.nsIWebProgress.NOTIFY_ALL);
-        selectedBrowser.webProgress.addProgressListener(filter, Ci.nsIWebProgress.NOTIFY_ALL);
+        targetBrowser.webProgress.addProgressListener(filter, Ci.nsIWebProgress.NOTIFY_ALL);
 
 		// restore history
 		// preview.docShell.useGlobalHistory = true
 
-		return selectedBrowser
+		return targetBrowser
     },
 
 	onfocus: function(e){
-		this.persistPreview()
+		this.persistPreview(InstantFoxModule.openSearchInNewTab?"new":null)
 	},
 	onTitleChanged: function(e){
 		//dump(e.target.title)
