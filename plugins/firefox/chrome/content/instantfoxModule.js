@@ -618,7 +618,7 @@ var parseSimpleJson = function(json, key, splitSpace){
 }
 var parseMapsJson = function(json, key, splitSpace){
 	var xhrReturn = json.match(/query:"[^"]*/g);
-	if(!xhrReturn.length)
+	if(!xhrReturn || !xhrReturn.length)
 		return
 
 	var results=[];
@@ -884,7 +884,7 @@ InstantFoxSearch.prototype = {
 
 		if (plugin.suggestPlugins) {
 			// handle ` searches
-			var results = getMatchingPlugins(plugin.key, plugin.tail)
+			var results = getMatchingPlugins(plugin.key.substr(1), plugin.tail)
 		} else if (!plugin.json || plugin.disableSuggest){
 			// suggest is dissabled
 			url = null

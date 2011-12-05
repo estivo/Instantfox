@@ -306,7 +306,7 @@ var InstantFox = {
 					gURLBar.selectionStart = keyIndex+1
 					gURLBar.selectionEnd = origVal.length
 				} else {
-					gURLBar.selectionStart = 0
+					gURLBar.selectionStart = key[0] == '`' ? 1 : 0
 					gURLBar.selectionEnd = keyIndex
 				}
 				simulateInput = true
@@ -384,7 +384,7 @@ var InstantFox = {
 		if(val[0]=='`'){
 			if (i == -1)
 				i = val.length
-			key = val.substring(1, i)
+			key = val.substring(0, i)
 			if(gURLBar.selectionStart <= i)
 				plugin = {
 					suggestPlugins: true,
@@ -393,7 +393,7 @@ var InstantFox = {
 					disableInstant: true
 				}
 			else
-				plugin = InstantFoxModule.getBestPluginMatch(key)
+				plugin = InstantFoxModule.getBestPluginMatch(key.substr(1))
 		}else{
 			if (i == -1)
 				return this.defQ
