@@ -59,6 +59,14 @@ try{
  *        id:
  *    }
  ***************/
+// clearly someone was drunk while inventing descriptor stuff
+// why is configurable needed in the first place?
+var desc = Object.getOwnPropertyDescriptor({i:1},'i')
+function setProp(o, name, val) {
+	desc.value = val
+	Object.defineProperty(o, name, desc)
+}
+ 
 // used for new plugins only
 function fixupPlugin(p){
 	if(p.url){
@@ -130,14 +138,14 @@ var pluginLoader = {
 				if(p.url != p.def_url)
 					p.iconURI = pluginLoader.getFavicon(p.url);
 			}
-			newPlugins[id] = p;
+			setProp(newPlugins, id, p);
 		}
 		// remove default plugins from other locale
 		for each(var p in oldPlugins) {
 			if (newPlugins[p.id])
 				continue
 			if (p.type != 'default' || this.isUserModified(p))
-				newPlugins[p.id] = p
+				setProp(newPlugins, id, p);
 		}
 		
 		InstantFoxModule.Plugins = newPlugins;
@@ -163,12 +171,14 @@ var pluginLoader = {
 				for each (var k in keys) {
 					if (!k)
 						continue
-						
-					if (InstantFoxModule.Shortcuts[k])
-						conflicts[InstantFoxModule.Plugins[InstantFoxModule.Shortcuts[k]].id] =
-							conflicts[p.id] = true
+					
+					var id = InstantFoxModule.resolveShortcut(k)
+					if (id) {
+						setProp(conflicts, InstantFoxModule.Plugins[id].id, true)
+						setProp(conflicts, p.id, true)
+					}
 
-					InstantFoxModule.Shortcuts[k] = p.id
+					setProp(InstantFoxModule.Shortcuts, k, p.id)
 				}
 			}
 		}
@@ -193,7 +203,7 @@ var pluginLoader = {
 			var mP = InstantFoxModule.Plugins[id]
 			if(mP && mP.key)
 				p.key = mP.key
-			InstantFoxModule.Plugins[id] = p;
+			setProp(InstantFoxModule.Plugins, id, p)
 		}
 		// add data from browser search engines
 		importBrowserPlugins(false)
@@ -428,7 +438,7 @@ function importBrowserPlugins(importKeys) {
 		var browserPlugins = Services.search.getEngines().map(pluginFromNsiSearch)
 		for each(var p in browserPlugins){
 			if(!InstantFoxModule.Plugins[p.id])
-				InstantFoxModule.Plugins[p.id] = p
+				setProp(InstantFoxModule.Plugins, p.id, p)
 			else if(importKeys && p.key)
 				InstantFoxModule.Plugins[p.id].key = p.key
 
@@ -566,6 +576,9 @@ InstantFoxModule = {
 	},
 	Plugins: {},
 	Shortcuts: {},
+	resolveShortcut: function(key) {
+		return this.Shortcuts.hasOwnProperty(key) && this.Shortcuts[key]
+	},
 	pluginLoader: pluginLoader,
 
 	getBestPluginMatch: function(key){

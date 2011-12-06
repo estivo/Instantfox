@@ -300,7 +300,7 @@ var InstantFox = {
 			var keyIndex = origVal.indexOf(' ')
 			var key = origVal.substring(0,keyIndex)
 
-			if(key in InstantFoxModule.Shortcuts || key[0] == '`'){
+			if(InstantFoxModule.resolveShortcut(key) || key[0] == '`'){
 			//gURLBar.value = '`'+origVal
 				if (gURLBar.selectionStart <= keyIndex) {
 					gURLBar.selectionStart = keyIndex+1
@@ -398,7 +398,7 @@ var InstantFox = {
 			if (i == -1)
 				return this.defQ
 			key = val.substr(0, i)
-			var id = InstantFoxModule.Shortcuts[key]
+			var id = InstantFoxModule.resolveShortcut(key)
 			if (!id)
 				return this.defQ;
 			plugin = InstantFoxModule.Plugins[id]
@@ -568,7 +568,7 @@ dump("---3",  url2go, q.query)
 					break
 				}
 			}
-			if(tab){
+			if(tab) {
 				this.pageLoader.persistPreview(tab, true)
 			}else{
 				dump('no tab')
