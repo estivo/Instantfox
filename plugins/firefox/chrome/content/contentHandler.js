@@ -85,7 +85,7 @@ InstantFox.pageLoader = {
 		if (!this.previewIsActive)
 			return;
 		gURLBar.blur()
-		if(tab == 'new'){
+		if(tab == 'new' || (tab == undefined && InstantFoxModule.openSearchInNewTab)){
 			tab = gBrowser.selectedTab
 			if(!isTabEmpty(tab)){
 				gBrowser._lastRelatedTab = null
@@ -166,13 +166,13 @@ InstantFox.pageLoader = {
         targetBrowser.webProgress.addProgressListener(filter, Ci.nsIWebProgress.NOTIFY_ALL);
 
 		// restore history
-		// preview.docShell.useGlobalHistory = true
+		targetBrowser.docShell.useGlobalHistory = true
 
 		return targetBrowser
     },
 
 	onfocus: function(e){
-		this.persistPreview(InstantFoxModule.openSearchInNewTab?"new":null)
+		this.persistPreview()
 	},
 	onTitleChanged: function(e){
 		//dump(e.target.title)
@@ -221,7 +221,7 @@ InstantFox.pageLoader = {
 		}
 		this.previewIsActive = true
 		// disable history
-		// preview.docShell.useGlobalHistory = false
+		preview.docShell.useGlobalHistory = false
 
 
         // Load the url i

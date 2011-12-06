@@ -555,12 +555,13 @@ dump("---3",  url2go, q.query)
 	finishSearch: function() {
 		this.$urlBarModified = this._isOwnQuery = false
 		this.updateShadowLink(null)
+		gBrowser.userTypedValue = null;
 
 		var q = InstantFoxModule.currentQuery, br
 		if (!q) {
 			this.pageLoader.removePreview()
-		} else if (q.tabId == this._ctabID){
-			this.pageLoader.persistPreview(q.forceNewTab?'new':'')
+		} else if (q.tabId == this._ctabID) {
+			this.pageLoader.persistPreview(q.forceNewTab? 'new' : '')
 		} else {
 			for (var i = 0; i < gBrowser.tabs.length; i++) {
 				if (gBrowser.tabs[i].linkedPanel == q.tabId ){
@@ -598,7 +599,6 @@ dump("---3",  url2go, q.query)
 		//
 		var tmp = this.doPreload(InstantFoxModule.currentQuery)
 		gURLBar.value = tmp;
-		gBrowser.userTypedValue = null;
 
 		this.finishSearch()
 
@@ -629,7 +629,7 @@ InstantFox.onPopupShowing = function(p) {
 
 	var st = p.querySelector('stack')
 	var ifr = p.querySelector('iframe')
-	if (ifr){
+	if (ifr) {
 		// touch the stack, otherwise it isn't drawn in nightly
 		st.flex=0
 		st.flex=1
