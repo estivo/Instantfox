@@ -881,7 +881,7 @@ function locale(localeNames, plugins, autoSearch){
 			url: goog.url,
 			instant: "off",
 			suggest: false,
-			minQChars: 5
+			minQChars: 3
 		}
 	}
 	

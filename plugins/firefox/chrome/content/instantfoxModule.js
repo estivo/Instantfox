@@ -61,10 +61,10 @@ try{
  ***************/
 // clearly someone was drunk while inventing descriptor stuff
 // why is configurable needed in the first place?
-var desc = Object.getOwnPropertyDescriptor({i:1},'i')
+var _desc_ = Object.getOwnPropertyDescriptor({i:1},'i')
 function setProp(o, name, val) {
-	desc.value = val
-	Object.defineProperty(o, name, desc)
+	_desc_.value = val
+	Object.defineProperty(o, name, _desc_)
 }
  
 // used for new plugins only
@@ -798,15 +798,9 @@ function AutoCompleteResultToArray(r){
 }
 function SimpleAutoCompleteResult(list, searchString, defaultIndex) {
 	this._searchString = searchString;
-	if (list){
-		var status = (list.length?'SUCCESS':'NOMATCH')
-		this.list = list;
-	} else
-		var status = 'FAILURE';
-
 	this._defaultIndex = defaultIndex || 0;
 
-	this._searchResult = Ci.nsIAutoCompleteResult['RESULT_' + status];
+	this.setResultList(list)
 }
 SimpleAutoCompleteResult.prototype = {
 	/**
@@ -828,6 +822,16 @@ SimpleAutoCompleteResult.prototype = {
 	setErrorDescription: function(aErrorDescription){},
 	appendMatch: function(aValue,aComment,aImage, aStyle){},
 	setListener: function(aListener){},
+	/********************/
+	setResultList: function(list) { 
+		if (list){
+			var status = (list.length?'SUCCESS':'NOMATCH')
+			this.list = list;
+		} else
+			var status = 'FAILURE';
+
+		this._searchResult = Ci.nsIAutoCompleteResult['RESULT_' + status];
+	},
 	/********************/
 
 	get searchResult() this._searchResult,
@@ -854,6 +858,33 @@ SimpleAutoCompleteResult.prototype = {
 	QueryInterface: XPCOMUtils.generateQI([ Ci.nsIAutoCompleteResult, Ci.nsIAutoCompleteSimpleResult ])  
 };
 
+function combinedSearch(searchProvider) {
+	this.searchProvider = searchProvider
+	this._result = new SimpleAutoCompleteResult()
+}
+combinedSearch.prototype = {
+	notifyListener: function(){
+		this._result.setResultList(Array.concat(this.xhrEntries||[], this.historyEntries||[]))
+		this.listener.onSearchResult(this.searchProvider, this._result)
+	},
+	onSearchResult: function(search, historyResult) {
+		this.historyEntries = AutoCompleteResultToArray(historyResult)
+		this.notifyListener()
+	},
+	onXHRReady: function(json) {
+		this.xhrEntries = parseSimpleJson(json, "", "")
+		this.notifyListener()
+	},
+	start: function(searchString, searchParam, listener, jsonURL) {
+		this.listener = listener
+		this.searchString = searchString
+		
+		this.searchProvider.historyAutoComplete.stopSearch()
+		this.searchProvider.historyAutoComplete.startSearch(searchString, searchParam, null, this);
+		var url = jsonURL.replace('%q', encodeURIComponent(searchString))
+		this.searchProvider.startReq(url)
+	}
+}
 
 function InstantFoxSearch(){}
 InstantFoxSearch.prototype = {
@@ -869,7 +900,7 @@ InstantFoxSearch.prototype = {
 
 	// implement nsIAutoCompleteSearch
 	startSearch: function(searchString, searchParam, previousResult, listener) {
-		if (searchString[0] == ":" || searchString.slice(0, 6) == 'about:'){
+		if (searchString[0] == ":" || searchString.slice(0, 6) == 'about:') {
 			searchString = searchString.substr(6)
 			var results = filter(getAboutUrls(), searchString)
 			if(results && results.length){
@@ -878,14 +909,25 @@ InstantFoxSearch.prototype = {
 				return
 			}
 		}
+		
 		if (!InstantFoxModule.currentQuery) {
+			var p = InstantFoxModule.autoSearch || {}
 			//Search user's history
 			this.$searchingHistory = true
+			dump(searchString.length , p.minQChars)
+			if (p.suggest && searchString.length >= p.minQChars) {
+				if (!this._combinedResult) {
+					this._combinedResult = new combinedSearch(this)					
+				}
+				this._combinedResult.start(searchString, searchParam, listener, p.json)
+				return
+			}
+			
 			this.listener = listener;
 			this.searchString = searchString;
 			this.historyAutoComplete.startSearch(searchString, searchParam, null, this);
 			return
-		}
+		} 
 		if (this.$searchingHistory)
 			this.historyAutoComplete.stopSearch()
 
@@ -975,13 +1017,14 @@ InstantFoxSearch.prototype = {
 		var json = e.target.responseText;
 
 		var q = InstantFoxModule.currentQuery
-		if(q){
+		if (q) {
 			var key = q.key || q.plugin.key
 			q.results = this.parser(json, key, q.splitSpace)
 			var newResult = new SimpleAutoCompleteResult(q.results, q.value);
 			this.listener.onSearchResult(this, newResult);
 			q.onSearchReady()
-		}
+		} else if (this._combinedResult)
+			this._combinedResult.onXHRReady(json)
 	},
 
 	stopOldRequests: function(req){
