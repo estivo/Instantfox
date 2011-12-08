@@ -157,8 +157,15 @@ var pluginLoader = {
 		if(!InstantFoxModule.autoSearch)
 			InstantFoxModule.autoSearch = p
 
-		InstantFoxModule.autoSearch.def_json = p.json
-		InstantFoxModule.autoSearch.def_url = p.url
+		var a = InstantFoxModule.autoSearch
+		
+		if (!a.def_json || a.def_json == a.json)
+			a.json = p.json
+		a.def_json = p.json
+		
+		if (!a.def_url || a.def_url == a.url)
+			a.url = p.url
+		a.def_url = p.url
 	},
 
 	initShortcuts: function(){

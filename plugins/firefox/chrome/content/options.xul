@@ -358,7 +358,7 @@ slidecheckbox:hover>slidecheck>check{
 					<preference id="removeSearchbar" name="extensions.InstantFox.removeSearchbar" type="bool" />
 				</preferences>
 
-				<groupbox id="autoSearch" oncommand="autoSearchUI.onChange(event)" onkeypress="autoSearchUI.onChange(event)">
+				<groupbox id="autoSearch" oncommand="autoSearchUI.onChange(event)" onkeypress="autoSearchUI.onChange(event)" oninput="autoSearchUI.onChange(event)">
 					<caption>
 						<slidecheckbox  aID="disabled" label='standard_search_label' class="i18n" 
 							oncommand="toggleVisibility(this.parentNode.parentNode, 'grid.animate', this.checked)"/>
