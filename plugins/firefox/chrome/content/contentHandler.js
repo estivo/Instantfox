@@ -1,3 +1,60 @@
+/********************************************************************
+ * http://dev.chromium.org/searchbox
+ * http://lists.whatwg.org/htdig.cgi/whatwg-whatwg.org/2010-October/028818.html
+ * http://src.chromium.org/svn/trunk/src/chrome/renderer/searchbox_extension.cc
+ *
+ * ******* deprecated variant currently used by google
+ *         // window.chrome.setSuggestResult // called by page
+ *         window.chrome.sv 
+ *         window.chrome.userInput(q, verbatim?46:0, selectionStart)
+ *         window.chrome.userWantsQuery(q) // finish instant
+ *         window.chrome.setDropdownDimensions(x,y,w,h, hideHeader)
+ */
+InstantFox.searchBoxAPI = {
+	getWindow: function(){
+		return InstantFox.pageLoader.preview
+			&& InstantFox.pageLoader.preview.contentWindow
+			&& InstantFox.pageLoader.preview.contentWindow.wrappedJSObject
+	},
+	isSupported: function() {
+		var win = this.getWindow()
+		return  win && win.chrome && (!!win.chrome.sv)
+	},
+	onInput: function(){
+		var q = InstantFoxModule.currentQuery
+		var text = q.shadow || q.query
+		
+		var win = this.getWindow()
+		win && win.chrome && win.chrome.userInput
+			&& win.chrome.userInput(text, 46, text.length)
+	},
+	setDimensions: function(){
+		var browser = InstantFox.pageLoader.preview
+		if (!browser)
+			return
+		
+		var zoom = browser.markupDocumentViewer.fullZoom;
+		
+		var r1 = gURLBar.popup.getBoundingClientRect()
+		var r2 = InstantFox.pageLoader.preview.getBoundingClientRect()
+
+		var x = (r1.left   - r2.left) /zoom
+		var y = (r1.top   - r2.top) /zoom
+		var w =  r1.width  / zoom
+		var h =  r1.height/ zoom
+		
+		var win = this.getWindow()
+		win && win.chrome && win.chrome.setDropdownDimensions
+			&& win.chrome.setDropdownDimensions(x,y,w,h)
+	},
+	onFinish: function(q){
+		var win = this.getWindow()
+		win && win.chrome && win.chrome.setDropdownDimensions
+			&& win.chrome.userWantsQuery(q)
+	}
+}
+
+
 InstantFox.contentHandlers = {
 	"__default__":{
 		isSame: function(q, url2go){

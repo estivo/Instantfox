@@ -500,18 +500,29 @@ var InstantFox = {
 		if (this._timeout != null)
 			this._timeout = clearTimeout(this._timeout)
 
+/****************************/
+if (q.$usingSearchBoxAPI == null) {
+	q.$usingSearchBoxAPI = this.searchBoxAPI.isSupported()
+}
+if (this._isOwnQuery && q.$usingSearchBoxAPI) {
+	this.searchBoxAPI.setDimensions()	
+	this.searchBoxAPI.onInput()
+	this.pageLoader 
+	return
+}
+
+/****************************/
+		
 		var url2go = InstantFoxModule.urlFromQuery(q);
 		var handler = this.contentHandlers[q.plugin.id] || this.contentHandlers.__default__;
 		if (this._isOwnQuery && handler.transformURL) {
 			url2go = handler.transformURL(q, url2go)
 		}
-dump("---1",  url2go, q.query)
 
 		if (handler.isSame(q, url2go)) {
 			handler.onLoad && handler.onLoad(q, url2go)
 			return url2go
 		}
-dump("---2",  url2go, q.query)
 
 		var now = Date.now()
 
@@ -527,7 +538,6 @@ dump("---2",  url2go, q.query)
 		} else {
 			this._isOwnQuery = true;
 		}
-dump("---3",  url2go, q.query)
 
 		q.preloadURL = url2go
 
@@ -556,8 +566,16 @@ dump("---3",  url2go, q.query)
 		this.$urlBarModified = this._isOwnQuery = false
 		this.updateShadowLink(null)
 		gBrowser.userTypedValue = null;
+		
+		
 
 		var q = InstantFoxModule.currentQuery, br
+		
+		if (q && q.$usingSearchBoxAPI) {
+			q.$usingSearchBoxAPI = null
+			this.searchBoxAPI.onFinish(q.shadow || q.query)
+		}
+		
 		if (!q) {
 			this.pageLoader.removePreview()
 		} else if (q.tabId == this._ctabID) {
@@ -598,7 +616,7 @@ dump("---3",  url2go, q.query)
 
 		//
 		var tmp = this.doPreload(InstantFoxModule.currentQuery)
-		gURLBar.value = tmp;
+		//gURLBar.value = tmp;
 
 		this.finishSearch()
 
