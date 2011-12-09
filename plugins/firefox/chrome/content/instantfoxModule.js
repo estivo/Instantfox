@@ -1016,15 +1016,14 @@ InstantFoxSearch.prototype = {
 
 	onSearchReady: function(e){
 		dump('end',e.target.channel.name, this._reqList[0] == e.target)
-		if(!this.listener)
-			return
 		// don't let older requests completing later mess with suggestions
 		this.stopOldRequests(e.target)
-
 		var json = e.target.responseText;
 
 		var q = InstantFoxModule.currentQuery
 		if (q) {
+			if(!this.listener)
+				return
 			var key = q.key || q.plugin.key
 			q.results = this.parser(json, key, q.splitSpace)
 			var newResult = new SimpleAutoCompleteResult(q.results, q.value);
