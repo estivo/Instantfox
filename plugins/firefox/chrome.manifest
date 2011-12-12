@@ -24,6 +24,7 @@ locale    instantfox fr-FR    chrome/locale/fr-FR/
 locale    instantfox hu       chrome/locale/hu/
 locale    instantfox it-IT    chrome/locale/it-IT/
 locale    instantfox ja       chrome/locale/ja/
+locale    instantfox ko       chrome/locale/ko/
 locale    instantfox pl       chrome/locale/pl/
 locale    instantfox pt       chrome/locale/pt/
 locale    instantfox pt-BR    chrome/locale/pt-BR/

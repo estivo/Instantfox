@@ -287,7 +287,7 @@ var pluginLoader = {
 			"de-DE","de-AT","de-CH",
 			"en-US","en-AU","en-CA","en-GB",
 			"es-ES","es-AR","es-MX","es-CL",
-			"fr-FR","it-IT","nl","pl","pt","pt-BR","ru","tr","ja","zh-CN","sv-SE","cs","hu","ro-RO","zh-TW","el"
+			"fr-FR","it-IT","nl","pl","pt","pt-BR","ru","tr","ja","zh-CN","sv-SE","cs","hu","ro-RO","zh-TW","el","ko"
 		]
 		callback && callback(a)
 		return a

@@ -849,6 +849,22 @@ locale(["el","el","gr"], {
 	}
 })
 
+locale(["ko","ko","co.kr"], {
+	Google: true,
+	GoogleImages: {
+		name: "Google Images / \uac80\uc0c9"
+	},
+	GoogleMaps: {
+		name: "Google Maps / \uc9c0\ub3c4"
+	},
+	Wikipedia: true,
+	Youtube: true,
+	Twitter: true,
+	GoogleTranslate: {
+		name: "Google Translate / \ubc88\uc5ed"
+	}
+})
+
 /*************************end of data  section *************************
  * locale(namemap:['%ls', '%ll', '%ld'], plugins)
  * folder name must be '%ll'
