@@ -870,8 +870,18 @@ function combinedSearch(searchProvider) {
 	this._result = new SimpleAutoCompleteResult()
 }
 combinedSearch.prototype = {
-	notifyListener: function(){
-		this._result.setResultList(Array.concat(this.xhrEntries||[], this.historyEntries||[]))
+	notifyListener: function() {
+		var list, l1 = this.xhrEntries, l2 = this.historyEntries
+		if (!l1 || !l1.length) {
+			list = l2 && l2.concat()
+		} else  if (!l2 || !l2.length) {
+			list = l1 && l1.concat()
+		} else {
+			list = Array.concat([l2[0]], l1)
+			for (var i = 1; i < l2.length; i++)
+				list.push(l2[i])
+		}
+		this._result.setResultList(list)
 		this.listener.onSearchResult(this.searchProvider, this._result)
 	},
 	onSearchResult: function(search, historyResult) {
