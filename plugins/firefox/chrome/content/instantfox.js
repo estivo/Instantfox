@@ -211,9 +211,10 @@ var InstantFox = {
 			var s = ss[i]
 			if(s.href=="chrome://instantfox/content/skin/instantfox.css"){
 				// caution: this depends on the order of css rules in instantfox.css
-				var prefs = Services.prefs
-				if (prefs.prefHasUserValue('extensions.InstantFox.fontsize')){
-					var pref = prefs.getCharPref('extensions.InstantFox.fontsize')
+				var prefs = Services.prefs.getBranch('extensions.InstantFox.')
+
+				if (prefs.prefHasUserValue('fontsize')){
+					var pref = prefs.getCharPref('fontsize')
 					if (!/^\d+.?\d*((px)|(em))$/.test(pref)){
 						pref = parseFloat(pref)
 
@@ -226,8 +227,8 @@ var InstantFox = {
 					}
 					s.cssRules[3].style.fontSize = pref;
 				}
-				if (prefs.prefHasUserValue('extensions.InstantFox.opacity')){
-					var pref = parseInt(prefs.getIntPref('extensions.InstantFox.opacity')) / 100
+				if (prefs.prefHasUserValue('opacity')){
+					var pref = parseInt(prefs.getIntPref('opacity')) / 100
 					if(isNaN(pref) || pref < 0.1)
 						pref = 1
 					s.cssRules[2].style.opacity = pref;
@@ -235,6 +236,19 @@ var InstantFox = {
 				if (document.dir == 'rtl'){
 					s.cssRules[5].style.backgroundPosition = '5% bottom';
 				}
+				
+				if (prefs.prefHasUserValue('hideUrlbarTips')) {
+					s.cssRules[13].style.display = prefs.getBoolPref('hideUrlbarTips')?"none":"";
+				}
+				if (prefs.prefHasUserValue('suggestStyle')) {
+					if (prefs.getCharPref('suggestStyle') == "condensed") {
+						var r=s.cssRules[3]
+						var t=r.cssText.replace('richlistitem[type="InstantFoxSuggest"]', 'richlistitem.autocomplete-richlistitem')
+						
+						s.deleteRule(3);s.insertRule(t,3)
+					}
+				}					
+				
 				break
 			}
 		}
@@ -512,7 +526,7 @@ if (this._isOwnQuery && q.$usingSearchBoxAPI) {
 }
 
 /****************************/
-		
+		dump.dir(q)
 		var url2go = InstantFoxModule.urlFromQuery(q);
 		var handler = this.contentHandlers[q.plugin.id] || this.contentHandlers.__default__;
 		if (this._isOwnQuery && handler.transformURL) {
@@ -520,6 +534,7 @@ if (this._isOwnQuery && q.$usingSearchBoxAPI) {
 		}
 
 		if (handler.isSame(q, url2go)) {
+		dump.dir("aa")
 			handler.onLoad && handler.onLoad(q, url2go)
 			return url2go
 		}

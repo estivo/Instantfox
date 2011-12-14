@@ -297,6 +297,10 @@ slidecheckbox:hover>slidecheck>check{
 .checked>slidecheck >check {
 	left: 50%
 }
+
+prefpane{
+	-moz-user-focus: normal;
+}
 </html:style>
 
 <tabbox flex='1'>
@@ -449,18 +453,31 @@ slidecheckbox:hover>slidecheck>check{
 		<tabpanel orient='vertical'  flex='1' >
 			<prefpane align='center' hidden='true' flex='1'>
 				<preferences>
+					<preference id="hide-urlbar-tips" name="extensions.InstantFox.hideUrlbarTips" type="bool" />
+					<preference id="suggest-style" name="extensions.InstantFox.suggestStyle" type="string" />
 					<preference id="fontsize" name="extensions.InstantFox.fontsize" type="string" />
 					<preference id="opacity" name="extensions.InstantFox.opacity" type="int" />
 				</preferences>
+			<hbox align="center">
+			  <label control="suggest-style-list" value="urlbar.popup.style" class="i18n"/>
+			  <menulist id="suggest-style-list" flex="1">
+				<menupopup>
+				  <menuitem label="popup.rich" value=""  class="i18n"/>
+				  <menuitem label="popup.simple" value="condensed" class="i18n"/>
+				</menupopup>
+			  </menulist>
+			</hbox>
+			<hbox align="center">
 				<label class="i18n" value='style.fontsize' control='fontsize-text'/>
 				<textbox preference="fontsize"  id='fontsize-text' placeholder="auto" class="i18n"/>
+			</hbox>
 				<label class="i18n" value='dropdown_opacity' control='opacity-scale'/>
 				<hbox pack='center' align='center'>
 					<scale value='20' min='10' max='100' flex='1' id='opacity-scale' preference-editable="true" preference="opacity" />
 					<textbox preference="opacity" id='opacity-text'  placeholder="auto" class="i18n"/>
 					<label value='%'/>
 				</hbox>
-
+				<checkbox class="i18n" label="urlbar.hideTips" preference="hide-urlbar-tips"/>
 				<spacer flex='1'/>
 			</prefpane>
 		</tabpanel>
