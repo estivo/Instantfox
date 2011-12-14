@@ -931,6 +931,8 @@ InstantFoxSearch.prototype = {
 			var p = InstantFoxModule.autoSearch || {}
 			//Search user's history
 			this.$searchingHistory = true
+			this.listener = listener;
+			this.searchString = searchString;
 			dump(searchString.length , p.minQChars)
 			if (p.suggest && searchString.length >= p.minQChars) {
 				if (!this._combinedResult) {
@@ -939,9 +941,6 @@ InstantFoxSearch.prototype = {
 				this._combinedResult.start(searchString, searchParam, listener, p.json)
 				return
 			}
-			
-			this.listener = listener;
-			this.searchString = searchString;
 			this.historyAutoComplete.startSearch(searchString, searchParam, null, this);
 			return
 		} 
@@ -1026,14 +1025,15 @@ InstantFoxSearch.prototype = {
 
 	onSearchReady: function(e){
 		dump('end',e.target.channel.name, this._reqList[0] == e.target)
+		// todo: why removing this displays suggestions from another plugin?
+		if(!this.listener)
+			return
 		// don't let older requests completing later mess with suggestions
 		this.stopOldRequests(e.target)
 		var json = e.target.responseText;
 
 		var q = InstantFoxModule.currentQuery
 		if (q) {
-			if(!this.listener)
-				return
 			var key = q.key || q.plugin.key
 			q.results = this.parser(json, key, q.splitSpace)
 			var newResult = new SimpleAutoCompleteResult(q.results, q.value);
