@@ -584,8 +584,8 @@ if (this._isOwnQuery && this.searchBoxAPI.canLoad(q.$searchBoxAPI_URL, url2go)) 
 
 		var q = InstantFoxModule.currentQuery, br
 		
-		if (q && q.$usingSearchBoxAPI) {
-			q.$usingSearchBoxAPI = null
+		if (q && q.$searchBoxAPI_URL) {
+			q.$searchBoxAPI_URL = null
 			this.searchBoxAPI.onFinish(q.shadow || q.query)
 		}
 		
