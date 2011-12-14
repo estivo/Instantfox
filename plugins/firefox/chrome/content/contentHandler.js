@@ -18,7 +18,11 @@ InstantFox.searchBoxAPI = {
 	},
 	isSupported: function() {
 		var win = this.getWindow()
-		return  win && win.chrome && (!!win.chrome.sv)
+		return  win && win.chrome && (!!win.chrome.sv) && win.location.href
+	},
+	urlRegexp:/#.*$/,
+	canLoad: function(qUrl, url2go){
+		return qUrl && url2go && qUrl.replace(this.urlRegexp, "") == url2go.replace(this.urlRegexp, "")
 	},
 	onInput: function(){
 		var q = InstantFoxModule.currentQuery

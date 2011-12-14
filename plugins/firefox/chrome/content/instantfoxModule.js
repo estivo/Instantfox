@@ -1025,7 +1025,6 @@ InstantFoxSearch.prototype = {
 
 	onSearchReady: function(e){
 		dump('end',e.target.channel.name, this._reqList[0] == e.target)
-		// todo: why removing this displays suggestions from another plugin?
 		if(!this.listener)
 			return
 		// don't let older requests completing later mess with suggestions

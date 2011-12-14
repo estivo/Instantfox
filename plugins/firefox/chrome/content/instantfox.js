@@ -419,7 +419,7 @@ var InstantFox = {
 		}
 
 		var j = val.substr(i).match(/^\s*/)[0].length
-		if (!oldQ) {
+		if (!oldQ || oldQ.plugin != plugin) {
 			oldQ = {
 				//browserText: nsContextMenu.prototype.getSelectedText().substr(0, 50),
 				tabId: gBrowser.mCurrentTab.linkedPanel,
@@ -514,24 +514,22 @@ var InstantFox = {
 		if (this._timeout != null)
 			this._timeout = clearTimeout(this._timeout)
 
-/****************************/
-if (q.$usingSearchBoxAPI == null) {
-	q.$usingSearchBoxAPI = this.searchBoxAPI.isSupported()
-}
-if (this._isOwnQuery && q.$usingSearchBoxAPI) {
-	this.searchBoxAPI.setDimensions()	
-	this.searchBoxAPI.onInput()
-	this.pageLoader 
-	return
-}
-
-/****************************/
-		dump.dir(q)
 		var url2go = InstantFoxModule.urlFromQuery(q);
 		var handler = this.contentHandlers[q.plugin.id] || this.contentHandlers.__default__;
 		if (this._isOwnQuery && handler.transformURL) {
 			url2go = handler.transformURL(q, url2go)
 		}
+
+/****************************/
+if (q.$searchBoxAPI_URL == null) {
+	q.$searchBoxAPI_URL = this.searchBoxAPI.isSupported()
+}
+if (this._isOwnQuery && this.searchBoxAPI.canLoad(q.$searchBoxAPI_URL, url2go)) {
+	this.searchBoxAPI.setDimensions()	
+	this.searchBoxAPI.onInput()
+	return
+}
+/****************************/
 
 		if (handler.isSame(q, url2go)) {
 		dump.dir("aa")
