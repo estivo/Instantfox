@@ -241,13 +241,19 @@ var InstantFox = {
 					s.cssRules[13].style.display = prefs.getBoolPref('hideUrlbarTips')?"none":"";
 				}
 				if (prefs.prefHasUserValue('suggestStyle')) {
-					if (prefs.getCharPref('suggestStyle') == "condensed") {
-						var r=s.cssRules[3]
-						var t=r.cssText.replace('richlistitem[type="InstantFoxSuggest"]', 'richlistitem.autocomplete-richlistitem')
-						
-						s.deleteRule(3);s.insertRule(t,3)
+					var r = s.cssRules[3], t = r.cssText
+
+					if (prefs.getCharPref('suggestStyle') == "condensed")
+						newSelector = 'richlistitem.autocomplete-richlistitem'
+					else
+						newSelector = 'richlistitem[type="InstantFoxSuggest"]'							
+					
+					if (t.substring(0, newSelector.length) != newSelector) {
+						t = newSelector + t.substr(t.indexOf("{")-1)
+						s.deleteRule(3);
+						s.insertRule(t,3)
 					}
-				}					
+				}
 				
 				break
 			}
@@ -520,19 +526,17 @@ var InstantFox = {
 			url2go = handler.transformURL(q, url2go)
 		}
 
-/****************************/
-if (q.$searchBoxAPI_URL == null) {
-	q.$searchBoxAPI_URL = this.searchBoxAPI.isSupported()
-}
-if (this._isOwnQuery && this.searchBoxAPI.canLoad(q.$searchBoxAPI_URL, url2go)) {
-	this.searchBoxAPI.setDimensions()	
-	this.searchBoxAPI.onInput()
-	return
-}
-/****************************/
-
+		/****************************/
+		if (q.$searchBoxAPI_URL == null) {
+			q.$searchBoxAPI_URL = this.searchBoxAPI.isSupported()
+		}
+		if (this._isOwnQuery && this.searchBoxAPI.canLoad(q.$searchBoxAPI_URL, url2go)) {
+			this.searchBoxAPI.setDimensions()	
+			this.searchBoxAPI.onInput()
+			return
+		}
+		/****************************/
 		if (handler.isSame(q, url2go)) {
-		dump.dir("aa")
 			handler.onLoad && handler.onLoad(q, url2go)
 			return url2go
 		}
@@ -544,10 +548,8 @@ if (this._isOwnQuery && this.searchBoxAPI.canLoad(q.$searchBoxAPI_URL, url2go)) 
 				this.schedulePreload(this.minLoadTime)
 				return
 			}
-			if (handler.onLoad) {
-				if (handler.onLoad(q, url2go))
-					return url2go
-			}
+			if (handler.onLoad && handler.onLoad(q, url2go))
+				return url2go
 		} else {
 			this._isOwnQuery = true;
 		}

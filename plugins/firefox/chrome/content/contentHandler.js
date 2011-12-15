@@ -11,6 +11,9 @@
  *         window.chrome.setDropdownDimensions(x,y,w,h, hideHeader)
  */
 InstantFox.searchBoxAPI = {
+	setStatus: function(str){
+		InstantFox.pageLoader.label.value = str;
+	},
 	getWindow: function(){
 		return InstantFox.pageLoader.preview
 			&& InstantFox.pageLoader.preview.contentWindow
@@ -29,8 +32,10 @@ InstantFox.searchBoxAPI = {
 		var text = q.shadow || q.query
 		
 		var win = this.getWindow()
-		win && win.chrome && win.chrome.userInput
-			&& win.chrome.userInput(text, 46, text.length)
+		if (win && win.chrome && win.chrome.userInput) {
+			win.chrome.userInput(text, 46, text.length) 
+			this.setStatus(text)
+		}
 	},
 	setDimensions: function(){
 		var browser = InstantFox.pageLoader.preview

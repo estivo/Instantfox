@@ -459,13 +459,11 @@ prefpane{
 					<preference id="opacity" name="extensions.InstantFox.opacity" type="int" />
 				</preferences>
 			<hbox align="center">
-			  <label control="suggest-style-list" value="urlbar.popup.style" class="i18n"/>
-			  <menulist id="suggest-style-list" flex="1">
-				<menupopup>
-				  <menuitem label="popup.rich" value=""  class="i18n"/>
-				  <menuitem label="popup.simple" value="condensed" class="i18n"/>
-				</menupopup>
-			  </menulist>
+				<label control="suggest-style-list" value="urlbar.popup.style" class="i18n"/>
+				<radiogroup id="suggest-style-list" preference="suggest-style" orient="horizontal">
+					<radio id="orange" label="popup.simple" value="condensed" class="i18n"/>
+					<radio id="violet" label="popup.rich" value="" selected="true" class="i18n"/>
+				</radiogroup>
 			</hbox>
 			<hbox align="center">
 				<label class="i18n" value='style.fontsize' control='fontsize-text'/>
