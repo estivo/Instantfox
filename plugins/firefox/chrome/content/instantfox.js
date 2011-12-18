@@ -206,56 +206,69 @@ var InstantFox = {
 		boxStyle.paddingRight = '1px'
 	},
 	updateUserStyle: function() {
-		var ss = document.styleSheets
-		for(var i = ss.length; i--; ){
-			var s = ss[i]
-			if(s.href=="chrome://instantfox/content/skin/instantfox.css"){
-				// caution: this depends on the order of css rules in instantfox.css
-				var prefs = Services.prefs.getBranch('extensions.InstantFox.')
+		var prefs = Services.prefs.getBranch('extensions.InstantFox.')
+		var cssRules, s, ruleIndex
+		
+		var findStyleSheet = function(href) {
+			var ss = document.styleSheets		
+			for(var i = ss.length; i--; ) {
+				s = ss[i]
+				if(s.href==href){
+					cssRules = s.cssRules
+					return s
+				}
+			}
+		}
+		var findRule = function(selector) {
+			for (var i = 0; i < cssRules.length; i++) {
+				var rule = cssRules[i]
+				if (rule.type == 1 && rule.selectorText.indexOf(selector) != -1){
+					ruleIndex = i
+					return rule
+				}
+			}
+		}
+		
+		findStyleSheet("chrome://instantfox/content/skin/instantfox.css");
+		
+		if (prefs.prefHasUserValue('fontsize')) {
+			var pref = prefs.getCharPref('fontsize')
+			if (!/^\d+.?\d*((px)|(em))$/.test(pref)){
+				pref = parseFloat(pref)
 
-				if (prefs.prefHasUserValue('fontsize')){
-					var pref = prefs.getCharPref('fontsize')
-					if (!/^\d+.?\d*((px)|(em))$/.test(pref)){
-						pref = parseFloat(pref)
+				if (isNaN(pref) || pref < 0.5)
+					pref = '';
+				else if (pref < 2)
+					pref+='em';
+				else
+					pref+='px';
+			}
+			findRule('richlistitem[type="InstantFoxSuggest"]').style.fontSize = pref;
+		}
+		if (prefs.prefHasUserValue('opacity')){
+			var pref = parseInt(prefs.getIntPref('opacity')) / 100
+			if(isNaN(pref) || pref < 0.1)
+				pref = 1
+			findRule('#PopupAutoCompleteRichResult').style.opacity = pref;
+		}
+		if (document.dir == 'rtl'){
+			findRule('richlistbox[type').style.backgroundPosition = '5% bottom';
+		}				
+		if (prefs.prefHasUserValue('hideUrlbarTips')) {
+			findRule('.instantfox-tip').style.display = prefs.getBoolPref('hideUrlbarTips')?"none":"";
+		}
+		if (prefs.prefHasUserValue('suggestStyle')) {
 
-						if (isNaN(pref) || pref < 0.5)
-							pref = '';
-						else if (pref < 2)
-							pref+='em';
-						else
-							pref+='px';
-					}
-					s.cssRules[3].style.fontSize = pref;
-				}
-				if (prefs.prefHasUserValue('opacity')){
-					var pref = parseInt(prefs.getIntPref('opacity')) / 100
-					if(isNaN(pref) || pref < 0.1)
-						pref = 1
-					s.cssRules[2].style.opacity = pref;
-				}
-				if (document.dir == 'rtl'){
-					s.cssRules[5].style.backgroundPosition = '5% bottom';
-				}
-				
-				if (prefs.prefHasUserValue('hideUrlbarTips')) {
-					s.cssRules[13].style.display = prefs.getBoolPref('hideUrlbarTips')?"none":"";
-				}
-				if (prefs.prefHasUserValue('suggestStyle')) {
-					var r = s.cssRules[3], t = r.cssText
-
-					if (prefs.getCharPref('suggestStyle') == "condensed")
-						newSelector = 'richlistitem.autocomplete-richlistitem'
-					else
-						newSelector = 'richlistitem[type="InstantFoxSuggest"]'							
-					
-					if (t.substring(0, newSelector.length) != newSelector) {
-						t = newSelector + t.substr(t.indexOf("{")-1)
-						s.deleteRule(3);
-						s.insertRule(t,3)
-					}
-				}
-				
-				break
+			if (prefs.getCharPref('suggestStyle') == "condensed")
+				newSelector = 'richlistitem.autocomplete-richlistitem'
+			else
+				newSelector = 'richlistitem.instantfox-slim'
+			
+			var t = findRule("richlistitem.").cssText
+			if (t.substring(0, newSelector.length) != newSelector) {			
+				t = newSelector + t.substr(t.indexOf("{")-1)
+				s.deleteRule(ruleIndex);
+				s.insertRule(t, ruleIndex)
 			}
 		}
 	},

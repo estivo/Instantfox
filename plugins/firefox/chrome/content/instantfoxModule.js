@@ -736,14 +736,19 @@ function filter(data, text) {
 	var filterTextCase = text;
 
 	//*******/
-	function computeSpringyIndex(val) {
-		var lowName = val.name.toLowerCase();
+	function computeSpringyIndex(val, prop) {
+		var lowName = val[prop||'name'].toLowerCase();
+		dump(lowName, prop, filterTextCase)
 		var priority = 0;
 		var lastI = 0;
 		var ind1 = 0;
 		if (val.name.indexOf(filterTextCase) === 0) {
-			val.priority = -2;
-			table.push(val);
+			if (prop) {
+				val.priority = -2;
+				table.push(val);
+			} else {
+				computeSpringyIndex(val, "title")
+			}
 			return;//exact match
 		}
 		for(var j = 0, ftLen = filterText.length; j < ftLen; j++) {
@@ -868,8 +873,20 @@ SimpleAutoCompleteResult.prototype = {
 function combinedSearch(searchProvider) {
 	this.searchProvider = searchProvider
 	this._result = new SimpleAutoCompleteResult()
+	this._result.removeValueAt = this.removeValueAt.bind(this)
 }
 combinedSearch.prototype = {
+	removeValueAt: function(index, removeFromDb) {
+	
+		var item = this._result.list[index]
+		if (!item)
+			return
+			
+		this._result.list.splice(index, 1);
+		
+		if(item.origIndex == null)
+			this.historyResult(origIndex, removeFromDb)
+	},
 	notifyListener: function() {
 		var list, l1 = this.xhrEntries, l2 = this.historyEntries
 		if (!l1 || !l1.length) {
@@ -877,14 +894,26 @@ combinedSearch.prototype = {
 		} else  if (!l2 || !l2.length) {
 			list = l1 && l1.concat()
 		} else {
-			list = Array.concat([l2[0]], l1)
-			for (var i = 1; i < l2.length; i++)
-				list.push(l2[i])
+			var list = []
+			var tip = list.length
+			for (var i = 0; i < l2.length; i++) {
+				var item = l2[i]
+				if (item.title == item.comment)
+					list.push(item)
+				else
+					list.splice(tip++, 0, item)
+			}
+			tip = 1
+			for (var i = 0; i < l1.length; i++) {
+				var item = l1[i]
+				list.splice(tip++, 0, item)
+			}
 		}
 		this._result.setResultList(list)
 		this.listener.onSearchResult(this.searchProvider, this._result)
 	},
 	onSearchResult: function(search, historyResult) {
+		this.historyResult = historyResult
 		this.historyEntries = AutoCompleteResultToArray(historyResult)
 		this.notifyListener()
 	},
@@ -918,13 +947,12 @@ InstantFoxSearch.prototype = {
 	// implement nsIAutoCompleteSearch
 	startSearch: function(searchString, searchParam, previousResult, listener) {
 		if (searchString[0] == ":" || searchString.slice(0, 6) == 'about:') {
-			searchString = searchString.substr(6)
+			searchString = searchString.substr(searchString[0] == ":" ? 1 : 6)
 			var results = filter(getAboutUrls(), searchString)
-			if(results && results.length){
-				var newResult = new SimpleAutoCompleteResult(results, searchString);
-				listener.onSearchResult(this, newResult);
-				return
-			}
+			dump(results)
+			var newResult = new SimpleAutoCompleteResult(results, searchString);
+			listener.onSearchResult(this, newResult);
+			return
 		}
 		
 		if (!InstantFoxModule.currentQuery) {
