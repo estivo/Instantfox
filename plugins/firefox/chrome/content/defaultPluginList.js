@@ -849,6 +849,32 @@ locale(["el","el","gr"], {
 	}
 })
 
+locale(["fi","fi","fi"], {
+	Google: true,
+	GoogleImages: {
+		key: "k",
+		name: "Google Kuvahaku"
+	},
+	GoogleMaps: {
+		name: "Google Kartat"
+	},
+	Wikipedia: true,
+	Youtube: true,
+	Twitter: true,
+	Weather: {
+		key: "S\u00e4\u00e4",
+		name: "s"
+	},
+	Calculator: {
+		name: "Laskin",
+		key: "l"
+	},
+	GoogleTranslate: {
+		name: "Google K\u00e4\u00e4nt\u00e4j\u00e4",
+		key: "k"
+	}
+})
+
 locale(["ko","ko","co.kr"], {
 	Google: true,
 	GoogleImages: {
