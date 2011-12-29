@@ -20,10 +20,12 @@ locale    instantfox es-MX    chrome/locale/es/
 locale    instantfox cs       chrome/locale/cs/
 locale    instantfox en-US    chrome/locale/en-US/
 locale    instantfox es       chrome/locale/es/
+locale    instantfox fi       chrome/locale/fi/
 locale    instantfox fr-FR    chrome/locale/fr-FR/
 locale    instantfox hu       chrome/locale/hu/
 locale    instantfox it-IT    chrome/locale/it-IT/
 locale    instantfox ja       chrome/locale/ja/
+locale    instantfox ko       chrome/locale/ko/
 locale    instantfox pl       chrome/locale/pl/
 locale    instantfox pt       chrome/locale/pt/
 locale    instantfox pt-BR    chrome/locale/pt-BR/

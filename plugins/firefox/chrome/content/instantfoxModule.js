@@ -59,6 +59,14 @@ try{
  *        id:
  *    }
  ***************/
+// clearly someone was drunk while inventing descriptor stuff
+// why is configurable needed in the first place?
+var _desc_ = Object.getOwnPropertyDescriptor({i:1},'i')
+function setProp(o, name, val) {
+	_desc_.value = val
+	Object.defineProperty(o, name, _desc_)
+}
+ 
 // used for new plugins only
 function fixupPlugin(p){
 	if(p.url){
@@ -130,14 +138,14 @@ var pluginLoader = {
 				if(p.url != p.def_url)
 					p.iconURI = pluginLoader.getFavicon(p.url);
 			}
-			newPlugins[id] = p;
+			setProp(newPlugins, p.id, p);
 		}
 		// remove default plugins from other locale
 		for each(var p in oldPlugins) {
 			if (newPlugins[p.id])
 				continue
 			if (p.type != 'default' || this.isUserModified(p))
-				newPlugins[p.id] = p
+				setProp(newPlugins, p.id, p);
 		}
 		
 		InstantFoxModule.Plugins = newPlugins;
@@ -149,8 +157,15 @@ var pluginLoader = {
 		if(!InstantFoxModule.autoSearch)
 			InstantFoxModule.autoSearch = p
 
-		InstantFoxModule.autoSearch.def_json = p.json
-		InstantFoxModule.autoSearch.def_url = p.url
+		var a = InstantFoxModule.autoSearch
+		
+		if (!a.def_json || a.def_json == a.json)
+			a.json = p.json
+		a.def_json = p.json
+		
+		if (!a.def_url || a.def_url == a.url)
+			a.url = p.url
+		a.def_url = p.url
 	},
 
 	initShortcuts: function(){
@@ -163,12 +178,14 @@ var pluginLoader = {
 				for each (var k in keys) {
 					if (!k)
 						continue
-						
-					if (InstantFoxModule.Shortcuts[k])
-						conflicts[InstantFoxModule.Plugins[InstantFoxModule.Shortcuts[k]].id] =
-							conflicts[p.id] = true
+					
+					var id = InstantFoxModule.resolveShortcut(k)
+					if (id) {
+						setProp(conflicts, InstantFoxModule.Plugins[id].id, true)
+						setProp(conflicts, p.id, true)
+					}
 
-					InstantFoxModule.Shortcuts[k] = p.id
+					setProp(InstantFoxModule.Shortcuts, k, p.id)
 				}
 			}
 		}
@@ -193,7 +210,7 @@ var pluginLoader = {
 			var mP = InstantFoxModule.Plugins[id]
 			if(mP && mP.key)
 				p.key = mP.key
-			InstantFoxModule.Plugins[id] = p;
+			setProp(InstantFoxModule.Plugins, id, p)
 		}
 		// add data from browser search engines
 		importBrowserPlugins(false)
@@ -270,7 +287,7 @@ var pluginLoader = {
 			"de-DE","de-AT","de-CH",
 			"en-US","en-AU","en-CA","en-GB",
 			"es-ES","es-AR","es-MX","es-CL",
-			"fr-FR","it-IT","nl","pl","pt","pt-BR","ru","tr","ja","zh-CN","sv-SE","cs","hu","ro-RO","zh-TW","el"
+			"fi","fr-FR","it-IT","nl","pl","pt","pt-BR","ru","tr","ja","zh-CN","sv-SE","cs","hu","ro-RO","zh-TW","el","ko"
 		]
 		callback && callback(a)
 		return a
@@ -428,7 +445,7 @@ function importBrowserPlugins(importKeys) {
 		var browserPlugins = Services.search.getEngines().map(pluginFromNsiSearch)
 		for each(var p in browserPlugins){
 			if(!InstantFoxModule.Plugins[p.id])
-				InstantFoxModule.Plugins[p.id] = p
+				setProp(InstantFoxModule.Plugins, p.id, p)
 			else if(importKeys && p.key)
 				InstantFoxModule.Plugins[p.id].key = p.key
 
@@ -566,6 +583,9 @@ InstantFoxModule = {
 	},
 	Plugins: {},
 	Shortcuts: {},
+	resolveShortcut: function(key) {
+		return this.Shortcuts.hasOwnProperty(key) && this.Shortcuts[key]
+	},
 	pluginLoader: pluginLoader,
 
 	getBestPluginMatch: function(key){
@@ -594,6 +614,7 @@ var parseSimpleJson = function(json, key, splitSpace){
 		var xhrReturn = JSON.parse(json)[1];
 	}catch(e){
 		Cu.reportError(e);
+		dump(json)
 		try{
 			xhrReturn = json.substring(json.indexOf("[\"")+2,json.lastIndexOf("\"]")).split('","')
 		}catch(e){
@@ -617,7 +638,7 @@ var parseSimpleJson = function(json, key, splitSpace){
 }
 var parseMapsJson = function(json, key, splitSpace){
 	var xhrReturn = json.match(/query:"[^"]*/g);
-	if(!xhrReturn.length)
+	if(!xhrReturn || !xhrReturn.length)
 		return
 
 	var results=[];
@@ -654,7 +675,8 @@ var getMatchingPlugins = function(key, tail){
 		results.push({
 			icon: p.iconURI,
 			title: p.name,
-			url: '`' + p.name.replace(' ', '\xB7', 'g') + tail
+			url: '`' + p.name.replace(' ', '\xB7', 'g') + tail,
+			comment: p.key
 		})
 	}
 	return results
@@ -714,14 +736,19 @@ function filter(data, text) {
 	var filterTextCase = text;
 
 	//*******/
-	function computeSpringyIndex(val) {
-		var lowName = val.name.toLowerCase();
+	function computeSpringyIndex(val, prop) {
+		var lowName = val[prop||'name'].toLowerCase();
+		dump(lowName, prop, filterTextCase)
 		var priority = 0;
 		var lastI = 0;
 		var ind1 = 0;
 		if (val.name.indexOf(filterTextCase) === 0) {
-			val.priority = -2;
-			table.push(val);
+			if (prop) {
+				val.priority = -2;
+				table.push(val);
+			} else {
+				computeSpringyIndex(val, "title")
+			}
 			return;//exact match
 		}
 		for(var j = 0, ftLen = filterText.length; j < ftLen; j++) {
@@ -775,7 +802,7 @@ function AutoCompleteResultToArray(r){
 			icon: r.getImageAt(i),
 			type: r.getStyleAt(i),
 			comment: r.getCommentAt(i),
-			label: r.getLabelAt(i),
+			title: r.getLabelAt(i),
 			url: r.getValueAt(i),
 			origIndex: i
 		})
@@ -783,15 +810,9 @@ function AutoCompleteResultToArray(r){
 }
 function SimpleAutoCompleteResult(list, searchString, defaultIndex) {
 	this._searchString = searchString;
-	if (list){
-		var status = (list.length?'SUCCESS':'NOMATCH')
-		this.list = list;
-	} else
-		var status = 'FAILURE';
-
 	this._defaultIndex = defaultIndex || 0;
 
-	this._searchResult = Ci.nsIAutoCompleteResult['RESULT_' + status];
+	this.setResultList(list)
 }
 SimpleAutoCompleteResult.prototype = {
 	/**
@@ -814,6 +835,16 @@ SimpleAutoCompleteResult.prototype = {
 	appendMatch: function(aValue,aComment,aImage, aStyle){},
 	setListener: function(aListener){},
 	/********************/
+	setResultList: function(list) { 
+		if (list){
+			var status = (list.length?'SUCCESS':'NOMATCH')
+			this.list = list;
+		} else
+			var status = 'FAILURE';
+
+		this._searchResult = Ci.nsIAutoCompleteResult['RESULT_' + status];
+	},
+	/********************/
 
 	get searchResult() this._searchResult,
 	get searchString() this._searchString,
@@ -822,9 +853,9 @@ SimpleAutoCompleteResult.prototype = {
 	get matchCount() this.list.length,
 
 	getCommentAt: function(index) 
-		this.list[index] && this.list[index].title || "",//title attribute on richlistitem in popup
+		this.list[index] && this.list[index].comment || "",//title attribute on richlistitem in popup
 	getLabelAt: function(index) 
-		this.list[index] && this.list[index].url || "",//url attribute on richlistitem in popup
+		this.list[index] && this.list[index].title || "",//url attribute on richlistitem in popup
 	getValueAt: function(index) 
 		this.list[index] && this.list[index].url || "",//displayed in urlbar
 	getImageAt: function(index) 
@@ -839,6 +870,67 @@ SimpleAutoCompleteResult.prototype = {
 	QueryInterface: XPCOMUtils.generateQI([ Ci.nsIAutoCompleteResult, Ci.nsIAutoCompleteSimpleResult ])  
 };
 
+function combinedSearch(searchProvider) {
+	this.searchProvider = searchProvider
+	this._result = new SimpleAutoCompleteResult()
+	this._result.removeValueAt = this.removeValueAt.bind(this)
+}
+combinedSearch.prototype = {
+	removeValueAt: function(index, removeFromDb) {
+	
+		var item = this._result.list[index]
+		if (!item)
+			return
+			
+		this._result.list.splice(index, 1);
+		
+		if(item.origIndex == null)
+			this.historyResult(origIndex, removeFromDb)
+	},
+	notifyListener: function() {
+		var list, l1 = this.xhrEntries, l2 = this.historyEntries
+		if (!l1 || !l1.length) {
+			list = l2 && l2.concat()
+		} else  if (!l2 || !l2.length) {
+			list = l1 && l1.concat()
+		} else {
+			var list = []
+			var tip = list.length
+			for (var i = 0; i < l2.length; i++) {
+				var item = l2[i]
+				if (item.title == item.comment)
+					list.push(item)
+				else
+					list.splice(tip++, 0, item)
+			}
+			tip = 1
+			for (var i = 0; i < l1.length; i++) {
+				var item = l1[i]
+				list.splice(tip++, 0, item)
+			}
+		}
+		this._result.setResultList(list)
+		this.listener.onSearchResult(this.searchProvider, this._result)
+	},
+	onSearchResult: function(search, historyResult) {
+		this.historyResult = historyResult
+		this.historyEntries = AutoCompleteResultToArray(historyResult)
+		this.notifyListener()
+	},
+	onXHRReady: function(json) {
+		this.xhrEntries = parseSimpleJson(json, "", "")
+		this.notifyListener()
+	},
+	start: function(searchString, searchParam, listener, jsonURL) {
+		this.listener = listener
+		this.searchString = searchString
+		
+		this.searchProvider.historyAutoComplete.stopSearch()
+		this.searchProvider.historyAutoComplete.startSearch(searchString, searchParam, null, this);
+		var url = jsonURL.replace('%q', encodeURIComponent(searchString))
+		this.searchProvider.startReq(url)
+	}
+}
 
 function InstantFoxSearch(){}
 InstantFoxSearch.prototype = {
@@ -854,23 +946,32 @@ InstantFoxSearch.prototype = {
 
 	// implement nsIAutoCompleteSearch
 	startSearch: function(searchString, searchParam, previousResult, listener) {
-		if (searchString[0] == ":" || searchString.slice(0, 6) == 'about:'){
-			searchString = searchString.substr(6)
+		if (searchString[0] == ":" || searchString.slice(0, 6) == 'about:') {
+			searchString = searchString.substr(searchString[0] == ":" ? 1 : 6)
 			var results = filter(getAboutUrls(), searchString)
-			if(results && results.length){
-				var newResult = new SimpleAutoCompleteResult(results, searchString);
-				listener.onSearchResult(this, newResult);
-				return
-			}
+			dump(results)
+			var newResult = new SimpleAutoCompleteResult(results, searchString);
+			listener.onSearchResult(this, newResult);
+			return
 		}
+		
 		if (!InstantFoxModule.currentQuery) {
+			var p = InstantFoxModule.autoSearch || {}
 			//Search user's history
 			this.$searchingHistory = true
 			this.listener = listener;
 			this.searchString = searchString;
+			dump(searchString.length , p.minQChars)
+			if (p.suggest && searchString.length >= p.minQChars) {
+				if (!this._combinedResult) {
+					this._combinedResult = new combinedSearch(this)					
+				}
+				this._combinedResult.start(searchString, searchParam, listener, p.json)
+				return
+			}
 			this.historyAutoComplete.startSearch(searchString, searchParam, null, this);
 			return
-		}
+		} 
 		if (this.$searchingHistory)
 			this.historyAutoComplete.stopSearch()
 
@@ -882,7 +983,7 @@ InstantFoxSearch.prototype = {
 
 		if (plugin.suggestPlugins) {
 			// handle ` searches
-			var results = getMatchingPlugins(plugin.key, plugin.tail)
+			var results = getMatchingPlugins(plugin.key.substr(1), plugin.tail)
 		} else if (!plugin.json || plugin.disableSuggest){
 			// suggest is dissabled
 			url = null
@@ -911,7 +1012,8 @@ InstantFoxSearch.prototype = {
 			this.parser = isMaps ? parseMapsJson : parseSimpleJson
 		}
 
-
+		dump(url)
+		
 		if (url) {
 			this.listener = listener;
 			this.startReq(url)
@@ -955,17 +1057,17 @@ InstantFoxSearch.prototype = {
 			return
 		// don't let older requests completing later mess with suggestions
 		this.stopOldRequests(e.target)
-
 		var json = e.target.responseText;
 
 		var q = InstantFoxModule.currentQuery
-		if(q){
+		if (q) {
 			var key = q.key || q.plugin.key
 			q.results = this.parser(json, key, q.splitSpace)
 			var newResult = new SimpleAutoCompleteResult(q.results, q.value);
 			this.listener.onSearchResult(this, newResult);
 			q.onSearchReady()
-		}
+		} else if (this._combinedResult)
+			this._combinedResult.onXHRReady(json)
 	},
 
 	stopOldRequests: function(req){

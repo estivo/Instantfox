@@ -849,6 +849,48 @@ locale(["el","el","gr"], {
 	}
 })
 
+locale(["fi","fi","fi"], {
+	Google: true,
+	GoogleImages: {
+		key: "k",
+		name: "Google Kuvahaku"
+	},
+	GoogleMaps: {
+		name: "Google Kartat"
+	},
+	Wikipedia: true,
+	Youtube: true,
+	Twitter: true,
+	Weather: {
+		key: "S\u00e4\u00e4",
+		name: "s"
+	},
+	Calculator: {
+		name: "Laskin",
+		key: "l"
+	},
+	GoogleTranslate: {
+		name: "Google K\u00e4\u00e4nt\u00e4j\u00e4",
+		key: "k"
+	}
+})
+
+locale(["ko","ko","co.kr"], {
+	Google: true,
+	GoogleImages: {
+		name: "Google Images / \uac80\uc0c9"
+	},
+	GoogleMaps: {
+		name: "Google Maps / \uc9c0\ub3c4"
+	},
+	Wikipedia: true,
+	Youtube: true,
+	Twitter: true,
+	GoogleTranslate: {
+		name: "Google Translate / \ubc88\uc5ed"
+	}
+})
+
 /*************************end of data  section *************************
  * locale(namemap:['%ls', '%ll', '%ld'], plugins)
  * folder name must be '%ll'
@@ -881,7 +923,7 @@ function locale(localeNames, plugins, autoSearch){
 			url: goog.url,
 			instant: "off",
 			suggest: false,
-			minQChars: 5
+			minQChars: 3
 		}
 	}
 	
@@ -1002,7 +1044,7 @@ preprocessRawData = function (pluginData, pluginLoader){
 
 	var newPlugins = {}
 
-	for(var i in pluginData.plugins) {
+	for (var i in pluginData.plugins) {
 		var p = pluginData.plugins[i];
 		if(!p || !p.url)
 			continue
@@ -1031,7 +1073,7 @@ preprocessRawData = function (pluginData, pluginLoader){
 	pluginData.plugins = newPlugins
 	//-------
 	var p = pluginData.autoSearch
-	if(p){
+	if(p) {
 		p.json = p.json.replace(localeRe, replacer)
 		p.url = p.url.replace(localeRe, replacer)
 	}

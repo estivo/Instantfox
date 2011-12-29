@@ -297,6 +297,10 @@ slidecheckbox:hover>slidecheck>check{
 .checked>slidecheck >check {
 	left: 50%
 }
+
+prefpane{
+	-moz-user-focus: normal;
+}
 </html:style>
 
 <tabbox flex='1'>
@@ -358,7 +362,7 @@ slidecheckbox:hover>slidecheck>check{
 					<preference id="removeSearchbar" name="extensions.InstantFox.removeSearchbar" type="bool" />
 				</preferences>
 
-				<groupbox id="autoSearch" oncommand="autoSearchUI.onChange(event)" onkeypress="autoSearchUI.onChange(event)">
+				<groupbox id="autoSearch" oncommand="autoSearchUI.onChange(event)" onkeypress="autoSearchUI.onChange(event)" oninput="autoSearchUI.onChange(event)">
 					<caption>
 						<slidecheckbox  aID="disabled" label='standard_search_label' class="i18n" 
 							oncommand="toggleVisibility(this.parentNode.parentNode, 'grid.animate', this.checked)"/>
@@ -394,19 +398,6 @@ slidecheckbox:hover>slidecheck>check{
 										</menupopup>
 									</menulist>
 								</row>
-								<row>
-									<label class="i18n" value='suggest_url'/>
-									<hbox align='center' flex='1' class='longbox'>
-										<checkbox aID='suggest' oncommand='toggleVisibility(this.parentNode.parentNode.parentNode, ".animate", this.checked)'/>
-										<textbox type='url' aID='json' flex='1' class='longbox animate' oninput="
-											this.nextSibling.hidden = !canResetProp(this, InstantFoxModule.autoSearch);
-											"/>
-										<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default' class="animate"/>
-									</hbox>
-									<hbox align="center" class='image animate'>
-										<dropmarker type='button' onmousedown='enginesPopup.show(this, "Url", "json")'/>
-									</hbox>
-								</row>
 								<row class='animate'>
 									<label value=''/>
 									<hbox align='center' flex='1' class='longbox'>
@@ -421,6 +412,19 @@ slidecheckbox:hover>slidecheck>check{
 									</hbox>
 									<hbox align="center" class='image animate'/>
 								</row>
+							</row>
+							<row>
+								<label class="i18n" value='suggest_url'/>
+								<hbox align='center' flex='1' class='longbox'>
+									<checkbox aID='suggest' oncommand='toggleVisibility(this.parentNode.parentNode.parentNode, ".animate", this.checked)'/>
+									<textbox type='url' aID='json' flex='1' class='longbox animate' oninput="
+										this.nextSibling.hidden = !canResetProp(this, InstantFoxModule.autoSearch);
+										"/>
+									<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default' class="animate"/>
+								</hbox>
+								<hbox align="center" class='image animate'>
+									<dropmarker type='button' onmousedown='enginesPopup.show(this, "Url", "json")'/>
+								</hbox>
 							</row>
 						</rows>
 					</grid>
@@ -449,18 +453,29 @@ slidecheckbox:hover>slidecheck>check{
 		<tabpanel orient='vertical'  flex='1' >
 			<prefpane align='center' hidden='true' flex='1'>
 				<preferences>
+					<preference id="hide-urlbar-tips" name="extensions.InstantFox.hideUrlbarTips" type="bool" />
+					<preference id="suggest-style" name="extensions.InstantFox.suggestStyle" type="string" />
 					<preference id="fontsize" name="extensions.InstantFox.fontsize" type="string" />
 					<preference id="opacity" name="extensions.InstantFox.opacity" type="int" />
 				</preferences>
+			<hbox align="center">
+				<label control="suggest-style-list" value="urlbar.popup.style" class="i18n"/>
+				<radiogroup id="suggest-style-list" preference="suggest-style" orient="horizontal">
+					<radio id="orange" label="popup.simple" value="condensed" class="i18n"/>
+					<radio id="violet" label="popup.rich" value="" selected="true" class="i18n"/>
+				</radiogroup>
+			</hbox>
+			<hbox align="center">
 				<label class="i18n" value='style.fontsize' control='fontsize-text'/>
 				<textbox preference="fontsize"  id='fontsize-text' placeholder="auto" class="i18n"/>
+			</hbox>
 				<label class="i18n" value='dropdown_opacity' control='opacity-scale'/>
 				<hbox pack='center' align='center'>
 					<scale value='20' min='10' max='100' flex='1' id='opacity-scale' preference-editable="true" preference="opacity" />
 					<textbox preference="opacity" id='opacity-text'  placeholder="auto" class="i18n"/>
 					<label value='%'/>
 				</hbox>
-
+				<checkbox class="i18n" label="urlbar.hideTips" preference="hide-urlbar-tips"/>
 				<spacer flex='1'/>
 			</prefpane>
 		</tabpanel>

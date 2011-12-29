@@ -206,36 +206,69 @@ var InstantFox = {
 		boxStyle.paddingRight = '1px'
 	},
 	updateUserStyle: function() {
-		var ss = document.styleSheets
-		for(var i = ss.length; i--; ){
-			var s = ss[i]
-			if(s.href=="chrome://instantfox/content/skin/instantfox.css"){
-				// caution: this depends on the order of css rules in instantfox.css
-				var prefs = Services.prefs
-				if (prefs.prefHasUserValue('extensions.InstantFox.fontsize')){
-					var pref = prefs.getCharPref('extensions.InstantFox.fontsize')
-					if (!/^\d+.?\d*((px)|(em))$/.test(pref)){
-						pref = parseFloat(pref)
+		var prefs = Services.prefs.getBranch('extensions.InstantFox.')
+		var cssRules, s, ruleIndex
+		
+		var findStyleSheet = function(href) {
+			var ss = document.styleSheets		
+			for(var i = ss.length; i--; ) {
+				s = ss[i]
+				if(s.href==href){
+					cssRules = s.cssRules
+					return s
+				}
+			}
+		}
+		var findRule = function(selector) {
+			for (var i = 0; i < cssRules.length; i++) {
+				var rule = cssRules[i]
+				if (rule.type == 1 && rule.selectorText.indexOf(selector) != -1){
+					ruleIndex = i
+					return rule
+				}
+			}
+		}
+		
+		findStyleSheet("chrome://instantfox/content/skin/instantfox.css");
+		
+		if (prefs.prefHasUserValue('fontsize')) {
+			var pref = prefs.getCharPref('fontsize')
+			if (!/^\d+.?\d*((px)|(em))$/.test(pref)){
+				pref = parseFloat(pref)
 
-						if (isNaN(pref) || pref < 0.5)
-							pref = '';
-						else if (pref < 2)
-							pref+='em';
-						else
-							pref+='px';
-					}
-					s.cssRules[3].style.fontSize = pref;
-				}
-				if (prefs.prefHasUserValue('extensions.InstantFox.opacity')){
-					var pref = parseInt(prefs.getIntPref('extensions.InstantFox.opacity')) / 100
-					if(isNaN(pref) || pref < 0.1)
-						pref = 1
-					s.cssRules[2].style.opacity = pref;
-				}
-				if (document.dir == 'rtl'){
-					s.cssRules[5].style.backgroundPosition = '5% bottom';
-				}
-				break
+				if (isNaN(pref) || pref < 0.5)
+					pref = '';
+				else if (pref < 2)
+					pref+='em';
+				else
+					pref+='px';
+			}
+			findRule('richlistitem[type="InstantFoxSuggest"]').style.fontSize = pref;
+		}
+		if (prefs.prefHasUserValue('opacity')){
+			var pref = parseInt(prefs.getIntPref('opacity')) / 100
+			if(isNaN(pref) || pref < 0.1)
+				pref = 1
+			findRule('#PopupAutoCompleteRichResult').style.opacity = pref;
+		}
+		if (document.dir == 'rtl'){
+			findRule('richlistbox[type').style.backgroundPosition = '5% bottom';
+		}				
+		if (prefs.prefHasUserValue('hideUrlbarTips')) {
+			findRule('.instantfox-tip').style.display = prefs.getBoolPref('hideUrlbarTips')?"none":"";
+		}
+		if (prefs.prefHasUserValue('suggestStyle')) {
+
+			if (prefs.getCharPref('suggestStyle') == "condensed")
+				newSelector = 'richlistitem.autocomplete-richlistitem'
+			else
+				newSelector = 'richlistitem.instantfox-slim'
+			
+			var t = findRule("richlistitem.").cssText
+			if (t.substring(0, newSelector.length) != newSelector) {			
+				t = newSelector + t.substr(t.indexOf("{")-1)
+				s.deleteRule(ruleIndex);
+				s.insertRule(t, ruleIndex)
 			}
 		}
 	},
@@ -276,13 +309,16 @@ var InstantFox = {
 				}
 			}
 			else if (key == 27) { // 27 == ESCAPE
-				if(InstantFox.pageLoader.preview.parentNode){
+				if (InstantFox.pageLoader.preview.parentNode){
 					InstantFox.pageLoader.removePreview()
 					// restore security and icon
 					XULBrowserWindow._hostChanged = true
 					XULBrowserWindow.onSecurityChange(null, null, XULBrowserWindow._state);
-				} else
-					gURLBar.blur()
+				} else if (InstantFoxModule.currentQuery) {
+					InstantFox.finishSearch()
+				} else {
+					return
+				}
 			}
 			else if (key == 8 || key == 46) { // 8 == BACK_SPACE, 46 == DELETE
 				if(gURLBar.selectionEnd == gURLBar.mInputField.value.length){
@@ -297,13 +333,13 @@ var InstantFox = {
 			var keyIndex = origVal.indexOf(' ')
 			var key = origVal.substring(0,keyIndex)
 
-			if(key in InstantFoxModule.Shortcuts || key[0] == '`'){
+			if(InstantFoxModule.resolveShortcut(key) || key[0] == '`'){
 			//gURLBar.value = '`'+origVal
 				if (gURLBar.selectionStart <= keyIndex) {
 					gURLBar.selectionStart = keyIndex+1
 					gURLBar.selectionEnd = origVal.length
 				} else {
-					gURLBar.selectionStart = 0
+					gURLBar.selectionStart = key[0] == '`' ? 1 : 0
 					gURLBar.selectionEnd = keyIndex
 				}
 				simulateInput = true
@@ -395,14 +431,14 @@ var InstantFox = {
 			if (i == -1)
 				return this.defQ
 			key = val.substr(0, i)
-			var id = InstantFoxModule.Shortcuts[key]
+			var id = InstantFoxModule.resolveShortcut(key)
 			if (!id)
 				return this.defQ;
 			plugin = InstantFoxModule.Plugins[id]
 		}
 
 		var j = val.substr(i).match(/^\s*/)[0].length
-		if (!oldQ) {
+		if (!oldQ || oldQ.plugin != plugin) {
 			oldQ = {
 				//browserText: nsContextMenu.prototype.getSelectedText().substr(0, 50),
 				tabId: gBrowser.mCurrentTab.linkedPanel,
@@ -502,13 +538,21 @@ var InstantFox = {
 		if (this._isOwnQuery && handler.transformURL) {
 			url2go = handler.transformURL(q, url2go)
 		}
-dump("---1",  url2go, q.query)
 
+		/****************************/
+		if (q.$searchBoxAPI_URL == null) {
+			q.$searchBoxAPI_URL = this.searchBoxAPI.isSupported()
+		}
+		if (this._isOwnQuery && this.searchBoxAPI.canLoad(q.$searchBoxAPI_URL, url2go)) {
+			this.searchBoxAPI.setDimensions()	
+			this.searchBoxAPI.onInput()
+			return
+		}
+		/****************************/
 		if (handler.isSame(q, url2go)) {
 			handler.onLoad && handler.onLoad(q, url2go)
 			return url2go
 		}
-dump("---2",  url2go, q.query)
 
 		var now = Date.now()
 
@@ -517,14 +561,11 @@ dump("---2",  url2go, q.query)
 				this.schedulePreload(this.minLoadTime)
 				return
 			}
-			if (handler.onLoad) {
-				if (handler.onLoad(q, url2go))
-					return url2go
-			}
+			if (handler.onLoad && handler.onLoad(q, url2go))
+				return url2go
 		} else {
 			this._isOwnQuery = true;
 		}
-dump("---3",  url2go, q.query)
 
 		q.preloadURL = url2go
 
@@ -552,12 +593,21 @@ dump("---3",  url2go, q.query)
 	finishSearch: function() {
 		this.$urlBarModified = this._isOwnQuery = false
 		this.updateShadowLink(null)
+		gBrowser.userTypedValue = null;
+		
+		
 
 		var q = InstantFoxModule.currentQuery, br
+		
+		if (q && q.$searchBoxAPI_URL) {
+			q.$searchBoxAPI_URL = null
+			this.searchBoxAPI.onFinish(q.shadow || q.query)
+		}
+		
 		if (!q) {
 			this.pageLoader.removePreview()
-		} else if (q.tabId == this._ctabID){
-			this.pageLoader.persistPreview(q.forceNewTab?'new':'')
+		} else if (q.tabId == this._ctabID) {
+			this.pageLoader.persistPreview(q.forceNewTab? 'new' : '')
 		} else {
 			for (var i = 0; i < gBrowser.tabs.length; i++) {
 				if (gBrowser.tabs[i].linkedPanel == q.tabId ){
@@ -565,7 +615,7 @@ dump("---3",  url2go, q.query)
 					break
 				}
 			}
-			if(tab){
+			if(tab) {
 				this.pageLoader.persistPreview(tab, true)
 			}else{
 				dump('no tab')
@@ -594,8 +644,7 @@ dump("---3",  url2go, q.query)
 
 		//
 		var tmp = this.doPreload(InstantFoxModule.currentQuery)
-		gURLBar.value = tmp;
-		gBrowser.userTypedValue = null;
+		//gURLBar.value = tmp;
 
 		this.finishSearch()
 
@@ -626,7 +675,7 @@ InstantFox.onPopupShowing = function(p) {
 
 	var st = p.querySelector('stack')
 	var ifr = p.querySelector('iframe')
-	if (ifr){
+	if (ifr) {
 		// touch the stack, otherwise it isn't drawn in nightly
 		st.flex=0
 		st.flex=1

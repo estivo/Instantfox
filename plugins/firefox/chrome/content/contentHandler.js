@@ -1,3 +1,69 @@
+/********************************************************************
+ * http://dev.chromium.org/searchbox
+ * http://lists.whatwg.org/htdig.cgi/whatwg-whatwg.org/2010-October/028818.html
+ * http://src.chromium.org/svn/trunk/src/chrome/renderer/searchbox_extension.cc
+ *
+ * ******* deprecated variant currently used by google
+ *         // window.chrome.setSuggestResult // called by page
+ *         window.chrome.sv 
+ *         window.chrome.userInput(q, verbatim?46:0, selectionStart)
+ *         window.chrome.userWantsQuery(q) // finish instant
+ *         window.chrome.setDropdownDimensions(x,y,w,h, hideHeader)
+ */
+InstantFox.searchBoxAPI = {
+	setStatus: function(str){
+		InstantFox.pageLoader.label.value = str;
+	},
+	getWindow: function(){
+		return InstantFox.pageLoader.preview
+			&& InstantFox.pageLoader.preview.contentWindow
+			&& InstantFox.pageLoader.preview.contentWindow.wrappedJSObject
+	},
+	isSupported: function() {
+		var win = this.getWindow()
+		return  win && win.chrome && (!!win.chrome.sv) && win.location.href
+	},
+	urlRegexp:/#.*$/,
+	canLoad: function(qUrl, url2go){
+		return qUrl && url2go && qUrl.replace(this.urlRegexp, "") == url2go.replace(this.urlRegexp, "")
+	},
+	onInput: function(){
+		var q = InstantFoxModule.currentQuery
+		var text = q.shadow || q.query
+		
+		var win = this.getWindow()
+		if (win && win.chrome && win.chrome.userInput) {
+			win.chrome.userInput(text, 46, text.length) 
+			this.setStatus(text)
+		}
+	},
+	setDimensions: function(){
+		var browser = InstantFox.pageLoader.preview
+		if (!browser)
+			return
+		
+		var zoom = browser.markupDocumentViewer.fullZoom;
+		
+		var r1 = gURLBar.popup.getBoundingClientRect()
+		var r2 = InstantFox.pageLoader.preview.getBoundingClientRect()
+
+		var x = (r1.left   - r2.left) /zoom
+		var y = (r1.top   - r2.top) /zoom
+		var w =  r1.width  / zoom
+		var h =  r1.height/ zoom
+		
+		var win = this.getWindow()
+		win && win.chrome && win.chrome.setDropdownDimensions
+			&& win.chrome.setDropdownDimensions(x,y,w,h)
+	},
+	onFinish: function(q){
+		var win = this.getWindow()
+		win && win.chrome && win.chrome.setDropdownDimensions
+			&& win.chrome.userWantsQuery(q)
+	}
+}
+
+
 InstantFox.contentHandlers = {
 	"__default__":{
 		isSame: function(q, url2go){
@@ -85,7 +151,7 @@ InstantFox.pageLoader = {
 		if (!this.previewIsActive)
 			return;
 		gURLBar.blur()
-		if(tab == 'new'){
+		if(tab == 'new' || (tab == undefined && InstantFoxModule.openSearchInNewTab)){
 			tab = gBrowser.selectedTab
 			if(!isTabEmpty(tab)){
 				gBrowser._lastRelatedTab = null
@@ -105,45 +171,45 @@ InstantFox.pageLoader = {
 	},
 	// Mostly copied from mozillaLabs instantPreview
 	swapBrowsers: function(tab) {
-		let preview = this.preview
+    	var origin = this.preview;
 
         // Mostly copied from tabbrowser.xml swapBrowsersAndCloseOther
-        let browser = window.gBrowser;
-		let selectedTab = tab || browser.selectedTab;
-        let selectedBrowser = selectedTab.linkedBrowser;
-        selectedBrowser.stop();
+        var gBrowser = window.gBrowser;
+		var targetTab = tab || gBrowser.selectedTab;
+        var targetBrowser = targetTab.linkedBrowser;
+        targetBrowser.stop();
 
-        // Unhook our progress listener
-        let selectedIndex = selectedTab._tPos;
-        const filter = browser.mTabFilters[selectedIndex];
-        let tabListener = browser.mTabListeners[selectedIndex];
-        selectedBrowser.webProgress.removeProgressListener(filter);
+        // Unhook progress listener
+        var targetPos = targetTab._tPos;
+		var filter = gBrowser.mTabFilters[targetPos];
+		targetBrowser.webProgress.removeProgressListener(filter);
+		var tabListener = gBrowser.mTabListeners[targetPos]
         filter.removeProgressListener(tabListener);
-        let tabListenerBlank = tabListener.mBlank;
+		tabListener.destroy();
+        var tabListenerBlank = tabListener.mBlank;
 
-        // Pick out the correct interface for before/after Firefox 4b8pre
-        let openPage = browser.mBrowserHistory || browser._placesAutocomplete;
+        var openPage = gBrowser._placesAutocomplete;
 
         // Restore current registered open URI.
-        if (selectedBrowser.registeredOpenURI) {
-            openPage.unregisterOpenPage(selectedBrowser.registeredOpenURI);
-            delete selectedBrowser.registeredOpenURI;
+        if (targetBrowser.registeredOpenURI) {
+            openPage.unregisterOpenPage(targetBrowser.registeredOpenURI);
+            delete targetBrowser.registeredOpenURI;
         }
-        openPage.registerOpenPage(preview.currentURI);
-        selectedBrowser.registeredOpenURI = preview.currentURI;
+        openPage.registerOpenPage(origin.currentURI);
+        targetBrowser.registeredOpenURI = origin.currentURI;
 
         // Save the last history entry from the preview if it has loaded
-        let history = preview.sessionHistory.QueryInterface(Ci.nsISHistoryInternal);
-        let entry;
+        var history = origin.sessionHistory.QueryInterface(Ci.nsISHistoryInternal);
+        var entry;
         if (history.count > 0) {
             entry = history.getEntryAtIndex(history.index, false);
             history.PurgeHistory(history.count);
         }
 
         // Copy over the history from the current tab if it's not empty
-        let origHistory = selectedBrowser.sessionHistory;
-        for (let i = 0; i <= origHistory.index; i++) {
-            let origEntry = origHistory.getEntryAtIndex(i, false);
+        var origHistory = targetBrowser.sessionHistory;
+        for (var i = 0; i <= origHistory.index; i++) {
+            var origEntry = origHistory.getEntryAtIndex(i, false);
             if (origEntry.URI.spec != "about:blank") history.addEntry(origEntry, true);
         }
 
@@ -152,23 +218,23 @@ InstantFox.pageLoader = {
 			history.addEntry(entry, true);
 
         // Swap the docshells then fix up various properties
-        selectedBrowser.swapDocShells(preview);
-        selectedBrowser.attachFormFill();
-        browser.setTabTitle(selectedTab);
-        browser.updateCurrentBrowser(true);
-        browser.useDefaultIcon(selectedTab);
-        gURLBar.value = (selectedBrowser.currentURI.spec != "about:blank") ? selectedBrowser.currentURI.spec : preview.getAttribute("src");
+        targetBrowser.swapDocShells(origin);
+        targetBrowser.attachFormFill();
+        gBrowser.setTabTitle(targetTab);
+        gBrowser.updateCurrentBrowser(true);
+        gBrowser.useDefaultIcon(targetTab);
+        gURLBar.value = (targetBrowser.currentURI.spec != "about:blank") ? targetBrowser.currentURI.spec : origin.getAttribute("src");
 
         // Restore the progress listener
-        tabListener = browser.mTabProgressListener(selectedTab, selectedBrowser, tabListenerBlank);
-        browser.mTabListeners[selectedIndex] = tabListener;
+        tabListener = gBrowser.mTabProgressListener(targetTab, targetBrowser, tabListenerBlank);
+        gBrowser.mTabListeners[targetPos] = tabListener;
         filter.addProgressListener(tabListener, Ci.nsIWebProgress.NOTIFY_ALL);
-        selectedBrowser.webProgress.addProgressListener(filter, Ci.nsIWebProgress.NOTIFY_ALL);
+        targetBrowser.webProgress.addProgressListener(filter, Ci.nsIWebProgress.NOTIFY_ALL);
 
 		// restore history
-		// preview.docShell.useGlobalHistory = true
+		targetBrowser.docShell.useGlobalHistory = true
 
-		return selectedBrowser
+		return targetBrowser
     },
 
 	onfocus: function(e){
@@ -221,7 +287,7 @@ InstantFox.pageLoader = {
 		}
 		this.previewIsActive = true
 		// disable history
-		// preview.docShell.useGlobalHistory = false
+		preview.docShell.useGlobalHistory = false
 
 
         // Load the url i
