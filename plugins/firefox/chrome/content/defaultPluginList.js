@@ -1044,7 +1044,7 @@ preprocessRawData = function (pluginData, pluginLoader){
 
 	var newPlugins = {}
 
-	for(var i in pluginData.plugins) {
+	for (var i in pluginData.plugins) {
 		var p = pluginData.plugins[i];
 		if(!p || !p.url)
 			continue
@@ -1073,7 +1073,7 @@ preprocessRawData = function (pluginData, pluginLoader){
 	pluginData.plugins = newPlugins
 	//-------
 	var p = pluginData.autoSearch
-	if(p){
+	if(p) {
 		p.json = p.json.replace(localeRe, replacer)
 		p.url = p.url.replace(localeRe, replacer)
 	}
