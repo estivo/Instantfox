@@ -106,13 +106,14 @@ var report = {
 	status: [],
 }
 updateUI = function(){
-	var data = $('data'), text, div
+	var data = $('data'), text, div, fullText = ""
 	data.textContent=""
 	for (var i in report){
 		div = document.createElement("div")
 		div.className = "head"
 		text = "#>>" + Array(40).join("-") + "\n"
 		     + "#>>" + i + "\n"
+		
 		div.textContent = text
 		data.appendChild(div)
 		
@@ -120,16 +121,24 @@ updateUI = function(){
 		div.className = "data"
 		div.textContent = report[i] + "\n"
 		data.appendChild(div)		
+
+		fullText = fullText + text + report[i] + "\n"
 	}
 	
-	return text
+	return fullText
 }
 copyToClipboard = function(){
-	Cc["@mozilla.org/widget/clipboardhelper;1"].getService(Ci.nsIClipboardHelper).copyString(updateUI())
+	Cc["@mozilla.org/widget/clipboardhelper;1"]
+		.getService(Ci.nsIClipboardHelper)
+		.copyString(updateUI())
 }
 
 setTimeout(updateUI, 500)
 // defaultLocale
+setTimeout(function(){
+	var i = Services.appinfo
+	report.app = [i.name, i.version, i.OS].join(" ")
+})
 setTimeout(function(){
 	Components.utils.import("resource://gre/modules/Services.jsm")
 	var PREF_MATCH_OS_LOCALE = "intl.locale.matchOS";
