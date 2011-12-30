@@ -138,14 +138,14 @@ var pluginLoader = {
 				if(p.url != p.def_url)
 					p.iconURI = pluginLoader.getFavicon(p.url);
 			}
-			setProp(newPlugins, id, p);
+			setProp(newPlugins, p.id, p);
 		}
 		// remove default plugins from other locale
 		for each(var p in oldPlugins) {
 			if (newPlugins[p.id])
 				continue
 			if (p.type != 'default' || this.isUserModified(p))
-				setProp(newPlugins, id, p);
+				setProp(newPlugins, p.id, p);
 		}
 		
 		InstantFoxModule.Plugins = newPlugins;
