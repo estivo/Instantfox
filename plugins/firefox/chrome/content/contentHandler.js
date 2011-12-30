@@ -83,7 +83,6 @@ InstantFox.contentHandlers = {
 		transformURL: function(q, url2go) {
 			try{
 				var url = InstantFox.pageLoader.preview.contentDocument.location.href;
-				dump("---", url, url2go, q.query)
 				// 
 				var gDomain = url.match(/https?:\/\/((www|encrypted)\.)?google.([a-z\.]*)[^#]*/i)
 				if (!gDomain)
@@ -241,7 +240,6 @@ InstantFox.pageLoader = {
 		this.persistPreview()
 	},
 	onTitleChanged: function(e){
-		//dump(e.target.title)
 		if(e.target == InstantFox.pageLoader.preview.contentDocument)
 			InstantFox.pageLoader.label.value = e.target.title;
 		e.stopPropagation()

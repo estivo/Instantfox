@@ -15,6 +15,7 @@
 		  <menuitem action="delete-plugin-file" label="delete-plugin-file"/>
 		  <menuitem action="test-first-run" label="test first run"/>
 		  <menuitem action="show-folder" label="show folder"/>
+		  <menuitem action="run-tests" label="run tests"/>
 		</menupopup>
 	  </toolbarbutton>
 	</statusbar>
@@ -50,8 +51,6 @@
 		</toolbarbutton>
 	
 		<!-- devel__( -->
-		<toolbarbutton type="menu" id='instantFox-icons' class='toolbarbutton-1 chromeclass-toolbar-additional'
-			style='list-style-image:url(chrome://instantfox/content/skin/button-logo.png)' label='InstantFox'>
 <svg:svg height="0">
 	<svg:filter id="gray">
 	  <svg:feColorMatrix values="0.3333 0.3333 0.3333 0 0 
@@ -60,6 +59,8 @@
 								 0      0      0      1 0"/>
 	</svg:filter>
 </svg:svg>	
+		<toolbarbutton type="menu" id='instantFox-icons' class='toolbarbutton-1 chromeclass-toolbar-additional'
+			style='list-style-image:url(chrome://instantfox/content/skin/button-logo.png)' label='InstantFox'>
 			<panel onpopupshowing="if(event.target==this)InstantFox.onPopupShowing(this)"  onpopuphiding="if(event.target==this)InstantFox.onPopupHiding(this)"
 				noautohide='true' position='after_end'/>
 		</toolbarbutton>

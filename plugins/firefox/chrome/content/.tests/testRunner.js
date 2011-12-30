@@ -1,6 +1,13 @@
 itest = {}
 ;(function(){
 
+this.qs = function(x, doc){
+	return (doc||document).querySelector(x)
+}
+this.qsa = function(x, doc){
+	return Array.slice((doc||document).querySelectorAll(x))
+}
+
 this.key = function(aKey, aEvent, aWindow) {
     aEvent = aEvent || {};
 	if (!aWindow)
@@ -73,6 +80,7 @@ this.test = function(name, test, delay) {
 	
 }
 this.run = function(){
+	this.$logData = []
 	this.i = 0
 	this.runNext()
 }
@@ -87,35 +95,63 @@ this.runNext = function(){
 		test.run()
 	}catch(e){
 		Cu.reportError(name+":(Failed to run")		
-		Cu.reportError(e)		
+		Cu.reportError(e)
 	}
-	setTimeout(function() {
-		try{
-			if(test.test())
-				dump(name, ':)Pass')
-			else
-				Cu.reportError(name+":(Fail")
-		}catch(e){
-			Cu.reportError(name+":(Fail")		
-			Cu.reportError(e)		
+	var wholeDelay, delay = 0
+	function waitAndTest(delay){
+		wholeDelay += delay
+		if (wholeDelay > 10000){
+			Cu.reportError(name+":(timed out")
+			return itest.runNext()
 		}
-		itest.runNext()
-	}, test.delay||0)
+		setTimeout(function(){
+			try{
+				var result = test.test()
+				if (typeof result == "number"){
+					return waitAndTest(result)
+				}
+				
+				if (result)
+					dump(name, ':)Pass')
+				else
+					Cu.reportError(name+":(Fail")
+			}catch(e){
+				Cu.reportError(name+":(Fail")		
+				Cu.reportError(e)		
+			}
+			itest.runNext()
+		}, delay)
+	}
+	waitAndTest(test.delay||0)
+}
+this.log = function(x){
+	dump(x)
+	this.$logData.push({data:x, type:''})
+}
+this.error = function(x){
+	Cu.reportError(name+":(Failed to run")	
+	this.$logData.push({data:x, type:'error'})
+}
+this.success = function(x){
+	this.$logData.push({data:x, type:'pass'})
+}
+this.showLog = function(){
+	
 }
 }).call(itest)
 
 testList = [{
 	name: 'FS#152 - instant does not work, if suggest is not checked',
 	run: function(){
-		var p = InstantFoxModule.Plugins.google
-		p.key = 'g'
+		var p = InstantFoxModule.Plugins.wikipedia
+		p.key = 'w'
 		p.disableSuggest = true
 		p.disableInstant = false
 		
 		window.focus()
 		itest.mouse(gURLBar)
 		gURLBar.select()
-		itest.key('g')
+		itest.key('w')
 		itest.key(' ')
 		itest.key('-')
 		itest.key('-')
@@ -124,9 +160,15 @@ testList = [{
 	},
 	test: function(){
         var pl = InstantFox.pageLoader
-		return pl.isActive&&pl.preview.contentDocument.location.href.indexOf('--')!=-1
+		if (pl.isActive){
+			var href = pl.preview.contentDocument.location.href
+			dump(href)
+			if (href == "about:blank")
+				return 200 // wait
+			return pl.preview.contentDocument.location.href.indexOf('--')!=-1
+		}
 	},
-	delay:100
+	delay:200
 }, {
     name: "escape",
     run: function(){
@@ -143,10 +185,9 @@ testList = [{
         
 	},
 	test: function(){
-		
+		itest.error()
 	},
-	delay:100
-},{
+}, {
 	name: 'wikipedia suggest rules ',
 	run: function() {
 	},
@@ -159,6 +200,25 @@ testList = [{
 			p.iconURI == "http://g.etfv.co/http://am.wikipedia.org" &&
 			p.name == "am.wikipedia.org" &&
 			p.json.indexOf("wikipedia")>0
+	},
+}, {
+	name: 'reset plugins to default',
+	run: function() {
+		itest.mouse(itest.qs("#instantFox-options"))
+	},
+	test: function(){
+		var doc = itest.qs("panel#instantfox-popup iframe").contentDocument
+		itest.mouse(itest.qsa("tab", doc)[1])
+		
+		doc.defaultView.resetAllPlugins(true)
+		return true
+	},
+	delay:500
+}, {
+	name: 'check plugin integrity after update',
+	run: function() {
+	},
+	test: function(){		
 	},
 	delay:100
 }]

@@ -140,7 +140,7 @@ var instantFoxDevel = {
 				this.getContainingFolder().reveal()
 				break
 			case 'build':
-				makeXPI()
+				makeXPI(instantFoxDevel.getContainingFolder())
 				break
 			case 'build-d':
 				break
@@ -153,8 +153,8 @@ var instantFoxDevel = {
 			case 'delete-plugin-file':
 				this.deletePluginFile(e.button)
 				break
-			case 'jsonify-plugins':
-				this.jsonifyPlugins()
+			case 'run-tests':
+				this.loadScript('chrome://instantfox/content/.tests/testRunner.js')
 				break
 		}
 	},
@@ -173,36 +173,6 @@ var instantFoxDevel = {
 			showFile?file.reveal():file.remove(false)
 		else
 			alert('already removed')
-	},
-	jsonifyPlugins: function(){
-		// override makeReq from foximirror to properly handle encodings
-		function makeReq(href) {
-			var req = new XMLHttpRequest;
-			req.open("GET", href, false);
-			try {
-				req.send(null);
-			} catch (e) {
-			}
-			return req.responseText;
-		}
-
-		function jsonify(locale){
-			var spec = InstantFoxModule.pluginLoader.getPluginFileSpec(locale)
-
-			var t = makeReq(spec)
-			if(t.match(/^rawPluginData/))
-			eval(t)
-			else
-			eval('rawPluginData='+t)
-
-			var text = JSON.stringify(rawPluginData, null, 4)
-			writeToFile(getLocalFile(spec), text)
-		}
-
-		InstantFoxModule.pluginLoader.getAvaliableLocales(function(locales) {
-			locales.forEach(jsonify)
-		})
-
 	},
 	encodePluginList: function(utf){
 		var spec = "chrome://instantfox/content/defaultPluginList.js"
@@ -250,6 +220,9 @@ var instantFoxDevel = {
 
 }
 
+
+
+/********************************* xpi builder ******************************************************/
 var gClipboardHelper = {
     copyString: function(str) {
         if (str)
@@ -299,9 +272,7 @@ getLocalFile=function getLocalFile(mPath){
 * callback is a function that it's called after the zip is created. It has one parameter: the nsFile created
 */
 var maxRecursion=1000, recur=0, cancel=false
-function makeXPI(){
-	var contextFolder = instantFoxDevel.getContainingFolder()
-
+function makeXPI(contextFolder){
 	packXPI(contextFolder, function(nsFile){
 		nsFile.QueryInterface(Ci.nsILocalFile).reveal()
 	})

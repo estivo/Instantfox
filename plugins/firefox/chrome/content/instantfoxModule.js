@@ -463,7 +463,6 @@ function importBrowserPlugins(importKeys) {
 
 searchEngineObserver = {
 	observe: function(subject, topic, j){
-		dump(subject, topic,'+++++++++++++**********+++++++',j)
 		importBrowserPlugins(false)
 		if(this.$listener){
 			this.$listener.get()()
@@ -738,7 +737,7 @@ function filter(data, text) {
 	//*******/
 	function computeSpringyIndex(val, prop) {
 		var lowName = val[prop||'name'].toLowerCase();
-		dump(lowName, prop, filterTextCase)
+
 		var priority = 0;
 		var lastI = 0;
 		var ind1 = 0;
@@ -949,7 +948,7 @@ InstantFoxSearch.prototype = {
 		if (searchString[0] == ":" || searchString.slice(0, 6) == 'about:') {
 			searchString = searchString.substr(searchString[0] == ":" ? 1 : 6)
 			var results = filter(getAboutUrls(), searchString)
-			dump(results)
+
 			var newResult = new SimpleAutoCompleteResult(results, searchString);
 			listener.onSearchResult(this, newResult);
 			return
@@ -961,7 +960,7 @@ InstantFoxSearch.prototype = {
 			this.$searchingHistory = true
 			this.listener = listener;
 			this.searchString = searchString;
-			dump(searchString.length , p.minQChars)
+
 			if (p.suggest && searchString.length >= p.minQChars) {
 				if (!this._combinedResult) {
 					this._combinedResult = new combinedSearch(this)					
@@ -1012,7 +1011,6 @@ InstantFoxSearch.prototype = {
 			this.parser = isMaps ? parseMapsJson : parseSimpleJson
 		}
 
-		dump(url)
 		
 		if (url) {
 			this.listener = listener;
@@ -1052,7 +1050,6 @@ InstantFoxSearch.prototype = {
 	},
 
 	onSearchReady: function(e){
-		dump('end',e.target.channel.name, this._reqList[0] == e.target)
 		if(!this.listener)
 			return
 		// don't let older requests completing later mess with suggestions

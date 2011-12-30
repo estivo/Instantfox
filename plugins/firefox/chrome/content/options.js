@@ -405,7 +405,6 @@ enginesPopup = {
 		for each(var p in items)
 			xml.push(formatString(str, p))
 
-		dump(xml.join(''))
 		appendXML(popup, xml.join(''))
 	},
 	getItems_Url: function(t){
@@ -509,7 +508,6 @@ autoSearchUI = {
 			box.plugin = p
 			box.value = p[i] || '';
 			box.nextSibling.hidden = !canResetProp(box)
-			dump(canResetProp(box))
 		}
 		
 		$t(g, "disabled").checked = !p.disabled
@@ -796,7 +794,6 @@ window.addEventListener("DOMContentLoaded", function() {
 	// check if we are inside popup
 	var InstantFox = top.InstantFox
 	if (InstantFox) {
-		dump("load into popup*********")
 		window.close = InstantFox.closeOptionsPopup
 		InstantFox.updatePopupSize(size)
 		// don't let clicks inside options window to close popup
@@ -813,7 +810,6 @@ onOptionsPopupShowing = function(){
 
 function onTabSelect(){
 	var i = this.selectedIndex
-	dump(i)
 	$("report-a-bug").hidden = i!=3
 	
 	i == 1 && autoSearchUI.init()
@@ -907,8 +903,8 @@ addPluginsFromClipboard = function(){
 	autoSearchUI.init()
 }
 
-resetAllPlugins = function() {
-	var proceed = Services.prompt.confirm(window, "InstantFox", i18n.get("alert.reset"))
+resetAllPlugins = function(proceed) {
+	proceed = proceed || Services.prompt.confirm(window, "InstantFox", i18n.get("alert.reset"))
 	if (!proceed)
 		return
 	InstantFoxModule.Plugins = {}
