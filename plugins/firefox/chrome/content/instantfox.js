@@ -995,7 +995,7 @@ InstantFox.modifyContextMenu = function(enable){
 		let popup = document.getElementById("contentAreaContextMenu")
 		let node = document.getElementById("ifox-context-searchselect")
 		node && node.parentNode.removeChild(node)
-		popup.insertBefore(proto.oldNode, proto.oldNodePosId && document.getElementById(proto.oldNodePosId))
+		proto.oldNode && popup.insertBefore(proto.oldNode, proto.oldNodePosId && document.getElementById(proto.oldNodePosId))
 	}
 }
 

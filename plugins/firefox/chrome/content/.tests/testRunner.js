@@ -32,6 +32,11 @@ this.key = function(aKey, aEvent, aWindow) {
 	}
 }
 
+this.type = function(str, aWindow){
+	for each(var i in str)
+		this.key(i, null, aWindow)
+}
+
 this.mouse = function(node, offsetX, offsetY, event, win){
     win = win || node.ownerDocument.defaultView;
     var utils = win.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindowUtils);
@@ -80,23 +85,52 @@ this.test = function(name, test, delay) {
 	
 }
 this.run = function(){
-	this.$logData = []
+	this.initLog()
 	this.i = 0
 	this.runNext()
 }
 this.runNext = function(){
-	var test = testList[this.i++]
-	if(!test){
+	this.test = testList[this.i++]
+	if(!this.test){
 		dump('all tests finished')
 		return	
 	}
+	this.prepare2test()
+}
+this.prepare2test = function(){
+	var self = this
+	var test = this.test
 	var name = test.name
-	try{
-		test.run()
-	}catch(e){
-		Cu.reportError(name+":(Failed to run")		
-		Cu.reportError(e)
+	var fList = test.run
+	var f, i = 0, r
+	
+	if (typeof fList == "function"){
+		f = fList
+		fList = []
+	}else{
+		f = fList[i++]
 	}
+	
+	function run(){
+		try{
+			r = f.call(test)
+		}catch(e){
+			Cu.reportError(name+":(Failed to run")		
+			Cu.reportError(e)
+		}
+		f = fList[i++]
+
+		if (f)
+			setTimeout(run, r || 0)
+		else
+			self.testResults()
+	}
+	run()
+}
+this.testResults = function(){
+	var name = this.test.name
+	var test = this.test
+	var self = this
 	var wholeDelay, delay = 0
 	function waitAndTest(delay){
 		wholeDelay += delay
@@ -119,10 +153,15 @@ this.runNext = function(){
 				Cu.reportError(name+":(Fail")		
 				Cu.reportError(e)		
 			}
-			itest.runNext()
+			self.runNext()
 		}, delay)
 	}
 	waitAndTest(test.delay||0)
+}
+
+this.initLog = function(x){
+	this.$logData = []
+	//dump.clear()
 }
 this.log = function(x){
 	dump(x)
@@ -138,6 +177,14 @@ this.success = function(x){
 this.showLog = function(){
 	
 }
+this.check = function(str, val){
+	var temp = eval(str)
+	if (temp == val)
+		return true
+	
+	dump(str, temp, val)
+	return fale
+}
 }).call(itest)
 
 testList = [{
@@ -151,10 +198,7 @@ testList = [{
 		window.focus()
 		itest.mouse(gURLBar)
 		gURLBar.select()
-		itest.key('w')
-		itest.key(' ')
-		itest.key('-')
-		itest.key('-')
+		itest.type('w --')
                 
         p.disableSuggest = false
 	},
@@ -185,7 +229,8 @@ testList = [{
         
 	},
 	test: function(){
-		itest.error()
+		//itest.error()
+		return true	
 	},
 }, {
 	name: 'wikipedia suggest rules ',
@@ -215,12 +260,124 @@ testList = [{
 	},
 	delay:500
 }, {
-	name: 'check plugin integrity after update',
-	run: function() {
-	},
-	test: function(){		
+	name: 'customize plugins',
+	run: [function() {
+		var pl = InstantFoxModule.Plugins
+		
+		var p = pl.google
+		p.url = p.def_url = "def://json/%q"
+		p.key = 'q'
+		
+		var p = pl.googleimages
+		p.name = "modified"
+		p.json = "new-json%q"
+		p.url = "http://io/%q"
+		
+		var p = {
+		   "url": "def_url",
+		   "def_url": "def_url",
+		   "json": "def_url",
+		   "def_json": "def_url",
+		   "domain": "dom",
+		   "type": "default",
+		   "name": "remove",
+		   "def_name": "remove",
+		   "id": "remove",
+		   "key": "r",
+		   "def_key": "r",
+		}		
+		pl[p.id] = p
+		
+		var p = {
+		   "url": "def_url",
+		   "json": "def_url",
+		   "domain": "dom",
+		   "type": "user",
+		   "name": "doNotRemove",
+		   "id": "doNotRemove",
+		   "key": "doNotRemove",
+		   "def_key": "r",
+		   "def_url": "def_url",
+		   "def_name": "remove",
+		   "def_json": "def_url"
+		}
+		pl[p.id] = p
+		
+		for each(var p in pl)
+			if (p.type == "browserSearch")
+				p.disabled = true
+		var doc = itest.qs("panel#instantfox-popup iframe").contentDocument
+		doc.defaultView.rebuild()
+		doc.defaultView.focus()
+				
+    	itest.mouse(itest.qsa("tab", doc)[0])
+        itest.mouse(itest.qs("#add", doc))
+		
+	}, function() {
+		var doc = itest.qs("panel#instantfox-popup iframe").contentDocument
+		var t = itest.qs("#edit-box textbox[aID=name]", doc)
+		t.focus()
+		itest.type("name")
+		
+		var t = itest.qs("#edit-box textbox[aID=url]", doc)
+		t.focus()
+		itest.type("http://me/%q")
+		dump(t.value)
+		return 300
+	}, function() {
+		var doc = itest.qs("panel#instantfox-popup iframe").contentDocument
+		itest.mouse(itest.qs("#edit-box slickbutton[label=OK]", doc))
+		return 300
+	}, function() {	
+		dump(InstantFoxModule.Plugins.user0)
+		var doc = itest.qs("panel#instantfox-popup iframe").contentDocument
+		itest.mouse(itest.qs("slickbutton[label=OK]", doc))		
+		return 100
+	}],
+	test: function(){
+		var pl = InstantFoxModule.Plugins
+		if (!pl.user0)
+			return 100
+		var success = true
+			&& pl.remove
+			&& pl.doNotRemove
+			&& pl.google.url.indexOf("google") == -1
+			&& pl.googleimages.url == "http://io/%q"
+				&& pl.googleimages.name == "modified"
+			&& pl.user0
+			&& pl.doNotRemove
+			
+		for each(var p in pl)
+			if (p.type == "browserSearch")
+				success = success && p.disabled
+		
+		
+		return success
 	},
 	delay:100
+}, {
+	name: 'check plugin integrity after update',
+	run: function() {
+		instantFoxDevel.testFirstRun()
+	},
+	test: function(){
+		var pl = InstantFoxModule.Plugins
+		var success = true
+			&& !pl.remove
+			&& pl.doNotRemove
+			&& pl.google.url.indexOf("google") != -1
+			&& pl.googleimages.url == "http://io/%q"
+				&& pl.googleimages.name == "modified"
+			&& pl.user0
+			&& pl.doNotRemove
+			
+		for each(var p in pl)
+			if (p.type == "browserSearch")
+				success = success && p.disabled
+		
+		return success
+	},
+	delay:500
 }]
 	
 

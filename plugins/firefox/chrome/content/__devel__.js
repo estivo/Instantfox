@@ -1,5 +1,24 @@
 /** devel__( */
 
+
+try{
+	dump = Cu.import("resource://shadia/main.js").dump
+}catch(e){
+	dump = function() {
+		var aMessage = "aMessage: ";
+		for (var i = 0; i < arguments.length; ++i) {
+			var a = arguments[i];
+			aMessage += (a && !a.toString ? "[object call]" : a) + " , ";
+		}
+		var consoleService = Components.classes['@mozilla.org/consoleservice;1'].getService(Components.interfaces.nsIConsoleService);
+		consoleService.logStringMessage("" + aMessage);
+	}	
+	dump.clear = function() {
+		Services.console.reset();
+		Services.console.logStringMessage("");
+	}
+}
+
 /** ************************* ---===--- ************************* **/
 function makeReq(href) {
 	var req = new XMLHttpRequest;
@@ -119,6 +138,10 @@ var instantFoxDevel = {
 			})
 		}catch(e){}
 	},
+	testFirstRun: function(isUpdate){
+		this.clearFirstRunPref(isUpdate)
+		this.doReload()
+	},
 	onClick: function(e){
 		var action = e.target.getAttribute('action')
 		switch(action){
@@ -133,8 +156,7 @@ var instantFoxDevel = {
 					break
 				}
 			case 'test-first-run':
-				this.clearFirstRunPref(e.button == 2)
-				this.doReload()
+				this.testFirstRun(e.button == 2)
 				break
 			case 'show-folder':
 				this.getContainingFolder().reveal()

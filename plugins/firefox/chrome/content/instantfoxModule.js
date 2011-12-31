@@ -118,7 +118,8 @@ var pluginLoader = {
 	addDefaultPlugins: function(pluginData){
 		InstantFoxModule.selectedLocale = pluginData.localeMap['%ll']
 		var newPlugins = {}, oldPlugins = InstantFoxModule.Plugins;
-		for each(var p in pluginData.plugins){
+		for each(var plugin in pluginData.plugins){
+			var p = this.cleanCopyPlugin(plugin)
 			var id = p.id
 			var mP = oldPlugins[id]
 			//copy user modified values
