@@ -1,5 +1,4 @@
-//var currentTab = getWebNavigation().sessionHistory;.getEntryAtIndex(currentTab.count-1, false).URI.spec
-var InstantFox = {
+window.InstantFox = {
 	$el: function(name, att, parent) {
 		var el = document.createElement(name)
 		for (var a in att)
@@ -112,19 +111,23 @@ var InstantFox = {
 	},
 	// end belong to notifyTab
 
-	initialize: function(event) {
-		window.removeEventListener('load', arguments.callee, true);
+	initialize: function() {
 		Cu.import('chrome://instantfox/content/instantfoxModule.js')
-
+		
+		var s = document.createProcessingInstruction('xml-stylesheet', 'href="chrome://instantfox/content/skin/instantfox.css"')
+		document.insertBefore(s, document.documentElement)
+		this.stylesheet = s
+		setTimeout(this.$initializeMain)
+	},
+	$initializeMain: function() {
 		gURLBar.setAttribute('autocompletesearch',	'instantFoxAutoComplete');
 		gURLBar.removeAttribute('oninput');
 
 		gURLBar.addEventListener('keydown', InstantFox.onKeydown, false);
 		gURLBar.addEventListener('input', InstantFox.onInput, false);
+		// _copyCutController prevents cut event, so modify it in hookUrlbarCommand
 		// gURLBar.addEventListener('cut', InstantFox.onInput, false);
-		// _copyCutController prevents cut event, so modify it for now
-		// (fortunately this function is same the in 3.6-8.0a)
-		gURLBar._copyCutController.doCommand = InstantFox._urlbarCutCommand
+		
 		gURLBar.addEventListener('blur', InstantFox.onblur, false);
 		gURLBar.addEventListener('focus', InstantFox.onfocus, false);
 		
@@ -143,6 +146,7 @@ var InstantFox = {
 		})
 
 		InstantFox.hookUrlbarCommand()
+		InstantFox.modifyContextMenu()
 	},
 
 	destroy: function(event) {
@@ -154,9 +158,14 @@ var InstantFox = {
 		gNavToolbox.removeEventListener("aftercustomization", InstantFox.afterCustomization, false);
 
 		this.finishSearch()
+		
 		this.hookUrlbarCommand('off')
-
 		InstantFox.modifyContextMenu(false)
+		
+		delete window.InstantFox
+		delete window.InstantFoxModule
+		
+		this.stylesheet.parentNode.removeChild(this.stylesheet)
 	},
 
 	checkURLBarBinding: function() {
@@ -209,16 +218,6 @@ var InstantFox = {
 		var prefs = Services.prefs.getBranch('extensions.InstantFox.')
 		var cssRules, s, ruleIndex
 		
-		var findStyleSheet = function(href) {
-			var ss = document.styleSheets		
-			for(var i = ss.length; i--; ) {
-				s = ss[i]
-				if(s.href==href){
-					cssRules = s.cssRules
-					return s
-				}
-			}
-		}
 		var findRule = function(selector) {
 			for (var i = 0; i < cssRules.length; i++) {
 				var rule = cssRules[i]
@@ -229,7 +228,7 @@ var InstantFox = {
 			}
 		}
 		
-		findStyleSheet("chrome://instantfox/content/skin/instantfox.css");
+		s = this.stylesheet.sheet
 		
 		if (prefs.prefHasUserValue('fontsize')) {
 			var pref = prefs.getCharPref('fontsize')
@@ -374,6 +373,7 @@ var InstantFox = {
 	onInput: function() {
 		var val = gURLBar.value;
 		gBrowser.userTypedValue = val;
+		dump(val)
 
 		var q = InstantFox.getQuery(val, InstantFoxModule.currentQuery)
 		if (q) {
@@ -779,61 +779,6 @@ InstantFox.afterCustomization = function(e){
 	dump(searchBar, optionsButton, "************************************")
 }
 
-//************************************************************************
-window.addEventListener('load', InstantFox.initialize, true);
-
-// modify URLBarSetURI defined in browser.js
-function URLBarSetURI(aURI) {
-	// auri is null if URLBarSetURI is called from urlbar.handleRevert
-	if (InstantFox.$urlBarModified) {
-		if (aURI
-			&& InstantFoxModule.currentQuery
-			&& InstantFoxModule.currentQuery.tabId == InstantFox._ctabID
-		) {
-			InstantFox.onPageLoad(aURI.spec)
-			return;
-		} else { //hide shadow if user switched tabs
-			InstantFox.finishSearch();
-		}
-	}
-    var value = gBrowser.userTypedValue;
-    var valid = false;
-    if (value == null) {
-        var uri = aURI || getWebNavigation().currentURI;
-        if (gInitialPages.indexOf(uri.spec) != -1) {
-            value = content.opener ? uri.spec : "";
-        } else {
-            value = losslessDecodeURI(uri);
-        }
-        valid = uri.spec != "about:blank";
-		// do not allow "about:blank"
-		if(!valid) value = '';
-    }
-    gURLBar.value = value;
-    SetPageProxyState(valid ? "valid" : "invalid");
-}
-// todo: find better way to intercept cut command
-InstantFox._urlbarCutCommand =  function(aCommand){
-	var urlbar = this.urlbar;
-	var val = urlbar._getSelectedValueForClipboard();
-	if (!val)
-		return;
-
-	if (aCommand == "cmd_cut" && this.isCommandEnabled(aCommand)) {
-		var start = urlbar.selectionStart;
-		var end = urlbar.selectionEnd;
-		// This should reset any "moz-action:" prefix.
-		urlbar.value = urlbar.inputField.value.substring(0, start) +
-							urlbar.inputField.value.substring(end);
-		urlbar.selectionStart = urlbar.selectionEnd = start;
-		SetPageProxyState("invalid");
-		InstantFox.onInput()
-	}
-
-	Cc["@mozilla.org/widget/clipboardhelper;1"]
-			.getService(Ci.nsIClipboardHelper)
-			.copyString(val);
-}
 
 /*********************************************************
  * contextMenu
@@ -1000,11 +945,19 @@ InstantFox.modifyContextMenu = function(enable){
 }
 
 InstantFox.hookUrlbarCommand = function(off){
-	if (off && InstantFox.handleCommand_orig) {
-		gURLBar.handleCommand = InstantFox.handleCommand_orig
+	if (off) {
+		this.handleCommand_orig && (gURLBar.handleCommand = this.handleCommand_orig)
+		this.URLBarSetURI_orig && (window.URLBarSetURI = this.URLBarSetURI_orig)
+		this._urlbarCutCommand_orig && (gURLBar._copyCutController.doCommand = this._urlbarCutCommand_orig)
 	} else {
-		InstantFox.handleCommand_orig = gURLBar.handleCommand
-		gURLBar.handleCommand = InstantFox.handleCommand
+		this.handleCommand_orig = gURLBar.handleCommand
+		gURLBar.handleCommand = this.handleCommand
+		
+		this.URLBarSetURI_orig = window.URLBarSetURI
+		window.URLBarSetURI = this.URLBarSetURI
+		
+		this._urlbarCutCommand_orig = gURLBar._copyCutController.doCommand 
+		gURLBar._copyCutController.doCommand = this._urlbarCutCommand
 	}
 }
 
@@ -1119,7 +1072,58 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
 	}
 }
 
+// modify URLBarSetURI defined in browser.js
+InstantFox.URLBarSetURI = function(aURI) {
+	// auri is null if URLBarSetURI is called from urlbar.handleRevert
+	if (InstantFox.$urlBarModified) {
+		if (aURI
+			&& InstantFoxModule.currentQuery
+			&& InstantFoxModule.currentQuery.tabId == InstantFox._ctabID
+		) {
+			InstantFox.onPageLoad(aURI.spec)
+			return;
+		} else { //hide shadow if user switched tabs
+			InstantFox.finishSearch();
+		}
+	}
+    var value = gBrowser.userTypedValue;
+    var valid = false;
+    if (value == null) {
+        var uri = aURI || getWebNavigation().currentURI;
+        if (gInitialPages.indexOf(uri.spec) != -1) {
+            value = content.opener ? uri.spec : "";
+        } else {
+            value = losslessDecodeURI(uri);
+        }
+        valid = uri.spec != "about:blank";
+		// do not allow "about:blank"
+		if(!valid) value = '';
+    }
+    gURLBar.value = value;
+    SetPageProxyState(valid ? "valid" : "invalid");
+}
+// todo: find better way to intercept cut command
+InstantFox._urlbarCutCommand =  function(aCommand){
+	var urlbar = this.urlbar;
+	var val = urlbar._getSelectedValueForClipboard();
+	if (!val)
+		return;
 
-InstantFox.modifyContextMenu()
+	if (aCommand == "cmd_cut" && this.isCommandEnabled(aCommand)) {
+		var start = urlbar.selectionStart;
+		var end = urlbar.selectionEnd;
+		// This should reset any "moz-action:" prefix.
+		urlbar.value = urlbar.inputField.value.substring(0, start) +
+							urlbar.inputField.value.substring(end);
+		urlbar.selectionStart = urlbar.selectionEnd = start;
+		SetPageProxyState("invalid");
+		InstantFox.onInput()
+	}
+
+	Cc["@mozilla.org/widget/clipboardhelper;1"]
+			.getService(Ci.nsIClipboardHelper)
+			.copyString(val);
+}
+
 
 dump("instantfox initialization success")

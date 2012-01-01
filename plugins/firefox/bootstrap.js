@@ -22,6 +22,8 @@ function loadIntoWindow(aWindow) {
 			script.type="text/javascript";
 			aWindow.document.documentElement.appendChild(script);*/
 	}catch(e){Components.utils.reportError(e)}
+	
+	aWindow.InstantFox.initialize()
 }
 
 function unloadFromWindow(aWindow){
@@ -90,6 +92,8 @@ function shutdown(aData, aReason) {
 	if (Services.vc.compare(Services.appinfo.platformVersion, "10.0") < 0)  
 		Components.manager.QueryInterface(Ci.nsIComponentRegistrar)
 			.removeBootstrappedManifestLocation(aData.installPath)
+	
+	Components.utils.unload('chrome://instantfox/content/instantfoxModule.js')
 }
 
 function install(aData, aReason){
