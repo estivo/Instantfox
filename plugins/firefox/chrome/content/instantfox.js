@@ -9,6 +9,10 @@ window.InstantFox = {
 		return el
 	},
 	$: function(x) document.getElementById(x), 
+	rem: function(x){
+		if(x && x.parentNode)
+			x.parentNode.removeChild(x)	
+	},
     // belong to notifyTab
 	install_url: "http://www.instantfox.net/welcome.php",
 	update_url:  "http://www.instantfox.net/update.php",
@@ -117,9 +121,7 @@ window.InstantFox = {
 		var s = document.createProcessingInstruction('xml-stylesheet', 'href="chrome://instantfox/content/skin/instantfox.css"')
 		document.insertBefore(s, document.documentElement)
 		this.stylesheet = s
-		setTimeout(this.$initializeMain)
-	},
-	$initializeMain: function() {
+		
 		gURLBar.setAttribute('autocompletesearch',	'instantFoxAutoComplete');
 		gURLBar.removeAttribute('oninput');
 
@@ -137,7 +139,7 @@ window.InstantFox = {
 		dump('instantFox initialized')
 		InstantFox.notifyTab()
 		// apply user modified styles
-		InstantFox.checkURLBarBinding()
+		InstantFox.transformURLBar()
 		InstantFox.updateUserStyle()
 
 		// this is needed if searchbar is removed from toolbar
@@ -162,23 +164,43 @@ window.InstantFox = {
 		this.hookUrlbarCommand('off')
 		InstantFox.modifyContextMenu(false)
 		
+		InstantFox.transformURLBar('off')
+		
 		delete window.InstantFox
 		delete window.InstantFoxModule
 		
-		this.stylesheet.parentNode.removeChild(this.stylesheet)
+		this.rem(this.stylesheet)
 	},
 
-	checkURLBarBinding: function() {
+	transformURLBar: function(off) {
+		if (off) {
+			if(!gURLBar.instantFoxKeyNode)
+				return;
+			var hbox = document.getAnonymousElementByAttribute(gURLBar, 'class', 'instantfox-box')
+			this.rem(hbox)
+			hbox = document.getAnonymousElementByAttribute(gURLBar, 'class', 'instantfox-box')
+			this.rem(hbox)
+			var s = document.getAnonymousElementByAttribute(gURLBar, 'class', 'instantfox-urlbar')
+			s && s.classList.remove('instantfox-urlbar')
+			
+			delete gURLBar.currentShadow
+			delete gURLBar.instantFoxKeyNode
+			delete gURLBar.instantFoxSpacerNode.textContent
+			delete gURLBar.instantFoxShadowNode.textContent
+			delete gURLBar.instantFoxTipNode			
+			
+			return
+		}
+		
 		if(gURLBar.instantFoxKeyNode)
 			return;
-		// our binding was overriden by some other addon
-		// we can recover if it placed mInputField into stack
 		var s = gURLBar.mInputField
-		while (s&&s.nodeName!='xul:stack')
+		while (s && s.nodeName!='xul:stack')
 			s = s.parentNode;
 
 		if(!s) {
-			// todo: add !important to our bindings rule
+			s = gURLBar.mInputField.parentNode
+			s.classList.add('instantfox-urlbar')
 		}
 
 		function hbox(name, addChildDiv){
@@ -670,7 +692,7 @@ InstantFox.onPopupShowing = function(p) {
 	if (p.id != 'instantfox-popup')
 		return
 
-	document.getElementById('instantFox-options').setAttribute("open", true)	
+	document.getElementById('instantFox-options').setAttribute("open", true)
 	window.addEventListener('mousedown', InstantFox.popupCloser, false)
 
 	var st = p.querySelector('stack')
@@ -698,12 +720,22 @@ InstantFox.onPopupHiding = function(p) {
 	document.getElementById('instantFox-options').removeAttribute("open");
 }
 InstantFox.updatePopupSize = function(size) {
-	var p = document.getElementById('instantfox-popup')
+	var RDF=Cc["@mozilla.org/rdf/rdf-service;1"].getService(Ci.nsIRDFService)
 
-	if (p.wrongSize){
-		delete p.wrongSize
-		p.width = size
+	var store= PlacesUIUtils.localStore//this.RDF.GetDataSource("rdf:local-store")
+
+	toolbar = this.RDF.GetResource("chrome://instantfox/content/options.xul#instantfox_options");
+	toolbar = this.RDF.GetResource("chrome://browser/content/browser.xul#instantfox-popup");
+
+	getPersist = function getPersist(aProperty) {
+		let property = RDF.GetResource(aProperty);
+		let target = store.GetTarget(this.toolbar, property, true);
+		if (target instanceof Ci.nsIRDFLiteral)
+			return target.Value;
+		return null;
 	}
+	  getPersist("width")
+	//  getPersist("height")
 }
 InstantFox.popupClickListener = function(e) {
 	InstantFox.clickedInPopup = true
@@ -826,7 +858,7 @@ InstantFox.modifyContextMenu = function(enable){
 			if(old){
 				nsContextMenu.prototype.oldNode = old
 				nsContextMenu.prototype.oldNodePosId = old.nextSibling && old.nextSibling.id
-				old.parentNode.removeChild(old)
+				InstantFox.rem(old)
 			}
 
 			var m = InstantFox.$el('menu', {
@@ -939,11 +971,14 @@ InstantFox.modifyContextMenu = function(enable){
 		delete proto.openLinkIn
 		let popup = document.getElementById("contentAreaContextMenu")
 		let node = document.getElementById("ifox-context-searchselect")
-		node && node.parentNode.removeChild(node)
+		InstantFox.rem(node)
 		proto.oldNode && popup.insertBefore(proto.oldNode, proto.oldNodePosId && document.getElementById(proto.oldNodePosId))
 	}
 }
 
+/*********************************************************
+ * urlbarCommand
+ *******/
 InstantFox.hookUrlbarCommand = function(off){
 	if (off) {
 		this.handleCommand_orig && (gURLBar.handleCommand = this.handleCommand_orig)
@@ -1071,8 +1106,6 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
 		loadCurrent();
 	}
 }
-
-// modify URLBarSetURI defined in browser.js
 InstantFox.URLBarSetURI = function(aURI) {
 	// auri is null if URLBarSetURI is called from urlbar.handleRevert
 	if (InstantFox.$urlBarModified) {

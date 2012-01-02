@@ -795,7 +795,6 @@ window.addEventListener("DOMContentLoaded", function() {
 	var InstantFox = top.InstantFox
 	if (InstantFox) {
 		window.close = InstantFox.closeOptionsPopup
-		InstantFox.updatePopupSize(size)
 		// don't let clicks inside options window to close popup
 		window.addEventListener('mousedown', InstantFox.popupClickListener, false)
 	}

@@ -42,8 +42,8 @@ richlistitem[type='InstantFoxSuggest'] {
 	-moz-box-orient: horizontal!important;
 }
 /** urlbar ************************************** =8= ****/
-#urlbar {
-  -moz-binding: url(chrome://instantfox/content/urlbar.xml#urlbar);
+.instantfox-urlbar {
+	display: -moz-stack!important;
 }
 .instantfox-box{
 	overflow:hidden;
