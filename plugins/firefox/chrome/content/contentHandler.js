@@ -3,63 +3,104 @@
  * http://lists.whatwg.org/htdig.cgi/whatwg-whatwg.org/2010-October/028818.html
  * http://src.chromium.org/svn/trunk/src/chrome/renderer/searchbox_extension.cc
  *
- * ******* deprecated variant currently used by google
- *         // window.chrome.setSuggestResult // called by page
- *         window.chrome.sv 
- *         window.chrome.userInput(q, verbatim?46:0, selectionStart)
- *         window.chrome.userWantsQuery(q) // finish instant
- *         window.chrome.setDropdownDimensions(x,y,w,h, hideHeader)
  */
 InstantFox.searchBoxAPI = {
-	setStatus: function(str){
+    setStatus: function(str){
 		InstantFox.pageLoader.label.value = str;
+	},
+	getUrl: function(){
+		return this.isSupported() && this.getWindow().location.href
 	},
 	getWindow: function(){
 		return InstantFox.pageLoader.preview
 			&& InstantFox.pageLoader.preview.contentWindow
 			&& InstantFox.pageLoader.preview.contentWindow.wrappedJSObject
 	},
+	getSearchBox: function(){
+		var w
+		return (w = this.getWindow()) && (w = w.navigator) && (w = w.searchBox)
+	},
 	isSupported: function() {
-		var win = this.getWindow()
-		return  win && win.chrome && (!!win.chrome.sv) && win.location.href
+		var sb = this.getSearchBox()
+		return sb
+			&& !!(sb.onchange
+			&& sb.onsubmit
+			&& sb.oncancel
+			&& sb.onresize)
 	},
 	urlRegexp:/#.*$/,
 	canLoad: function(qUrl, url2go){
+		dump(
+			qUrl , url2go,
+			qUrl && url2go && qUrl.replace(this.urlRegexp, "") == url2go.replace(this.urlRegexp, "")
+		)
 		return qUrl && url2go && qUrl.replace(this.urlRegexp, "") == url2go.replace(this.urlRegexp, "")
 	},
 	onInput: function(){
 		var q = InstantFoxModule.currentQuery
 		var text = q.shadow || q.query
-		
-		var win = this.getWindow()
-		if (win && win.chrome && win.chrome.userInput) {
-			win.chrome.userInput(text, 46, text.length) 
+
+		var sb = this.getSearchBox()
+		if (sb) {
+			sb.selectionEnd = sb.selectionStart = text.length
+			sb.value = text
+			sb.verbatim = false
 			this.setStatus(text)
+			this.call(sb, "onchange")
+			this.call(sb, "onresize")
 		}
 	},
 	setDimensions: function(){
-		var browser = InstantFox.pageLoader.preview
-		if (!browser)
+		var sb = this.getSearchBox()
+		if (!sb)
 			return
-		
+		var browser = InstantFox.pageLoader.preview
+
 		var zoom = browser.markupDocumentViewer.fullZoom;
-		
+
 		var r1 = gURLBar.popup.getBoundingClientRect()
 		var r2 = InstantFox.pageLoader.preview.getBoundingClientRect()
 
-		var x = (r1.left   - r2.left) /zoom
-		var y = (r1.top   - r2.top) /zoom
-		var w =  r1.width  / zoom
-		var h =  r1.height/ zoom
-		
-		var win = this.getWindow()
-		win && win.chrome && win.chrome.setDropdownDimensions
-			&& win.chrome.setDropdownDimensions(x,y,w,h)
+		sb.x = (r1.left   - r2.left) /zoom
+		sb.y = (r1.top   - r2.top) /zoom
+		sb.height = r1.height / zoom
+		sb.width  = r1.width / zoom
+
+		this.call(sb, "onresize")
 	},
 	onFinish: function(q){
+		var sb = this.getSearchBox()
+		if (!sb)
+			return
+		sb.value = q
+		sb.verbatim = true
+		this.call(sb, "onchange")
+		this.call(sb, "onsubmit")
+	},
+	addToWindow: function(){
 		var win = this.getWindow()
-		win && win.chrome && win.chrome.setDropdownDimensions
-			&& win.chrome.userWantsQuery(q)
+		win.navigator.searchBox = {
+			value: '',
+			verbatim: false,
+			selectionStart: 0,
+			selectionEnd: 0,
+			x:0, y:0, width:0, height:0,
+			setSuggestions: function(suggestions) {
+				dump(JSON.stringify(suggestions))
+			}
+			/* onchange onsubmit oncancel onresize;*/
+		}
+	},
+	call: function(sb, prop){
+		dump(prop, sb[prop])
+		sb[prop] && sb[prop]()
+	},
+	handleEvent: function(e){
+		e.currentTarget.removeEventListener("DOMWindowCreated", this, false)
+		this.addToWindow()
+	},
+	listen: function(el){
+		el.addEventListener("DOMWindowCreated", this, false)
 	}
 }
 
@@ -83,13 +124,13 @@ InstantFox.contentHandlers = {
 		transformURL: function(q, url2go) {
 			try{
 				var url = InstantFox.pageLoader.preview.contentDocument.location.href;
-				// 
+				//
 				var gDomain = url.match(/https?:\/\/((www|encrypted)\.)?google.([a-z\.]*)[^#]*/i)
 				if (!gDomain)
 					return url2go
 				var query = url2go.match(/#.*/)
 				if (!query)
-					return url2go					
+					return url2go
 				return gDomain[0] + query[0]
 			}catch(e){
 				Cu.reportError(e)
@@ -145,7 +186,7 @@ InstantFox.pageLoader = {
         }
     },
 
-    // Provide a way to replace the current tab with the preview	
+    // Provide a way to replace the current tab with the preview
     persistPreview: function(tab, inBackground) {
 		if (!this.previewIsActive)
 			return;
@@ -246,12 +287,6 @@ InstantFox.pageLoader = {
 	},
 
     addPreview: function(url) {
-        // Only auto-load some types of uris
-        //let url = result.getAttribute("url");
-        /* if (url.search(/^(data|ftp|https?):/) == -1) {
-            this.removePreview();
-            return;
-        } */
 		let preview = this.preview
 		let browser = window.gBrowser;
         // Create the preview if it's missing
@@ -287,7 +322,7 @@ InstantFox.pageLoader = {
 		// disable history
 		preview.docShell.useGlobalHistory = false
 
-
+		InstantFox.searchBoxAPI.listen(preview)
         // Load the url i
         preview.webNavigation.loadURI(url, nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE, null, null, null);
     },
@@ -298,6 +333,7 @@ InstantFox.pageLoader = {
 		if(!this.a){
 			//InstantFox.pageLoader.preview.addProgressListener(this);
 			this.a = true
+
 		}
 
 		if(!this.image){

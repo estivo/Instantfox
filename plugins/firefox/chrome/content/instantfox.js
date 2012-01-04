@@ -573,7 +573,7 @@ window.InstantFox = {
 
 		/****************************/
 		if (q.$searchBoxAPI_URL == null) {
-			q.$searchBoxAPI_URL = this.searchBoxAPI.isSupported()
+			q.$searchBoxAPI_URL = this.searchBoxAPI.getUrl()
 		}
 		if (this._isOwnQuery && this.searchBoxAPI.canLoad(q.$searchBoxAPI_URL, url2go)) {
 			this.searchBoxAPI.setDimensions()	
