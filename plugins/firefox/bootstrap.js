@@ -23,7 +23,7 @@ function loadIntoWindow(win) {
 function unloadFromWindow(win){
 	try {
 		// delete all added variables and remove eventListeners
-		win.instantmaps_loader.uninit()
+		win.InstantFox.destroy()
 	}catch(e){Cu.reportError(e)}
 }
 
@@ -54,6 +54,12 @@ function startup(aData, aReason) {
 			'instantfox',
 			Services.io.newURI(__SCRIPT_URI_SPEC__+'/../modules/', null, null)    
 		)
+	// prefs
+    let branch = Services.prefs.getDefaultBranch("extensions.InstantFox.");
+	branch.setCharPref("version", "0.0.0");
+	branch.setBoolPref("removeSearchbar", true);
+	branch.setBoolPref("removeOptions", false);
+
 	// Load into any existing windows
 	var enumerator = Services.wm.getEnumerator("navigator:browser");
 	while (enumerator.hasMoreElements()) {
@@ -85,6 +91,12 @@ function shutdown(aData, aReason) {
 			.removeBootstrappedManifestLocation(aData.installPath)
 	
 	Cu.unload('chrome://instantfox/content/instantfoxModule.js')
+	Cu.unload('chrome://instantfox/content/defaultPluginList.js')
+	
+	/*devel__(*/
+		// prefs
+		// Services.prefs.getDefaultBranch("extensions.InstantFox.").deleteBranch("");
+	/*devel__)*/
 }
 
 function install(aData, aReason) {

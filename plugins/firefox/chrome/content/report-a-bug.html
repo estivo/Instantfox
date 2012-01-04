@@ -228,7 +228,6 @@ setTimeout(function() {
 setTimeout(function(){
 	var prefs = Services.prefs
 	var names = prefs.getChildList("extensions.InstantFox.",{},{})
-	names.push("extensions.instantfox.version")
 	names.forEach(function(x){
 		report.prefs+=x + ":  " + getPref(x) + "\n"
 	})

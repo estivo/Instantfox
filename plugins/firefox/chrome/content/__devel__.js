@@ -87,7 +87,8 @@ var instantFoxDevel = {
 	}*/
 	sourceList: [
 		"chrome://instantfox/content/instantfox.js",
-		"chrome://instantfox/content/contentHandler.js"
+		"chrome://instantfox/content/contentHandler.js",
+		"chrome://instantfox/content/overlay.js"
 	],
 	moduleHref: 'chrome://instantfox/content/instantfoxModule.js',
 
@@ -110,8 +111,6 @@ var instantFoxDevel = {
 		if(this.loadedScriptsCount == this.sourceList.length){
 			this.reloadModule("chrome://instantfox/content/defaultPluginList.js")
 			this.m = this.reloadModule(this.moduleHref)
-			if("$shadia" in window)
-				this.m.dump = $shadia.dump
 			// simulate document load event
 			InstantFox.initialize()
 		}else{
@@ -124,18 +123,16 @@ var instantFoxDevel = {
 	clearFirstRunPref: function(update){
 		try{
 			var prefs = Services.prefs
-			// debug initialization
-			if (update)
-				prefs.setCharPref("extensions.instantfox.version", 'oldVersion')
-			else
-				prefs.clearUserPref("extensions.instantfox.version")
-
+			
 			//Services.prefs.resetBranch("extensions.InstantFox.")//not implemented:(
 			//Services.prefs.deleteBranch("extensions.InstantFox.")
 			//InstantFox.updateOptionsButton(true)
 			prefs.getChildList("extensions.InstantFox.",{},{}).forEach(function(x){
 				prefs.clearUserPref(x)
 			})
+			
+			if (update)
+				prefs.setCharPref("extensions.InstantFox.version", 'oldVersion')
 		}catch(e){}
 	},
 	testFirstRun: function(isUpdate){

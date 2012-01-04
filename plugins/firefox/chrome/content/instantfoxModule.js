@@ -237,7 +237,7 @@ var pluginLoader = {
 			selectedLocale: InstantFoxModule.selectedLocale,
 			defaultPlugin: InstantFoxModule.defaultPlugin,
 			autoSearch: InstantFoxModule.autoSearch,
-			version: Services.prefs.getCharPref("extensions.instantfox.version"),
+			version: Services.prefs.getCharPref("extensions.InstantFox.version"),
 			plugins: ob
 		}
 

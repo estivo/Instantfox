@@ -1,19 +1,27 @@
 window.InstantFox = {
-	$el: function(name, att, parent) {
+	$el: function(name, attributes, childList_, parent) {
+    	if (!Array.isArray(childList_)){
+			parent = childList_
+			childList_ = null
+		}			
 		var el = document.createElement(name)
-		for (var a in att)
-			el.setAttribute(a, att[a])
+		for (var a in attributes)
+			el.setAttribute(a, attributes[a])		
+		for each(var a in childList_)
+			el.appendChild(a)			
 		if (parent)
 			parent.appendChild(el)
 		
 		return el
 	},
 	$: function(x) document.getElementById(x), 
-	rem: function(x){
-		if(x && x.parentNode)
-			x.parentNode.removeChild(x)	
+	rem: function(x) {
+		if (typeof x == "string")
+			x = document.getElementById(x)
+		x && x.parentNode && x.parentNode.removeChild(x)
 	},
-    // belong to notifyTab
+    idsToRemove: [],
+	// belong to notifyTab
 	install_url: "http://www.instantfox.net/welcome.php",
 	update_url:  "http://www.instantfox.net/update.php",
 	checkversion: true,
@@ -33,7 +41,7 @@ window.InstantFox = {
 
 		AddonManager.getAddonByID('searchy@searchy', function(addon){
 			InstantFox.checkversion = false;
-			var prefName = "extensions.instantfox.version";
+			var prefName = "extensions.InstantFox.version";
 			var oldVersion = Services.prefs.getCharPref(prefName);
 			var newVersion = addon.version;
 			if (oldVersion == newVersion)
@@ -118,9 +126,8 @@ window.InstantFox = {
 	initialize: function() {
 		Cu.import('chrome://instantfox/content/instantfoxModule.js')
 		
-		var s = document.createProcessingInstruction('xml-stylesheet', 'href="chrome://instantfox/content/skin/instantfox.css"')
-		document.insertBefore(s, document.documentElement)
-		this.stylesheet = s
+		this.stylesheet = document.createProcessingInstruction('xml-stylesheet', 'href="chrome://instantfox/content/skin/instantfox.css"')
+		document.insertBefore(this.stylesheet, document.documentElement)
 		
 		gURLBar.setAttribute('autocompletesearch',	'instantFoxAutoComplete');
 		gURLBar.removeAttribute('oninput');
@@ -137,15 +144,17 @@ window.InstantFox = {
 		gNavToolbox.addEventListener("aftercustomization", InstantFox.afterCustomization, false);
 
 		dump('instantFox initialized')
-		InstantFox.notifyTab()
+		InstantFox.applyOverlay()
+
 		// apply user modified styles
 		InstantFox.transformURLBar()
 		InstantFox.updateUserStyle()
 
 		// this is needed if searchbar is removed from toolbar
-		BrowserSearch.__defineGetter__("searchbar", function(){
+		BrowserSearch.__defineGetter__("searchbar", function() {
 			return document.getElementById("searchbar") || document.getElementById("urlbar")
 		})
+		InstantFox.notifyTab()
 
 		InstantFox.hookUrlbarCommand()
 		InstantFox.modifyContextMenu()
@@ -165,11 +174,12 @@ window.InstantFox = {
 		InstantFox.modifyContextMenu(false)
 		
 		InstantFox.transformURLBar('off')
+				
+		this.rem(this.stylesheet)
+		this.idsToRemove.forEach(this.rem)
 		
 		delete window.InstantFox
 		delete window.InstantFoxModule
-		
-		this.rem(this.stylesheet)
 	},
 
 	transformURLBar: function(off) {
@@ -675,7 +685,7 @@ window.InstantFox = {
 }
 
 //************************************************************************
-// experimental options popup
+// options popup
 InstantFox.popupCloser = function(e) {
 	var inPopup = InstantFox.clickedInPopup
 	InstantFox.clickedInPopup = false
@@ -749,7 +759,7 @@ InstantFox.openHelp = function() {
 	gBrowser.loadOneTab(url, {inBackground: false, relatedToCurrent: true});
 }
 
-// todo: call this after window load on first install releted to FS#32
+// called after window load on first install
 InstantFox.updateToolbarItems = function(removeOptions, removeSearchbar) {
 	if (removeSearchbar == undefined)
 		removeSearchbar = Services.prefs.getBoolPref("extensions.InstantFox.removeSearchbar")

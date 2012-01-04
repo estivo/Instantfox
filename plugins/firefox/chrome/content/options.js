@@ -687,6 +687,10 @@ function saveChanges(){
 	var em = Services.wm.getEnumerator('navigator:browser')
 	while(em.hasMoreElements()){
 		var iFox = em.getNext().InstantFox
+		if (!iFox) {
+			Components.utils.reportError('no iFox in window')
+			continue
+		}
 		iFox.updateUserStyle()
 		gToolbarsChanged && iFox.updateToolbarItems()
 	}
