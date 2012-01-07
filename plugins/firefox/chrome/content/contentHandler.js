@@ -22,11 +22,12 @@ InstantFox.searchBoxAPI = {
 	},
 	isSupported: function() {
 		var sb = this.getSearchBox()
+		dump(sb, sb&&sb.onchange)
 		return sb
 			&& !!(sb.onchange
 			&& sb.onsubmit
 			&& sb.oncancel
-			&& sb.onresize)
+			&& sb.onresize) || null
 	},
 	urlRegexp:/#.*$/,
 	canLoad: function(qUrl, url2go){
@@ -61,8 +62,8 @@ InstantFox.searchBoxAPI = {
 		var r1 = gURLBar.popup.getBoundingClientRect()
 		var r2 = InstantFox.pageLoader.preview.getBoundingClientRect()
 
-		sb.x = (r1.left   - r2.left) /zoom
-		sb.y = (r1.top   - r2.top) /zoom
+		sb.x = (r1.left - r2.left) /zoom
+		sb.y = (r1.top  - r2.top) /zoom
 		sb.height = r1.height / zoom
 		sb.width  = r1.width / zoom
 

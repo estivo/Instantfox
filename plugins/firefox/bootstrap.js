@@ -54,11 +54,6 @@ function startup(aData, aReason) {
 			'instantfox',
 			Services.io.newURI(__SCRIPT_URI_SPEC__+'/../modules/', null, null)    
 		)
-	// prefs
-    let branch = Services.prefs.getDefaultBranch("extensions.InstantFox.");
-	branch.setCharPref("version", "0.0.0");
-	branch.setBoolPref("removeSearchbar", true);
-	branch.setBoolPref("removeOptions", false);
 
 	// Load into any existing windows
 	var enumerator = Services.wm.getEnumerator("navigator:browser");
@@ -92,11 +87,6 @@ function shutdown(aData, aReason) {
 	
 	Cu.unload('chrome://instantfox/content/instantfoxModule.js')
 	Cu.unload('chrome://instantfox/content/defaultPluginList.js')
-	
-	/*devel__(*/
-		// prefs
-		// Services.prefs.getDefaultBranch("extensions.InstantFox.").deleteBranch("");
-	/*devel__)*/
 }
 
 function install(aData, aReason) {
