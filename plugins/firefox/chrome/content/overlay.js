@@ -152,16 +152,16 @@ InstantFox.openHelp = function() {
 
 // called after window load on first install
 InstantFox.updateToolbarItems = function(removeOptions, removeSearchbar) {
-	var prefs = Services.prefs.getBranch("extensions.InstantFox.")
+	var pb = Services.prefs.getBranch("extensions.InstantFox.")
 	if (removeSearchbar == undefined)
-		removeSearchbar = prefs.prefHasUserValue("removeSearchbar") ? prefs.getBoolPref("removeSearchbar") : false
+		removeSearchbar = pb.prefHasUserValue("removeSearchbar") ? pb.getBoolPref("removeSearchbar") : true
 	else
-		prefs.setBoolPref("removeSearchbar", removeSearchbar)
+		pb.setBoolPref("removeSearchbar", removeSearchbar)
 		
 	if (removeOptions == undefined)
-		removeOptions = prefs.prefHasUserValue("removeOptions") ? prefs.getBoolPref("removeOptions") : true
+		removeOptions = pb.prefHasUserValue("removeOptions") ? pb.getBoolPref("removeOptions") : false
 	else
-		prefs.setBoolPref("removeOptions", removeOptions)
+		pb.setBoolPref("removeOptions", removeOptions)
 
 		
 	var navBar = document.getElementById("nav-bar");

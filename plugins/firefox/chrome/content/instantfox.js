@@ -41,13 +41,22 @@ window.InstantFox = {
 
 		AddonManager.getAddonByID('searchy@searchy', function(addon){
 			InstantFox.checkversion = false;
-			var prefs = Services.prefs.getBranch('extensions.InstantFox.')
-			var oldVersion = prefs.prefHasUserValue("version") ? prefs.getCharPref("version") : "0.0.0"
+			var pb = Services.prefs.getBranch('extensions.InstantFox.')
+			var oldVersion = pb.prefHasUserValue('version') ? pb.getCharPref('version') : '0.0.0'
+			
+			if (oldVersion == '0.0.0') {
+				let pbo = Services.prefs.getBranch('extensions.instantfox.')
+				if (pbo.prefHasUserValue('version')) {
+					oldVersion = pbo.getCharPref('version')
+					pbo.deleteBranch('')
+				}
+			}
+			
 			var newVersion = addon.version;
 			if (oldVersion == newVersion)
 				return;
 
-			Services.prefs.setCharPref("version", newVersion);
+			pb.setCharPref("version", newVersion);
 			try {
 				// check if new plugins are added by this update
 				InstantFoxModule.pluginLoader.onInstantfoxUpdate()
@@ -126,8 +135,9 @@ window.InstantFox = {
 	initialize: function() {
 		Cu.import('chrome://instantfox/content/instantfoxModule.js')
 		
-		this.stylesheet = document.createProcessingInstruction('xml-stylesheet', 'href="chrome://instantfox/content/skin/instantfox.css"')
-		document.insertBefore(this.stylesheet, document.documentElement)
+		InstantFox.stylesheet = document.createProcessingInstruction('xml-stylesheet', 'href="chrome://instantfox/content/skin/instantfox.css"')
+		document.insertBefore(InstantFox.stylesheet, document.documentElement)
+		setTimeout(InstantFox.updateUserStyle)
 		
 		gURLBar.setAttribute('autocompletesearch',	'instantFoxAutoComplete');
 		gURLBar.removeAttribute('oninput');
@@ -147,8 +157,7 @@ window.InstantFox = {
 		InstantFox.applyOverlay()
 
 		// apply user modified styles
-		InstantFox.transformURLBar()
-		InstantFox.updateUserStyle()
+		InstantFox.transformURLBar()		
 
 		// this is needed if searchbar is removed from toolbar
 		BrowserSearch.__defineGetter__("searchbar", function() {
@@ -248,7 +257,7 @@ window.InstantFox = {
 	},
 	updateUserStyle: function() {
 		var prefs = Services.prefs.getBranch('extensions.InstantFox.')
-		var cssRules, s, ruleIndex
+		var cssRules, ruleIndex
 		
 		var findRule = function(selector) {
 			for (var i = 0; i < cssRules.length; i++) {
@@ -260,7 +269,8 @@ window.InstantFox = {
 			}
 		}
 		
-		s = this.stylesheet.sheet
+		cssRules = InstantFox.stylesheet.sheet.cssRules
+		 
 		
 		if (prefs.prefHasUserValue('fontsize')) {
 			var pref = prefs.getCharPref('fontsize')

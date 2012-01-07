@@ -228,6 +228,9 @@ var pluginLoader = {
 	},
 
 	getPluginString: function(forUser){
+		var prefs = Services.prefs.getBranch('extensions.InstantFox.')
+		var version = prefs.prefHasUserValue("version") ? prefs.getCharPref("version") : "0.0.0"
+		
 		var ob={}
 		for each(var p in InstantFoxModule.Plugins)
 			if(p.url)
@@ -237,7 +240,7 @@ var pluginLoader = {
 			selectedLocale: InstantFoxModule.selectedLocale,
 			defaultPlugin: InstantFoxModule.defaultPlugin,
 			autoSearch: InstantFoxModule.autoSearch,
-			version: Services.prefs.getCharPref("extensions.InstantFox.version"),
+			version: version,
 			plugins: ob
 		}
 

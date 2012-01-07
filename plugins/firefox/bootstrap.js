@@ -74,12 +74,18 @@ function shutdown(aData, aReason) {
 	if (aReason == APP_SHUTDOWN)
 		return;
 	dump(aReason, "---------------------------")
-	if (aReason == ADDON_DISABLE || aReason == ADDON_UNINSTALL) try {
-		var win = Services.wm.getMostRecentWindow('navigator:browser')
-		var iFox = win.InstantFox
-		iFox.addTab(win.InstantFoxModule.uninstallURL + '?version=' + aData.version + '&face=:(')
-		// restore searchbar
-		iFox.updateToolbarItems(false, false);	
+	// || aReason == ADDON_UNINSTALL happens on update ?
+	if (aReason == ADDON_DISABLE ) try {
+		var pb = Services.prefs.getBranch('extensions.InstantFox.')
+		var noticeshown = pb.prefHasUserValue("uninstalled") && pb.getCharPref("uninstalled")
+		if (noticeshown != aData.version) {
+			var win = Services.wm.getMostRecentWindow('navigator:browser')
+			var iFox = win.InstantFox
+			iFox.addTab(win.InstantFoxModule.uninstallURL + '?version=' + aData.version + '&face=:(')
+			// restore searchbar
+			iFox.updateToolbarItems(false, false);
+			pb.setCharPref("uninstalled", aData.version)
+		}
 	} catch (e) {Cu.reportError(e)}
 	
 	// Unload from any existing windows
