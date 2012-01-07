@@ -4,11 +4,15 @@ var XPIProviderBP = Components.utils.import("resource://gre/modules/XPIProvider.
 XPIProviderBP.XPIProvider.bootstrapScopes["instant@maps.de"]
 
 /******************************************************************/
-
+/*devel__(*/
+try{
+	dump = Components.utils.import("resource://shadia/main.js").dump
+}catch(e){}
+/*devel__)*/
 var {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 Cu.import("resource://gre/modules/Services.jsm");
 
-function loadIntoWindow(win) {	
+function loadIntoWindow(win) {
 	/*devel__(*/
 		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
 		Services.scriptloader.loadSubScript( 'chrome://instantfox/content/__devel__.js', win);
@@ -69,7 +73,15 @@ function shutdown(aData, aReason) {
 	// no need to cleanup, everything goes to die anyway
 	if (aReason == APP_SHUTDOWN)
 		return;
-
+	dump(aReason, "---------------------------")
+	if (aReason == ADDON_DISABLE || aReason == ADDON_UNINSTALL) try {
+		var win = Services.wm.getMostRecentWindow('navigator:browser')
+		var iFox = win.InstantFox
+		iFox.addTab(win.InstantFoxModule.uninstallURL + '?version=' + aData.version + '&face=:(')
+		// restore searchbar
+		iFox.updateToolbarItems(false, false);	
+	} catch (e) {Cu.reportError(e)}
+	
 	// Unload from any existing windows
 	var enumerator = Services.wm.getEnumerator("navigator:browser");
 	while (enumerator.hasMoreElements()) {
@@ -91,14 +103,14 @@ function shutdown(aData, aReason) {
 
 function install(aData, aReason) {
 	/*devel__(*/
-		dump = Cu.import("resource://shadia/main.js").dump
+		dump = Components.utils.import("resource://shadia/main.js").dump
 		dump(aData, aReason, arguments.callee.name, "--------------------")
 	/*devel__)*/
 }
 
 function uninstall(aData, aReason) {
 	/*devel__(*/
-		dump = Cu.import("resource://shadia/main.js").dump
+		dump = Components.utils.import("resource://shadia/main.js").dump
 		dump(aData, aReason, arguments.callee.name, "--------------------")
 	/*devel__)*/
 }

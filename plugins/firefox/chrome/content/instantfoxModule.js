@@ -1102,28 +1102,6 @@ XPCOMUtils.defineLazyServiceGetter(InstantFoxSearch.prototype, "historyAutoCompl
 
 InstantFoxModule.initialize()
 
-
-/***************************************************
- * uninstall listener
- * see https://developer.mozilla.org/en/Addons/Add-on_Manager/AddonListener
- * todo: will not be needed for restartless addon
- ***********************/
-var addonListener = addonListener || {
-	onUninstalling: function(addon){
-		if(addon.id=='searchy@searchy'){
-			var iFox = Services.wm.getMostRecentWindow('navigator:browser').InstantFox
-			iFox.addTab(InstantFoxModule.uninstallURL + '?version=' + addon.version + '&face=:(')
-			// open page only once
-			Cu.import('resource://gre/modules/AddonManager.jsm', {}).AddonManager.removeAddonListener(this)
-			// restore searchbar
-			iFox.updateToolbarItems(false, false);
-		}
-	}
-	// onDisabled
-}
-
-Cu.import('resource://gre/modules/AddonManager.jsm', {}).AddonManager.addAddonListener(addonListener)
-
 /***************************************************
  * localization
  ***********************/
