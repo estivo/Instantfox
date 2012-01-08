@@ -93,32 +93,21 @@ var instantFoxDevel = {
 	moduleHref: 'chrome://instantfox/content/instantfoxModule.js',
 
 	doReload: function(){
-		//this.reloadComponent()
-		try{InstantFox.destroy()}catch(e){}
-
-		try{
-			var p = document.querySelector('#instantfox-popup iframe')
-			p && p.parentNode.removeChild(p)
-		}catch(e){
-			Cu.reportError(e)
-		}
-
-		var i = this.loadedScriptsCount = 0
-		this.loadScript(this.sourceList[i], i)
-	},
-	onLoad: function(e, script){
-		this.loadedScriptsCount++;
-		if(this.loadedScriptsCount == this.sourceList.length){
-			this.reloadModule("chrome://instantfox/content/defaultPluginList.js")
-			this.m = this.reloadModule(this.moduleHref)
-			// simulate document load event
-			InstantFox.initialize()
-		}else{
-			//load next script
-			var i = this.loadedScriptsCount
-			this.loadScript(this.sourceList[i], i)
-			dump('next')
-		}
+		XPIProviderBP = Components.utils.import("resource://gre/modules/XPIProvider.jsm")
+		XPIProvider = XPIProviderBP.XPIProvider
+     
+		var id="searchy@searchy"
+		let file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+		file.persistentDescriptor = XPIProvider.bootstrappedAddons[id].descriptor;
+		XPIProvider.callBootstrapMethod(id, XPIProvider.bootstrappedAddons[id].version,
+								   XPIProvider.bootstrappedAddons[id].type, file, "shutdown",
+								   XPIProviderBP.BOOTSTRAP_REASONS.APP_SHUTDOWN);
+		
+		delete XPIProvider.bootstrapScopes[id]
+		
+		XPIProvider.callBootstrapMethod(id, XPIProvider.bootstrappedAddons[id].version,
+								   XPIProvider.bootstrappedAddons[id].type, file,
+								   "startup", XPIProviderBP.BOOTSTRAP_REASONS.APP_STARTUP);
 	},
 	clearFirstRunPref: function(update){
 		try{
