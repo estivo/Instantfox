@@ -137,7 +137,7 @@ window.InstantFox = {
 		
 		InstantFox.stylesheet = document.createProcessingInstruction('xml-stylesheet', 'href="chrome://instantfox/content/skin/instantfox.css"')
 		document.insertBefore(InstantFox.stylesheet, document.documentElement)
-		setTimeout(InstantFox.updateUserStyle, 200)
+		setTimeout(InstantFox.updateUserStyle, 200) // needs some time untill stylesheet is loaded
 		
 		InstantFox.autocompletesearch_orig = gURLBar.getAttribute('autocompletesearch')
 		gURLBar.setAttribute('autocompletesearch',	'instantFoxAutoComplete');
@@ -214,7 +214,7 @@ window.InstantFox = {
 			return
 		}
 		
-		if (gURLBar.instantFoxKeyNode)
+		if(gURLBar.instantFoxKeyNode)
 			return;
 		var s = gURLBar.mInputField
 		while (s && s.nodeName!='xul:stack')

@@ -20,8 +20,9 @@ function loadIntoWindow(win) {
 	for each (var x in ["instantfox", "contentHandler", "overlay"]) try {
 		Services.scriptloader.loadSubScript( 'chrome://instantfox/content/'+x+'.js', win);
 	} catch(e) {Cu.reportError(e)}
-	
-	win.InstantFox.initialize()
+	try {
+		win.InstantFox.initialize()
+	} catch(e) {Cu.reportError(e)}
 }
 
 function unloadFromWindow(win){
@@ -85,6 +86,8 @@ function shutdown(aData, aReason) {
 			// restore searchbar
 			iFox.updateToolbarItems(false, false);
 			pb.setCharPref("uninstalled", aData.version)
+			pb.clearUserPref("removeOptions")
+			pb.clearUserPref("removeSearchbar")
 		}
 	} catch (e) {Cu.reportError(e)}
 	
@@ -113,13 +116,13 @@ function shutdown(aData, aReason) {
 function install(aData, aReason) {
 	/*devel__(*/
 		dump = Components.utils.import("resource://shadia/main.js").dump
-		dump(aData, aReason, arguments.callee.name, "--------------------")
+		dump(aData, aReason, "install--------------------")
 	/*devel__)*/
 }
 
 function uninstall(aData, aReason) {
 	/*devel__(*/
 		dump = Components.utils.import("resource://shadia/main.js").dump
-		dump(aData, aReason, arguments.callee.name, "--------------------")
+		dump(aData, aReason, "uninstall--------------------")
 	/*devel__)*/
 }
