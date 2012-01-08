@@ -640,13 +640,13 @@ var parseSimpleJson = function(json, key, splitSpace){
 	return results
 }
 var parseMapsJson = function(json, key, splitSpace){
-	var xhrReturn = json.match(/query:"[^"]*/g);
+	var xhrReturn = json.match(/query"?:"[^"]*/g);
 	if(!xhrReturn || !xhrReturn.length)
 		return
 
 	var results=[];
 	for(var i = 0; i < xhrReturn.length; i++){
-		var result = xhrReturn[i].substr(7);
+		var result = xhrReturn[i].replace(/query"?:"/, '')
 		results.push({
 			icon: '',
 			title: result,
@@ -658,7 +658,7 @@ var parseMapsJson = function(json, key, splitSpace){
 var parseGeoJson = function(json, key, splitSpace){
 	var city = json.match(/"city":"(.*?)"/)
 	// sometimes city can be '(null)': why?
-	if (!city || /\(?null\)?/.test())
+	if (!city || /\(?null\)?/.test(city[1]))
 		return
 	var result = city[1]
 	// side effect
