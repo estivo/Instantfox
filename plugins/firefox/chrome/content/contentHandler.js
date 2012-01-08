@@ -23,6 +23,7 @@ InstantFox.searchBoxAPI = {
 	isSupported: function() {
 		var sb = this.getSearchBox()
 		dump(sb, sb&&sb.onchange)
+		
 		return sb
 			&& !!(sb.onchange
 			&& sb.onsubmit
@@ -31,10 +32,10 @@ InstantFox.searchBoxAPI = {
 	},
 	urlRegexp:/#.*$/,
 	canLoad: function(qUrl, url2go){
-		dump(
+		/*dump(
 			qUrl , url2go,
 			qUrl && url2go && qUrl.replace(this.urlRegexp, "") == url2go.replace(this.urlRegexp, "")
-		)
+		)*/
 		return qUrl && url2go && qUrl.replace(this.urlRegexp, "") == url2go.replace(this.urlRegexp, "")
 	},
 	onInput: function(){

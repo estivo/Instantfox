@@ -1089,20 +1089,24 @@ XPCOMUtils.defineLazyServiceGetter(InstantFoxSearch.prototype, "historyAutoCompl
 /*******************************************************
  *  component registration
  *************/
-;(function(component){
-	var reg = Components.manager.QueryInterface(Components.interfaces.nsIComponentRegistrar)
-	var CONTRACT_ID = component.prototype.contractID
-	try{
-		reg.unregisterFactory(
-			reg.contractIDToCID(CONTRACT_ID),
-			reg.getClassObjectByContractID(CONTRACT_ID, Ci.nsISupports)
-		)
-	}catch(e){}
-	var cp = component.prototype;
-	var factory = XPCOMUtils.generateNSGetFactory([component])(cp.classID);
-	reg.registerFactory(cp.classID, cp.classDescription, cp.contractID, factory);
-})(InstantFoxSearch);
-
+InstantFoxModule.updateComponent = function(off) {
+	(function(component, off){
+		var reg = Components.manager.QueryInterface(Components.interfaces.nsIComponentRegistrar)
+		var CONTRACT_ID = component.prototype.contractID
+		try{
+			reg.unregisterFactory(
+				reg.contractIDToCID(CONTRACT_ID),
+				reg.getClassObjectByContractID(CONTRACT_ID, Ci.nsISupports)
+			)
+		}catch(e){}
+		if (off)
+			return
+		var cp = component.prototype;
+		var factory = XPCOMUtils.generateNSGetFactory([component])(cp.classID);
+		reg.registerFactory(cp.classID, cp.classDescription, cp.contractID, factory);
+	})(InstantFoxSearch, off);
+}
+InstantFoxModule.updateComponent()
 InstantFoxModule.initialize()
 
 /***************************************************

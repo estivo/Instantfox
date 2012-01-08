@@ -411,7 +411,22 @@ removeDebugCode = function(code){
 	var n = 100;
 	while(n-- && readBlock());
 
-	return ans.replace(/^\s*dump.*$/gm, '')
+	// remove dump
+	Components.utils.import("resource://gre/modules/reflect.jsm");
+	
+	var anstemp = ans.replace(/^\s*dump.*$/gm, '')	
+	
+	if (ans != anstemp) try {
+		var wasValid
+		try {
+			Reflect.parse(ans)
+			wasValid = true
+		} catch(e) {}
+		wasValid && Reflect.parse(anstemp)
+		ans = anstemp
+	} catch(e){Cu.reportError("unable to remove dump" + e);dump(anstemp)}
+	
+	return ans
 }
 //
 function isInvalid(entry) {

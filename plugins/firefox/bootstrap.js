@@ -103,6 +103,9 @@ function shutdown(aData, aReason) {
 		Components.manager.QueryInterface(Ci.nsIComponentRegistrar)
 			.removeBootstrappedManifestLocation(aData.installPath)
 	
+	Cu.import('chrome://instantfox/content/instantfoxModule.js')
+	InstantFoxModule.updateComponent('off')
+
 	Cu.unload('chrome://instantfox/content/instantfoxModule.js')
 	Cu.unload('chrome://instantfox/content/defaultPluginList.js')
 }

@@ -137,8 +137,9 @@ window.InstantFox = {
 		
 		InstantFox.stylesheet = document.createProcessingInstruction('xml-stylesheet', 'href="chrome://instantfox/content/skin/instantfox.css"')
 		document.insertBefore(InstantFox.stylesheet, document.documentElement)
-		setTimeout(InstantFox.updateUserStyle)
+		setTimeout(InstantFox.updateUserStyle, 200)
 		
+		InstantFox.autocompletesearch_orig = gURLBar.getAttribute('autocompletesearch')
 		gURLBar.setAttribute('autocompletesearch',	'instantFoxAutoComplete');
 		gURLBar.removeAttribute('oninput');
 
@@ -175,14 +176,16 @@ window.InstantFox = {
 		gURLBar.removeEventListener('focus', this.onfocus, false);
 		gURLBar.removeEventListener('blur', this.onblur, false);
 		
-		gNavToolbox.removeEventListener("aftercustomization", InstantFox.afterCustomization, false);
+		gURLBar.setAttribute('autocompletesearch',	this.autocompletesearch_orig);
+		
+		gNavToolbox.removeEventListener("aftercustomization", this.afterCustomization, false);
 
 		this.finishSearch()
 		
 		this.hookUrlbarCommand('off')
-		InstantFox.modifyContextMenu(false)
+		this.modifyContextMenu(false)
 		
-		InstantFox.transformURLBar('off')
+		this.transformURLBar('off')
 				
 		this.rem(this.stylesheet)
 		this.idsToRemove.forEach(this.rem)
@@ -211,7 +214,7 @@ window.InstantFox = {
 			return
 		}
 		
-		if(gURLBar.instantFoxKeyNode)
+		if (gURLBar.instantFoxKeyNode)
 			return;
 		var s = gURLBar.mInputField
 		while (s && s.nodeName!='xul:stack')
