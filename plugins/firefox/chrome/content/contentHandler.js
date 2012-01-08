@@ -120,7 +120,7 @@ InstantFox.contentHandlers = {
 				return true
 
 			var m1 = url2go.match(this.qRe), m2 = q.preloadURL.match(this.qRe)
-			return m1 && m2 && m1[1].toLowerCase() == m2[1].toLowerCase()
+			return (!m1 && !m2) || (m1 && m2 && m1[1].toLowerCase() == m2[1].toLowerCase())
 		},
 		transformURL: function(q, url2go) {
 			try{
