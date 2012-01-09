@@ -40,7 +40,7 @@ InstantFox.searchBoxAPI = {
 	},
 	onInput: function(){
 		var q = InstantFoxModule.currentQuery
-		var text = q.shadow || q.query
+		// var text = q.shadow || q.query
 		var text = q.query
 
 		var sb = this.getSearchBox()

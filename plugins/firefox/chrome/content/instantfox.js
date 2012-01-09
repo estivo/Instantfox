@@ -502,10 +502,10 @@ window.InstantFox = {
 			if (!maxIndex--)
 				break
 			var title = i.title.toLowerCase()
-			if (title == query) {
+			/*if (title == query) {
 				q.shadow = i.title
 				break
-			}
+			}*/
 			if (!q.shadow && title.indexOf(query) == 0)
 				q.shadow = i.title
 		}
