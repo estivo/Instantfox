@@ -467,7 +467,6 @@ function importBrowserPlugins(importKeys) {
 
 searchEngineObserver = {
 	observe: function(subject, topic, j){
-		dump(1)
 		importBrowserPlugins(false)
 		if(this.$listener){
 			this.$listener.get()()
@@ -490,7 +489,7 @@ Services.obs.addObserver(searchEngineObserver, "browser-search-engine-modified",
 InstantFoxModule = {
 	helpURL: 'http://www.instantfox.net/help/',
 	editingHelpURL: 'http://www.instantfox.net/help/#add-plugin',
-	uninstallURL: 'http://www.instantfox.net/uninstall',
+	uninstallURL: 'http://www.instantfox.net/uninstall.php',
 	install_url: "http://www.instantfox.net/welcome.php",
 	update_url:  "http://www.instantfox.net/update.php",
 
