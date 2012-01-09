@@ -488,7 +488,7 @@ Services.obs.addObserver(searchEngineObserver, "browser-search-engine-modified",
 InstantFoxModule = {
 	helpURL: 'http://www.instantfox.net/help/',
 	editingHelpURL: 'http://www.instantfox.net/help/#add-plugin',
-	uninstallURL: 'http://www.instantfox.net/uninstall',
+	uninstallURL: 'http://www.instantfox.net/uninstall.php',
 
 	bp: this,
 
