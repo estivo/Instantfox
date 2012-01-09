@@ -467,6 +467,7 @@ function importBrowserPlugins(importKeys) {
 
 searchEngineObserver = {
 	observe: function(subject, topic, j){
+		dump(1)
 		importBrowserPlugins(false)
 		if(this.$listener){
 			this.$listener.get()()
@@ -477,6 +478,7 @@ searchEngineObserver = {
 	},
 	QueryInterface: function() this
 }
+// holds weak reference. no need to remove
 Services.obs.addObserver(searchEngineObserver, "engine-added", true)
 Services.obs.addObserver(searchEngineObserver, "engine-loaded", true)
 Services.obs.addObserver(searchEngineObserver, "engine-removed", true)
@@ -489,6 +491,8 @@ InstantFoxModule = {
 	helpURL: 'http://www.instantfox.net/help/',
 	editingHelpURL: 'http://www.instantfox.net/help/#add-plugin',
 	uninstallURL: 'http://www.instantfox.net/uninstall',
+	install_url: "http://www.instantfox.net/welcome.php",
+	update_url:  "http://www.instantfox.net/update.php",
 
 	bp: this,
 
@@ -1141,3 +1145,67 @@ InstantFoxModule.getString = function(name) {
 		}
 	}
 }
+
+/***************************************************
+ * update notification
+ ***********************/
+
+checkVersion = function() {
+	Components.utils.import("resource://gre/modules/AddonManager.jsm", {})
+	.AddonManager.getAddonByID('searchy@searchy', function(addon) {
+		var pb = Services.prefs.getBranch('extensions.InstantFox.')
+		var oldVersion = pb.prefHasUserValue('version') ? pb.getCharPref('version') : '0.0.0'
+		var uninstallVersion = pb.prefHasUserValue("uninstalled") && pb.getCharPref('uninstalled')
+		var newVersion = addon.version;
+		
+		// ---------------------------- remove old pref ---------------
+		if (oldVersion == '0.0.0') {
+			let pbo = Services.prefs.getBranch('extensions.instantfox.')
+			if (pbo.prefHasUserValue('version')) {
+				oldVersion = pbo.getCharPref('version')
+				pbo.deleteBranch('')
+			}
+		}
+		// ---------------------------- --------------- ---------------
+		
+		var topWin, ifox
+		// update toolbar items of loaded windows
+		if (oldVersion != newVersion || uninstallVersion == newVersion) {
+			var e = Services.wm.getEnumerator("navigator:browser")
+			while(e.hasMoreElements()) try {
+				var win = e.getNext()
+				ifox = win.InstantFox
+				if (!ifox)
+					continue
+				topWin = topWin || win // show install notification in top window
+				ifox.updateToolbarItems();
+			} catch(e) {Cu.reportError(e)}
+		}
+		
+		if (oldVersion == newVersion)
+			return;
+
+		pb.setCharPref("version", newVersion);
+		// check if new plugins are added by this update
+		try {
+			InstantFoxModule.pluginLoader.onInstantfoxUpdate()
+		} catch(e) {Cu.reportError(e)}
+	
+		// don't bother user with minor updates
+		if (oldVersion.slice(0,-1) == newVersion.slice(0,-1))
+			return
+		
+		if (oldVersion == "0.0.0") {
+			var url = InstantFoxModule.install_url + '?to=' + newVersion;
+			// add options button only on first install
+			topWin.setTimeout(topWin.InstantFox.showInstallNotification, 600);
+		} else {
+			var url = InstantFoxModule.update_url + '?to=' + newVersion + '&from=' +oldVersion
+		}
+
+		topWin.setTimeout(topWin.InstantFox.addTab, 500, url);
+	})
+}
+
+// this will be called after 
+checkVersion()

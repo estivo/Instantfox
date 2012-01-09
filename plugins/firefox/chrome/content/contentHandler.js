@@ -41,6 +41,7 @@ InstantFox.searchBoxAPI = {
 	onInput: function(){
 		var q = InstantFoxModule.currentQuery
 		var text = q.shadow || q.query
+		var text = q.query
 
 		var sb = this.getSearchBox()
 		if (sb) {
@@ -94,7 +95,7 @@ InstantFox.searchBoxAPI = {
 		}
 	},
 	call: function(sb, prop){
-		dump(prop, sb[prop])
+		dump(prop, sb.value, sb.verbatim)
 		sb[prop] && sb[prop]()
 	},
 	handleEvent: function(e){

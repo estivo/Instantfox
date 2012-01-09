@@ -70,25 +70,36 @@ function startup(aData, aReason) {
 	Services.wm.addListener(WindowListener);
 }
 
+function showNotice(aData, aReason) {
+	var pb = Services.prefs.getBranch('extensions.InstantFox.')
+	var noticeshown = pb.prefHasUserValue("uninstalled") && pb.getCharPref("uninstalled")
+	var win = Services.wm.getMostRecentWindow('navigator:browser')
+	var iFox = win.InstantFox
+	if (noticeshown != aData.version) {
+		iFox.addTab(win.InstantFoxModule.uninstallURL + '?version=' + aData.version + '&face=:(')
+		pb.setCharPref("uninstalled", aData.version)
+	}
+	// restore searchbar
+	var e = Services.wm.getEnumerator("navigator:browser")
+	while(e.hasMoreElements()) try {
+		iFox = e.getNext().InstantFox
+		
+		iFox && iFox.updateToolbarItems(false, false);
+	} catch(e) {Cu.reportError(e)}
+	pb.clearUserPref("removeOptions")
+	pb.clearUserPref("removeSearchbar")	
+}
+
 function shutdown(aData, aReason) {
+	dump(aReason, "---------------------------")
+
 	// no need to cleanup, everything goes to die anyway
 	if (aReason == APP_SHUTDOWN)
 		return;
-	dump(aReason, "---------------------------")
+	
 	// || aReason == ADDON_UNINSTALL happens on update ?
 	if (aReason == ADDON_DISABLE ) try {
-		var pb = Services.prefs.getBranch('extensions.InstantFox.')
-		var noticeshown = pb.prefHasUserValue("uninstalled") && pb.getCharPref("uninstalled")
-		if (noticeshown != aData.version) {
-			var win = Services.wm.getMostRecentWindow('navigator:browser')
-			var iFox = win.InstantFox
-			iFox.addTab(win.InstantFoxModule.uninstallURL + '?version=' + aData.version + '&face=:(')
-			// restore searchbar
-			iFox.updateToolbarItems(false, false);
-			pb.setCharPref("uninstalled", aData.version)
-			pb.clearUserPref("removeOptions")
-			pb.clearUserPref("removeSearchbar")
-		}
+		showNotice(aData, aReason)
 	} catch (e) {Cu.reportError(e)}
 	
 	// Unload from any existing windows

@@ -25,10 +25,6 @@ window.InstantFox = {
 	},
     idsToRemove: [],
 	// belong to notifyTab
-	install_url: "http://www.instantfox.net/welcome.php",
-	update_url:  "http://www.instantfox.net/update.php",
-	checkversion: true,
-
 	addTab: function(url, nextToCurrent){
 		if(url){
 			var targetTab = gBrowser.addTab(url);
@@ -38,57 +34,7 @@ window.InstantFox = {
 			return targetTab
 		}
 	},
-	notifyTab: function(){
-		if (!InstantFox.checkversion)
-			return;
-
-		AddonManager.getAddonByID('searchy@searchy', function(addon){
-			InstantFox.checkversion = false;
-			var pb = Services.prefs.getBranch('extensions.InstantFox.')
-			var oldVersion = pb.prefHasUserValue('version') ? pb.getCharPref('version') : '0.0.0'
-			
-			if (oldVersion == '0.0.0') {
-				let pbo = Services.prefs.getBranch('extensions.instantfox.')
-				if (pbo.prefHasUserValue('version')) {
-					oldVersion = pbo.getCharPref('version')
-					pbo.deleteBranch('')
-				}
-			}
-			
-			var newVersion = addon.version;
-			if (oldVersion == newVersion)
-				return;
-
-			pb.setCharPref("version", newVersion);
-			try {
-				// check if new plugins are added by this update
-				InstantFoxModule.pluginLoader.onInstantfoxUpdate()
-			} catch(e) {
-				Cu.reportError(e)
-			}
-			try {
-				InstantFox.updateToolbarItems();
-			} catch(e) {
-				Cu.reportError(e)
-			}
-			
-			
-			// don't bother user with minor updates
-			if (oldVersion.slice(0,-1) == newVersion.slice(0,-1))
-				return 
-			
-			if (oldVersion == "0.0.0") {
-				var url = InstantFox.install_url + '?to=' + newVersion;
-				// add options button only on first install
-				setTimeout(InstantFox.showInstallNotification, 600);
-			} else {
-				var url = InstantFox.update_url + '?to=' + newVersion + '&from=' +oldVersion
-			}
-
-
-			setTimeout(InstantFox.addTab, 500, url);
-		})
-	},
+	
 	showInstallNotification: function(){
 		var n = {
 			id: 'instant-fox-installed',
@@ -165,7 +111,6 @@ window.InstantFox = {
 		BrowserSearch.__defineGetter__("searchbar", function() {
 			return document.getElementById("searchbar") || document.getElementById("urlbar")
 		})
-		InstantFox.notifyTab()
 
 		InstantFox.hookUrlbarCommand()
 		InstantFox.modifyContextMenu()
@@ -177,6 +122,11 @@ window.InstantFox = {
 		delete gURLBar.currentShadow
 		this.pageLoader.removePreview()
 		this.updateLogo(false)
+		
+		// destroy popup
+		InstantFox.onPopupHiding = dump
+		InstantFox.popupCloser({target:""})
+		this.idsToRemove.forEach(this.rem)
 		
 
 		gURLBar.removeEventListener('keydown', this.onKeydown, false);
@@ -193,7 +143,6 @@ window.InstantFox = {
 		
 				
 		this.rem(this.stylesheet)
-		this.idsToRemove.forEach(this.rem)
 		
 		this.setURLBarAutocompleter('off')
 		
