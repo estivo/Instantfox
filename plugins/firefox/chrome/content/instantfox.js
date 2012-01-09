@@ -20,6 +20,9 @@ window.InstantFox = {
 			x = document.getElementById(x)
 		x && x.parentNode && x.parentNode.removeChild(x)
 	},
+	reloadBinding: function(node) {
+		return node && node.parentNode && node.parentNode.insertBefore(node, node.nextSibling)
+	},
     idsToRemove: [],
 	// belong to notifyTab
 	install_url: "http://www.instantfox.net/welcome.php",
@@ -139,9 +142,7 @@ window.InstantFox = {
 		document.insertBefore(InstantFox.stylesheet, document.documentElement)
 		setTimeout(InstantFox.updateUserStyle, 200) // needs some time untill stylesheet is loaded
 		
-		InstantFox.autocompletesearch_orig = gURLBar.getAttribute('autocompletesearch')
-		gURLBar.setAttribute('autocompletesearch',	'instantFoxAutoComplete');
-		gURLBar.removeAttribute('oninput');
+		this.setURLBarAutocompleter()
 
 		gURLBar.addEventListener('keydown', InstantFox.onKeydown, false);
 		gURLBar.addEventListener('input', InstantFox.onInput, false);
@@ -171,29 +172,49 @@ window.InstantFox = {
 	},
 
 	destroy: function(event) {
+		// finishSearch
+		gURLBar.blur()
+		delete gURLBar.currentShadow
+		this.pageLoader.removePreview()
+		this.updateLogo(false)
+		
+
 		gURLBar.removeEventListener('keydown', this.onKeydown, false);
 		gURLBar.removeEventListener('input', this.onInput, false);
 		gURLBar.removeEventListener('focus', this.onfocus, false);
 		gURLBar.removeEventListener('blur', this.onblur, false);
-		
-		gURLBar.setAttribute('autocompletesearch',	this.autocompletesearch_orig);
-		
+
 		gNavToolbox.removeEventListener("aftercustomization", this.afterCustomization, false);
 
-		this.finishSearch()
-		
 		this.hookUrlbarCommand('off')
 		this.modifyContextMenu(false)
 		
 		this.transformURLBar('off')
+		
 				
 		this.rem(this.stylesheet)
 		this.idsToRemove.forEach(this.rem)
+		
+		this.setURLBarAutocompleter('off')
 		
 		delete window.InstantFox
 		delete window.InstantFoxModule
 	},
 
+	setURLBarAutocompleter: function(state){
+		var search = InstantFox._autocompletesearch_orig, oninput = InstantFox._oninput_orig
+		if (state != 'off') {
+			InstantFox._autocompletesearch_orig = gURLBar.getAttribute('autocompletesearch')
+			InstantFox._oninput_orig = gURLBar.getAttribute('oninput')
+			search = 'instantFoxAutoComplete';
+			oninput = ''
+		}
+		gURLBar.setAttribute("autocompletesearch", search)
+		gURLBar.setAttribute('oninput', oninput);
+
+		// reload binding
+		this.reloadBinding(gURLBar)
+	},
 	transformURLBar: function(off) {
 		if (off) {
 			if(!gURLBar.instantFoxKeyNode)
@@ -640,8 +661,6 @@ window.InstantFox = {
 		this.updateShadowLink(null)
 		gBrowser.userTypedValue = null;
 		
-		
-
 		var q = InstantFoxModule.currentQuery, br
 		
 		if (q && q.$searchBoxAPI_URL) {
