@@ -86,7 +86,7 @@ window.InstantFox = {
 		
 		InstantFox.stylesheet = document.createProcessingInstruction('xml-stylesheet', 'href="chrome://instantfox/content/skin/instantfox.css"')
 		document.insertBefore(InstantFox.stylesheet, document.documentElement)
-		setTimeout(InstantFox.updateUserStyle, 200) // needs some time untill stylesheet is loaded
+		setTimeout(InstantFox.updateUserStyle, 200, true) // needs some time untill stylesheet is loaded
 		
 		this.setURLBarAutocompleter()
 
@@ -228,7 +228,7 @@ window.InstantFox = {
 		boxStyle.paddingLeft = '1px'
 		boxStyle.paddingRight = '1px'
 	},
-	updateUserStyle: function() {
+	updateUserStyle: function(firstTime) {
 		var prefs = Services.prefs.getBranch('extensions.InstantFox.')
 		var cssRules, ruleIndex
 		
@@ -279,12 +279,15 @@ window.InstantFox = {
 				newSelector = 'richlistitem.instantfox-slim'
 			
 			var t = findRule("richlistitem.").cssText
-			if (t.substring(0, newSelector.length) != newSelector) {			
+			if (t.substring(0, newSelector.length) != newSelector) {
 				t = newSelector + t.substr(t.indexOf("{")-1)
 				s.deleteRule(ruleIndex);
 				s.insertRule(t, ruleIndex)
 			}
 		}
+		//without this adding opacity to popup creates black background on xp
+		if (firstTime)
+			InstantFox.reloadBinding(InstantFox.$("PopupAutoCompleteRichResult"))
 	},
 	// ****** event handlers ****************************************
 	onKeydown: function(event) {
