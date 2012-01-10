@@ -90,6 +90,11 @@ InstantFox.searchBoxAPI = {
 			x:0, y:0, width:0, height:0,
 			setSuggestions: function(suggestions) {
 				dump(JSON.stringify(suggestions))
+			},
+			set  onsubmit(val){
+				delete this.onsubmit
+				this.onsubmit = val
+				dump("[[[[[[[[[[[]]]]]]]]]]]")
 			}
 			/* onchange onsubmit oncancel onresize;*/
 		}
@@ -99,10 +104,16 @@ InstantFox.searchBoxAPI = {
 		sb[prop] && sb[prop]()
 	},
 	handleEvent: function(e){
-		e.currentTarget.removeEventListener("DOMWindowCreated", this, false)
-		this.addToWindow()
+		e.currentTarget.removeEventListener(e.type, this, false)
+		if(e.type == "DOMWindowCreated"){
+			this.addToWindow()
+			dump(e.type, this, "\\\\\\\\")
+		}
+		dump(e.type, InstantFox.searchBoxAPI.getSearchBox().onchange, "////////////////////////////")
 	},
 	listen: function(el){
+		el.addEventListener("load", this, false)
+		el.addEventListener("DOMContentLoaded", this, false)
 		el.addEventListener("DOMWindowCreated", this, false)
 	}
 }
