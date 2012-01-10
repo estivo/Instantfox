@@ -101,9 +101,10 @@ var instantFoxDevel = {
 		file.persistentDescriptor = XPIProvider.bootstrappedAddons[id].descriptor;
 		XPIProvider.callBootstrapMethod(id, XPIProvider.bootstrappedAddons[id].version,
 								   XPIProvider.bootstrappedAddons[id].type, file, "shutdown",
-								   XPIProviderBP.BOOTSTRAP_REASONS.APP_SHUTDOWN);
+								   XPIProviderBP.BOOTSTRAP_REASONS.ADDON_UPGRADE);
 		
 		delete XPIProvider.bootstrapScopes[id]
+		XPIProviderBP.flushStartupCache()
 		
 		XPIProvider.callBootstrapMethod(id, XPIProvider.bootstrappedAddons[id].version,
 								   XPIProvider.bootstrappedAddons[id].type, file,

@@ -48,7 +48,7 @@ InstantFox.searchBoxAPI = {
 			sb.selectionEnd = sb.selectionStart = text.length
 			sb.value = text
 			sb.verbatim = false
-			this.setStatus(text)
+			this.setStatus(text + " - " + (q.shadow || q.query))
 			this.call(sb, "onchange")
 			this.call(sb, "onresize")
 		}
@@ -69,7 +69,7 @@ InstantFox.searchBoxAPI = {
 		sb.height = r1.height / zoom
 		sb.width  = r1.width / zoom
 
-		this.call(sb, "onresize")
+		// this.call(sb, "onresize")
 	},
 	onFinish: function(q){
 		var sb = this.getSearchBox()
