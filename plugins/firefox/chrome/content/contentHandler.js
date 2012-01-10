@@ -40,14 +40,13 @@ InstantFox.searchBoxAPI = {
 	},
 	onInput: function(){
 		var q = InstantFoxModule.currentQuery
-		// var text = q.shadow || q.query
-		var text = q.query
+		var text = q.shadow || q.query
 
 		var sb = this.getSearchBox()
 		if (sb) {
 			sb.selectionEnd = sb.selectionStart = text.length
 			sb.value = text
-			sb.verbatim = false
+			sb.verbatim = true
 			this.setStatus(text + " - " + (q.shadow || q.query))
 			this.call(sb, "onchange")
 			this.call(sb, "onresize")
@@ -84,7 +83,7 @@ InstantFox.searchBoxAPI = {
 		var win = this.getWindow()
 		win.navigator.searchBox = {
 			value: '',
-			verbatim: false,
+			verbatim: true,
 			selectionStart: 0,
 			selectionEnd: 0,
 			x:0, y:0, width:0, height:0,
