@@ -108,7 +108,7 @@ window.InstantFox = {
 		InstantFox.transformURLBar()		
 
 		// this is needed if searchbar is removed from toolbar
-		BrowserSearch.__defineGetter__("searchbar", function() {
+		BrowserSearch.__defineGetter__("searchBar", function() {
 			return document.getElementById("searchbar") || document.getElementById("urlbar")
 		})
 
