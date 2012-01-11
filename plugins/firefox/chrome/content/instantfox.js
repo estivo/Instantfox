@@ -459,8 +459,8 @@ window.InstantFox = {
 			this.rightShadow = ''
 			return
 		}
-		var container = document.getAnonymousElementByAttribute(gURLBar, 'class', 'instantfox-urlbar')
-		if (!s || !container)
+		
+		if (!s || !s.box1 || !s.box1.parentNode)
 			s = this.prepareShadowNodes()
 
 		var key = q.key + q.splitSpace.replace(' ', '\u00a0', 'g');
@@ -512,13 +512,13 @@ window.InstantFox = {
 			return hb
 		}
 
-        var b2 = hbox('box')
+        var b2 = shadow.box2 = hbox('box')
 		b2.setAttribute('pack', 'end')
 		b2.setAttribute('onclick','InstantFox.openHelp()')
 		b2.appendChild(hbox('tip', true))
 		s.appendChild(b2)
 
-		var b1 = hbox('box')
+		var b1 = shadow.box1 = hbox('box')
 		b1.appendChild(hbox('key',true))
 		b1.appendChild(hbox('spacer',true))
 		b1.appendChild(hbox('shadow',true))
