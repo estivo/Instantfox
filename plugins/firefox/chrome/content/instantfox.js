@@ -104,9 +104,6 @@ window.InstantFox = {
 		dump('instantFox initialized')
 		InstantFox.applyOverlay()
 
-		// apply user modified styles
-		InstantFox.transformURLBar()		
-
 		// this is needed if searchbar is removed from toolbar
 		BrowserSearch.__defineGetter__("searchBar", function() {
 			return document.getElementById("searchbar") || document.getElementById("urlbar")
@@ -119,7 +116,6 @@ window.InstantFox = {
 	destroy: function(event) {
 		// finishSearch
 		gURLBar.blur()
-		delete gURLBar.currentShadow
 		this.pageLoader.removePreview()
 		this.updateLogo(false)
 		
@@ -139,7 +135,7 @@ window.InstantFox = {
 		this.hookUrlbarCommand('off')
 		this.modifyContextMenu(false)
 		
-		this.transformURLBar('off')
+		this.removeShadowNodes()
 		
 				
 		this.rem(this.stylesheet)
@@ -164,70 +160,7 @@ window.InstantFox = {
 		// reload binding
 		this.reloadBinding(gURLBar)
 	},
-	transformURLBar: function(off) {
-		if (off) {
-			if(!gURLBar.instantFoxKeyNode)
-				return;
-			var hbox = document.getAnonymousElementByAttribute(gURLBar, 'class', 'instantfox-box')
-			this.rem(hbox)
-			hbox = document.getAnonymousElementByAttribute(gURLBar, 'class', 'instantfox-box')
-			this.rem(hbox)
-			var s = document.getAnonymousElementByAttribute(gURLBar, 'class', 'instantfox-urlbar')
-			s && s.classList.remove('instantfox-urlbar')
-			
-			delete gURLBar.currentShadow
-			delete gURLBar.instantFoxKeyNode
-			delete gURLBar.instantFoxSpacerNode.textContent
-			delete gURLBar.instantFoxShadowNode.textContent
-			delete gURLBar.instantFoxTipNode			
-			
-			return
-		}
-		
-		if(gURLBar.instantFoxKeyNode)
-			return;
-		var s = gURLBar.mInputField
-		while (s && s.nodeName!='xul:stack')
-			s = s.parentNode;
-
-		if(!s) {
-			s = gURLBar.mInputField.parentNode
-			s.classList.add('instantfox-urlbar')
-		}
-
-		function hbox(name, addChildDiv){
-			var hb = document.createElement('hbox')
-			hb.align = 'center'
-			hb.className = "instantfox-"+name
-			if(addChildDiv){
-				hb.appendChild(document.createElementNS('http://www.w3.org/1999/xhtml','div'))
-
-				gURLBar["instantFox" + name[0].toUpperCase() + name.substr(1) + "Node"] = hb.firstChild;
-			}
-			return hb
-		}
-
-        var b2 = hbox('box')
-		b2.setAttribute('pack', 'end')
-		b2.setAttribute('onclick','InstantFox.openHelp()')
-		b2.appendChild(hbox('tip', true))
-		s.appendChild(b2)
-
-		var b1 = hbox('box')
-		b1.appendChild(hbox('key',true))
-		b1.appendChild(hbox('spacer',true))
-		b1.appendChild(hbox('shadow',true))
-		s.insertBefore(b1, s.firstChild)
-
-		var l1 = gURLBar.editor.rootElement.getBoundingClientRect().left
-		var l2 = b1.getBoundingClientRect().left
-		var boxStyle = b1.style;
-		boxStyle.marginLeft = l1 - l2 + 'px'
-		// 1px is from getComputedStyle(gURLBar.mInputField.editor.rootElement).paddingLeft
-		// this is platform independant.
-		boxStyle.paddingLeft = '1px'
-		boxStyle.paddingRight = '1px'
-	},
+	
 	updateUserStyle: function(firstTime) {
 		var prefs = Services.prefs.getBranch('extensions.InstantFox.')
 		var cssRules, ruleIndex
@@ -515,33 +448,90 @@ window.InstantFox = {
 	},
 	updateShadowLink: function(q){
 		//var q = InstantFoxModule.currentQuery;
+		var s = gURLBar.instantFoxShadow
 		if(!q) {
-			if(!gURLBar.currentShadow)
+			if(!s)
 				return;
-			gURLBar.currentShadow = null;
-			gURLBar.instantFoxKeyNode.textContent =
-			gURLBar.instantFoxSpacerNode.textContent =
-			gURLBar.instantFoxShadowNode.textContent = '';
-			gURLBar.instantFoxTipNode.parentNode.hidden = true;
+			s.keyNode.textContent =
+			s.spacerNode.textContent =
+			s.shadowNode.textContent = '';
+			s.tipNode.parentNode.hidden = true;
 			this.rightShadow = ''
 			return
 		}
+		var container = document.getAnonymousElementByAttribute(gURLBar, 'class', 'instantfox-urlbar')
+		if (!s || !container)
+			s = this.prepareShadowNodes()
 
 		var key = q.key + q.splitSpace.replace(' ', '\u00a0', 'g');
 		var l = 1
-		var s = {
-			key: key,
-			spacer: q.value.substr(key.length).replace(' ', '\u00a0', 'g'),
-			shadow: q.shadow.substr(q.query.length)
-		}
-		gURLBar.instantFoxKeyNode.textContent = s.key;
-		gURLBar.instantFoxSpacerNode.textContent = s.spacer
-		gURLBar.instantFoxShadowNode.textContent = s.shadow;
-		gURLBar.currentShadow = s
+		s.key = key,
+		s.spacer = q.value.substr(key.length).replace(' ', '\u00a0', 'g'),
+		s.shadow = q.shadow.substr(q.query.length)
+		
+		s.keyNode.textContent = s.key;
+		s.spacerNode.textContent = s.spacer
+		s.shadowNode.textContent = s.shadow;
+
 		this.rightShadow = s.shadow // fixme
-		gURLBar.instantFoxTipNode.parentNode.hidden = false;
-		gURLBar.instantFoxTipNode.textContent = InstantFoxModule.getString("hint.tabToComplete"); //\u21B9 \u21C4
+		s.tipNode.parentNode.hidden = false;
+		s.tipNode.textContent = InstantFoxModule.getString("hint.tabToComplete"); //\u21B9 \u21C4
 		this.$urlBarModified = true
+	},
+	removeShadowNodes: function(){
+		if(!gURLBar.instantFoxShadow)
+			return;
+		
+		var s = gURLBar.mInputField.parentNode
+		s && s.classList.remove('instantfox-urlbar')
+	
+		for each (var hbox in s.querySelectorAll(".instantfox-box"))
+			this.rem(hbox)		
+		
+		delete gURLBar.instantFoxShadow
+	},
+	prepareShadowNodes: function() {
+		var s = gURLBar.mInputField.parentNode
+		// measure sizes before modifiing dom
+		var l1 = gURLBar.editor.rootElement.getBoundingClientRect().left
+		var l2 = s.getBoundingClientRect().left
+		
+		s.classList.add('instantfox-urlbar')
+		
+		var shadow = gURLBar.instantFoxShadow = {}
+
+		function hbox(name, addChildDiv){
+			var hb = document.createElement('hbox')
+			hb.align = 'center'
+			hb.className = "instantfox-"+name
+			if(addChildDiv){
+				hb.appendChild(document.createElementNS('http://www.w3.org/1999/xhtml','div'))
+
+				shadow[name + "Node"] = hb.firstChild;
+			}
+			return hb
+		}
+
+        var b2 = hbox('box')
+		b2.setAttribute('pack', 'end')
+		b2.setAttribute('onclick','InstantFox.openHelp()')
+		b2.appendChild(hbox('tip', true))
+		s.appendChild(b2)
+
+		var b1 = hbox('box')
+		b1.appendChild(hbox('key',true))
+		b1.appendChild(hbox('spacer',true))
+		b1.appendChild(hbox('shadow',true))
+		s.insertBefore(b1, s.firstChild)
+
+		var boxStyle = b1.style;
+		boxStyle.marginLeft = l1 - l2 + 'px'
+		// 1px is from getComputedStyle(gURLBar.mInputField.editor.rootElement).paddingLeft
+		// this is platform independant.
+		boxStyle.paddingLeft = '1px'
+		boxStyle.paddingRight = '1px'
+		
+		return shadow
 	},
 
 	// ****** instant preview ****************************************

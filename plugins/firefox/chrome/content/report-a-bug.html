@@ -213,7 +213,11 @@ setTimeout(function(){
 
 	report.shortcuts = JSON.stringify(InstantFoxModule.Shortcuts,null,1)
 
-	report.shadow = JSON.stringify(win.gURLBar.currentShadow,null,1)
+	report.shadow = JSON.stringify(win.gURLBar.instantFoxShadow, function(x,y){
+		if( typeof y != 'object' || Array.isArray(y) || Object.prototype.toString.call(y) == "[object Object]")
+			return y
+		return y.toString()
+	}, 1)
 	report.query = JSON.stringify(win.InstantFoxModule.currentQuery,null,1)
 	
 	updateUI()

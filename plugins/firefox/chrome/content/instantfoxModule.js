@@ -390,7 +390,7 @@ function fetchAsync(href, callback){
 		else for each(var func in callback)
 			if (typeof func == 'function') try {
 				func(reqText);
-			} catch(e){Cu.reportError(e)}	
+			} catch(e){Components.utils.reportError(e)}	
 	}, false)
 
 	req.send(null);
