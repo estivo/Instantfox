@@ -490,6 +490,7 @@ InstantFoxModule = {
 	helpURL: 'http://www.instantfox.net/help/',
 	editingHelpURL: 'http://www.instantfox.net/help/#add-plugin',
 	uninstallURL: 'http://www.instantfox.net/uninstall.php',
+	deactivatedURL: 'http://www.instantfox.net/deactivated.php',
 	install_url: "http://www.instantfox.net/welcome.php",
 	update_url:  "http://www.instantfox.net/update.php",
 

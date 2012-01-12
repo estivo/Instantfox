@@ -71,12 +71,19 @@ function startup(aData, aReason) {
 }
 
 function showNotice(aData, aReason) {
+	// addon manager gives buggy information about uninstalling, so we look up the pressed button
+	try {
+		var el = Cc["@mozilla.org/focus-manager;1"].getService(Ci.nsIFocusManager).focusedElement
+		var isUninstall = el && el.className.indexOf("remove") > 0
+	}catch(e){}
 	var pb = Services.prefs.getBranch('extensions.InstantFox.')
 	var noticeshown = pb.prefHasUserValue("uninstalled") && pb.getCharPref("uninstalled")
 	var win = Services.wm.getMostRecentWindow('navigator:browser')
 	var iFox = win.InstantFox
 	if (noticeshown != aData.version) {
-		iFox.addTab(win.InstantFoxModule.uninstallURL + '?version=' + aData.version + '&face=:(')
+		var im = win.InstantFoxModule
+		var url = isUninstall ? im.uninstallURL : im.deactivatedURL;
+		iFox.addTab(url + '?version=' + aData.version + '&face=:(')
 		pb.setCharPref("uninstalled", aData.version)
 	}
 	// restore searchbar
