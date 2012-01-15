@@ -77,7 +77,7 @@ var instantFoxDevel = {
 		s.type = "text/javascript;version=1.8";
 		s.src = href
 		s.index = index
-		s.onload = function(e){instantFoxDevel.onLoad(e, this)}
+		s.onload = function(e){dump(e, this)}
 		document.documentElement.appendChild(s)
 	},
 

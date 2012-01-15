@@ -1178,7 +1178,7 @@ checkVersion = function() {
 				if (!ifox)
 					continue
 				topWin = topWin || win // show install notification in top window
-				ifox.updateToolbarItems();
+				ifox.updateToolbarItems("install");
 			} catch(e) {Cu.reportError(e)}
 		}
 		

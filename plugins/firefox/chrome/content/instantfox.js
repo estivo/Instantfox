@@ -45,7 +45,7 @@ window.InstantFox = {
 			action: 'document.getElementById("instantFox-options").open=true;',
 			a: {
 				label: 'remove this button',
-				action: 'InstantFox.updateToolbarItems(false, false)'
+				action: ''
 			}
 		}
 
@@ -99,7 +99,7 @@ window.InstantFox = {
 		gURLBar.addEventListener('focus', InstantFox.onfocus, false);
 		
 		// afterCustomization
-		gNavToolbox.addEventListener("aftercustomization", InstantFox.afterCustomization, false);
+		gNavToolbox.addEventListener("aftercustomization", InstantFox.updateToolbarPrefs, false);
 
 		dump('instantFox initialized')
 		InstantFox.applyOverlay()
@@ -120,9 +120,9 @@ window.InstantFox = {
 		this.updateLogo(false)
 		
 		// destroy popup
-		InstantFox.onPopupHiding = dump
-		InstantFox.popupCloser({target:""})
-		this.idsToRemove.forEach(this.rem)
+		this.onPopupHiding = dump
+		this.popupCloser({target:""})
+		this.applyOverlay('off')
 		
 
 		gURLBar.removeEventListener('keydown', this.onKeydown, false);
@@ -130,7 +130,7 @@ window.InstantFox = {
 		gURLBar.removeEventListener('focus', this.onfocus, false);
 		gURLBar.removeEventListener('blur', this.onblur, false);
 
-		gNavToolbox.removeEventListener("aftercustomization", this.afterCustomization, false);
+		gNavToolbox.removeEventListener("aftercustomization", this.updateToolbarPrefs, false);
 
 		this.hookUrlbarCommand('off')
 		this.modifyContextMenu(false)

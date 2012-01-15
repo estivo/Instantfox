@@ -1,8 +1,15 @@
-InstantFox.applyOverlay = function() {
+InstantFox.applyOverlay = function(off) {
     var $el = InstantFox.$el, $ = InstantFox.$, rem = InstantFox.rem
 	var buttonId = 'instantFox-options', popupId = 'instantfox-popup'
-	InstantFox.idsToRemove.push(buttonId, popupId)
-	
+	if (off) {
+		[
+			gNavToolbox.palette.querySelector("#" + buttonId),
+			$(buttonId),
+			$(popupId)
+		].forEach(rem)
+		return
+	}
+
 	/* devel__( */
 	var $elList = function(name, attrNames, attrVals) {
 		var count = attrVals && attrVals.length
@@ -36,11 +43,11 @@ InstantFox.applyOverlay = function() {
 				"delete-plugin-file" ,"delete-plugin-file",
 				"test-first-run"     ,"test first run",
 				"show-folder"        ,"show folder",
-				"run-tests"          ,"run tests"				
+				"run-tests"          ,"run tests"
 			])
-		)], $("status-bar")) 
+		)], $("status-bar"))
 	/* devel__) */
-	
+
 	// ---------------------------
 	var options = {
 		id: popupId, noautohide:'true', position:'after_end',
@@ -51,29 +58,29 @@ InstantFox.applyOverlay = function() {
 	InstantFox.updatePopupSize(options)
 	$el("panel", options, [$el("stack", {flex: 1}, [
 		$el('resizer', {element: popupId, dir:'bottomleft',
-			left:'0', bottom:'0', width:'16', height:'16', style:'-moz-transform: rotate(90deg);' 		
+			left:'0', bottom:'0', width:'16', height:'16', style:'-moz-transform: rotate(90deg);'
 		})
 	])], $("mainPopupSet"))
 	// ---------------------------
-	
+
 	var toolbarButton = $el('toolbarbutton', {type:"menu", popup: popupId, id: buttonId,
 		class:'toolbarbutton-1 chromeclass-toolbar-additional',
 		image:'chrome://instantfox/content/skin/button-logo.png', label:'InstantFox'
-	}, ($("navigator-toolbox") || $("mail-toolbox")).palette)
-	
+	}, gNavToolbox.palette)
+
 	var id = buttonId
 	var selector = "[currentset^='"+id+",'],[currentset*=',"+id+",'],[currentset$=',"+id+"']"
 	var toolbar = document.querySelector(selector)
-	if (!toolbar) 
+	if (!toolbar)
 		return
-	
+
 	var currentset = toolbar.getAttribute("currentset").split(",");
     var i = currentset.indexOf(id) + 1;
 
     var len = currentset.length, beforeEl;
     while (i < len && !(beforeEl = $(currentset[i])))
 		i++
-  
+
 	toolbar.insertItem(id, beforeEl);
 }
 
@@ -150,49 +157,89 @@ InstantFox.openHelp = function() {
 	gBrowser.loadOneTab(url, {inBackground: false, relatedToCurrent: true});
 }
 
-// called after window load on first install
-InstantFox.updateToolbarItems = function(removeOptions, removeSearchbar) {
-	var pb = Services.prefs.getBranch("extensions.InstantFox.")
-	if (removeSearchbar == undefined)
-		removeSearchbar = pb.prefHasUserValue("removeSearchbar") ? pb.getBoolPref("removeSearchbar") : true
-	else
-		pb.setBoolPref("removeSearchbar", removeSearchbar)
-		
-	if (removeOptions == undefined)
-		removeOptions = pb.prefHasUserValue("removeOptions") ? pb.getBoolPref("removeOptions") : false
-	else
-		pb.setBoolPref("removeOptions", removeOptions)
-
-		
+// mode = ""           follow prefs
+// mode = "install"    remove searchbox and add instantfox button
+// mode = "uninstall"  add searchbox if 
+InstantFox.updateToolbarItems = function(mode) {		
 	var navBar = document.getElementById("nav-bar");
 	var curSet = navBar.currentSet.split(",");
-
-	var myId = "instantFox-options";
-	var i = curSet.indexOf(myId)
-	if (!removeOptions && i == -1 && !document.getElementById(myId)) {
+	//**********************************************
+	var oldId = "search-container"
+	var newId = "instantFox-options"
+	var getSearchbarPosition = function(){
 		var pos = curSet.indexOf("urlbar-container") + 1;
 		if (pos) {
-			while ('reload-button,stop-button'.indexOf(curSet[pos]) != -1)
+			while (
+				   curSet[pos] == 'reload-button'
+				|| curSet[pos] == 'stop-button'
+				|| curSet[pos] == 'search-container'
+			) {
 				pos++
-		} else
+			}
+		} else {
 			pos = curSet.length;
-		curSet.splice(pos, 0, myId)
-	} else if (i != -1 && removeOptions) {
-		curSet.splice(i, 1)
+		}
+		return pos
 	}
-
-	// remove searchbar
-	var myId = "search-container"
-	var i = curSet.indexOf(myId)
-	if (i == -1 && !removeSearchbar) {
-		var pos = curSet.indexOf("urlbar-container") + 1;
-		if (!pos)
-			pos = curSet.length;
-		curSet.splice(pos, 0, myId)
-	} else if (i != -1 && removeSearchbar) {
-		curSet.splice(i, 1)
+	var pb = Services.prefs.getBranch("extensions.InstantFox.")
+	var getPref = function(name, defVal) {
+		if (name in (mode || {}))
+			return mode.name
+		else if (pb.prefHasUserValue(name))
+			return pb.getBoolPref(name)
+		else
+			return defVal
 	}
+	//**********************************************
+	dump(mode)
+	dump(curSet)
+	dump(InstantFoxModule._defToolbarSet)
+	if (mode == "install"){
+		if (!InstantFoxModule._defToolbarSet)
+			InstantFoxModule._defToolbarSet = curSet.concat()
+		
+		var i1 = curSet.indexOf(newId)
+		var i2 = curSet.indexOf(oldId)
+		dump(i1, i2)
+		if (i1 >= 0 || document.getElementById(newId))
+			return
+		if (i2 == -1) {
+			var pos = getSearchbarPosition()
+			curSet.splice(pos, 0, newId)
+		} else {
+			curSet[i2] = newId
+		}
+	}
+	else if (mode == "uninstall") {
+		if (InstantFoxModule._defToolbarSet)
+			curSet = InstantFoxModule._defToolbarSet
+		else {
+			var i1 = curSet.indexOf(newId)
+			if (i1 >= 0 && !document.getElementById(oldId))
+				curSet[i1] = oldId
+		}
+	}
+	else {
+		var item2Toolbar = function(id, remove) {
+			dump(id, remove)
+			var i = curSet.indexOf(id)
+			if (remove) {
+				i != -1 && curSet.splice(i, 1)
+			} else if (i == -1) {
+				var pos = getSearchbarPosition()
+				curSet.splice(pos, 0, id)
+			}
+		}
+		var removeSearchbar = getPref("removeSearchbar", true)		
+		var removeOptions = getPref("removeOptions", false)
+		
+		item2Toolbar(oldId, removeSearchbar)		
+		item2Toolbar(newId, removeOptions)
+	}
+	
+	dump(curSet)
 
+	//**********************************************
 	curSet = curSet.join(",")
 	if (curSet != navBar.currentSet){
 		navBar.setAttribute("currentset", curSet);
@@ -200,16 +247,18 @@ InstantFox.updateToolbarItems = function(removeOptions, removeSearchbar) {
 		document.persist(navBar.id, "currentset");
 		try {
 			BrowserToolboxCustomizeDone(true);
-		}catch (e) {}
+		} catch (e) {}
 	}
 }
-InstantFox.afterCustomization = function(e){
+
+InstantFox.updateToolbarPrefs = function(e) {
+	InstantFoxModule._defToolbarSet = null
 	var optionsButton = document.getElementById("instantFox-options")
 	var searchBar = document.getElementById('search-container')
-	
+
 	Services.prefs.setBoolPref("extensions.InstantFox.removeSearchbar", !searchBar)
 	Services.prefs.setBoolPref("extensions.InstantFox.removeOptions", !optionsButton)
-	
+
 	dump(searchBar, optionsButton, "************************************")
 }
 

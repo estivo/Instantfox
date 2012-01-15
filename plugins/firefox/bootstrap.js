@@ -91,7 +91,7 @@ function showNotice(aData, aReason) {
 	while(e.hasMoreElements()) try {
 		iFox = e.getNext().InstantFox
 		
-		iFox && iFox.updateToolbarItems(false, false);
+		iFox && iFox.updateToolbarItems("uninstall");
 	} catch(e) {Cu.reportError(e)}
 	pb.clearUserPref("removeOptions")
 	pb.clearUserPref("removeSearchbar")	
@@ -129,18 +129,22 @@ function shutdown(aData, aReason) {
 
 	Cu.unload('chrome://instantfox/content/instantfoxModule.js')
 	Cu.unload('chrome://instantfox/content/defaultPluginList.js')
+	
+	/*devel__(*/
+		Components.manager.QueryInterface(Ci.nsIComponentRegistrar).addBootstrappedManifestLocation(aData.installPath)
+	/*devel__)*/
 }
 
 function install(aData, aReason) {
 	/*devel__(*/
-		dump = Components.utils.import("resource://shadia/main.js").dump
+		var dump = Components.utils.import("resource://shadia/main.js").dump
 		dump(aData, aReason, "install--------------------")
 	/*devel__)*/
 }
 
 function uninstall(aData, aReason) {
 	/*devel__(*/
-		dump = Components.utils.import("resource://shadia/main.js").dump
+		var dump = Components.utils.import("resource://shadia/main.js").dump
 		dump(aData, aReason, "uninstall--------------------")
 	/*devel__)*/
 }
