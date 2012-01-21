@@ -448,7 +448,7 @@ window.InstantFox = {
 	},
 	updateShadowLink: function(q){
 		//var q = InstantFoxModule.currentQuery;
-		var s = gURLBar.instantFoxShadow
+		var s = gURLBar.mInputField.instantFoxShadow
 		if(!q) {
 			if(!s)
 				return;
@@ -460,7 +460,7 @@ window.InstantFox = {
 			return
 		}
 		
-		if (!s || !s.box1 || !s.box1.parentNode)
+		if (!s || !s.box1 || s.box1.parentNode != gURLBar.mInputField.parentNode)
 			s = this.prepareShadowNodes()
 
 		var key = q.key + q.splitSpace.replace(' ', '\u00a0', 'g');
@@ -479,26 +479,27 @@ window.InstantFox = {
 		this.$urlBarModified = true
 	},
 	removeShadowNodes: function(){
-		if(!gURLBar.instantFoxShadow)
+		var inputField = gURLBar.mInputField
+		if(!inputField.instantFoxShadow)
 			return;
 		
-		var s = gURLBar.mInputField.parentNode
+		var s = inputField.parentNode
 		s && s.classList.remove('instantfox-urlbar')
 	
 		for each (var hbox in s.querySelectorAll(".instantfox-box"))
 			this.rem(hbox)		
 		
-		delete gURLBar.instantFoxShadow
+		delete gURLBar.mInputField.instantFoxShadow
 	},
 	prepareShadowNodes: function() {
-		var s = gURLBar.mInputField.parentNode
+		var container = gURLBar.mInputField.parentNode
 		// measure sizes before modifiing dom
 		var l1 = gURLBar.editor.rootElement.getBoundingClientRect().left
-		var l2 = s.getBoundingClientRect().left
+		var l2 = container.getBoundingClientRect().left
 		
-		s.classList.add('instantfox-urlbar')
+		container.classList.add('instantfox-urlbar')
 		
-		var shadow = gURLBar.instantFoxShadow = {}
+		var shadow = gURLBar.mInputField.instantFoxShadow = {}
 
 		function hbox(name, addChildDiv){
 			var hb = document.createElement('hbox')
@@ -516,13 +517,13 @@ window.InstantFox = {
 		b2.setAttribute('pack', 'end')
 		b2.setAttribute('onclick','InstantFox.openHelp()')
 		b2.appendChild(hbox('tip', true))
-		s.appendChild(b2)
+		container.appendChild(b2)
 
 		var b1 = shadow.box1 = hbox('box')
 		b1.appendChild(hbox('key',true))
 		b1.appendChild(hbox('spacer',true))
 		b1.appendChild(hbox('shadow',true))
-		s.insertBefore(b1, s.firstChild)
+		container.insertBefore(b1, container.firstChild)
 
 		var boxStyle = b1.style;
 		boxStyle.marginLeft = l1 - l2 + 'px'

@@ -47,7 +47,8 @@ richlistitem[type='InstantFoxSuggest'] {
 }
 .instantfox-box{
 	overflow:hidden;
-	white-space:pre
+	white-space:pre;
+	pointer-events: none
 }
 .instantfox-key{
 	/*box-shadow: 0px 0px 2px 2px yellow inset;
@@ -71,9 +72,7 @@ richlistitem[type='InstantFoxSuggest'] {
 	pointer-events:auto;
 	cursor:pointer;
 }
-.instantfox-box{
-	pointer-events: none
-}
+
 /** splitmenu *********************************** =15= ****/
 menuitem.split-menuitem-item[_moz-menuactive="true"], .split-menu-right-image[_moz-menuactive="true"] {/*for xp*/
     background-color: -moz-menuhover;
@@ -101,7 +100,7 @@ menu[type=splitmenu] {
 	list-style-image: url("chrome://instantfox/content/skin/logo.png");
 }
 
-/** mouseUI      ************************************/
+/** mouseUI      ************************************ /
 .instantFox-mouseUI{
 	/filter: url("#instantFox-gray");
 	background:white;
@@ -126,11 +125,11 @@ menu[type=splitmenu] {
 	border:1px solid blue;
 }
 .instantFox-plugin:hover{
-	-moz-transgorm:translate(-0px -2px);
+	-moz-transform:translate(-0px -2px);
 	background-size: 100% 100%;
 	border:1px solid lightblue;
 }
-
+*/
 
 
 
