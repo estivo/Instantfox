@@ -271,25 +271,31 @@ createEmptyPlugin=function(){
 	}
 }
 openEditPopup = function(item, anchor){
-	var plugin = InstantFoxModule.Plugins[item.id]
-
-	var panel = $('edit-box')
-
-	// without this, arrow isn't shown first time
- 	if(!window.$panelHackApplied){
-		var p = gPlugin
-		gPlugin = null
-		window.$panelHackApplied=true
-		panel.openPopup(document.documentElement)
-		panel.hidePopup()
-		gPlugin = p
+	if(item.id == autoSearchUI.id){
+		var panel = $('edit-box-autoSearch')
+		autoSearchUI.init()
+	} else {
+		var panel = $('edit-box')
+		var plugin = InstantFoxModule.Plugins[item.id]
+		initEditPopup(plugin, panel)
 	}
+	$openPopup(panel, anchor || item.lastElementChild || item)
+}
 
-	initEditPopup(plugin, panel)
-
+function $openPopup(panel, anchor){
+	// without this, arrow isn't shown first time
+	if (!panel.openedOnce){
+		// todo popupshowing attribute
+		var onpopuphiding = panel.getAttribute("onpopuphiding")
+		panel.removeAttribute("onpopuphiding")
+		panel.openPopup(anchor)
+		panel.hidePopup()
+		panel.openedOnce = true
+		panel.setAttribute("onpopuphiding", onpopuphiding)
+	}	
 	var popupBoxObject = panel.popupBoxObject;
 	popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
-	panel.openPopup(anchor || item.lastElementChild || item, 'start_before', 0, 0, false, true)
+	panel.openPopup(anchor, 'start_before', 0, 0, false, true)
 }
 
 editPopupSave = function(panel){
@@ -496,6 +502,7 @@ enginesPopup = {
 }
 
 autoSearchUI = {
+	id: "-------autoSearchUI-id",
 	init: function(){
 		if(!this.onTimeout)
 			this.onTimeout = this.$onTimeout.bind(this)
@@ -549,8 +556,21 @@ autoSearchUI = {
 			p.minQChars = 0	
 
 		gPluginsChanged = true
-	}
+	},
 	
+	// richlistbox integration
+	getXML: function(){
+		var a = InstantFoxModule.autoSearch
+		var p = {}
+		p.disabled = a.disabled
+		p.name = i18n.get("standard_search_label")
+		p.iconURI = "chrome://instantfox/content/skin/button-logo.png"
+		p.id = this.id
+		
+		var fr = p.disabled ? xmlFragmentDis : xmlFragment
+		fr = fr.replace(/class=.key.>.*<\/hbox/, "/")
+		return formatString(fr, p)
+	}
 }
 
 
@@ -636,6 +656,12 @@ rbMouseup = function(e, rbox){
 	//**********
 	if (aID == 'enable-link') {
 		var item = $parent(e.target)
+		if(item.id == autoSearchUI.id){
+			InstantFoxModule.autoSearch.disabled = false
+			gPluginsChanged = true
+			rebuild()
+			return 
+		}
 		gPlugin = InstantFoxModule.Plugins[item.id]
 		gPlugin.disabled = false
 		saveGPlugin()
@@ -756,13 +782,17 @@ rebuild = function(){
 	}
 	var sepXML1 = '<label class="separator" value="   ', sepXML2 ='"/>'
 
-	xml.unshift(sepXML1 + i18n.get("separator_standard") + sepXML2)
-	if(userxml.length)
+	// 
+		xml.unshift(sepXML1 + i18n.get("separator_standard") + sepXML2)
+	if (userxml.length)
 		xml.push(sepXML1 + i18n.get("separator_your") + sepXML2)
-
-	if(disabledxml.length)
+	if (disabledxml.length)
 		userxml.push(sepXML1 + i18n.get("separator_inactive") + sepXML2)
 
+	// default search
+	if (!pluginFilter)
+		xml.unshift(autoSearchUI.getXML())
+	
 	var el = $("shortcuts");
 	//it's important to clear selection of richbox before removing its' children
 	el.clearSelection && el.clearSelection()
@@ -814,9 +844,7 @@ onOptionsPopupShowing = function(){
 function onTabSelect(){
 	var i = this.selectedIndex
 	$("report-a-bug").hidden = i!=3
-	
-	i == 1 && autoSearchUI.init()
-	
+		
 	if(this[i+"_paneReady"])
 		return;
 	this[i+"_paneReady"] = true

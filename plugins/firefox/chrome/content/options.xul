@@ -362,78 +362,10 @@ prefpane{
 					<preference id="removeSearchbar" name="extensions.InstantFox.removeSearchbar" type="bool" />
 				</preferences>
 
-				<groupbox id="autoSearch" oncommand="autoSearchUI.onChange(event)" onkeypress="autoSearchUI.onChange(event)" oninput="autoSearchUI.onChange(event)">
-					<caption>
-						<slidecheckbox  aID="disabled" label='standard_search_label' class="i18n" 
-							oncommand="toggleVisibility(this.parentNode.parentNode, 'grid.animate', this.checked)"/>
-					</caption>
-					<grid class="animate">
-						<columns>
-							<column flex="0"/>
-							<column flex="1"/>
-						</columns>
-						<rows>
-							<row>
-								<label class="i18n" value='search_url'/>
-								<hbox align='center' flex='1' class='longbox'>
-									<textbox type='url' aID='url' flex='1'  oninput="
-										this.nextSibling.hidden = !canResetProp(this, InstantFoxModule.autoSearch);
-										"/>
-									<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
-								</hbox>
-								<hbox align="center" class='image'>
-									<dropmarker type='button' onmousedown='enginesPopup.show(this, "Url", "url")'/>
-								</hbox>
-							</row>
-							
-							<row hidden="true">
-								<row>
-									<label class="i18n" value='instant_loading'/>
-									<menulist aID="instant" sizetopopup='none' oncommand = ''>
-										<menupopup>
-											<menuitem class="i18n" aID='off'     label='instant.off' />
-											<menuitem class="i18n" aID='history' label='instant.only_for_history' />
-											<menuitem class="i18n" aID='search'  label='instant.only_for_search' />
-											<menuitem class="i18n" aID='all'     label='instant.always' />
-										</menupopup>
-									</menulist>
-								</row>
-								<row class='animate'>
-									<label value=''/>
-									<hbox align='center' flex='1' class='longbox'>
-										<label value='start showing remote results if:'/>
-									</hbox>
-									<hbox align="center" class='image animate'/>
-								</row><row class='animate'>
-									<label value=''/>
-									<hbox align='center' flex='1' class='longbox'>
-										<label value='query is longer than'/>
-										<textbox type='number' aID='minQChars' flex='1'/>
-									</hbox>
-									<hbox align="center" class='image animate'/>
-								</row>
-							</row>
-							<row>
-								<label class="i18n" value='suggest_url'/>
-								<hbox align='center' flex='1' class='longbox'>
-									<checkbox aID='suggest' oncommand='toggleVisibility(this.parentNode.parentNode.parentNode, ".animate", this.checked)'/>
-									<textbox type='url' aID='json' flex='1' class='longbox animate' oninput="
-										this.nextSibling.hidden = !canResetProp(this, InstantFoxModule.autoSearch);
-										"/>
-									<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default' class="animate"/>
-								</hbox>
-								<hbox align="center" class='image animate'>
-									<dropmarker type='button' onmousedown='enginesPopup.show(this, "Url", "json")'/>
-								</hbox>
-							</row>
-						</rows>
-					</grid>
-					<separator/>
-					<hbox align='center'>
-						<label class="i18n" value='pref_maxUrlbarResults' control='maxRichResults-textbox'/>
-						<textbox id='maxRichResults-textbox' preference="maxRichResults"/>
-					</hbox>
-				</groupbox>
+				<hbox align='center'>
+					<label class="i18n" value='pref_maxUrlbarResults' control='maxRichResults-textbox'/>
+					<textbox id='maxRichResults-textbox' preference="maxRichResults"/>
+				</hbox>
 				<separator/>
 				<checkbox class="i18n" label="pref_openSearchInNewTab" id='openintab-checkbox' preference="openintab" 
 						oncommand='InstantFoxModule.openSearchInNewTab=this.checked'/>
@@ -587,6 +519,82 @@ prefpane{
 	</hbox>
 </panel>
 
+<panel id="edit-box-autoSearch" ignorekeys='true' type="arrow"
+		orient='vertical' onpopuphiding='if(event.target==this)window.rebuild()' position='start_before'>
+	<groupbox id="autoSearch" oncommand="autoSearchUI.onChange(event)" onkeypress="autoSearchUI.onChange(event)" oninput="autoSearchUI.onChange(event)">
+		<caption>
+			<slidecheckbox  aID="disabled" label='standard_search_label' class="i18n" 
+				oncommand="toggleVisibility(this.parentNode.parentNode, 'grid.animate', this.checked)"/>
+		</caption>
+		<grid class="animate">
+			<columns>
+				<column flex="0"/>
+				<column flex="1"/>
+			</columns>
+			<rows>
+				<row>
+					<label class="i18n" value='search_url'/>
+					<hbox align='center' flex='1' class='longbox'>
+						<textbox type='url' aID='url' flex='1'  oninput="
+							this.nextSibling.hidden = !canResetProp(this, InstantFoxModule.autoSearch);
+							"/>
+						<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>
+					</hbox>
+					<hbox align="center" class='image'>
+						<dropmarker type='button' onmousedown='enginesPopup.show(this, "Url", "url")'/>
+					</hbox>
+				</row>
+				
+				<row hidden="true">
+					<row>
+						<label class="i18n" value='instant_loading'/>
+						<menulist aID="instant" sizetopopup='none' oncommand = ''>
+							<menupopup>
+								<menuitem class="i18n" aID='off'     label='instant.off' />
+								<menuitem class="i18n" aID='history' label='instant.only_for_history' />
+								<menuitem class="i18n" aID='search'  label='instant.only_for_search' />
+								<menuitem class="i18n" aID='all'     label='instant.always' />
+							</menupopup>
+						</menulist>
+					</row>
+					<row class='animate'>
+						<label value=''/>
+						<hbox align='center' flex='1' class='longbox'>
+							<label value='start showing remote results if:'/>
+						</hbox>
+						<hbox align="center" class='image animate'/>
+					</row><row class='animate'>
+						<label value=''/>
+						<hbox align='center' flex='1' class='longbox'>
+							<label value='query is longer than'/>
+							<textbox type='number' aID='minQChars' flex='1'/>
+						</hbox>
+						<hbox align="center" class='image animate'/>
+					</row>
+				</row>
+				<row>
+					<label class="i18n" value='suggest_url'/>
+					<hbox align='center' flex='1' class='longbox'>
+						<checkbox aID='suggest' oncommand='toggleVisibility(this.parentNode.parentNode.parentNode, ".animate", this.checked)'/>
+						<textbox type='url' aID='json' flex='1' class='longbox animate' oninput="
+							this.nextSibling.hidden = !canResetProp(this, InstantFoxModule.autoSearch);
+							"/>
+						<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default' class="animate"/>
+					</hbox>
+					<hbox align="center" class='image animate'>
+						<dropmarker type='button' onmousedown='enginesPopup.show(this, "Url", "json")'/>
+					</hbox>
+				</row>
+			</rows>
+		</grid>
+		<separator/>
+	</groupbox>
+	<hbox align='center' oncommand="this.parentNode.hidePopup()">
+		<slickbutton class="i18n" label='disable' oncommand="InstantFoxModule.autoSearch.disabled = true;gPluginsChanged = true"/>
+		<spacer flex='1'/>
+		<slickbutton class="i18n" label='ok'/>
+	</hbox>
+</panel>
 
 <script type="application/x-javascript" src="options.js"></script>
 
