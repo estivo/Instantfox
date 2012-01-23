@@ -360,6 +360,7 @@ prefpane{
 					<preference id="maxRichResults" name="browser.urlbar.maxRichResults" type="int" />
 					<preference id="context-usedefault" name="extensions.InstantFox.context.usedefault" type="bool" />
 					<preference id="removeSearchbar" name="extensions.InstantFox.removeSearchbar" type="bool" />
+					<preference id="takeSuggestedOnEnter" name="extensions.InstantFox.takeSuggestedOnEnter" type="bool" />
 				</preferences>
 
 				<hbox align='center'>
@@ -369,6 +370,8 @@ prefpane{
 				<separator/>
 				<checkbox class="i18n" label="pref_openSearchInNewTab" id='openintab-checkbox' preference="openintab" 
 						oncommand='InstantFoxModule.openSearchInNewTab=this.checked'/>
+				<checkbox class="i18n" label="pref_takeSuggestedOnEnter" id='takeSuggestedOnEnter-checkbox' preference="takeSuggestedOnEnter" 
+						oncommand='InstantFoxModule.takeSuggestedOnEnter=this.checked'/>
 				<checkbox class="i18n" label="pref_defaultContext" id='context-usedefault-checkbox' preference="context-usedefault" 
 						oncommand='InstantFoxModule.modifyContextMenu(!this.checked)'/>
 				<separator/>

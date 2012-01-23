@@ -246,7 +246,6 @@ window.InstantFox = {
 			}
 			else if (key == 13 && !meta && !ctrl) { // 13 == ENTER
 				if (InstantFox.pageLoader.previewIsActive) {
-					q.shadow = ""
 					InstantFox.onEnter(null, alt)
 					event.preventDefault();
 				}
@@ -643,12 +642,10 @@ window.InstantFox = {
 		//
 		q.forceNewTab = InstantFoxModule.openSearchInNewTab ? !forceNewTab : forceNewTab
 
+		dump(InstantFoxModule.takeSuggestedOnEnter,q.shadow,q.query)
 		//
-		if (value)
-			q.shadow = q.query = value
-		else if (q.shadow)
-			q.query = q.shadow
-
+		this.fixQueryBeforeEnter(q, value)
+		
 		//
 		var tmp = this.doPreload(InstantFoxModule.currentQuery)
 		//gURLBar.value = tmp;
@@ -657,6 +654,16 @@ window.InstantFox = {
 
 		InstantFoxModule.currentQuery = null;
 	},
+	// apply setting for taking shadow even when unselected
+	fixQueryBeforeEnter: function(q, value){
+		if (!value) {
+			if (InstantFoxModule.takeSuggestedOnEnter && q.shadow)
+				value = q.shadow
+			else
+				value = q.query
+		}
+		q.shadow = q.query = value
+	}
 }
 
 /*********************************************************
@@ -881,8 +888,9 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
 		InstantFox.onInput()
 		// instantfox shortcuts have the highest priority
 		if (InstantFoxModule.currentQuery) {
-			url = InstantFoxModule.urlFromQuery(InstantFoxModule.currentQuery);
-			InstantFoxModule.currentQuery.shadow = "" // remove this line to get to the first suggest
+			var q = InstantFoxModule.currentQuery
+			InstantFox.fixQueryBeforeEnter(q)
+			url = InstantFoxModule.urlFromQuery(q)
 			InstantFox.finishSearch()
 		} else if (InstantFoxModule.autoSearch && !InstantFoxModule.autoSearch.disabled && !isModifierPressed(aTriggeringEvent)) {
 			url = url.trimRight() // remove spaces at the end
