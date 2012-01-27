@@ -602,11 +602,6 @@ InstantFoxModule = {
 	},
 	pluginLoader: pluginLoader,
 
-	getBestPluginMatch: function(key){
-		if(!key)
-			return this.Plugins[this.defaultPlugin]
-		return filter(InstantFoxModule.Plugins, key.replace('\xB7', ' ', 'g'))[0]||this.Plugins[this.defaultPlugin]
-	},
 	setAutoSearch: function(val){
 		// todo
 		this.autoSearch = val
@@ -679,9 +674,8 @@ var parseGeoJson = function(json, key, splitSpace){
 		url: key + splitSpace + result
 	}]
 }
-var getMatchingPlugins = function(key, tail){
+var parsePluginSuggestions = function(plugins, tail){
 	var results=[];
-	var plugins = filter(InstantFoxModule.Plugins, key)
 	for each(var p in plugins){
 		if(p.disabled)
 			continue
@@ -746,6 +740,7 @@ function filter(data, text) {
 			table.push(p);
 		return table;
 	}
+	text = text.replace(/[`\xb7]/g, "")
 	var filterText = text.toLowerCase();
 	var filterTextCase = text;
 
@@ -997,9 +992,9 @@ InstantFoxSearch.prototype = {
 
 		var isMaps = plugin && plugin.json && plugin.json.indexOf('http://maps.google') == 0
 
-		if (plugin.suggestPlugins) {
+		if (plugin.pluginSuggestions) {
 			// handle ` searches
-			var results = getMatchingPlugins(plugin.key.substr(1), plugin.tail)
+			var results = parsePluginSuggestions(plugin.pluginSuggestions, plugin.tail)
 		} else if (!plugin.json || plugin.disableSuggest){
 			// suggest is dissabled
 			url = null
