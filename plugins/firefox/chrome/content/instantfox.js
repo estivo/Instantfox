@@ -104,10 +104,14 @@ window.InstantFox = {
 		dump('instantFox initialized')
 		InstantFox.applyOverlay()
 
+		
 		// this is needed if searchbar is removed from toolbar
-		BrowserSearch.__defineGetter__("searchBar", function() {
-			return document.getElementById("searchbar") || document.getElementById("urlbar")
-		})
+		eval('BrowserSearch.addEngine = ' +
+			BrowserSearch.addEngine.toString().replace(
+				/{\s*if\s*\(\!this.searchBar\)/, 
+				"{if(0&&!this.searchBar)"
+			)
+		)
 
 		InstantFox.hookUrlbarCommand()
 		InstantFox.modifyContextMenu()
@@ -144,6 +148,13 @@ window.InstantFox = {
 		
 		delete window.InstantFox
 		delete window.InstantFoxModule
+		
+		eval('BrowserSearch.addEngine = ' +
+			BrowserSearch.addEngine.toString().replace(
+				/{\s*if\s*\(0\s*&&\s*\!this.searchBar\)/, 
+				"{if(!this.searchBar)"
+			)
+		)
 	},
 
 	setURLBarAutocompleter: function(state){
