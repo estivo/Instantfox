@@ -32,18 +32,14 @@ function unloadFromWindow(win){
 	}catch(e){Cu.reportError(e)}
 }
 
-WindowListener = {
-	onOpenWindow: function(win){
-		// Wait for the window to finish loading
-		win = win.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow).window;
+function windowWatcher(win, topic) {
+	if (topic == "domwindowopened") {
 		win.addEventListener("load", function() {
 			win.removeEventListener("load", arguments.callee, false);
 			if (win.location.href == 'chrome://browser/content/browser.xul')
 				loadIntoWindow(win)
 		}, false);
-	},
-	onCloseWindow: function(win) {},
-	onWindowTitleChange: function(win, aTitle) {}
+	}
 }
 
 /**************************************************************************
@@ -67,7 +63,7 @@ function startup(aData, aReason) {
 		loadIntoWindow(win);
 	}
 	// Load into all new windows
-	Services.wm.addListener(WindowListener);
+	Services.ww.registerNotification(windowWatcher);
 }
 
 function showNotice(aData, aReason) {
@@ -116,7 +112,7 @@ function shutdown(aData, aReason) {
 		var win = enumerator.getNext();
 		unloadFromWindow(win);
 	}
-	Services.wm.removeListener(WindowListener);
+	Services.ww.unregisterNotification(windowWatcher)
 	
 	Services.io.getProtocolHandler('resource').QueryInterface(Ci.nsIResProtocolHandler)
 		.setSubstitution('instantfox',null)
