@@ -95,6 +95,7 @@ function showNotice(aData, aReason) {
 	} catch(e) {Cu.reportError(e)}
 	pb.clearUserPref("removeOptions")
 	pb.clearUserPref("removeSearchbar")	
+	pb.clearUserPref('version')
 }
 
 function shutdown(aData, aReason) {

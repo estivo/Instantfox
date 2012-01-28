@@ -1170,7 +1170,7 @@ checkVersion = function() {
 		
 		var topWin, ifox
 		// update toolbar items of loaded windows
-		if (oldVersion != newVersion || uninstallVersion == newVersion) {
+		if (oldVersion != newVersion) {
 			var e = Services.wm.getEnumerator("navigator:browser")
 			while(e.hasMoreElements()) try {
 				var win = e.getNext()
@@ -1191,8 +1191,8 @@ checkVersion = function() {
 			InstantFoxModule.pluginLoader.onInstantfoxUpdate()
 		} catch(e) {Cu.reportError(e)}
 	
-		// don't bother user with minor updates
-		if (oldVersion.slice(0,-1) == newVersion.slice(0,-1))
+		// don't bother user with minor updates or after reenabling
+		if (oldVersion.slice(0,-1) == newVersion.slice(0,-1) || uninstallVersion == newVersion)
 			return
 		
 		if (oldVersion == "0.0.0") {
