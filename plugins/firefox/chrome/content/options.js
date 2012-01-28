@@ -844,6 +844,7 @@ onOptionsPopupShowing = function(){
 function onTabSelect(){
 	var i = this.selectedIndex
 	$("report-a-bug").hidden = i!=3
+	$("rate-it").hidden = i!=0
 		
 	if(this[i+"_paneReady"])
 		return;
@@ -1010,6 +1011,7 @@ slideCheckbox = {
 	}
 }
 
+/**********************************************************************/
 i18n = {
 	init: function(){
 		this.$bundle = InstantFoxModule.bp.getBundle('options.properties')
@@ -1058,3 +1060,8 @@ i18n = {
 i18n.init()
 i18n.localize()
 
+/**********************************************************************/
+function addTab(url){
+	Services.wm.getMostRecentWindow("navigator:browser")
+		.InstantFox.addTab(url)
+}

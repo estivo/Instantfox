@@ -104,10 +104,14 @@ window.InstantFox = {
 		dump('instantFox initialized')
 		InstantFox.applyOverlay()
 
+		
 		// this is needed if searchbar is removed from toolbar
-		BrowserSearch.__defineGetter__("searchBar", function() {
-			return document.getElementById("searchbar") || document.getElementById("urlbar")
-		})
+		eval('BrowserSearch.addEngine = ' +
+			BrowserSearch.addEngine.toString().replace(
+				/{\s*if\s*\(\!this.searchBar\)/, 
+				"{if(0&&!this.searchBar)"
+			)
+		)
 
 		InstantFox.hookUrlbarCommand()
 		InstantFox.modifyContextMenu()
@@ -144,6 +148,13 @@ window.InstantFox = {
 		
 		delete window.InstantFox
 		delete window.InstantFoxModule
+		
+		eval('BrowserSearch.addEngine = ' +
+			BrowserSearch.addEngine.toString().replace(
+				/{\s*if\s*\(0\s*&&\s*\!this.searchBar\)/, 
+				"{if(!this.searchBar)"
+			)
+		)
 	},
 
 	setURLBarAutocompleter: function(state){
@@ -246,7 +257,6 @@ window.InstantFox = {
 			}
 			else if (key == 13 && !meta && !ctrl) { // 13 == ENTER
 				if (InstantFox.pageLoader.previewIsActive) {
-					q.shadow = ""
 					InstantFox.onEnter(null, alt)
 					event.preventDefault();
 				}
@@ -364,31 +374,112 @@ window.InstantFox = {
 	getQuery: function(val, oldQ){
 		//dump(val, oldQ)
 		var plugin, key
-		var i = val.indexOf(' ');
-		if(val[0]=='`'){
-			if (i == -1)
-				i = val.length
-			key = val.substring(0, i)
-			if(gURLBar.selectionStart <= i)
-				plugin = {
-					suggestPlugins: true,
-					key: key,
-					tail: val.substr(i),
-					disableInstant: true
-				}
-			else
-				plugin = InstantFoxModule.getBestPluginMatch(key.substr(1))
-		}else{
-			if (i == -1)
+		var spacePos = val.indexOf(' ');
+		var bi = val.indexOf('`');
+		
+		if (bi == -1) {
+			if (spacePos == -1)
 				return this.defQ
-			key = val.substr(0, i)
+			key = val.substr(0, spacePos)
 			var id = InstantFoxModule.resolveShortcut(key)
 			if (!id)
 				return this.defQ;
 			plugin = InstantFoxModule.Plugins[id]
+		} else { //searching through plugins
+			var cursorPos = gURLBar.selectionStart
+			var typedChar = val[cursorPos-1]
+			var plugin = oldQ && oldQ.plugin
+			var savedPos = plugin && plugin.savedPos
+			
+			if (spacePos == -1)
+				spacePos = val.length
+			
+			if (typedChar == '`' && (bi != 0 || cursorPos > spacePos)) {
+				plugin = null
+				savedPos = val.length - cursorPos
+				if (bi != 0)
+					val = '` ' + val.replace('`', '', 'g')
+				else
+					val = '`' + val.replace('`', '', 'g')
+
+				gURLBar.value = val
+				spacePos = cursorPos = 1
+				gURLBar.selectionStart = cursorPos
+				gURLBar.selectionEnd = bi == 0 ? Math.max(cursorPos, val.indexOf(' ')) : cursorPos
+			} else if ((typedChar == ' ' && bi == 0) || (typedChar == '`' && cursorPos <= spacePos)) {
+				if (savedPos != null) {
+					if (val.match(/^`\s+/))
+						val = val.replace(/^`\s+/, '')
+					else
+						val = '`' + val.replace('`', '', 'g').replace(/\s+/, ' ')
+
+					val = gURLBar.value = val
+					cursorPos = val.length - savedPos					
+					gURLBar.selectionEnd = gURLBar.selectionStart = cursorPos						
+				}
+			}
+			
+			key = val.substring(0, spacePos)
+			// sort plugins
+			var needle = key.substr(1).replace('\xB7', ' ', 'g').toLowerCase()
+			pluginSuggestions = []
+			for each(var p in InstantFoxModule.Plugins){
+				if (p.key == needle) {
+					p.score = Infinity
+					pluginSuggestions.push(p)
+					continue
+				}
+				p.score = 0
+				if (p.key.indexOf(needle) == 0)
+					p.score += 100000
+				var name = p.name.toLowerCase()
+				var i = -1, j = 0, score = 0
+				for each (var ch in needle) {
+					i = name.indexOf(ch, i + 1)
+					dump(i,name,needle)
+					if (i == -1) {
+						score = 0
+						break
+					}
+					if (i == 0)
+						score += 4
+					if (j == i + 1)
+						score += 2
+					else
+						score += 1
+					j = i
+				}
+				
+				p.score += score
+				p.score && pluginSuggestions.push(p)
+			}
+			if (!pluginSuggestions[0]){
+				var defp = InstantFoxModule.Plugins[InstantFoxModule.defaultPlugin]				
+				pluginSuggestions.push(defp)
+			}
+			
+			pluginSuggestions.sort(function(a,b){
+				if (a.score == b.score)
+					return a.name > b.name
+				return b.score - a.score
+			})
+			dump(pluginSuggestions, pluginSuggestions.length)
+			//------------------------
+			if (cursorPos > spacePos) {
+				plugin = pluginSuggestions[0]
+			} else {
+				plugin = {
+					pluginSuggestions: pluginSuggestions,
+					key: key,
+					tail: val.substr(spacePos),
+					disableInstant: true,
+					savedPos: savedPos
+				}
+			}
 		}
 
-		var j = val.substr(i).match(/^\s*/)[0].length
+
+		var spaceLen = val.substr(spacePos).match(/^\s*/)[0].length
 		if (!oldQ || oldQ.plugin != plugin) {
 			oldQ = {
 				//browserText: nsContextMenu.prototype.getSelectedText().substr(0, 50),
@@ -400,8 +491,8 @@ window.InstantFox = {
 
 		oldQ.key = key
 		oldQ.plugin = plugin
-		oldQ.query = val.substr(i+j)
-		oldQ.splitSpace = val.substr(i,j)
+		oldQ.query = val.substr(spacePos + spaceLen)
+		oldQ.splitSpace = val.substr(spacePos, spaceLen)
 		oldQ.value = val
 		return oldQ
 	},
@@ -643,12 +734,10 @@ window.InstantFox = {
 		//
 		q.forceNewTab = InstantFoxModule.openSearchInNewTab ? !forceNewTab : forceNewTab
 
+		dump(InstantFoxModule.takeSuggestedOnEnter,q.shadow,q.query)
 		//
-		if (value)
-			q.shadow = q.query = value
-		else if (q.shadow)
-			q.query = q.shadow
-
+		this.fixQueryBeforeEnter(q, value)
+		
 		//
 		var tmp = this.doPreload(InstantFoxModule.currentQuery)
 		//gURLBar.value = tmp;
@@ -657,6 +746,16 @@ window.InstantFox = {
 
 		InstantFoxModule.currentQuery = null;
 	},
+	// apply setting for taking shadow even when unselected
+	fixQueryBeforeEnter: function(q, value){
+		if (!value) {
+			if (InstantFoxModule.takeSuggestedOnEnter && q.shadow)
+				value = q.shadow
+			else
+				value = q.query
+		}
+		q.shadow = q.query = value
+	}
 }
 
 /*********************************************************
@@ -881,8 +980,9 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
 		InstantFox.onInput()
 		// instantfox shortcuts have the highest priority
 		if (InstantFoxModule.currentQuery) {
-			url = InstantFoxModule.urlFromQuery(InstantFoxModule.currentQuery);
-			InstantFoxModule.currentQuery.shadow = "" // remove this line to get to the first suggest
+			var q = InstantFoxModule.currentQuery
+			InstantFox.fixQueryBeforeEnter(q)
+			url = InstantFoxModule.urlFromQuery(q)
 			InstantFox.finishSearch()
 		} else if (InstantFoxModule.autoSearch && !InstantFoxModule.autoSearch.disabled && !isModifierPressed(aTriggeringEvent)) {
 			url = url.trimRight() // remove spaces at the end
