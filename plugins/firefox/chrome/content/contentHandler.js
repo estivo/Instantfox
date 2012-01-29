@@ -136,7 +136,7 @@ InstantFox.contentHandlers = {
 		},
 		transformURL: function(q, url2go) {
 			try{
-				var url = InstantFox.pageLoader.preview.contentDocument.location.href;
+				var url = InstantFox.pageLoader.getCurrentLoacation()
 				//
 				var gDomain = url.match(/https?:\/\/((www|encrypted)\.)?google.([a-z\.]*)[^#]*/i)
 				if (!gDomain)
@@ -171,7 +171,7 @@ InstantFox.contentHandlers = {
 
 			self.timeout = null
 
-			var url = InstantFox.pageLoader.preview.contentDocument.location.href
+			var url = InstantFox.pageLoader.getCurrentLoacation()
 			if (url == "about:blank")
 				return;
 
@@ -185,6 +185,10 @@ InstantFox.contentHandlers = {
 }
 
 InstantFox.pageLoader = {
+	getCurrentLoacation: function(){
+		var x
+		return ((x = this.preview)&&(x = x.contentDocument)&&x.location.href)||'';
+	},
 	get isActive(){
 		return this.preview && this.preview.parentNode
 	},

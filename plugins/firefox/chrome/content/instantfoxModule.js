@@ -59,13 +59,6 @@ try{
  *        id:
  *    }
  ***************/
-// clearly someone was drunk while inventing descriptor stuff
-// why is configurable needed in the first place?
-var _desc_ = Object.getOwnPropertyDescriptor({i:1},'i')
-function setProp(o, name, val) {
-	_desc_.value = val
-	Object.defineProperty(o, name, _desc_)
-}
  
 // used for new plugins only
 function fixupPlugin(p){
@@ -117,7 +110,8 @@ var pluginLoader = {
 
 	addDefaultPlugins: function(pluginData){
 		InstantFoxModule.selectedLocale = pluginData.localeMap['%ll']
-		var newPlugins = {}, oldPlugins = InstantFoxModule.Plugins;
+		var newPlugins = Object.create(null)
+		var oldPlugins = InstantFoxModule.Plugins;
 		for each(var plugin in pluginData.plugins){
 			var p = this.cleanCopyPlugin(plugin)
 			var id = p.id
@@ -139,14 +133,14 @@ var pluginLoader = {
 				if(p.url != p.def_url)
 					p.iconURI = pluginLoader.getFavicon(p.url);
 			}
-			setProp(newPlugins, p.id, p);
+			newPlugins[p.id] = p;
 		}
 		// remove default plugins from other locale
 		for each(var p in oldPlugins) {
 			if (newPlugins[p.id])
 				continue
 			if (p.type != 'default' || this.isUserModified(p))
-				setProp(newPlugins, p.id, p);
+				newPlugins[p.id] = p;
 		}
 		
 		InstantFoxModule.Plugins = newPlugins;
@@ -170,8 +164,8 @@ var pluginLoader = {
 	},
 
 	initShortcuts: function(){
-		InstantFoxModule.Shortcuts = {}
-		var conflicts={}
+		InstantFoxModule.Shortcuts = Object.create(null)
+		var conflicts = Object.create(null)
 
 		for each (var  p in InstantFoxModule.Plugins) {
 			if (p.url && p.key && !p.disabled) {
@@ -182,11 +176,11 @@ var pluginLoader = {
 					
 					var id = InstantFoxModule.resolveShortcut(k)
 					if (id) {
-						setProp(conflicts, InstantFoxModule.Plugins[id].id, true)
-						setProp(conflicts, p.id, true)
+						conflicts[InstantFoxModule.Plugins[id].id] = true
+						conflicts[p.id] = true
 					}
 
-					setProp(InstantFoxModule.Shortcuts, k, p.id)
+					InstantFoxModule.Shortcuts[k] = p.id
 				}
 			}
 		}
@@ -207,11 +201,10 @@ var pluginLoader = {
 		}
 
 		for each(var p in pluginData.plugins){
-			var id = p.id
-			var mP = InstantFoxModule.Plugins[id]
-			if(mP && mP.key)
+			var mP = InstantFoxModule.Plugins[p.id]
+			if (mP && mP.key)
 				p.key = mP.key
-			setProp(InstantFoxModule.Plugins, id, p)
+			InstantFoxModule.Plugins[p.id] = p
 		}
 		// add data from browser search engines
 		importBrowserPlugins(false)
@@ -448,11 +441,14 @@ function importBrowserPlugins(importKeys) {
 	try{
 		var browserPlugins = Services.search.getEngines().map(pluginFromNsiSearch)
 		for each(var p in browserPlugins){
-			if(!InstantFoxModule.Plugins[p.id])
-				setProp(InstantFoxModule.Plugins, p.id, p)
-			else if(importKeys && p.key)
-				InstantFoxModule.Plugins[p.id].key = p.key
-
+			if (!InstantFoxModule.Plugins[p.id])
+				InstantFoxModule.Plugins[p.id] = p
+			else if (importKeys && p.key) {
+				var iPlugin = InstantFoxModule.Plugins[p.id]
+				if (!iPlugin.key)
+					iPlugin.key = p.key
+			}
+			
 			// handle default plugins
 			var p1 = InstantFoxModule.Plugins[p.id]
 			if(p1.type == 'browserSearch')
@@ -595,10 +591,10 @@ InstantFoxModule = {
 			keylength: q.length
 		};
 	},
-	Plugins: {},
-	Shortcuts: {},
+	Plugins: Object.create(null),
+	Shortcuts: Object.create(null),
 	resolveShortcut: function(key) {
-		return this.Shortcuts.hasOwnProperty(key) && this.Shortcuts[key]
+		return this.Shortcuts[key]
 	},
 	pluginLoader: pluginLoader,
 
@@ -957,6 +953,7 @@ InstantFoxSearch.prototype = {
 
 	// implement nsIAutoCompleteSearch
 	startSearch: function(searchString, searchParam, previousResult, listener) {
+		dump(searchString, searchParam, previousResult, listener)
 		if (searchString[0] == ":" || searchString.slice(0, 6) == 'about:') {
 			searchString = searchString.substr(searchString[0] == ":" ? 1 : 6)
 			var results = filter(getAboutUrls(), searchString)

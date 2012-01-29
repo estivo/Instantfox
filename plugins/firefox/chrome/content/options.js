@@ -939,7 +939,7 @@ resetAllPlugins = function(proceed) {
 	proceed = proceed || Services.prompt.confirm(window, "InstantFox", i18n.get("alert.reset"))
 	if (!proceed)
 		return
-	InstantFoxModule.Plugins = {}
+	InstantFoxModule.Plugins = Object.create(null)
 	InstantFoxModule.selectedLocale = null
 	InstantFoxModule.autoSearch = null
 	InstantFoxModule.defaultPlugin = null

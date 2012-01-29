@@ -91,7 +91,8 @@ window.InstantFox = {
 		this.setURLBarAutocompleter()
 
 		gURLBar.addEventListener('keydown', InstantFox.onKeydown, false);
-		gURLBar.addEventListener('input', InstantFox.onInput, false);
+		// must be capturing to run after value is changed and before autocompleter
+		gURLBar.addEventListener('input', InstantFox.onInput, true); 
 		// _copyCutController prevents cut event, so modify it in hookUrlbarCommand
 		// gURLBar.addEventListener('cut', InstantFox.onInput, false);
 		
@@ -130,7 +131,7 @@ window.InstantFox = {
 		
 
 		gURLBar.removeEventListener('keydown', this.onKeydown, false);
-		gURLBar.removeEventListener('input', this.onInput, false);
+		gURLBar.removeEventListener('input', this.onInput, true);
 		gURLBar.removeEventListener('focus', this.onfocus, false);
 		gURLBar.removeEventListener('blur', this.onblur, false);
 
@@ -430,7 +431,7 @@ window.InstantFox = {
 					continue
 				}
 				p.score = 0
-				if (p.key.indexOf(needle) == 0)
+				if (p.key && p.key.indexOf(needle) == 0)
 					p.score += 100000
 				var name = p.name.toLowerCase()
 				var i = -1, j = 0, score = 0
