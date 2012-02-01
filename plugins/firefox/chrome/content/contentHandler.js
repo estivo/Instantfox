@@ -76,10 +76,14 @@ InstantFox.searchBoxAPI = {
 			return
 		sb.value = q
 		sb.verbatim = true
+		if (this.delayOnSubmit)
+			return
 		this.call(sb, "onchange")
 		this.call(sb, "onsubmit")
 	},
 	addToWindow: function(){
+		this.delayOnSubmit = false
+		
 		var win = this.getWindow()
 		win.navigator.searchBox = {
 			value: '',
@@ -100,7 +104,11 @@ InstantFox.searchBoxAPI = {
 	},
 	call: function(sb, prop){
 		dump(prop, sb.value, sb.verbatim)
-		sb[prop] && sb[prop]()
+		try{
+			sb[prop] && sb[prop]()
+		}catch(e){
+			Cu.reportError(e)
+		}
 	},
 	handleEvent: function(e){
 		e.currentTarget.removeEventListener(e.type, this, false)
@@ -114,6 +122,20 @@ InstantFox.searchBoxAPI = {
 		el.addEventListener("load", this, false)
 		el.addEventListener("DOMContentLoaded", this, false)
 		el.addEventListener("DOMWindowCreated", this, false)
+	},
+	// do not resize box if mouse is down
+	delaySubmiting: function(){
+		this.delayOnSubmit = true
+		this._sb = this.getSearchBox()
+		return this.doDelayedSubmiting.bind(this)
+	},
+	doDelayedSubmiting: function(){
+		var sb = this._sb
+		if (sb) {
+			this.call(sb, "onchange")
+			this.call(sb, "onsubmit")
+		}
+		this._sb = this.delayOnSubmit = null
 	}
 }
 
@@ -178,6 +200,7 @@ InstantFox.pageLoader = {
 
     // Provide a way to replace the current tab with the preview
     persistPreview: function(tab, inBackground) {
+		dump.trace()	
 		if (!this.previewIsActive)
 			return;
 		gURLBar.blur()
@@ -267,10 +290,17 @@ InstantFox.pageLoader = {
 		return targetBrowser
     },
 
-	onfocus: function(e){
+	onFocus: function(e) {
 		this.persistPreview()
 	},
-	onTitleChanged: function(e){
+	onMouseDown: function(e) {
+		InstantFox.searchBoxAPI.delaySubmiting()
+		window.addEventListener("mouseup", function onup() {
+			window.removeEventListener("mouseup", onup, true)
+			InstantFox.searchBoxAPI.doDelayedSubmiting()
+		}, true)
+	},
+	onTitleChanged: function(e) {
 		if(e.target == InstantFox.pageLoader.preview.contentDocument)
 			InstantFox.pageLoader.label.value = e.target.title;
 		e.stopPropagation()
@@ -293,7 +323,8 @@ InstantFox.pageLoader = {
             preview.addEventListener("DOMTitleChanged", this.onTitleChanged, true);
 
             // The user clicking or tabbinb to the content should indicate persist
-            preview.addEventListener("focus", this.onfocus.bind(this), true);
+            preview.addEventListener("focus", this.onFocus.bind(this), true);
+            preview.addEventListener("mousedown", this.onMouseDown.bind(this), true);
 			this.preview = preview
         }
 
