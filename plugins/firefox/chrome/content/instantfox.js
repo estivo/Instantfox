@@ -376,9 +376,8 @@ window.InstantFox = {
 		//dump(val, oldQ)
 		var plugin, key
 		var spacePos = val.indexOf(' ');
-		var bi = val.indexOf('`');
 		
-		if (bi == -1) {
+		if (val[0]!='`') {
 			if (spacePos == -1)
 				return this.defQ
 			key = val.substr(0, spacePos)
@@ -388,37 +387,10 @@ window.InstantFox = {
 			plugin = InstantFoxModule.Plugins[id]
 		} else { //searching through plugins
 			var cursorPos = gURLBar.selectionStart
-			var typedChar = val[cursorPos-1]
 			var plugin = oldQ && oldQ.plugin
-			var savedPos = plugin && plugin.savedPos
 			
 			if (spacePos == -1)
 				spacePos = val.length
-			
-			if (typedChar == '`' && (bi != 0 || cursorPos > spacePos)) {
-				plugin = null
-				savedPos = val.length - cursorPos
-				if (bi != 0)
-					val = '` ' + val.replace('`', '', 'g')
-				else
-					val = '`' + val.replace('`', '', 'g')
-
-				gURLBar.value = val
-				spacePos = cursorPos = 1
-				gURLBar.selectionStart = cursorPos
-				gURLBar.selectionEnd = bi == 0 ? Math.max(cursorPos, val.indexOf(' ')) : cursorPos
-			} else if ((typedChar == ' ' && bi == 0) || (typedChar == '`' && cursorPos <= spacePos)) {
-				if (savedPos != null) {
-					if (val.match(/^`\s+/))
-						val = val.replace(/^`\s+/, '')
-					else
-						val = '`' + val.replace('`', '', 'g').replace(/\s+/, ' ')
-
-					val = gURLBar.value = val
-					cursorPos = val.length - savedPos					
-					gURLBar.selectionEnd = gURLBar.selectionStart = cursorPos						
-				}
-			}
 			
 			key = val.substring(0, spacePos)
 			// sort plugins
@@ -455,7 +427,7 @@ window.InstantFox = {
 				p.score && pluginSuggestions.push(p)
 			}
 			if (!pluginSuggestions[0]){
-				var defp = InstantFoxModule.Plugins[InstantFoxModule.defaultPlugin]				
+				var defp = InstantFoxModule.Plugins[InstantFoxModule.defaultPlugin]
 				pluginSuggestions.push(defp)
 			}
 			
@@ -473,8 +445,7 @@ window.InstantFox = {
 					pluginSuggestions: pluginSuggestions,
 					key: key,
 					tail: val.substr(spacePos),
-					disableInstant: true,
-					savedPos: savedPos
+					disableInstant: true
 				}
 			}
 		}
