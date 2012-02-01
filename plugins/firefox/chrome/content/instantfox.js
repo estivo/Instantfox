@@ -161,9 +161,10 @@ window.InstantFox = {
 	setURLBarAutocompleter: function(state){
 		var search = InstantFox._autocompletesearch_orig, oninput = InstantFox._oninput_orig
 		if (state != 'off') {
-			InstantFox._autocompletesearch_orig = gURLBar.getAttribute('autocompletesearch')
+			var s = InstantFox._autocompletesearch_orig = gURLBar.getAttribute('autocompletesearch')
+			var n = 'instantFoxAutoComplete'
 			InstantFox._oninput_orig = gURLBar.getAttribute('oninput')
-			search = 'instantFoxAutoComplete';
+			search = /\bhistory\b/.test(s) ? s.replace(/\bhistory\b/,n) : n;
 			oninput = ''
 		}
 		gURLBar.setAttribute("autocompletesearch", search)
