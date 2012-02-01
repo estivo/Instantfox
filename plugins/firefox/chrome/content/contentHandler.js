@@ -151,36 +151,9 @@ InstantFox.contentHandlers = {
 			}
 		},
 		onLoad: function(q){
-			this.checkPreview(800)
 		},
 		// workaround for google bug
-		qRe: /[&?#]q=([^&]*)/,
-		checkPreview: function(delay){
-			var q = InstantFoxModule.currentQuery
-			if(!q)
-				return
-
-			var self = InstantFox.contentHandlers.google
-			if(delay){
-				if(self.timeout)
-					clearTimeout(self.timeout)
-
-				self.timeout = setTimeout(self.checkPreview, delay, 0)
-				return
-			}
-
-			self.timeout = null
-
-			var url = InstantFox.pageLoader.getCurrentLoacation()
-			if (url == "about:blank")
-				return;
-
-			if (!self.isSame(q, url)) {
-				Cu.reportError(url + "\n!=\n" + q.preloadURL)
-				InstantFox.pageLoader.addPreview(q.preloadURL)
-				self.checkPreview(800)
-			}
-		}
+		qRe: /[&?#]q=([^&]*)/
 	}
 }
 
