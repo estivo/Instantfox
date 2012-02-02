@@ -71,13 +71,13 @@ InstantFox.searchBoxAPI = {
 		// this.call(sb, "onresize")
 	},
 	onFinish: function(q){
+		if (this.delayOnSubmit)
+			return
 		var sb = this.getSearchBox()
 		if (!sb)
 			return
 		sb.value = q
 		sb.verbatim = true
-		if (this.delayOnSubmit)
-			return
 		this.call(sb, "onchange")
 		this.call(sb, "onsubmit")
 	},
@@ -200,7 +200,6 @@ InstantFox.pageLoader = {
 
     // Provide a way to replace the current tab with the preview
     persistPreview: function(tab, inBackground) {
-		dump.trace()	
 		if (!this.previewIsActive)
 			return;
 		gURLBar.blur()

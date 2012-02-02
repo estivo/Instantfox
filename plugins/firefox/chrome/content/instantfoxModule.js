@@ -323,7 +323,7 @@ var pluginLoader = {
 		p1.id = p.id;
 		p1.key = p.key
 		//
-		p.disabled && (p1.disabled = true)
+		p.disabled && (p1.disabled = p.disabled)
 		p.disableInstant && (p1.disableInstant = true)
 		p.disableSuggest && (p1.disableSuggest = true)
 		p.hideFromContextMenu && (p1.hideFromContextMenu = true)

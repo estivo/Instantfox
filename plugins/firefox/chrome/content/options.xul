@@ -301,6 +301,9 @@ slidecheckbox:hover>slidecheck>check{
 prefpane{
 	-moz-user-focus: normal;
 }
+#remove-button{
+	color:darkred
+}
 </html:style>
 
 <tabbox flex='1'>
@@ -519,7 +522,8 @@ prefpane{
 	</grid>
 
 	<hbox align='center'>
-		<slickbutton label='remove' aID='remove' oncommand="removePlugin(gPlugin);$('edit-box').hidePopup();"/>
+		<slickbutton class='i18n' label='disable' aID='disable' oncommand="disablePlugin(gPlugin);$('edit-box').hidePopup();"/>
+		<slickbutton class='i18n' label='remove' aID='remove' id="remove-button"  oncommand="removePlugin(gPlugin);"/>
 		<toolbarbutton label='more' hidden='true'/>
 		<description class='i18n help link' value='help' onclick='open(InstantFoxModule.editingHelpURL)'/>
 		<spacer flex='1'/>

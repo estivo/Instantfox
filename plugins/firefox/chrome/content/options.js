@@ -246,11 +246,13 @@ initEditPopup = function(plugin, panel){
 	chkbox.checked = suggest
 	chkbox.doCommand()
 
-	var rem =  $t(panel, 'remove')
+	var rem =  $t(panel, 'disable')
 	if(plugin){
-		rem.label = i18n.get(gPlugin.type == 'user' ? 'remove': 'disable');
+		rem.label = i18n.get('disable');
 		rem.hidden = false;
+		$t(panel, 'remove').hidden = false
 	}else{
+		$t(panel, 'remove').hidden = true
 		rem.label = i18n.get('cancel');
 		rem.hidden = false;
 	}
@@ -343,20 +345,38 @@ saveGPlugin = function(createNew){
 }
 
 
+disablePlugin = function(p) {
+	if (p.createNew) {
+		gPlugin = null
+		return
+	} else {
+		p.disabled = true
+	}
+	ibp.pluginLoader.initShortcuts()
+	rebuild()
+	gPluginsChanged = true
+}
 removePlugin = function(p) {
 	if (p.createNew) {
 		gPlugin = null
-	}else if (p.type != 'user' ) {
-		p.disabled = true
+		return
+	}
+	gPlugin = null
+	$('edit-box').hidePopup();
+	
+	
+	var proceed = Services.prompt.confirm(window, "InstantFox", i18n.get("alert.remove"))
+	if (!proceed)
+		return
+
+	if (p.type != 'user' ) {
+		InstantFoxModule.Plugins[p.id].disabled = "invisible"
 	} else {
 		delete InstantFoxModule.Plugins[p.id];
-		ibp.pluginLoader.initShortcuts()
-		markConflicts()
-
-		var item = $(p.id)
-		item.parentNode.removeChild(item)
 	}
 
+	ibp.pluginLoader.initShortcuts()
+	rebuild()	
 	gPluginsChanged = true
 }
 canResetProp = function(el, plugin){
@@ -767,14 +787,16 @@ rebuild = function(){
 	var xml=[], userxml = [], disabledxml = [];
 	var activePlugins = InstantFoxModule.Plugins
 
-	var pluginFilter = $("pluginFilter").value
-	for each(var p in activePlugins){
-		if(!p.url || (pluginFilter && p.name.toLowerCase().indexOf(pluginFilter) == -1))
+	var pluginFilter = $('pluginFilter').value
+	for each (var p in activePlugins) {
+		if (!p.url || (pluginFilter && p.name.toLowerCase().indexOf(pluginFilter) == -1))
 			continue
-
+		if (p.disabled == 'invisible')
+			continue
+			
 		var dis = p.disabled, def = p.type=='default'
 		var px = plugin2XML(p)
-		if(dis)
+		if (dis)
 			disabledxml[p.disabled?'unshift':'push'](px)
 		else
 			(def ? xml : userxml).push(px)
