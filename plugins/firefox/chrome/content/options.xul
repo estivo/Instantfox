@@ -427,11 +427,13 @@ prefpane{
 		<shadiaglue id='status-bar' buttons=""/>
 	<!-- devel__) -->
 	<hbox width="16"/>
-	<slickbutton id="report-a-bug" label='report a bug'
-		oncommand='addTab("chrome://instantfox/content/report-a-bug.html")' />
 	<hbox align="center">
+		<description value=' Do you like Instantfox? ' />
 		<description class='i18n help link' value='rate_it' id="rate-it"
 			onclick='addTab("https://addons.mozilla.org/en-US/firefox/addon/instantfox/")'/>
+		<description value=' or ' />
+		<description class='help link' value='report a bug!' id="report-a-bug"
+			onclick='addTab("chrome://instantfox/content/report-a-bug.html")'/>
 	</hbox>
 	<spacer flex='1'/>
 	<slickbutton class="i18n" label='ok' oncommand='resultOK=true;close()'/>
