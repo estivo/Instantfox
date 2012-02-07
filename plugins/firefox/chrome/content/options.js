@@ -865,9 +865,7 @@ onOptionsPopupShowing = function(){
 
 function onTabSelect(){
 	var i = this.selectedIndex
-	$("report-a-bug").hidden = i!=3
-	$("rate-it").hidden = i!=0
-		
+
 	if(this[i+"_paneReady"])
 		return;
 	this[i+"_paneReady"] = true
