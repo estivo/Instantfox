@@ -1,4 +1,46 @@
 window.InstantFox = {
+	// function overriding.
+	// using this instead of eval to not get slow reviews because of "eval crusade"
+	// BrowserSearch.addEngine with removed this.searchBar check
+	addEngine_: function(engine, targetDoc) {
+		var browser = gBrowser.getBrowserForDocument(targetDoc);
+		if (!browser)
+			return;
+		if (browser.engines && browser.engines.some((function(e) e.title == engine.title)))
+			return;
+
+		var iconURL = null;
+		if (gBrowser.shouldLoadFavIcon(targetDoc.documentURIObject))
+			iconURL = targetDoc.documentURIObject.prePath + "/favicon.ico";
+
+		var hidden = false;
+		if (Services.search.getEngineByName(engine.title))
+			hidden = true;
+
+		var engines = (hidden ? browser.hiddenEngines : browser.engines) || [];
+		engines.push({uri: engine.href, title: engine.title, icon: iconURL});
+		if (hidden)
+			browser.hiddenEngines = engines;
+		else
+			browser.engines = engines;
+	},
+
+	$patch: function(obj, funcName, patchName) {
+		patchName = patchName || funcName+'_'
+		if (this[funcName+'_orig'])
+			return Cu.reportError(funcName + " already patched")
+		this[funcName+'_orig'] = obj[funcName]
+		obj[funcName] = this[patchName]
+	},
+	$unpatch: function(obj, funcName, patchName) {
+		patchName = patchName || funcName+'_'
+		if (this[patchName] != obj[funcName])
+			return Cu.reportError("can't restore "+funcName)
+		obj[funcName] = this[funcName+'_orig']
+		this[funcName+'_orig'] = null
+	},
+	// end overrides
+	
 	$el: function(name, attributes, childList_, parent) {
     	if (!Array.isArray(childList_)){
 			parent = childList_
@@ -84,38 +126,33 @@ window.InstantFox = {
 	initialize: function() {
 		Cu.import('chrome://instantfox/content/instantfoxModule.js')
 		
-		InstantFox.stylesheet = document.createProcessingInstruction('xml-stylesheet', 'href="chrome://instantfox/content/skin/instantfox.css"')
-		document.insertBefore(InstantFox.stylesheet, document.documentElement)
-		setTimeout(InstantFox.updateUserStyle, 200, true) // needs some time untill stylesheet is loaded
+		this.stylesheet = document.createProcessingInstruction('xml-stylesheet', 'href="chrome://instantfox/content/skin/instantfox.css"')
+		document.insertBefore(this.stylesheet, document.documentElement)
+		setTimeout(this.updateUserStyle, 200, true) // needs some time untill stylesheet is loaded
 		
 		this.setURLBarAutocompleter()
 
-		gURLBar.addEventListener('keydown', InstantFox.onKeydown, false);
+		gURLBar.addEventListener('keydown', this.onKeydown, false);
 		// must be capturing to run after value is changed and before autocompleter
-		gURLBar.addEventListener('input', InstantFox.onInput, true); 
+		gURLBar.addEventListener('input', this.onInput, true); 
 		// _copyCutController prevents cut event, so modify it in hookUrlbarCommand
-		// gURLBar.addEventListener('cut', InstantFox.onInput, false);
+		// gURLBar.addEventListener('cut', this.onInput, false);
 		
-		gURLBar.addEventListener('blur', InstantFox.onblur, false);
-		gURLBar.addEventListener('focus', InstantFox.onfocus, false);
+		gURLBar.addEventListener('blur', this.onblur, false);
+		gURLBar.addEventListener('focus', this.onfocus, false);
 		
 		// afterCustomization
-		gNavToolbox.addEventListener("aftercustomization", InstantFox.updateToolbarPrefs, false);
+		gNavToolbox.addEventListener('aftercustomization', this.updateToolbarPrefs, false);
 
 		dump('instantFox initialized')
-		InstantFox.applyOverlay()
+		this.applyOverlay()
 
 		
 		// this is needed if searchbar is removed from toolbar
-		eval('BrowserSearch.addEngine = ' +
-			BrowserSearch.addEngine.toString().replace(
-				/{\s*if\s*\(\!this.searchBar\)/, 
-				"{if(0&&!this.searchBar)"
-			)
-		)
+		this.$patch(BrowserSearch, 'addEngine')
 
-		InstantFox.hookUrlbarCommand()
-		InstantFox.modifyContextMenu()
+		this.hookUrlbarCommand()
+		this.modifyContextMenu()
 	},
 
 	destroy: function(event) {
@@ -126,7 +163,7 @@ window.InstantFox = {
 		
 		// destroy popup
 		this.onPopupHiding = dump
-		this.popupCloser({target:""})
+		this.popupCloser({target:''})
 		this.applyOverlay('off')
 		
 
@@ -135,7 +172,7 @@ window.InstantFox = {
 		gURLBar.removeEventListener('focus', this.onfocus, false);
 		gURLBar.removeEventListener('blur', this.onblur, false);
 
-		gNavToolbox.removeEventListener("aftercustomization", this.updateToolbarPrefs, false);
+		gNavToolbox.removeEventListener('aftercustomization', this.updateToolbarPrefs, false);
 
 		this.hookUrlbarCommand('off')
 		this.modifyContextMenu(false)
@@ -150,12 +187,7 @@ window.InstantFox = {
 		delete window.InstantFox
 		delete window.InstantFoxModule
 		
-		eval('BrowserSearch.addEngine = ' +
-			BrowserSearch.addEngine.toString().replace(
-				/{\s*if\s*\(0\s*&&\s*\!this.searchBar\)/, 
-				"{if(!this.searchBar)"
-			)
-		)
+		this.$unpatch(BrowserSearch, 'addEngine')
 	},
 
 	setURLBarAutocompleter: function(state){
@@ -899,23 +931,13 @@ InstantFox.modifyContextMenu = function(enable){
  * urlbarCommand
  *******/
 InstantFox.hookUrlbarCommand = function(off){
-	if (off) {
-		this.handleCommand_orig && (gURLBar.handleCommand = this.handleCommand_orig)
-		this.URLBarSetURI_orig && (window.URLBarSetURI = this.URLBarSetURI_orig)
-		this._urlbarCutCommand_orig && (gURLBar._copyCutController.doCommand = this._urlbarCutCommand_orig)
-	} else {
-		this.handleCommand_orig = gURLBar.handleCommand
-		gURLBar.handleCommand = this.handleCommand
-		
-		this.URLBarSetURI_orig = window.URLBarSetURI
-		window.URLBarSetURI = this.URLBarSetURI
-		
-		this._urlbarCutCommand_orig = gURLBar._copyCutController.doCommand 
-		gURLBar._copyCutController.doCommand = this._urlbarCutCommand
-	}
+	var patcher = off ? '$unpatch' : '$patch'
+	this[patcher](gURLBar, 'handleCommand')
+	this[patcher](window, 'URLBarSetURI')
+	this[patcher](gURLBar._copyCutController, 'doCommand', '_urlbarCutCommand')
 }
 
-InstantFox.handleCommand = function(aTriggeringEvent) {
+InstantFox.handleCommand_ = function(aTriggeringEvent) {
 	if (aTriggeringEvent instanceof MouseEvent && aTriggeringEvent.button == 2)
 		return; // Do nothing for right clicks
 	var url = this.value;
@@ -1026,7 +1048,7 @@ InstantFox.handleCommand = function(aTriggeringEvent) {
 		loadCurrent();
 	}
 }
-InstantFox.URLBarSetURI = function(aURI) {
+InstantFox.URLBarSetURI_ = function(aURI) {
 	// auri is null if URLBarSetURI is called from urlbar.handleRevert
 	if (InstantFox.$urlBarModified) {
 		if (aURI
@@ -1056,7 +1078,7 @@ InstantFox.URLBarSetURI = function(aURI) {
     SetPageProxyState(valid ? "valid" : "invalid");
 }
 // todo: find better way to intercept cut command
-InstantFox._urlbarCutCommand =  function(aCommand){
+InstantFox._urlbarCutCommand = function(aCommand){
 	var urlbar = this.urlbar;
 	var val = urlbar._getSelectedValueForClipboard();
 	if (!val)
