@@ -979,6 +979,10 @@ InstantFox.handleCommand_ = function(aTriggeringEvent) {
 			InstantFox.fixQueryBeforeEnter(q)
 			url = InstantFoxModule.urlFromQuery(q)
 			InstantFox.finishSearch()
+			if (InstantFoxModule.openSearchInNewTab) {
+				aTriggeringEvent = {__noSuchFunction__: function(){}}
+				aTriggeringEvent.altKey = true
+			}
 		} else if (InstantFoxModule.autoSearch && !InstantFoxModule.autoSearch.disabled && !isModifierPressed(aTriggeringEvent)) {
 			url = url.trimRight() // remove spaces at the end
 			if (!url)
