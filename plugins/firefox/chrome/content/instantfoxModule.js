@@ -42,6 +42,12 @@ try{
 }catch(e){}
 
 //}/** devel__) **/
+try{
+	var HttpsEverywhere = !!Cc["@eff.org/https-everywhere;1"]
+}catch(e){}
+// compatibility with https-everywhere
+
+
 /*************************************************************************
  *    load and save customized plugins
  *    plugin={
@@ -1053,7 +1059,9 @@ InstantFoxSearch.prototype = {
 		_req.addEventListener("load", this.onSearchReady, false);
 
 		this._reqList.push(_req)
-
+		
+		if (HttpsEverywhere) url = url.replace(/^http:/, 'https:')
+		
 		_req.open("GET", url, true);
 		_req.send(null);
 	},
