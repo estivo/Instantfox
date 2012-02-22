@@ -94,7 +94,7 @@ InstantFox.searchBoxAPI = {
 			setSuggestions: function(suggestions) {
 				dump(JSON.stringify(suggestions))
 			},
-			set  onsubmit(val){
+			set onsubmit(val){
 				delete this.onsubmit
 				this.onsubmit = val
 				dump("[[[[[[[[[[[]]]]]]]]]]]")
@@ -103,7 +103,7 @@ InstantFox.searchBoxAPI = {
 		}
 	},
 	call: function(sb, prop){
-		dump(prop, sb.value, sb.verbatim)
+		dump(prop, sb.value, sb.verbatim, sb.selectionStart, sb.selectionEnd)
 		try{
 			sb[prop] && sb[prop]()
 		}catch(e){
