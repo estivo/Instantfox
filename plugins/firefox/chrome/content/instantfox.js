@@ -962,13 +962,15 @@ InstantFox.handleCommand_ = function(aTriggeringEvent) {
 			return e && (e.altKey || e.ctrlKey || e.shiftKey || e.metaKey)
 		}
 		var canBeUrl = function(str) {
-			if (str[0] == " ")
-				return false
 			if (/^[\w\-]+:/.test(str))
 				return true
-			if (/[\.\/\\]/.test(str))
-				return true
 			if (/^localhost/.test(str))
+				return true
+			if (/^(\w+)\.(\w{1,4})(\.\w{1,4})?($|\/|:)/.test(str))
+				return true
+			if (/[\/\\]/.test(str))
+				return true
+			if (/[\.]/.test(str))
 				return true
 		}
 
