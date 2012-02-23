@@ -177,7 +177,7 @@ AddonManager.getAllAddons(function(addons){
     var ans = ""
     addons.forEach(function(x){
         if(x.isActive)
-            ans += x.name+ "\t"+ x.version+"\t#"+x.id+"\n"
+            ans += (x.isActive?'+':'-') + x.name + "\t" + x.version + "\t#" + x.id + "\n"
     })
     report.addons = ans
 	updateUI()
@@ -232,8 +232,9 @@ setTimeout(function() {
 setTimeout(function(){
 	var prefs = Services.prefs
 	var names = prefs.getChildList("extensions.InstantFox.",{},{})
+	report.prefs = ''
 	names.forEach(function(x){
-		report.prefs+=x + ":  " + getPref(x) + "\n"
+		report.prefs += x + ":  " + getPref(x) + "\n"
 	})
 	updateUI()
 })

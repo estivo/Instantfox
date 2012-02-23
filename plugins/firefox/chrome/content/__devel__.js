@@ -146,12 +146,13 @@ var instantFoxDevel = {
 				this.testFirstRun(e.button == 2)
 				break
 			case 'show-folder':
-				this.getContainingFolder().reveal()
+				(e.button == 2
+					? InstantFoxModule.bp.getUserFile('instantFoxPlugins.js')
+					: this.getContainingFolder()
+				).reveal()
 				break
 			case 'build':
-				makeXPI(instantFoxDevel.getContainingFolder())
-				break
-			case 'build-d':
+				makeXPI(instantFoxDevel.getContainingFolder(), e.button == 2)
 				break
 			case 'copyLocaleManifest':
 				this.copyLocaleManifest(e.button == 2)
@@ -281,7 +282,17 @@ getLocalFile=function getLocalFile(mPath){
 * callback is a function that it's called after the zip is created. It has one parameter: the nsFile created
 */
 var maxRecursion=1000, recur=0, cancel=false
-function makeXPI(contextFolder){
+function makeXPI(contextFolder, keepDebugCode){
+	packXPI.keepDebugCode = keepDebugCode
+	if (keepDebugCode){
+		packXPI.isInvalid = function(entry) {
+			return /\.xpi$|\.zip$|\.rar$|thumbs.db$|^\./i.test(entry.leafName)
+		}
+	}else{
+		packXPI.isInvalid = function(entry) {
+			return /\.xpi$|\.zip$|\.rar$|thumbs.db$|^\.|^_/i.test(entry.leafName)
+		}	
+	}
 	packXPI(contextFolder, function(nsFile){
 		nsFile.QueryInterface(Ci.nsILocalFile).reveal()
 	})
@@ -350,8 +361,8 @@ function addFolderContentsToZip(zipW, folder, root){
 
 		var entry = entries.getNext();
 		entry.QueryInterface(Ci.nsIFile);
-		dump(entry, isInvalid(entry))
-		if (isInvalid(entry))//skip archives and .svn
+		dump(entry, packXPI.isInvalid(entry))
+		if (packXPI.isInvalid(entry))//skip archives and .svn
 			continue
 
 		var jarName = root + entry.leafName
@@ -367,7 +378,8 @@ function addFolderContentsToZip(zipW, folder, root){
 //
 addTrimmedFileContentsToJAR = function(zipW, entryPath, file){
 	var data = readEntireFile(file)
-	data = removeDebugCode(data)
+	if (!packXPI.keepDebugCode)
+		data = removeDebugCode(data)
 	if (data.length < 10)
 		return
 
@@ -417,10 +429,6 @@ removeDebugCode = function(code){
 	} catch(e){Cu.reportError("unable to remove dump" + e);dump(anstemp)}
 	
 	return ans
-}
-//
-function isInvalid(entry) {
-	return /\.xpi$|\.zip$|\.rar$|thumbs.db$|^\.|^__/i.test(entry.leafName)
 }
 
 /**zr constants*/

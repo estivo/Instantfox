@@ -37,12 +37,12 @@ InstantFox.applyOverlay = function(off) {
 		, onclick:"instantFoxDevel.onClick(event)", label:"instantFoxDevel"
 		}, [$el("menupopup", {},
 			$elList("menuitem", ["action", "label"], [
-				"build"              , "build",
+				"build"              ,"build (right click=keep dump calls)",
 				"encodePluginList"   ,"convert pluginList to (left:ascii/right:utf-8)",
 				"copyLocaleManifest" ,"copy Locales for Manifest",
 				"delete-plugin-file" ,"delete-plugin-file",
 				"test-first-run"     ,"test first run",
-				"show-folder"        ,"show folder",
+				"show-folder"        ,"show folder (right click=profile)",
 				"run-tests"          ,"run tests"
 			])
 		)], $("status-bar"))
