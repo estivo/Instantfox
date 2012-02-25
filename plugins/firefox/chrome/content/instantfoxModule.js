@@ -1218,3 +1218,27 @@ checkVersion = function() {
 
 // this will be called after 
 checkVersion()
+
+
+
+// log
+logData = []
+function safeStringify(object){
+	return JSON.stringify(object, function(x,y){
+		if(typeof y == 'function')
+			return "[function]"
+		if( typeof y != 'object' || Array.isArray(y) || Object.prototype.toString.call(y) == "[object Object]")
+			return y
+		return y?y.toString():''
+	}, 0)
+}
+InstantFoxModule.log = function() {
+	var d = Array.prototype.slice.call(arguments).map(safeStringify).join(" ")
+	logData.push(d)
+	/* var s=Components.stack.caller
+	dump(d,s.filename, s.lineNumber)*/
+} 
+
+InstantFoxModule.getLogData = function(){
+	return logData.join('\n')
+}

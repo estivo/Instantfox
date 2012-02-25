@@ -83,6 +83,7 @@ InstantFox.searchBoxAPI = {
 	},
 	addToWindow: function(){
 		this.delayOnSubmit = false
+InstantFoxModule.log('searchbox.addtowin', this.getSearchBox())
 
 		var win = this.getWindow()
 		win.navigator.searchBox = {
@@ -92,22 +93,24 @@ InstantFox.searchBoxAPI = {
 			selectionEnd: 0,
 			x:0, y:0, width:0, height:0,
 			setSuggestions: function(suggestions) {
-				dump(JSON.stringify(suggestions))
-			},
+InstantFoxModule.log('suggestions.from.google', suggestions)
+			}/* ,
 			set onsubmit(val){
 				delete this.onsubmit
 				this.onsubmit = val
 				dump("[[[[[[[[[[[]]]]]]]]]]]")
-			}
+			} */
 			/* onchange onsubmit oncancel onresize;*/
 		}
 	},
 	call: function(sb, prop){
 		dump(prop, sb.value, sb.verbatim, sb.selectionStart, sb.selectionEnd)
+InstantFoxModule.log('searchbox.call', prop, sb)
+
 		try{
 			sb[prop] && sb[prop]()
 		}catch(e){
-			Cu.reportError(e)
+InstantFoxModule.log('sb.error', e.toString())
 		}
 	},
 	handleEvent: function(e){
@@ -190,6 +193,7 @@ InstantFox.pageLoader = {
 	preview: null,
 	previewIsActive: false,
 	removePreview: function() {
+InstantFoxModule.log('pageLoader.removePreview')
 		if(this.previewIsActive)
 			this.previewIsActive = false
 		if (this.preview != null && this.preview.parentNode) {
@@ -200,6 +204,7 @@ InstantFox.pageLoader = {
 
 	// Provide a way to replace the current tab with the preview
 	persistPreview: function(tab, inBackground) {
+InstantFoxModule.log('pageLoader.persistPreview', this)
 		if (!this.previewIsActive)
 			return;
 		gURLBar.blur()
@@ -293,6 +298,7 @@ InstantFox.pageLoader = {
 		this.persistPreview()
 	},
 	onMouseDown: function(e) {
+InstantFoxModule.log('pageLoader.onMouseDown1', e, q)
 		// if searchBoxAPI haven't been used yet, do nothing
 		if (!InstantFoxModule.currentQuery.$searchBoxAPI_URL)
 			return
@@ -300,6 +306,7 @@ InstantFox.pageLoader = {
 		window.addEventListener("mouseup", function onup() {
 			window.removeEventListener("mouseup", onup, true)
 			InstantFox.searchBoxAPI.doDelayedSubmiting()
+InstantFoxModule.log('pageLoader.onMouseDown2', InstantFox.searchBoxAPI.getSearchBox())
 		}, true)
 	},
 	onTitleChanged: function(e) {
@@ -309,6 +316,8 @@ InstantFox.pageLoader = {
 	},
 
 	addPreview: function(url) {
+InstantFoxModule.log('pageLoader.addPreview', url)
+
 		let preview = this.preview
 		let browser = window.gBrowser;
 		// Create the preview if it's missing

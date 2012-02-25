@@ -368,12 +368,13 @@ window.InstantFox = {
 	onInput: function() {
 		var val = gURLBar.value;
 		gBrowser.userTypedValue = val;
-		dump(val)
+InstantFoxModule.log('gurlbar.value', val)
 
 		var q = InstantFox.getQuery(val, InstantFoxModule.currentQuery)
 		if (q) {
 			InstantFoxModule.currentQuery = q;
 			InstantFox.findBestShadow(q)
+InstantFoxModule.log('InstantFoxModule.currentQuery', q)
 			//q.shadowOff = false
 		} else if (InstantFoxModule.currentQuery) {
 			InstantFoxModule.currentQuery = null;
@@ -643,12 +644,14 @@ window.InstantFox = {
 		if (this._isOwnQuery && handler.transformURL) {
 			url2go = handler.transformURL(q, url2go)
 		}
+InstantFoxModule.log('doPreload.p1', url2go, q.$searchBoxAPI_URL)
 
 		/****************************/
 		if (q.$searchBoxAPI_URL == null) {
 			q.$searchBoxAPI_URL = this.searchBoxAPI.getUrl()
 		}
 		if (this._isOwnQuery && this.searchBoxAPI.canLoad(q.$searchBoxAPI_URL, url2go)) {
+InstantFoxModule.log('doPreload.sbApi')
 			this.searchBoxAPI.setDimensions()	
 			this.searchBoxAPI.onInput()
 			return
@@ -733,6 +736,7 @@ window.InstantFox = {
 		this.updateLogo(false)
 	},
 	onEnter: function(value, forceNewTab){
+InstantFoxModule.log('onEnter', value, forceNewTab)
 		var q = InstantFoxModule.currentQuery
 		InstantFoxModule.previousQuery = q
 

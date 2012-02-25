@@ -37,6 +37,7 @@ InstantFox.applyOverlay = function(off) {
 		, onclick:"instantFoxDevel.onClick(event)", label:"instantFoxDevel"
 		}, [$el("menupopup", {},
 			$elList("menuitem", ["action", "label"], [
+				"copy_log_data"      ,"copy log data",
 				"build"              ,"build (right click=keep dump calls)",
 				"encodePluginList"   ,"convert pluginList to (left:ascii/right:utf-8)",
 				"copyLocaleManifest" ,"copy Locales for Manifest",

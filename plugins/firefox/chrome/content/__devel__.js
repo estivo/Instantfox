@@ -132,6 +132,9 @@ var instantFoxDevel = {
 	onClick: function(e){
 		var action = e.target.getAttribute('action')
 		switch(action){
+			case 'copy_log_data':
+				gClipboardHelper.copyString(InstantFoxModule.getLogData())
+				break
 			case 'reload':
 				if (e.originalTarget.tagName != 'xul:toolbarbutton')
 					return
