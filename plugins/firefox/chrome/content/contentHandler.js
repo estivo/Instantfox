@@ -30,7 +30,7 @@ InstantFox.searchBoxAPI = {
 			&& sb.oncancel
 			&& sb.onresize) || null
 	},
-	urlRegexp:/#.*$/,
+	urlRegexp:/[#?].*$/,
 	canLoad: function(qUrl, url2go){
 		/*dump(
 			qUrl , url2go,
@@ -93,11 +93,6 @@ InstantFox.searchBoxAPI = {
 			x:0, y:0, width:0, height:0,
 			setSuggestions: function(suggestions) {
 				dump(JSON.stringify(suggestions))
-			},
-			set onsubmit(val){
-				delete this.onsubmit
-				this.onsubmit = val
-				dump("[[[[[[[[[[[]]]]]]]]]]]")
 			}
 			/* onchange onsubmit oncancel onresize;*/
 		}
@@ -107,7 +102,10 @@ InstantFox.searchBoxAPI = {
 		try{
 			sb[prop] && sb[prop]()
 		}catch(e){
-			Cu.reportError(e)
+			// setSelectionRange throws on firefox if element is hidden
+			// google uses it because it works on chrome
+			// error here doesn't seem to cause any trouble, so do nothing for now
+			dump(e)
 		}
 	},
 	handleEvent: function(e){
@@ -312,7 +310,9 @@ InstantFox.pageLoader = {
 		let preview = this.preview
 		let browser = window.gBrowser;
 		// Create the preview if it's missing
-		if (preview == null) {
+		if (!preview || !preview.docShell) {
+			preview && this.removePreview() // 1password somehow deletes docShell 
+
 			preview = window.document.createElement("browser");
 			preview.setAttribute("type", "content");
 
