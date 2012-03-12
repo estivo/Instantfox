@@ -30,7 +30,7 @@ InstantFox.searchBoxAPI = {
 			&& sb.oncancel
 			&& sb.onresize) || null
 	},
-	urlRegexp:/[#?].*$/,
+	urlRegexp:/(^https?:)|([#?].*$)/g,
 	canLoad: function(qUrl, url2go){
 		/*dump(
 			qUrl , url2go,
