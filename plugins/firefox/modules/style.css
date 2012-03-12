@@ -27,8 +27,8 @@ html, body {
   background: #d8f2ff;
   border: 5px solid #eef9ff;
   border-radius: 10px;
-  -moz-border-radius: 10px;
-  -moz-box-shadow: 0 0 40px #37a0d3;
+  border-radius: 10px;
+  box-shadow: 0 0 40px #37a0d3;
 }
 
 .calculator {
