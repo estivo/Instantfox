@@ -12,7 +12,7 @@ var avaliableLocales = {}, avaliableLocaleNames = [];
 var commonPlugins = {
 	Google: {
 		key: "g",
-		url: "http://www.google.%ld/#hl=%ls&q=%q&fp=1&cad=b",
+		url: "http://www.google.%ld/search?hl=%ls&q=%q",
 		json: "http://suggestqueries.google.com/complete/search?json&client=firefox&q=%q&hl=%ls",
 		name: "Google"
 	},
@@ -189,7 +189,7 @@ locale(["de","de-CH","ch"], {
 // make en-US default for en-* branch
 locale(["en","en-US","com"], {
 	Google: {
-		url: "http://www.google.%ld/#q=%q&fp=1&cad=b"
+		url: "http://www.google.%ld/search?q=%q"
 	},
 	GoogleImages: {
 		url: "http://www.google.%ld/images?q=%q",
