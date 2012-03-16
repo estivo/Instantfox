@@ -923,7 +923,8 @@ function locale(localeNames, plugins, autoSearch){
 			url: goog.url,
 			instant: "off",
 			suggest: false,
-			minQChars: 3
+			minQChars: 3,
+			disabled: true
 		}
 	}
 	
