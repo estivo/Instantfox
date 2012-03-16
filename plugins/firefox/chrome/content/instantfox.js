@@ -219,8 +219,8 @@ window.InstantFox = {
 				}
 			}
 		}
-		
-		cssRules = InstantFox.stylesheet.sheet.cssRules
+		var sheet = InstantFox.stylesheet.sheet
+		cssRules = sheet.cssRules
 		 
 		
 		if (prefs.prefHasUserValue('fontsize')) {
@@ -259,8 +259,8 @@ window.InstantFox = {
 			var t = findRule("richlistitem.").cssText
 			if (t.substring(0, newSelector.length) != newSelector) {
 				t = newSelector + t.substr(t.indexOf("{")-1)
-				s.deleteRule(ruleIndex);
-				s.insertRule(t, ruleIndex)
+				sheet.deleteRule(ruleIndex);
+				sheet.insertRule(t, ruleIndex)
 			}
 		}
 		//without this adding opacity to popup creates black background on xp
