@@ -149,9 +149,14 @@ var instantFoxDevel = {
 				(e.button == 2
 					? InstantFoxModule.bp.getUserFile('instantFoxPlugins.js')
 					: this.getContainingFolder()
-				).reveal()
+				).QueryInterface(Ci.nsILocalFile).reveal()
 				break
 			case 'build':
+				makeXPI.lite = false
+				makeXPI(instantFoxDevel.getContainingFolder(), e.button == 2)
+				break
+			case 'build-lite':
+				makeXPI.lite = true
 				makeXPI(instantFoxDevel.getContainingFolder(), e.button == 2)
 				break
 			case 'copyLocaleManifest':

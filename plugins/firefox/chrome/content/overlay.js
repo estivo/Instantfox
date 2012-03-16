@@ -38,6 +38,7 @@ InstantFox.applyOverlay = function(off) {
 		}, [$el("menupopup", {},
 			$elList("menuitem", ["action", "label"], [
 				"build"              ,"build (right click=keep dump calls)",
+				"build-lite"         ,"build lite version",
 				"encodePluginList"   ,"convert pluginList to (left:ascii/right:utf-8)",
 				"copyLocaleManifest" ,"copy Locales for Manifest",
 				"delete-plugin-file" ,"delete-plugin-file",
