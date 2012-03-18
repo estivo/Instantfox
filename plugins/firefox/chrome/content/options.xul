@@ -378,7 +378,7 @@ prefpane{
 				<checkbox class="i18n" label="pref_defaultContext" id='context-usedefault-checkbox' preference="context-usedefault" 
 						oncommand='InstantFoxModule.modifyContextMenu(!this.checked)'/>
 				<separator/>
-				<checkbox class="i18n" label="pref_hideSearchbox" preference="removeSearchbar" 
+				<checkbox class="i18n" label="pref_hideSearchbox" preference="removeSearchbar" checked="true"
 						oncommand="window.gToolbarsChanged=true;schedule(updateToolbarItems)"/>
 				<spacer flex="1"/>
 				<groupbox pack="start">
@@ -394,13 +394,21 @@ prefpane{
 					<preference id="hide-urlbar-tips" name="extensions.InstantFox.hideUrlbarTips" type="bool" />
 					<preference id="suggest-style" name="extensions.InstantFox.suggestStyle" type="string" />
 					<preference id="fontsize" name="extensions.InstantFox.fontsize" type="string" />
+					<preference id="shadowStyle" name="extensions.InstantFox.shadowStyle" type="string" />
 					<preference id="opacity" name="extensions.InstantFox.opacity" type="int" />
 				</preferences>
 			<hbox align="center">
 				<label control="suggest-style-list" value="urlbar.popup.style" class="i18n"/>
 				<radiogroup id="suggest-style-list" preference="suggest-style" orient="horizontal">
-					<radio id="orange" label="popup.simple" value="condensed" class="i18n"/>
-					<radio id="violet" label="popup.rich" value="" selected="true" class="i18n"/>
+					<radio label="popup.simple" value="condensed" class="i18n"/>
+					<radio label="popup.rich" value="" selected="true" class="i18n"/>
+				</radiogroup>
+			</hbox>
+			<hbox align="center">
+				<label control="shadow-style-list" value="urlbar.shadow.style" class="i18n"/>
+				<radiogroup id="shadow-style-list" preference="shadowStyle" orient="horizontal">
+					<radio label="gray" value="" class="i18n" selected="true"/>
+					<radio label="highlighthed" value="highlighthed" class="i18n"/>
 				</radiogroup>
 			</hbox>
 			<hbox align="center">

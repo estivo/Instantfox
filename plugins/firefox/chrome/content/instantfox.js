@@ -219,10 +219,33 @@ window.InstantFox = {
 				}
 			}
 		}
+		var changeSelector = function(oldSelector, newSelector){
+			try{
+				var r = findRule(oldSelector)
+				if (!r)
+					return
+				var t = r.cssText
+				if (t.substring(0, newSelector.length) != newSelector) {
+					t = newSelector + t.substr(t.indexOf("{")-1)
+					sheet.deleteRule(ruleIndex);
+					sheet.insertRule(t, ruleIndex)
+				}
+			}catch(e){
+				Cu.reportError(e)
+			}
+		}
+		
 		var sheet = InstantFox.stylesheet.sheet
 		cssRules = sheet.cssRules
 		 
 		
+		if (prefs.prefHasUserValue('shadowStyle')) {
+			var selector = '.instantfox-shadow[selected]'
+			var newSelector = selector
+			if (prefs.getCharPref('shadowStyle'))
+				newSelector += ',.instantfox-shadow'			
+			changeSelector(selector, newSelector)
+		}
 		if (prefs.prefHasUserValue('fontsize')) {
 			var pref = prefs.getCharPref('fontsize')
 			if (!/^\d+.?\d*((px)|(em))$/.test(pref)){
@@ -255,13 +278,8 @@ window.InstantFox = {
 				newSelector = 'richlistitem.autocomplete-richlistitem'
 			else
 				newSelector = 'richlistitem.instantfox-slim'
-			
-			var t = findRule("richlistitem.").cssText
-			if (t.substring(0, newSelector.length) != newSelector) {
-				t = newSelector + t.substr(t.indexOf("{")-1)
-				sheet.deleteRule(ruleIndex);
-				sheet.insertRule(t, ruleIndex)
-			}
+				
+			changeSelector("richlistitem.", newSelector)			
 		}
 		//without this adding opacity to popup creates black background on xp
 		if (firstTime)

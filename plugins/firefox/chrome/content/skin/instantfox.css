@@ -60,6 +60,12 @@ richlistitem[type='InstantFoxSuggest'] {
 .instantfox-shadow{
 	color: graytext;
 }
+.instantfox-shadow[selected]{
+	color: HighlightText!important;
+	background-color: highlight;
+    -moz-margin-start:1px;
+    -moz-padding-start:1px;
+}
 .instantfox-spacer{
 	visibility:hidden;
 }
