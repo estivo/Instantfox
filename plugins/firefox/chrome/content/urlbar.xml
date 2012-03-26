@@ -209,18 +209,19 @@
     <content>
       <xul:hbox align="center" class="ac-title-box">
         <xul:image xbl:inherits="src=image" class="ac-site-icon"/>
-        <xul:hbox anonid="title-box" class="ac-title"
+        <xul:hbox anonid="title-box" class="ac-title" style="max-width:50%"
                   onunderflow="_doUnderflow('_title');"
                   onoverflow="_doOverflow('_title');">
           <xul:description anonid="title" class="ac-normal-text ac-comment" xbl:inherits="selected"/>
         </xul:hbox>
         <xul:label anonid="title-overflow-ellipsis" xbl:inherits="selected"
-                   class="ac-ellipsis-after ac-comment"/>
+                   class="ac-ellipsis-after ac-comment" style="display:none"/>
+		<xul:label value="&#8211;"/>
 									 
         <xul:image class="ac-action-icon"/>
         <xul:hbox anonid="url-box" class="ac-url"
                   onunderflow="_doUnderflow('_url');"
-                  onoverflow="_doOverflow('_url');" style="max-width:50%">
+                  onoverflow="_doOverflow('_url');" style="max-width:50%" flex="1">
           <xul:description anonid="url" class="ac-normal-text ac-url-text"
                            xbl:inherits="selected type"/>
           <xul:description anonid="action" class="ac-normal-text ac-action-text"
@@ -527,16 +528,16 @@
           } else {
             // Hide the title's extra box if we don't need extra stuff
             this._extraBox.hidden = true;
-            this._titleBox.flex = 1;
+            this._titleBox.flex = 0;
           }
 
           // Give the image the icon style and a special one for the type
           this._typeImage.className = "ac-type-icon" +
             (type ? " ac-result-type-" + type : "");
 
-          // Show the url as the title if we don't have a title
-          if (title == "")
-            title = url;
+          // show nothing if we don't have a title
+          if (title == url)
+            title = "";
 
           // Emphasize the matching search terms for the description
           this._setUpDescription(this._title, title);

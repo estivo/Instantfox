@@ -932,6 +932,9 @@ combinedSearch.prototype = {
 	},
 	onXHRReady: function(json) {
 		this.xhrEntries = parseSimpleJson(json, "", "")
+		for (var i = this.xhrEntries.length; i--; ) {
+			this.xhrEntries[i].icon = "chrome://instantfox/content/skin/button-logo.png"
+		}
 		this.notifyListener()
 	},
 	start: function(searchString, searchParam, listener, jsonURL) {
