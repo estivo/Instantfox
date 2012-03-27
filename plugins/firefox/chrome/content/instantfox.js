@@ -24,6 +24,18 @@ window.InstantFox = {
 		else
 			browser.engines = engines;
 	},
+	webSearch_: function() {
+		if (window.fullScreen) {
+			FullScreen.mouseoverToggle(true);
+		}
+		var searchBar = this.searchBar;
+		if (!isElementVisible(searchBar)) {
+			searchBar = gURLBar
+		}
+		
+		searchBar.select();
+		searchBar.focus();
+	},
 
 	$patch: function(obj, funcName, patchName) {
 		patchName = patchName || funcName+'_'
@@ -150,6 +162,7 @@ window.InstantFox = {
 		
 		// this is needed if searchbar is removed from toolbar
 		this.$patch(BrowserSearch, 'addEngine')
+		this.$patch(BrowserSearch, 'webSearch')
 
 		this.hookUrlbarCommand()
 		this.modifyContextMenu()
@@ -188,6 +201,7 @@ window.InstantFox = {
 		delete window.InstantFoxModule
 		
 		this.$unpatch(BrowserSearch, 'addEngine')
+		this.$unpatch(BrowserSearch, 'webSearch')
 	},
 
 	setURLBarAutocompleter: function(state){
