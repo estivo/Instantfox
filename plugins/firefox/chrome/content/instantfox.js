@@ -29,10 +29,23 @@ window.InstantFox = {
 			FullScreen.mouseoverToggle(true);
 		}
 		var searchBar = this.searchBar;
-		if (!isElementVisible(searchBar)) {
+		if (!searchBar || !isElementVisible(searchBar)) {
+			var p = InstantFoxModule.Plugins[InstantFoxModule.defaultPlugin]
+			if (p) {
+				gURLBar.focus()
+				var val = gURLBar.value
+				var key = p.key + " "
+				if (val.substring(0,key.length)!=key) {
+					gURLBar.value = key
+					InstantFox.onInput()
+					val = key + val
+					gURLBar.value = val
+				}
+				gURLBar.setSelectionRange(key.length, val.length)
+				return
+			}
 			searchBar = gURLBar
 		}
-		
 		searchBar.select();
 		searchBar.focus();
 	},
@@ -52,23 +65,23 @@ window.InstantFox = {
 		this[funcName+'_orig'] = null
 	},
 	// end overrides
-	
+
 	$el: function(name, attributes, childList_, parent) {
     	if (!Array.isArray(childList_)){
 			parent = childList_
 			childList_ = null
-		}			
+		}
 		var el = document.createElement(name)
 		for (var a in attributes)
-			el.setAttribute(a, attributes[a])		
+			el.setAttribute(a, attributes[a])
 		for each(var a in childList_)
-			el.appendChild(a)			
+			el.appendChild(a)
 		if (parent)
 			parent.appendChild(el)
-		
+
 		return el
 	},
-	$: function(x) document.getElementById(x), 
+	$: function(x) document.getElementById(x),
 	rem: function(x) {
 		if (typeof x == "string")
 			x = document.getElementById(x)
@@ -88,7 +101,7 @@ window.InstantFox = {
 			return targetTab
 		}
 	},
-	
+
 	showInstallNotification: function(){
 		var n = {
 			id: 'instant-fox-installed',
@@ -112,7 +125,7 @@ window.InstantFox = {
 			popupid:            n.id,
 			closebuttoncommand: n.hide,
 			buttonlabel:        n.mainActionLabel,
-			buttoncommand:      n.hide + n.action,			
+			buttoncommand:      n.hide + n.action,
 			menucommand:        "event.target.hasAttribute(action)?" + n.a.action + ':' + n.hide,
 			closeitemcommand:   n.hide
 		}, p);
@@ -125,8 +138,8 @@ window.InstantFox = {
 		var closeItemSeparator = $el("menuseparator", null, popupnotification);
 
 		p.openPopup($(n.anchor), "bottomcenter topleft");
-		
-		// 
+
+		//
 		setTimeout(function() {
 			gBrowser.userTypedValue = gURLBar.value = InstantFoxModule.Plugins.google.key + " " +
 				InstantFoxModule.getString("welcome.urlbar")
@@ -137,29 +150,29 @@ window.InstantFox = {
 
 	initialize: function() {
 		Cu.import('chrome://instantfox/content/instantfoxModule.js')
-		
+
 		this.stylesheet = document.createProcessingInstruction('xml-stylesheet', 'href="chrome://instantfox/content/skin/instantfox.css"')
 		document.insertBefore(this.stylesheet, document.documentElement)
 		setTimeout(this.updateUserStyle, 200, true) // needs some time untill stylesheet is loaded
-		
+
 		this.setURLBarAutocompleter()
 
 		gURLBar.addEventListener('keydown', this.onKeydown, false);
 		// must be capturing to run after value is changed and before autocompleter
-		gURLBar.addEventListener('input', this.onInput, true); 
+		gURLBar.addEventListener('input', this.onInput, true);
 		// _copyCutController prevents cut event, so modify it in hookUrlbarCommand
 		// gURLBar.addEventListener('cut', this.onInput, false);
-		
+
 		gURLBar.addEventListener('blur', this.onblur, false);
 		gURLBar.addEventListener('focus', this.onfocus, false);
-		
+
 		// afterCustomization
 		gNavToolbox.addEventListener('aftercustomization', this.updateToolbarPrefs, false);
 
 		dump('instantFox initialized')
 		this.applyOverlay()
 
-		
+
 		// this is needed if searchbar is removed from toolbar
 		this.$patch(BrowserSearch, 'addEngine')
 		this.$patch(BrowserSearch, 'webSearch')
@@ -173,12 +186,12 @@ window.InstantFox = {
 		gURLBar.blur()
 		this.pageLoader.removePreview()
 		this.updateLogo(false)
-		
+
 		// destroy popup
 		this.onPopupHiding = dump
 		this.popupCloser({target:''})
 		this.applyOverlay('off')
-		
+
 
 		gURLBar.removeEventListener('keydown', this.onKeydown, false);
 		gURLBar.removeEventListener('input', this.onInput, true);
@@ -189,17 +202,17 @@ window.InstantFox = {
 
 		this.hookUrlbarCommand('off')
 		this.modifyContextMenu(false)
-		
+
 		this.removeShadowNodes()
-		
-				
+
+
 		this.rem(this.stylesheet)
-		
+
 		this.setURLBarAutocompleter('off')
-		
+
 		delete window.InstantFox
 		delete window.InstantFoxModule
-		
+
 		this.$unpatch(BrowserSearch, 'addEngine')
 		this.$unpatch(BrowserSearch, 'webSearch')
 	},
@@ -219,11 +232,11 @@ window.InstantFox = {
 		// reload binding
 		this.reloadBinding(gURLBar)
 	},
-	
+
 	updateUserStyle: function(firstTime) {
 		var prefs = Services.prefs.getBranch('extensions.InstantFox.')
 		var cssRules, ruleIndex
-		
+
 		var findRule = function(selector) {
 			for (var i = 0; i < cssRules.length; i++) {
 				var rule = cssRules[i]
@@ -248,16 +261,16 @@ window.InstantFox = {
 				Cu.reportError(e)
 			}
 		}
-		
+
 		var sheet = InstantFox.stylesheet.sheet
 		cssRules = sheet.cssRules
-		 
-		
+
+
 		if (prefs.prefHasUserValue('shadowStyle')) {
 			var selector = '.instantfox-shadow[selected]'
 			var newSelector = selector
 			if (prefs.getCharPref('shadowStyle'))
-				newSelector += ',.instantfox-shadow'			
+				newSelector += ',.instantfox-shadow'
 			changeSelector(selector, newSelector)
 		}
 		if (prefs.prefHasUserValue('fontsize')) {
@@ -282,7 +295,7 @@ window.InstantFox = {
 		}
 		if (document.dir == 'rtl'){
 			findRule('richlistbox[type').style.backgroundPosition = '5% bottom';
-		}				
+		}
 		if (prefs.prefHasUserValue('hideUrlbarTips')) {
 			findRule('.instantfox-tip').style.display = prefs.getBoolPref('hideUrlbarTips')?"none":"";
 		}
@@ -292,8 +305,8 @@ window.InstantFox = {
 				newSelector = 'richlistitem.autocomplete-richlistitem'
 			else
 				newSelector = 'richlistitem.instantfox-slim'
-				
-			changeSelector("richlistitem.", newSelector)			
+
+			changeSelector("richlistitem.", newSelector)
 		}
 		//without this adding opacity to popup creates black background on xp
 		if (firstTime)
@@ -441,7 +454,7 @@ window.InstantFox = {
 		//dump(val, oldQ)
 		var plugin, key
 		var spacePos = val.indexOf(' ');
-		
+
 		if (val[0]!='`') {
 			if (spacePos == -1)
 				return this.defQ
@@ -453,10 +466,10 @@ window.InstantFox = {
 		} else { //searching through plugins
 			var cursorPos = gURLBar.selectionStart
 			var plugin = oldQ && oldQ.plugin
-			
+
 			if (spacePos == -1)
 				spacePos = val.length
-			
+
 			key = val.substring(0, spacePos)
 			// sort plugins
 			var needle = key.substr(1).replace('\xB7', ' ', 'g').toLowerCase()
@@ -487,7 +500,7 @@ window.InstantFox = {
 						score += 1
 					j = i
 				}
-				
+
 				p.score += score
 				p.score && pluginSuggestions.push(p)
 			}
@@ -495,7 +508,7 @@ window.InstantFox = {
 				var defp = InstantFoxModule.Plugins[InstantFoxModule.defaultPlugin]
 				pluginSuggestions.push(defp)
 			}
-			
+
 			pluginSuggestions.sort(function(a,b){
 				if (a.score == b.score)
 					return a.name > b.name
@@ -587,7 +600,7 @@ window.InstantFox = {
 			this.rightShadow = ''
 			return
 		}
-		
+
 		if (!s || !s.box1 || s.box1.parentNode != gURLBar.mInputField.parentNode)
 			s = this.prepareShadowNodes()
 
@@ -596,7 +609,7 @@ window.InstantFox = {
 		s.key = key,
 		s.spacer = q.value.substr(key.length).replace(' ', '\u00a0', 'g'),
 		s.shadow = q.shadow.substr(q.query.length)
-		
+
 		s.keyNode.textContent = s.key;
 		s.spacerNode.textContent = s.spacer
 		s.shadowNode.textContent = s.shadow;
@@ -610,13 +623,13 @@ window.InstantFox = {
 		var inputField = gURLBar.mInputField
 		if(!inputField.instantFoxShadow)
 			return;
-		
+
 		var s = inputField.parentNode
 		s && s.classList.remove('instantfox-urlbar')
-	
+
 		for each (var hbox in s.querySelectorAll(".instantfox-box"))
-			this.rem(hbox)		
-		
+			this.rem(hbox)
+
 		delete gURLBar.mInputField.instantFoxShadow
 	},
 	prepareShadowNodes: function() {
@@ -624,9 +637,9 @@ window.InstantFox = {
 		// measure sizes before modifiing dom
 		var l1 = gURLBar.editor.rootElement.getBoundingClientRect().left
 		var l2 = container.getBoundingClientRect().left
-		
+
 		container.classList.add('instantfox-urlbar')
-		
+
 		var shadow = gURLBar.mInputField.instantFoxShadow = {}
 
 		function hbox(name, addChildDiv){
@@ -659,7 +672,7 @@ window.InstantFox = {
 		// this is platform independant.
 		boxStyle.paddingLeft = '1px'
 		boxStyle.paddingRight = '1px'
-		
+
 		return shadow
 	},
 
@@ -681,7 +694,7 @@ window.InstantFox = {
 			q.$searchBoxAPI_URL = this.searchBoxAPI.getUrl()
 		}
 		if (this._isOwnQuery && this.searchBoxAPI.canLoad(q.$searchBoxAPI_URL, url2go)) {
-			this.searchBoxAPI.setDimensions()	
+			this.searchBoxAPI.setDimensions()
 			this.searchBoxAPI.onInput()
 			return
 		}
@@ -731,14 +744,14 @@ window.InstantFox = {
 		this.$urlBarModified = this._isOwnQuery = false
 		this.updateShadowLink(null)
 		gBrowser.userTypedValue = null;
-		
+
 		var q = InstantFoxModule.currentQuery, br
-		
+
 		if (q && q.$searchBoxAPI_URL) {
 			q.$searchBoxAPI_URL = null
 			this.searchBoxAPI.onFinish(q.shadow || q.query)
 		}
-		
+
 		if (!q) {
 			this.pageLoader.removePreview()
 		} else if (q.tabId == this._ctabID) {
@@ -774,7 +787,7 @@ window.InstantFox = {
 		dump(InstantFoxModule.takeSuggestedOnEnter,q.shadow,q.query)
 		//
 		this.fixQueryBeforeEnter(q, value)
-		
+
 		//
 		var tmp = this.doPreload(InstantFoxModule.currentQuery)
 		//gURLBar.value = tmp;
@@ -886,7 +899,7 @@ InstantFox.modifyContextMenu = function(enable){
 			var menu
 			while(menu = popup.firstChild)
 				popup.removeChild(menu)
-			
+
 			var $el = InstantFox.$el
 
 			for each (engine in InstantFoxModule.Plugins) {
@@ -1028,7 +1041,7 @@ InstantFox.handleCommand_ = function(aTriggeringEvent) {
 				var shortcutURL = getShortcutOrURI(url, {}, {})
 				postData = postData.value
 				mayInheritPrincipal = mayInheritPrincipal.value
-				
+
 				if (shortcutURL != url)
 					url = shortcutURL
 				else if (!canBeUrl(url))
