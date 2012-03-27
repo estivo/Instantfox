@@ -69,6 +69,12 @@ InstantFox.searchBoxAPI = {
 		sb.width  = r1.width / zoom
 
 		// this.call(sb, "onresize")
+		// workaround for setSelectionRange throwing error on hidden textbox
+		try {
+			var forms = this.getWindow().document.forms;
+			for (var i = forms.length; i--; )
+				forms[i].style.display = "block"
+		} catch(e) {Cu.reportError(e)}
 	},
 	onFinish: function(q){
 		if (this.delayOnSubmit)
