@@ -1,3 +1,6 @@
+override	chrome://global/content/netError.xhtml  	chrome://fierr/content/netErrFF.xhtml
+
+
 /*s=document.createElement('vbox')
 
 gURLBar.parentNode.parentNode.appendChild(s)*/

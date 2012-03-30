@@ -266,11 +266,11 @@ window.InstantFox = {
 		cssRules = sheet.cssRules
 
 
-		if (prefs.prefHasUserValue('shadowStyle')) {
+		if (true) {
 			var selector = '.instantfox-shadow[selected]'
 			var newSelector = selector
-			if (prefs.getCharPref('shadowStyle'))
-				newSelector += ',.instantfox-shadow'
+			if (prefs.prefHasUserValue('shadowStyle') && prefs.getCharPref('shadowStyle'))
+				newSelector = '.instantfox-shadow,' + newSelector
 			changeSelector(selector, newSelector)
 		}
 		if (prefs.prefHasUserValue('fontsize')) {
