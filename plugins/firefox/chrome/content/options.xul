@@ -304,6 +304,11 @@ prefpane{
 #remove-button{
 	color:darkred
 }
+
+.description-box > description {
+	-moz-margin-end: 0!important;
+	-moz-margin-start: 0!important;
+}
 </html:style>
 
 <tabbox flex='1'>
@@ -435,7 +440,7 @@ prefpane{
 		<shadiaglue id='status-bar' buttons=""/>
 	<!-- devel__) -->
 	<hbox width="16"/>
-	<hbox align="center">
+	<hbox align="center" class="description-box">
 		<description value=' Do you like Instantfox? ' />
 		<description class='i18n help link' value='rate_it' id="rate-it"
 			onclick='addTab("https://addons.mozilla.org/en-US/firefox/addon/instantfox/")'/>

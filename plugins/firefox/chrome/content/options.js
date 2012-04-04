@@ -873,6 +873,12 @@ function onTabSelect(){
 	if(i == 1 || i == 2){
 		this.parentNode.selectedPanel.firstChild.hidden = false;
 		gPrefChanged = true;
+		if(i == 1) {			
+			if(!Services.prefs.prefHasUserValue("extensions.InstantFox.removeSearchbar"))
+				setTimeout(function() {
+					document.querySelector("checkbox[preference='removeSearchbar']").checked = true
+				})
+		}
 	}else if(i == 3){
 		var iframe = document.createElement('iframe');
 		iframe.setAttribute('type', 'content');
