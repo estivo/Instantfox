@@ -227,6 +227,8 @@ InstantFox.updateToolbarItems = function(mode) {
 			if (remove) {
 				i != -1 && curSet.splice(i, 1)
 			} else if (i == -1) {
+				if (document.getElementById(id))
+					return
 				var pos = getSearchbarPosition()
 				curSet.splice(pos, 0, id)
 			}
@@ -234,7 +236,7 @@ InstantFox.updateToolbarItems = function(mode) {
 		var removeSearchbar = getPref("removeSearchbar", true)		
 		var removeOptions = getPref("removeOptions", false)
 		
-		item2Toolbar(oldId, removeSearchbar)		
+		item2Toolbar(oldId, removeSearchbar)
 		item2Toolbar(newId, removeOptions)
 	}
 	
