@@ -1066,6 +1066,8 @@ InstantFoxSearch.prototype = {
 		if (HttpsEverywhere) url = url.replace(/^http:/, 'https:')
 		
 		_req.open("GET", url, true);
+		// without this request can generate prompts
+		_req.channel.notificationCallbacks = new SearchSuggestLoadListener();
 		_req.send(null);
 	},
 
@@ -1101,6 +1103,17 @@ InstantFoxSearch.prototype = {
 XPCOMUtils.defineLazyServiceGetter(InstantFoxSearch.prototype, "historyAutoComplete",
 					"@mozilla.org/autocomplete/search;1?name=history", "nsIAutoCompleteSearch")
 
+function SearchSuggestLoadListener() { }
+SearchSuggestLoadListener.prototype = {
+	// nsIBadCertListener2
+	notifyCertProblem: function(socketInfo, status, targetSite) { return true; },
+	// nsISSLErrorListener
+	notifySSLError: function(socketInfo, error, targetSite) { return true; },
+	// nsIInterfaceRequestor
+	getInterface: function SSLL_getInterface(iid) { return this.QueryInterface(iid); },
+	// nsISupports
+	QueryInterface: XPCOMUtils.generateQI([Ci.nsIBadCertListener2, Ci.nsISSLErrorListener, Ci.nsIInterfaceRequestor])
+};
 
 /*******************************************************
  *  component registration
