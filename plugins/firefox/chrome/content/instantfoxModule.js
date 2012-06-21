@@ -497,6 +497,11 @@ InstantFoxModule = {
 	update_url:  "http://www.instantfox.net/update.php",
 
 	bp: this,
+    get contextMenuPlugins function() {
+        for each(var i in this) {}
+        delete this.contextMenuPlugins
+        this.contextMenuPlugins = []
+    },
 
 	//
 	get openSearchInNewTab(){
