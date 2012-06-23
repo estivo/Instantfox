@@ -240,7 +240,8 @@ var pluginLoader = {
 			defaultPlugin: InstantFoxModule.defaultPlugin,
 			autoSearch: InstantFoxModule.autoSearch,
 			version: version,
-			plugins: ob
+			plugins: ob,
+			contextMenu: InstantFoxModule.contextMenuPlugins
 		}
 
 		return JSON.stringify(pluginData, null, forUser?4:1)
@@ -497,10 +498,18 @@ InstantFoxModule = {
 	update_url:  "http://www.instantfox.net/update.php",
 
 	bp: this,
-    get contextMenuPlugins function() {
-        for each(var i in this) {}
+    get contextMenuPlugins() {
         delete this.contextMenuPlugins
+		
         this.contextMenuPlugins = []
+		for each (var engine in this.Plugins) {
+			if(engine.disabled || engine.hideFromContextMenu)
+				continue
+
+			this.contextMenuPlugins.push(engine.id)
+		}
+		this.contextMenuPlugins.push("-", "__search_site__")
+		return this.contextMenuPlugins
     },
 
 	//
