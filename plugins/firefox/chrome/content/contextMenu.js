@@ -23,7 +23,7 @@ InstantFox.modifyContextMenu = function(enable){
             if (selectedText.length > 15)
                 croppedText = selectedText.substr(0,15) + this.ellipsis;
 
-			var engineId = InstantFoxModule.contextMenuPlugins[0]
+			var engineId = InstantFoxModule.getContextMenuPlugins("default")
             var engine = InstantFoxModule.Plugins[engineId]
 
             // format "Search <engine> for <selection>" string to show in menu
@@ -234,10 +234,10 @@ InstantFox.initPopupEvents = function(el) {
     function shouldShow(x, rect) {
         return (x < rect.right - 2 && x > rect.right - 30)
     }
-    function isOutside(x, y, rect) {
-        if (rect.left > x || rect.right + 10 < x)
+    function isOutside(x, y, rect, d) {
+        if (rect.left - d > x || rect.right + d < x)
             return true
-        if (rect.top > y || rect.bottom < y)
+        if (rect.top - d > y || rect.bottom + d < y)
             return true
     }
     function getChild(y) {
@@ -257,9 +257,11 @@ InstantFox.initPopupEvents = function(el) {
 
     el.addEventListener("mousedown", function(e) {
         if (!isTooltipOpen)
-            return
-        else
+            var state = "wait"
+        else {
+			var state = "drag"
             disableTooltip()
+		}
 
         var startY = e.clientY
         var drag = {}
@@ -271,16 +273,27 @@ InstantFox.initPopupEvents = function(el) {
         var h = dragElRect.height
         var dragOffset = - startY + dragElRect.top + h/2
 
-        var rect2 = el.getBoundingClientRect()
+        var popupRect = el.getBoundingClientRect()
         dragEl.setAttribute("_moz-menuactive", true)
         dragEl.setCapture(true)
         dragEl.style.cssText = "position:absolute;z-index:10000"
+		setTimeout(function() {
+			dragEl.setAttribute("_moz-menuactive", true)
+		})
 
         var movedElements = []
         var current, onMove, onUp;
         el.addEventListener("mousemove", onMove = function(e) {
             var {clientX: x, clientY: y} = e;
-            if (isOutside(x, y, rect2)) {
+			
+			if (state == "wait") {
+				if (isOutside(x, y, dragElRect, 0))
+					state = "drag"
+				else
+					return;
+            } 
+			
+			if (isOutside(x, y, popupRect, 5)) {
                 var d = 0
                 dragEl.style.opacity =  "0.1"
                 translate(dragEl, 50, 0)
@@ -325,30 +338,27 @@ InstantFox.initPopupEvents = function(el) {
         el.addEventListener("mouseup", onUp = function(e) {
             el.removeEventListener("mouseup", onUp, true)
             el.removeEventListener("mousemove", onMove, true)
+			if (state == "wait")
+				return;
+			// stop the event 
+            e.preventDefault()
+            e.stopPropagation()
+
             translate(dragEl, 0, 0)
             for(var i = movedElements.length; i--;) {
                 translate(movedElements[i], 0, 0)
             }
             dragEl.style.cssText=""
 
+			if (current) {
+				var next = current.index >= drag.index ? current.el.nextSibling : current.el;
+				var curr = drag.el.cloneNode(true)
+                el.insertBefore(curr, next)			
+			}
             // do this to not get click event
-            el.removeChild(drag.el)
-            drag.el = drag.el.cloneNode(true)
-
-            if (current) {
-                if (current.index > drag.index)
-                    el.insertBefore(drag.el, current.el.nextSibling)
-                else if (current.index < drag.index)
-                    el.insertBefore(drag.el, current.el)
-				
-				updateFirstItem(el, current, drag)
-            } else {
-				// already removed
-                // el.removeChild(drag.el)
-				updateFirstItem(el, {}, drag)
-            }
-            e.preventDefault()
-            e.stopPropagation()
+			el.removeChild(drag.el)
+			updateFirstItem(el, current || {}, drag)
+			
             // reenable tooltip
             enableTooltip()
 			

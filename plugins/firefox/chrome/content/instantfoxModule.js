@@ -217,6 +217,7 @@ var pluginLoader = {
 
 		InstantFoxModule.selectedLocale = pluginData.selectedLocale
 		InstantFoxModule.defaultPlugin = pluginData.defaultPlugin
+		InstantFoxModule.setContextMenuPlugins(pluginData.contextMenu)
 
 		if(pluginData.autoSearch)
 			InstantFoxModule.autoSearch = pluginData.autoSearch
@@ -241,7 +242,7 @@ var pluginLoader = {
 			autoSearch: InstantFoxModule.autoSearch,
 			version: version,
 			plugins: ob,
-			contextMenu: InstantFoxModule.contextMenuPlugins
+			contextMenu: InstantFoxModule.getContextMenuPlugins()
 		}
 
 		return JSON.stringify(pluginData, null, forUser?4:1)
@@ -498,20 +499,35 @@ InstantFoxModule = {
 	update_url:  "http://www.instantfox.net/update.php",
 
 	bp: this,
-    get contextMenuPlugins() {
-        delete this.contextMenuPlugins
-		
-        this.contextMenuPlugins = []
-		for each (var engine in this.Plugins) {
-			if(engine.disabled || engine.hideFromContextMenu)
-				continue
+    getContextMenuPlugins: function(type) {
+		if (!this.contextMenuPlugins) {
+			this.contextMenuPlugins = []
+			for each (var engine in this.Plugins) {
+				if(engine.disabled || engine.hideFromContextMenu)
+					continue
 
-			this.contextMenuPlugins.push(engine.id)
+				this.contextMenuPlugins.push(engine.id)
+			}
+			this.contextMenuPlugins.push("-", "__search_site__")
 		}
-		this.contextMenuPlugins.push("-", "__search_site__")
-		return this.contextMenuPlugins
+		if (type == "default") {
+			return this.contextMenuPlugins[0]
+		} else if (type == "on") {
+			return this.contextMenuPlugins
+		} else if (type == "off") {
+			var ans = []; var pList = this.contextMenuPlugins
+			var add = function(id) { if (pList.indexOf(id) == -1) ans.push(id) }
+			
+			for each (var engine in this.Plugins)
+				engine.disabled || add(engine.id)
+			add("-")
+			add("__search_site__")
+			return ans
+		}
     },
-
+    setContextMenuPlugins: function(list) {
+        
+    },
 	//
 	get openSearchInNewTab(){
 		delete this.openSearchInNewTab

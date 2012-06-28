@@ -26,7 +26,8 @@ var commonPlugins = {
 		key: "m",
 		url: "http://maps.google.%ld/maps?q=%q",
 		json: "http://maps.google.%ld/maps/suggest?q=%q&cp=999&hl=%ll&gl=%ll&v=2&json=b",
-		name: "Google Maps"
+		name: "Google Maps",
+		iconURI: "http://maps.gstatic.com/favicon.ico"
 	},
 	Wikipedia: {
 		key: "w",
