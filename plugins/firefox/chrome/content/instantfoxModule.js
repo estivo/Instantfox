@@ -499,34 +499,36 @@ InstantFoxModule = {
 	update_url:  "http://www.instantfox.net/update.php",
 
 	bp: this,
+	
     getContextMenuPlugins: function(type) {
-		if (!this.contextMenuPlugins) {
-			this.contextMenuPlugins = []
-			for each (var engine in this.Plugins) {
-				if(engine.disabled || engine.hideFromContextMenu)
-					continue
+		if (!this.contextMenuPlugins)
+			this.setContextMenuPlugins([])
 
-				this.contextMenuPlugins.push(engine.id)
-			}
-			this.contextMenuPlugins.push("-", "__search_site__")
+		switch(type) {
+			case "default":
+				return this.contextMenuPlugins[0]
+			case "on":
+				return this.contextMenuPlugins
+			case "off":
+				var ans = []; var pList = this.contextMenuPlugins
+				var add = function(id) { if (pList.indexOf(id) == -1) ans.push(id) }
+				
+				for each (var engine in this.Plugins)
+					engine.disabled || add(engine.id)
+				add("-")
+				add("__search_site__")
+				return ans
 		}
-		if (type == "default") {
-			return this.contextMenuPlugins[0]
-		} else if (type == "on") {
-			return this.contextMenuPlugins
-		} else if (type == "off") {
-			var ans = []; var pList = this.contextMenuPlugins
-			var add = function(id) { if (pList.indexOf(id) == -1) ans.push(id) }
-			
-			for each (var engine in this.Plugins)
-				engine.disabled || add(engine.id)
-			add("-")
-			add("__search_site__")
-			return ans
-		}
-    },
+    },	
     setContextMenuPlugins: function(list) {
-        
+        this.contextMenuPlugins = []
+		for each (var engine in this.Plugins) {
+			if(engine.disabled || engine.hideFromContextMenu)
+				continue
+
+			this.contextMenuPlugins.push(engine.id)
+		}
+		this.contextMenuPlugins.push("-", "__search_site__")
     },
 	//
 	get openSearchInNewTab(){

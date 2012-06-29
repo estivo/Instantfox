@@ -283,7 +283,7 @@ InstantFox.initPopupEvents = function(el) {
 
         var movedElements = []
         var current, onMove, onUp;
-        el.addEventListener("mousemove", onMove = function(e) {
+        var onMove = function(e) {
             var {clientX: x, clientY: y} = e;
 			
 			if (state == "wait") {
@@ -333,9 +333,9 @@ InstantFox.initPopupEvents = function(el) {
 
             e.preventDefault()
             e.stopPropagation()
-        }, true)
+        }		
 
-        el.addEventListener("mouseup", onUp = function(e) {
+        var onUp = function(e) {
             el.removeEventListener("mouseup", onUp, true)
             el.removeEventListener("mousemove", onMove, true)
 			if (state == "wait")
@@ -367,7 +367,10 @@ InstantFox.initPopupEvents = function(el) {
 			for (var i = ch.length; i--;) {
 				InstantFoxModule.contextMenuPlugins.unshift(ch[i].getAttribute("name"))
 			}
-        }, true)
+        }
+		
+		el.addEventListener("mousemove", onMove, true)
+		el.addEventListener("mouseup", onUp, true)
     })
 	
 	function updateFirstItem(popup, current, drag) {

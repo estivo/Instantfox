@@ -8,12 +8,12 @@ XPIProviderBP.XPIProvider.bootstrapScopes["instant@maps.de"]
 try{
 	dump = Components.utils.import("resource://shadia/main.js").dump
 }catch(e){}
-function __addDevelScript(src){
-	var script = aWindow.document.createElementNS("http://www.w3.org/1999/xhtml",'html:script')
+function __addDevelScript(src, win){
+	var script = win.document.createElementNS("http://www.w3.org/1999/xhtml",'html:script')
 	script.src = 'resource://instantmaps/'+src+'.js'
 	script.language="javascript"
 	script.type="text/javascript"
-	aWindow.document.documentElement.appendChild(script)
+	win.document.documentElement.appendChild(script)
 }
 /*devel__)*/
 var {classes: Cc, interfaces: Ci, utils: Cu} = Components;
@@ -28,7 +28,7 @@ function loadIntoWindow(win) {
 		Services.scriptloader.loadSubScript( 'chrome://instantfox/content/'+x+'.js', win);
 	} catch(e) {
 		/*devel__(*/
-			__addDevelScript(x)
+			__addDevelScript(x, win)
 		/*devel__)*/
 		Cu.reportError(e)
 	}
