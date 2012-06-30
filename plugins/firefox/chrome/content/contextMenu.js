@@ -23,7 +23,7 @@ InstantFox.modifyContextMenu = function(enable){
             if (selectedText.length > 15)
                 croppedText = selectedText.substr(0,15) + this.ellipsis;
 
-			var engineId = InstantFoxModule.getContextMenuPlugins("default")
+            var engineId = InstantFoxModule.getContextMenuPlugins("default")
             var engine = InstantFoxModule.Plugins[engineId]
 
             // format "Search <engine> for <selection>" string to show in menu
@@ -94,25 +94,25 @@ InstantFox.modifyContextMenu = function(enable){
                 popup.removeChild(menuItem)
 
             var $el = InstantFox.$el
-			
-			void (engineList || InstantFoxModule.contextMenuPlugins).forEach(function(id) {
-				var engine = InstantFoxModule.Plugins[id]
-				if (engine) {
-					$el('menuitem', {
-						'name' : engine.id,
-						'label': engine.name,
-						'image': engine.iconURI,
-						'class': "menuitem-iconic",
-					}, popup)
-				} else if (id == "-") {
-					$el('menuseparator', {'name': id}, popup)					
-				} else if (id == "__search_site__") {
-					$el('menuitem', {
-						'name' :  id,
-						'label':  InstantFoxModule.getString("context.searchSite")
-					}, popup)
-				}
-			})
+
+            void (engineList || InstantFoxModule.contextMenuPlugins).forEach(function(id) {
+                var engine = InstantFoxModule.Plugins[id]
+                if (engine) {
+                    $el('menuitem', {
+                        'name' : engine.id,
+                        'label': engine.name,
+                        'image': engine.iconURI,
+                        'class': "menuitem-iconic",
+                    }, popup)
+                } else if (id == "-") {
+                    $el('menuseparator', {'name': id}, popup)
+                } else if (id == "__search_site__") {
+                    $el('menuitem', {
+                        'name' :  id,
+                        'label':  InstantFoxModule.getString("context.searchSite")
+                    }, popup)
+                }
+            })
         }
         proto.doSearch = function(e) {
             if(e.target.menuitem && !e.target.isMenuitemActive)
@@ -150,10 +150,10 @@ InstantFox.modifyContextMenu = function(enable){
                 where = 'current';
 
             openLinkIn(href, where, fixup||{
-				postData: postData,
-				relatedToCurrent: true,
-				linkNode: document.popupNode // this is needed only for treeStyleTab addon
-			});
+                postData: postData,
+                relatedToCurrent: true,
+                linkNode: document.popupNode // this is needed only for treeStyleTab addon
+            });
         }
     }
     else if(!enable && proto.isTextSelection_orig){
@@ -216,7 +216,7 @@ InstantFox.initPopupEvents = function(el) {
             timer = setTimeout(updateTooltip, 100)
     }
     function enableTooltip(){
-		timer = isTooltipOpen = false;
+        timer = isTooltipOpen = false;
         el.addEventListener("mousemove", onTooltipMouseMove)
         el.addEventListener("mouseout", onTooltipMouseOut)
     }
@@ -256,12 +256,12 @@ InstantFox.initPopupEvents = function(el) {
     }
 
     el.addEventListener("mousedown", function(e) {
-        if (!isTooltipOpen)
+        if (!isTooltipOpen) {
             var state = "wait"
-        else {
-			var state = "drag"
+        } else {
+            var state = "drag"
             disableTooltip()
-		}
+        }
 
         var startY = e.clientY
         var drag = {}
@@ -277,23 +277,23 @@ InstantFox.initPopupEvents = function(el) {
         dragEl.setAttribute("_moz-menuactive", true)
         dragEl.setCapture(true)
         dragEl.style.cssText = "position:absolute;z-index:10000"
-		setTimeout(function() {
-			dragEl.setAttribute("_moz-menuactive", true)
-		})
+        setTimeout(function() {
+            dragEl.setAttribute("_moz-menuactive", true)
+        })
 
         var movedElements = []
         var current, onMove, onUp;
         var onMove = function(e) {
             var {clientX: x, clientY: y} = e;
-			
-			if (state == "wait") {
-				if (isOutside(x, y, dragElRect, 0))
-					state = "drag"
-				else
-					return;
-            } 
-			
-			if (isOutside(x, y, popupRect, 5)) {
+
+            if (state == "wait") {
+                if (isOutside(x, y, dragElRect, 0))
+                    state = "drag"
+                else
+                    return;
+            }
+
+            if (isOutside(x, y, popupRect, 5)) {
                 var d = 0
                 dragEl.style.opacity =  "0.1"
                 translate(dragEl, 50, 0)
@@ -333,14 +333,14 @@ InstantFox.initPopupEvents = function(el) {
 
             e.preventDefault()
             e.stopPropagation()
-        }		
+        }
 
         var onUp = function(e) {
             el.removeEventListener("mouseup", onUp, true)
             el.removeEventListener("mousemove", onMove, true)
-			if (state == "wait")
-				return;
-			// stop the event 
+            if (state == "wait")
+                return;
+            // stop the event
             e.preventDefault()
             e.stopPropagation()
 
@@ -350,41 +350,41 @@ InstantFox.initPopupEvents = function(el) {
             }
             dragEl.style.cssText=""
 
-			if (current) {
-				var next = current.index >= drag.index ? current.el.nextSibling : current.el;
-				var curr = drag.el.cloneNode(true)
-                el.insertBefore(curr, next)			
-			}
+            if (current) {
+                var next = current.index >= drag.index ? current.el.nextSibling : current.el;
+                var curr = drag.el.cloneNode(true)
+                el.insertBefore(curr, next)
+            }
             // do this to not get click event
-			el.removeChild(drag.el)
-			updateFirstItem(el, current || {}, drag)
-			
+            el.removeChild(drag.el)
+            updateFirstItem(el, current || {}, drag)
+
             // reenable tooltip
             enableTooltip()
-			
-			InstantFoxModule.contextMenuPlugins = []			
-			var ch = el.children
-			for (var i = ch.length; i--;) {
-				InstantFoxModule.contextMenuPlugins.unshift(ch[i].getAttribute("name"))
-			}
+
+            InstantFoxModule.contextMenuPlugins = []
+            var ch = el.children
+            for (var i = ch.length; i--;) {
+                InstantFoxModule.contextMenuPlugins.unshift(ch[i].getAttribute("name"))
+            }
         }
-		
-		el.addEventListener("mousemove", onMove, true)
-		el.addEventListener("mouseup", onUp, true)
+
+        el.addEventListener("mousemove", onMove, true)
+        el.addEventListener("mouseup", onUp, true)
     })
-	
-	function updateFirstItem(popup, current, drag) {
-		if (current.index == 0)
-			var currentLabel = current.el.label
-		else if (drag.index == 0)
-			var currentLabel = drag.el.label
-		else
-			return
-		var first = popup.firstChild;
-		var splitMenu = document.getElementById("ifox-context-searchselect") || this.createSearchItem()
-		var menuitem = splitMenu.menuitem
-		menuitem.label = menuitem.label.replace(currentLabel, first.label)
-		menuitem.image = first.image
-		splitMenu.setAttribute('name', first.id)
-	}
+
+    function updateFirstItem(popup, current, drag) {
+        if (current.index == 0)
+            var currentLabel = current.el.label
+        else if (drag.index == 0)
+            var currentLabel = drag.el.label
+        else
+            return
+        var first = popup.firstChild;
+        var splitMenu = document.getElementById("ifox-context-searchselect") || this.createSearchItem()
+        var menuitem = splitMenu.menuitem
+        menuitem.label = menuitem.label.replace(currentLabel, first.label)
+        menuitem.image = first.image
+        splitMenu.setAttribute('name', first.id)
+    }
 }
