@@ -303,6 +303,10 @@ InstantFox.initPopupEvents = function(el) {
                 current = null
             } else {
                 var d = e.clientY -  startY
+				
+				// if (!morePopup){
+				//	 morePopup = setTimeout(showMoreItems,0,el)
+				// }
 
                 dragEl.style.opacity =  ""
                 translate(dragEl, 10, d)
@@ -349,7 +353,11 @@ InstantFox.initPopupEvents = function(el) {
                 translate(movedElements[i], 0, 0)
             }
             dragEl.style.cssText=""
-
+			
+			// todo change when removing is enabled
+			if (!current)
+				current = drag
+			
             if (current) {
                 var next = current.index >= drag.index ? current.el.nextSibling : current.el;
                 var curr = drag.el.cloneNode(true)
@@ -367,11 +375,20 @@ InstantFox.initPopupEvents = function(el) {
             for (var i = ch.length; i--;) {
                 InstantFoxModule.contextMenuPlugins.unshift(ch[i].getAttribute("name"))
             }
+			InstantFoxModule.pluginLoader.scheduleSavePlugins(setTimeout)
         }
 
         el.addEventListener("mousemove", onMove, true)
         el.addEventListener("mouseup", onUp, true)
     })
+	
+	// var morePopup
+	// function showMoreItems(anchor){
+		// var y = InstantFox.$el("panel", {noautohide:true}, document.documentElement)
+		// InstantFox.fillSearchSubmenu(y, InstantFoxModule.getContextMenuPlugins("off"))
+		// y.openPopup(anchor, "start_after")
+		// return morePopup = y
+	// }
 
     function updateFirstItem(popup, current, drag) {
         if (current.index == 0)

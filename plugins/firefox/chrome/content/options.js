@@ -743,6 +743,10 @@ function saveChanges(){
 	
 	if(!gPluginsChanged)
 		return
+		
+	if(resultOK)
+		InstantFoxModule.updateContextMenuPlugins()
+		
 	if(resultOK)
 		InstantFoxModule.pluginLoader.savePlugins()
 	else

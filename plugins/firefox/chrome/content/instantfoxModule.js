@@ -242,7 +242,7 @@ var pluginLoader = {
 			autoSearch: InstantFoxModule.autoSearch,
 			version: version,
 			plugins: ob,
-			contextMenu: InstantFoxModule.getContextMenuPlugins()
+			contextMenu: InstantFoxModule.getContextMenuPlugins("on")
 		}
 
 		return JSON.stringify(pluginData, null, forUser?4:1)
@@ -251,6 +251,13 @@ var pluginLoader = {
 		var js = this.getPluginString(false)
 
 		writeToFile(getUserFile('instantFoxPlugins.js'), js)
+	},
+	scheduleSavePlugins: function(setTimeout, t) {
+		if (pluginLoader.savePlugins.timeout)
+			return
+		pluginLoader.savePlugins.timeout = setTimeout(function() {
+			pluginLoader.savePlugins()
+		}, t || 100)
 	},
 	loadPlugins: function(locale, callback){
 		var file = getUserFile('instantFoxPlugins.js')
@@ -502,11 +509,12 @@ InstantFoxModule = {
 	
     getContextMenuPlugins: function(type) {
 		if (!this.contextMenuPlugins)
-			this.setContextMenuPlugins([])
+			this.setContextMenuPlugins()
 
 		switch(type) {
 			case "default":
 				return this.contextMenuPlugins[0]
+			case null:
 			case "on":
 				return this.contextMenuPlugins
 			case "off":
@@ -515,20 +523,63 @@ InstantFoxModule = {
 				
 				for each (var engine in this.Plugins)
 					engine.disabled || add(engine.id)
-				add("-")
 				add("__search_site__")
+				ans.splice(1,0,"-")
 				return ans
 		}
-    },	
-    setContextMenuPlugins: function(list) {
-        this.contextMenuPlugins = []
-		for each (var engine in this.Plugins) {
-			if(engine.disabled || engine.hideFromContextMenu)
+    },
+	updateContextMenuPlugins: function(){
+		var pList = this.getContextMenuPlugins("on")
+		for (var i = pList.length; i--;) {
+			var id = pList[i]
+			if (id == "-" || id == "__search_site__")
 				continue
-
-			this.contextMenuPlugins.push(engine.id)
+			var p = this.Plugins[id]
+			if (p && !p.disabled && !p.hideFromContextMenu)
+				continue
+			pList.splice(i, 1)
 		}
-		this.contextMenuPlugins.push("-", "__search_site__")
+		
+		for each (var p in this.Plugins) {
+			if(p.disabled || p.hideFromContextMenu)
+				continue
+			var id = p.id
+			if (pList.indexOf(id) == -1) {
+				var insertPos = pList.lastIndexOf("-")
+				if (insertPos == -1)
+					insertPos = pList.length				
+				pList.splice(insertPos - 1, 0, id)
+			}
+		}		
+	},
+    setContextMenuPlugins: function(list) {
+		var pList = this.contextMenuPlugins = []
+		
+		if (!list) {
+			var add = function(id) { pList.push(id) }
+			for each (var p in this.Plugins) {
+				if(p.disabled || p.hideFromContextMenu)
+					continue
+				add(p.id)
+			}
+			add("-")
+			add("__search_site__")
+		} else {
+			var add = function(id) { if (pList.indexOf(id) == -1) pList.push(id) }
+
+			for (var i = 0; i < list.length; i++) {
+				var id = list[i]
+				if (id == "-" || id == "__search_site__") {
+					this.contextMenuPlugins.push(id)
+					continue
+				}			
+				var p = this.Plugins[id]
+				if(!p || p.disabled || p.hideFromContextMenu)
+					continue
+					
+				this.contextMenuPlugins.push(id)
+			}
+		}
     },
 	//
 	get openSearchInNewTab(){
