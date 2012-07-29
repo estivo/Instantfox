@@ -94,7 +94,7 @@ menu[type=splitmenu] {
     background-color: transparent !important;
 }
 /** notification ************************************/
-.popup-notification-icon[popupid="instant-fox-installed"] {
+.popup-notification-icon[popupid="instantfox-installed"] {
 	list-style-image: url("chrome://instantfox/content/skin/logo.png");
 }
 

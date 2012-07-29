@@ -10,10 +10,11 @@
 	title="instantfox options"
 	width="450" height="600" persist='width height' id='instantfox_options'
 	resizable='yes' onunload='saveChanges()'>
-<script>
+<script><![CDATA[
+// on windows options dialog is modeal, reopen it as a normal window
 Components.utils.import("resource://gre/modules/Services.jsm");
 try{
-	if(window.opener &amp;&amp; window.opener.location.href=='about:addons'){
+	if(window.opener && window.opener.location.href=='about:addons' && navigator.userAgent.indexOf("Windows")!=-1){
 		Services.ww.openWindow(null, window.location, "_blank", 'dialog=no,centerscreen,resizable', null)
 		saveChanges = onTabSelect = function(){}
 		setTimeout(window.close, 20)
@@ -28,7 +29,7 @@ try{
 		dump('new dump')
 	}catch(e){}
 /**devel__)*/
-</script>
+]]></script>
 
 <svg:svg height="0">
     <svg:filter id="gray">

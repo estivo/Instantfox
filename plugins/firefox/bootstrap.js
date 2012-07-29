@@ -4,34 +4,43 @@ var XPIProviderBP = Components.utils.import("resource://gre/modules/XPIProvider.
 XPIProviderBP.XPIProvider.bootstrapScopes["instant@maps.de"]
 
 /******************************************************************/
+var BASE_URI = "chrome://instantfox/content/"
+var {classes: Cc, interfaces: Ci, utils: Cu} = Components;
+Cu.import("resource://gre/modules/Services.jsm");
+
+var addScript = function(src, win) Services.scriptloader.loadSubScript(BASE_URI + src + ".js", win);
 /*devel__(*/
 try{
 	dump = Components.utils.import("resource://shadia/main.js").dump
 }catch(e){}
-function __addDevelScript(src, win){
-	var script = win.document.createElementNS("http://www.w3.org/1999/xhtml",'html:script')
-	script.src = 'resource://instantmaps/'+src+'.js'
-	script.language="javascript"
-	script.type="text/javascript"
+
+var _addScript = addScript
+var addDevelScript = function(src, win) {
+	var script = win.document.createElementNS("http://www.w3.org/1999/xhtml","html:script")
+	script.src = BASE_URI + src + ".js"
+	script.language = "javascript"
+	script.type = "text/javascript"
 	win.document.documentElement.appendChild(script)
 }
+addScript = function(src, win) {
+	try {
+		_addScript(src, win)
+	} catch(e) {
+		Cu.reportError(e)
+		addDevelScript(src, win)
+	}
+}
 /*devel__)*/
-var {classes: Cc, interfaces: Ci, utils: Cu} = Components;
-Cu.import("resource://gre/modules/Services.jsm");
+
 
 function loadIntoWindow(win) {
 	/*devel__(*/
-		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
-		Services.scriptloader.loadSubScript( 'chrome://instantfox/content/__devel__.js', win);
+	Services.obs.notifyObservers(null, "startupcache-invalidate", null);
+	addScript('__devel__', win);
 	/*devel__)*/
-	for each (var x in ["instantfox", "contentHandler", "overlay", "contextMenu"]) try {
-		Services.scriptloader.loadSubScript( 'chrome://instantfox/content/'+x+'.js', win);
-	} catch(e) {
-		/*devel__(*/
-			__addDevelScript(x, win)
-		/*devel__)*/
-		Cu.reportError(e)
-	}
+	for each (var src in ["instantfox", "contentHandler", "overlay", "contextMenu"]) 
+		addScript(src, win)
+
 	try {
 		win.InstantFox.initialize()
 	} catch(e) {Cu.reportError(e)}

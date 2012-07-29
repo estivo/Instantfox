@@ -104,7 +104,7 @@ window.InstantFox = {
 
 	showInstallNotification: function(){
 		var n = {
-			id: 'instant-fox-installed',
+			id: 'instantfox-installed',
 			anchor: "instantFox-options",
 			label: InstantFoxModule.getString("welcome.notification"),
 			hide: 'document.getBindingParent(this).parentNode.hidePopup();',

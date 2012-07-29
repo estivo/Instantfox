@@ -65,7 +65,6 @@ var instantFoxDevel = {
 	reloadModule: function(href){
 		//Cu.import(href).eval(makeReq(href))
 		//return Cu.import(href)
-		//Cc["@mozilla.org/moz/jssubscript-loader;1"].getService(Ci.mozIJSSubScriptLoader)
 		var bp = Cu.import(href)
 		// query needed to confuse startupcache in ff 8.0+
 		Services.scriptloader.loadSubScript(href+'?'+Date.now(), bp);
@@ -81,15 +80,6 @@ var instantFoxDevel = {
 		document.documentElement.appendChild(s)
 	},
 
-	/*get sourceList() {
-		var t=makeReq("chrome://instantfox/content/instantfox.xul")
-		t.match(/<script.*src="(.*)"/g).map(function(x)x.match(/src="(.*)"/)[1])
-	}*/
-	sourceList: [
-		"chrome://instantfox/content/instantfox.js",
-		"chrome://instantfox/content/contentHandler.js",
-		"chrome://instantfox/content/overlay.js"
-	],
 	moduleHref: 'chrome://instantfox/content/instantfoxModule.js',
 
 	doReload: function(){
@@ -113,10 +103,6 @@ var instantFoxDevel = {
 	clearFirstRunPref: function(update){
 		try{
 			var prefs = Services.prefs
-			
-			//Services.prefs.resetBranch("extensions.InstantFox.")//not implemented:(
-			//Services.prefs.deleteBranch("extensions.InstantFox.")
-			//InstantFox.updateOptionsButton(true)
 			prefs.getChildList("extensions.InstantFox.",{},{}).forEach(function(x){
 				prefs.clearUserPref(x)
 			})
