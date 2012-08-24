@@ -113,7 +113,9 @@ locale(["de","de-DE","de"], {
 	Amazon: {
 		url: "http://www.amazon.de/gp/search?ie=UTF8&keywords=%q&tag=324-21&index=aps&linkCode=ur2&camp=1638&creative=6742"
 	},
-	eBay: true,
+	eBay: {
+		url: "http://rover.ebay.com/rover/1/707-53477-19255-0/1?icep_ff3=9&pub=5574841060&toolid=10001&campid=5337149391&customid=&icep_sellerId=&icep_ex_kw=&icep_sortBy=12&icep_catId=&icep_minPrice=&icep_maxPrice=&ipn=psmain&icep_vectorid=229487&kwid=902099&mtid=824&kw=lg&icep_uq=%q"
+	},
 	Twitter: true,
 	Weather: {
 		name: "Wetter"
@@ -142,7 +144,9 @@ locale(["de","de-AT","at"], {
 	Amazon: {
 		url: "http://www.amazon.de/gp/search?ie=UTF8&keywords=%q&tag=324-21&index=aps&linkCode=ur2&camp=1638&creative=6742"
 	},
-	eBay: true,
+	eBay: {
+		url: "http://rover.ebay.com/rover/1/705-53470-19255-0/1?icep_ff3=9&pub=5574841060&toolid=10001&campid=5337149391&customid=&icep_sellerId=&icep_ex_kw=&icep_sortBy=12&icep_catId=&icep_minPrice=&icep_maxPrice=&ipn=psmain&icep_vectorid=229515&kwid=902099&mtid=824&kw=lg&&icep_uq=%q"
+	},
 	Twitter: true,
 	Weather: {
 		name: "Wetter"
@@ -171,7 +175,9 @@ locale(["de","de-CH","ch"], {
 	Amazon: {
 		url: "http://www.amazon.de/gp/search?ie=UTF8&keywords=%q&tag=324-21&index=aps&linkCode=ur2&camp=1638&creative=6742"
 	},
-	eBay: true,
+	eBay: {
+		url: "http://rover.ebay.com/rover/1/5222-53480-19255-0/1?icep_ff3=9&pub=5574841060&toolid=10001&campid=5337149391&customid=&icep_sellerId=&icep_ex_kw=&icep_sortBy=12&icep_catId=&icep_minPrice=&icep_maxPrice=&ipn=psmain&icep_vectorid=229536&kwid=902099&mtid=824&kw=lg&icep_uq=%q"
+	},
 	Twitter: true,
 	Weather: {
 		name: "Wetter"
@@ -203,7 +209,9 @@ locale(["en","en-US","com"], {
 		json: "http://suggestqueries.google.com/complete/search?json&client=firefox&ds=yt&q=%q"
 	},
 	Amazon: true,
-	eBay: true,
+	eBay: {
+		url: "http://rover.ebay.com/rover/1/711-53200-19255-0/1?icep_ff3=9&pub=5574841060&toolid=10001&campid=5337149391&customid=&icep_sellerId=&icep_ex_kw=&icep_sortBy=12&icep_catId=&icep_minPrice=&icep_maxPrice=&ipn=psmain&icep_vectorid=229466&kwid=902099&mtid=824&kw=lg&icep_uq=%q"
+	},
 	Twitter: true,
 	Weather: true,
 	IMDb: {
@@ -223,7 +231,9 @@ locale(["en","en-AU","com.au"], {
 	Wikipedia: true,
 	Youtube: true,
 	Amazon: true,
-	eBay: true,
+	eBay: {
+		url: "http://rover.ebay.com/rover/1/705-53470-19255-0/1?icep_ff3=9&pub=5574841060&toolid=10001&campid=5337149391&customid=&icep_sellerId=&icep_ex_kw=&icep_sortBy=12&icep_catId=&icep_minPrice=&icep_maxPrice=&ipn=psmain&icep_vectorid=229515&kwid=902099&mtid=824&kw=lg&icep_uq=%q"
+	},
 	Twitter: true,
 	Weather: true,
 	IMDb: true,
@@ -241,7 +251,9 @@ locale(["en","en-CA","ca"], {
 	Amazon: {
 		url: "http://www.amazon.ca/gp/search?ie=UTF8&keywords=%q&tag=609-20&index=aps&linkCode=ur2&camp=15121&creative=330641"
 	},
-	eBay: true,
+	eBay: {
+		url: "http://rover.ebay.com/rover/1/706-53473-19255-0/1?icep_ff3=9&pub=5574841060&toolid=10001&campid=5337149391&customid=&icep_sellerId=&icep_ex_kw=&icep_sortBy=12&icep_catId=&icep_minPrice=&icep_maxPrice=&ipn=psmain&icep_vectorid=229529&kwid=902099&mtid=824&kw=lg&icep_uq=%q"
+	},
 	Twitter: true,
 	Weather: true,
 	IMDb: true,
@@ -259,7 +271,9 @@ locale(["en","en-GB","co.uk"], {
 	Amazon: {
 		url: "http://www.amazon.co.uk/gp/search?ie=UTF8&keywords=%q&tag=509-21&index=aps&linkCode=ur2&camp=1634&creative=6738"
 	},
-	eBay: true,
+	eBay: {
+		url: "http://rover.ebay.com/rover/1/710-53481-19255-0/1?icep_ff3=9&pub=5574841060&toolid=10001&campid=5337149391&customid=&icep_sellerId=&icep_ex_kw=&icep_sortBy=12&icep_catId=&icep_minPrice=&icep_maxPrice=&ipn=psmain&icep_vectorid=229508&kwid=902099&mtid=824&kw=lg&icep_uq=%q"
+	},
 	Twitter: true,
 	Weather: true,
 	IMDb: true,
@@ -281,7 +295,9 @@ locale(["es","es-ES","es"], {
 	Amazon: {
 		url: "http://www.amazon.es/gp/search?ie=UTF8&keywords=%q&tag=608-21&index=aps&linkCode=ur2&camp=3626&creative=24790"
 	},
-	eBay: true,
+	eBay: {
+		url: "http://rover.ebay.com/rover/1/1185-53479-19255-0/1?icep_ff3=9&pub=5574841060&toolid=10001&campid=5337149391&customid=&icep_sellerId=&icep_ex_kw=&icep_sortBy=12&icep_catId=&icep_minPrice=&icep_maxPrice=&ipn=psmain&icep_vectorid=229501&kwid=902099&mtid=824&kw=lg&icep_uq=%q"
+	},
 	Twitter: true,
 	Weather: {
 		key: "to",
@@ -400,7 +416,9 @@ locale(["fr","fr-FR","fr"], {
 	Amazon: {
 		url: "http://www.amazon.fr/gp/search?ie=UTF8&keywords=%q&tag=604-21&index=aps&linkCode=ur2&camp=1642&creative=6746"
 	},
-	eBay: true,
+	eBay: {
+		url: "http://rover.ebay.com/rover/1/709-53476-19255-0/1?icep_ff3=9&pub=5574841060&toolid=10001&campid=5337149391&customid=&icep_sellerId=&icep_ex_kw=&icep_sortBy=12&icep_catId=&icep_minPrice=&icep_maxPrice=&ipn=psmain&icep_vectorid=229480&kwid=902099&mtid=824&kw=lg&icep_uq=%q"
+	},
 	Twitter: true,
 	Weather: {
 		key: "to",
@@ -432,7 +450,9 @@ locale(["it","it-IT","it"], {
 	Amazon: {
 		url: "http://www.amazon.it/gp/search?ie=UTF8&keywords=%q&tag=805-21&index=blended&linkCode=ur2&camp=3370&creative=23322"
 	},
-	eBay: true,
+	eBay: {
+		url: "http://rover.ebay.com/rover/1/724-53478-19255-0/1?icep_ff3=9&pub=5574841060&toolid=10001&campid=5337149391&customid=&icep_sellerId=&icep_ex_kw=&icep_sortBy=12&icep_catId=&icep_minPrice=&icep_maxPrice=&ipn=psmain&icep_vectorid=229494&kwid=902099&mtid=824&kw=lg&icep_uq=%q"
+	},
 	Twitter: true,
 	Weather: {
 		key: "to",
@@ -465,7 +485,9 @@ locale(["nl","nl","nl"], {
 	Amazon: {
 		url: "http://www.amazon.co.uk/gp/search?ie=UTF8&keywords=%q&tag=509-21&index=aps&linkCode=ur2&camp=1634&creative=6738"
 	},
-	eBay: true,
+	eBay: {
+		url: "http://rover.ebay.com/rover/1/1346-53482-19255-0/1?icep_ff3=9&pub=5574841060&toolid=10001&campid=5337149391&customid=&icep_sellerId=&icep_ex_kw=&icep_sortBy=12&icep_catId=&icep_minPrice=&icep_maxPrice=&ipn=psmain&icep_vectorid=229557&kwid=902099&mtid=824&kw=lg&icep_uq=%q"
+	},
 	Twitter: true,
 	Weather: {
 		key: "to",
