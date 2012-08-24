@@ -298,7 +298,8 @@ InstantFox.pageLoader = {
 	},
 	onMouseDown: function(e) {
 		// if searchBoxAPI haven't been used yet, do nothing
-		if (!InstantFoxModule.currentQuery.$searchBoxAPI_URL)
+		if (!InstantFoxModule.currentQuery 
+		  ||!InstantFoxModule.currentQuery.$searchBoxAPI_URL)
 			return
 		InstantFox.searchBoxAPI.delaySubmiting()
 		window.addEventListener("mouseup", function onup() {
@@ -342,9 +343,10 @@ InstantFox.pageLoader = {
 			selectedStack.appendChild(preview);
 			this.addProgressListener(preview)
 
-			// set urlbaricon
 			// todo: handle this elsewhere
-			PageProxySetIcon('chrome://instantfox/content/skin/button-logo.png')
+			// set urlbaricon, this isn't possible in firefox 14+ 
+			if (window.PageProxySetIcon)
+				PageProxySetIcon('chrome://instantfox/content/skin/button-logo.png')
 			gIdentityHandler.setMode(gIdentityHandler.IDENTITY_MODE_UNKNOWN)
 		}
 		this.previewIsActive = true
