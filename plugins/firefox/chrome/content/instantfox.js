@@ -874,7 +874,7 @@ InstantFox.handleCommand_ = function(aTriggeringEvent) {
 				// let firefox to handle builtin shortcuts if any
 				var postData = {};
 				var mayInheritPrincipal = { value: false };
-				var shortcutURL = getShortcutOrURI(url, {}, {})
+				var shortcutURL = getShortcutOrURI(url, postData, mayInheritPrincipal)
 				postData = postData.value
 				mayInheritPrincipal = mayInheritPrincipal.value
 
