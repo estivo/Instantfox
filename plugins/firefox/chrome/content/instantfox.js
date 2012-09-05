@@ -148,14 +148,14 @@ window.InstantFox = {
 	},
 	// end belong to notifyTab
 
-	initialize: function() {
+	initialize: function(isNewWindow) {
 		Cu.import('chrome://instantfox/content/instantfoxModule.js')
 
 		this.stylesheet = document.createProcessingInstruction('xml-stylesheet', 'href="chrome://instantfox/content/skin/instantfox.css"')
 		document.insertBefore(this.stylesheet, document.documentElement)
 		setTimeout(this.updateUserStyle, 200, true) // needs some time untill stylesheet is loaded
 
-		this.setURLBarAutocompleter()
+		this.setURLBarAutocompleter('on', isNewWindow)
 
 		gURLBar.addEventListener('keydown', this.onKeydown, false);
 		// must be capturing to run after value is changed and before autocompleter
@@ -217,7 +217,7 @@ window.InstantFox = {
 		this.$unpatch(BrowserSearch, 'webSearch')
 	},
 
-	setURLBarAutocompleter: function(state){
+	setURLBarAutocompleter: function(state, isNewWindow){
 		var search = InstantFox._autocompletesearch_orig, oninput = InstantFox._oninput_orig
 		if (state != 'off') {
 			var s = InstantFox._autocompletesearch_orig = gURLBar.getAttribute('autocompletesearch')
@@ -229,8 +229,8 @@ window.InstantFox = {
 		gURLBar.setAttribute("autocompletesearch", search)
 		gURLBar.setAttribute('oninput', oninput);
 
-		// reload binding
-		this.reloadBinding(gURLBar)
+		// do not reload binding for new windows since it breaks abp button when url-addon-bar is installed
+		isNewWindow || this.reloadBinding(gURLBar)
 	},
 
 	updateUserStyle: function(firstTime) {

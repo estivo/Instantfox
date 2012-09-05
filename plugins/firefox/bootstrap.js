@@ -33,7 +33,7 @@ addScript = function(src, win) {
 /*devel__)*/
 
 
-function loadIntoWindow(win) {
+function loadIntoWindow(win, isNew) {
 	/*devel__(*/
 	Services.obs.notifyObservers(null, "startupcache-invalidate", null);
 	addScript('__devel__', win);
@@ -42,7 +42,7 @@ function loadIntoWindow(win) {
 		addScript(src, win)
 
 	try {
-		win.InstantFox.initialize()
+		win.InstantFox.initialize(isNew)
 	} catch(e) {Cu.reportError(e)}
 }
 
@@ -58,7 +58,7 @@ function windowWatcher(win, topic) {
 		win.addEventListener("load", function() {
 			win.removeEventListener("load", arguments.callee, false);
 			if (win.location.href == 'chrome://browser/content/browser.xul')
-				loadIntoWindow(win)
+				loadIntoWindow(win, true)
 		}, false);
 	}
 }
