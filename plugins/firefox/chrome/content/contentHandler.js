@@ -99,8 +99,13 @@ InstantFox.searchBoxAPI = {
 			x:0, y:0, width:0, height:0,
 			setSuggestions: function(suggestions) {
 				dump(JSON.stringify(suggestions))
+			},
+			// needed for firefox 15+
+			__exposedProps__: {
+				value: 'r', verbatim: 'r', selectionStart: 'rw', selectionEnd: 'rw',
+				x: 'r', y: 'r', width: 'r', height: 'r', setSuggestions: 'r',
+			onchange: 'rw', onsubmit: 'rw', oncancel: 'rw', onresize: 'rw'
 			}
-			/* onchange onsubmit oncancel onresize;*/
 		}
 	},
 	call: function(sb, prop){
