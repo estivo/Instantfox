@@ -1,3 +1,6 @@
+/* devel__( */ // helps to test button behavior while disabling
+XULBrowserWindow.inContentWhitelist=[]
+/* devel__) */
 InstantFox.applyOverlay = function(off) {
     var $el = InstantFox.$el, $ = InstantFox.$, rem = InstantFox.rem
 	var buttonId = 'instantFox-options', popupId = 'instantfox-popup'
@@ -5,7 +8,8 @@ InstantFox.applyOverlay = function(off) {
 		[
 			gNavToolbox.palette.querySelector("#" + buttonId),
 			$(buttonId),
-			$(popupId)
+			$(popupId),
+            $("instantFox-menuitem"),
 		].forEach(rem)
 		return
 	}
@@ -72,19 +76,47 @@ InstantFox.applyOverlay = function(off) {
 	var id = buttonId
 	var selector = "[currentset^='"+id+",'],[currentset*=',"+id+",'],[currentset$=',"+id+"']"
 	var toolbar = document.querySelector(selector)
-	if (!toolbar)
-		return
+	
+    toolbar ?  insertButton() : insertMenuitem()
 
-	var currentset = toolbar.getAttribute("currentset").split(",");
-    var i = currentset.indexOf(id) + 1;
+    function insertButton() {
+        var currentset = toolbar.getAttribute("currentset").split(",");
+        var i = currentset.indexOf(id) + 1;
 
-    var len = currentset.length, beforeEl;
-    while (i < len && !(beforeEl = $(currentset[i])))
-		i++
+        var len = currentset.length, beforeEl;
+        while (i < len && !(beforeEl = $(currentset[i])))
+            i++
 
-	toolbar.insertItem(id, beforeEl);
+        toolbar.insertItem(id, beforeEl);
+    }
+    
+    function insertMenuitem() {
+        var popup = $("menu_ToolsPopup")
+        if (!popup)
+            return;
+        popup.insertBefore($el("menuitem", { 
+              id:"instantFox-menuitem"
+            , image:"chrome://instantfox/content/skin/button-logo.png"
+            , onclick:"InstantFox.openOptionsWindow()", label: "InstantFox Options"
+            , class: "menuitem-iconic"
+        }), $("prefSep"))
+    }
 }
-
+InstantFox.openOptionsWindow = function() {
+    var uri = "chrome://instantfox/content/options.xul"
+    function findWin() {
+        var winEnum = Services.wm.getEnumerator("");
+        while (winEnum.hasMoreElements()) {
+            var win = winEnum.getNext();
+            if (win.closed)continue;
+            if (win.location.href == uri)
+                return win;
+        }
+    }
+    var optWindow = findWin()
+    if (optWindow) optWindow.focus()
+    else window.open(uri, "_blank", "chrome,extrachrome,menubar,resizable,scrollbars,status,toolbar");
+}
 //************************************************************************
 // options popup
 InstantFox.popupCloser = function(e) {
