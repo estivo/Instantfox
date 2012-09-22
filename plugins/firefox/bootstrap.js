@@ -110,8 +110,8 @@ function showNotice(aData, aReason) {
 		
 		iFox && iFox.updateToolbarItems("uninstall");
 	} catch(e) {Cu.reportError(e)}
-	pb.clearUserPref("removeOptions")
-	pb.clearUserPref("removeSearchbar")	
+	// pb.clearUserPref("removeOptions")
+	// pb.clearUserPref("removeSearchbar")
 	pb.clearUserPref('version')
 }
 

@@ -202,13 +202,8 @@ InstantFox.updateToolbarItems = function(mode) {
 	var getSearchbarPosition = function(){
 		var pos = curSet.indexOf("urlbar-container") + 1;
 		if (pos) {
-			while (
-				   curSet[pos] == 'reload-button'
-				|| curSet[pos] == 'stop-button'
-				|| curSet[pos] == 'search-container'
-			) {
+			while (['reload-button', 'stop-button', 'search-container'].indexOf(curSet[pos]) != -1)
 				pos++
-			}
 		} else {
 			pos = curSet.length;
 		}
@@ -216,31 +211,34 @@ InstantFox.updateToolbarItems = function(mode) {
 	}
 	var pb = Services.prefs.getBranch("extensions.InstantFox.")
 	var getPref = function(name, defVal) {
-		if (name in (mode || {}))
-			return mode.name
-		else if (pb.prefHasUserValue(name))
+		if (pb.prefHasUserValue(name))
 			return pb.getBoolPref(name)
 		else
 			return defVal
 	}
 	//**********************************************
-	dump(mode)
-	dump(curSet)
+	var shouldRemoveSearchbar = getPref("removeSearchbar", true)
+	var shouldRemoveOptions = getPref("removeOptions", false)
+        
+	dump(mode + "-ing", curSet)
 	dump(InstantFoxModule._defToolbarSet)
 	if (mode == "install"){
+        if (shouldRemoveOptions)
+            return;
+
 		if (!InstantFoxModule._defToolbarSet)
 			InstantFoxModule._defToolbarSet = curSet.concat()
 		
 		var i1 = curSet.indexOf(newId)
 		var i2 = curSet.indexOf(oldId)
-		dump(i1, i2)
+		dump("new item: old item", i1, i2)
 		if (i1 >= 0 || document.getElementById(newId))
 			return
-		if (i2 == -1) {
+		if (i2 != -1 && shouldRemoveSearchbar) {
+            curSet[i2] = newId
+		} else {
 			var pos = getSearchbarPosition()
 			curSet.splice(pos, 0, newId)
-		} else {
-			curSet[i2] = newId
 		}
 	}
 	else if (mode == "uninstall") {
@@ -265,14 +263,13 @@ InstantFox.updateToolbarItems = function(mode) {
 				curSet.splice(pos, 0, id)
 			}
 		}
-		var removeSearchbar = getPref("removeSearchbar", true)		
-		var removeOptions = getPref("removeOptions", false)
+
 		
-		item2Toolbar(oldId, removeSearchbar)
-		item2Toolbar(newId, removeOptions)
+		item2Toolbar(oldId, shouldRemoveSearchbar)
+		item2Toolbar(newId, shouldRemoveOptions)
 	}
 	
-	dump(curSet)
+	dump("final curset", curSet)
 
 	//**********************************************
 	curSet = curSet.join(",")
