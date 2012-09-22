@@ -878,7 +878,7 @@ function getAboutUrls(){
 	for(var i in Cc)
 		if(i.indexOf(l)==0){
 			var name = i.substr(l.length)
-			ans.push({
+			ans[name == "config" ? "unshift" : "push"]({
 				url: 'about:'+ name,
 				title: 'about:'+ name,
 				name: name
