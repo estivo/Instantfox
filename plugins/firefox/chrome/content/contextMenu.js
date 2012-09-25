@@ -19,6 +19,9 @@ InstantFox.modifyContextMenu = function(enable){
                 splitMenu.hidden = true
                 return false;
             }
+            
+            // reset flag tracking command after click
+            splitMenu.$ignoreCommand = false
 
             if (selectedText.length > 15)
                 croppedText = selectedText.substr(0,15) + this.ellipsis;
@@ -51,8 +54,8 @@ InstantFox.modifyContextMenu = function(enable){
             var m = InstantFox.$el('menu', {
                 'id':         "ifox-context-searchselect",
                 'type':       "splitmenu",
-                'onclick':    "gContextMenu&&gContextMenu.doSearch(event)",
-                'oncommand':  "gContextMenu&&gContextMenu.doSearch(event)",
+                'onclick':    "gContextMenu&&gContextMenu.doSearch(event, 'mouse')",
+                'oncommand':  "gContextMenu&&gContextMenu.doSearch(event, 'command')",
                 'class':      "menu-non-iconic"
             })
 
@@ -114,12 +117,14 @@ InstantFox.modifyContextMenu = function(enable){
                 }
             })
         }
-        proto.doSearch = function(e) {
+        proto.doSearch = function(e, source) {
             if(e.target.menuitem && !e.target.isMenuitemActive)
                 return;
             // needed to prevent calling command listener after click listener
+            if(source == 'command' && e.currentTarget.$ignoreCommand)
+                return;
             if(e.button != 1)
-                gContextMenu = null
+                e.currentTarget.$ignoreCommand = true
 
             var name = e.target.getAttribute('name'), href;
             if (!name)
