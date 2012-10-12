@@ -7,6 +7,31 @@ InstantFox.modifyContextMenu = function(enable){
         enable = !(Services.prefs.prefHasUserValue(prefName) && Services.prefs.getBoolPref(prefName))
     }
     let proto = nsContextMenu.prototype
+    // stupid rename in firefox 18
+    var bundleName;
+    var getBundleName = function() {
+        try {
+            bundleName = "contextMenuSearchText"
+            gNavigatorBundle.getFormattedString(bundleName, []);
+            return bundleName;
+        }catch(e){}
+        try {
+            bundleName = "contextMenuSearch"
+            gNavigatorBundle.getFormattedString(bundleName, []);
+            return bundleName;
+        }catch(e){}
+    }
+    var getLabel = function(name, text) {
+        try {
+            return gNavigatorBundle.getFormattedString(bundleName||getBundleName(), [name, text]);
+        }catch(e){return "..." + text}
+    }
+    var getKey = function(){
+        try {
+            return gNavigatorBundle.getString(bundleName + ".accesskey")
+        }catch(e){return " "}
+    }
+    
     if (enable && !proto.isTextSelection_orig) {
         proto.isTextSelection_orig = proto.isTextSelection_orig || proto.isTextSelection
         proto.isTextSelection = function() {
@@ -30,13 +55,12 @@ InstantFox.modifyContextMenu = function(enable){
             var engine = InstantFoxModule.Plugins[engineId]
 
             // format "Search <engine> for <selection>" string to show in menu
-            var menuLabel = gNavigatorBundle.getFormattedString("contextMenuSearchText",
-                                                                [engine.name, croppedText]);
+            var menuLabel = getLabel(engine.name, croppedText)
             if (menuitem) {
                 menuitem.label = menuLabel;
                 menuitem.image = engine.iconURI
                 splitMenu.setAttribute('name', engine.id)
-                menuitem.accessKey = gNavigatorBundle.getString("contextMenuSearchText.accesskey");
+                menuitem.accessKey = getKey();
                 splitMenu.hidden = false
             }
             // this caches the selected text in isTextSelected
