@@ -65,7 +65,7 @@ try{
  *        id:
  *    }
  ***************/
- 
+
 // used for new plugins only
 function fixupPlugin(p){
 	if(p.url){
@@ -148,9 +148,9 @@ var pluginLoader = {
 			if (p.type != 'default' || this.isUserModified(p))
 				newPlugins[p.id] = p;
 		}
-		
+
 		InstantFoxModule.Plugins = newPlugins;
-		
+
 		InstantFoxModule.defaultPlugin = InstantFoxModule.defaultPlugin||'google'
 		//---------
 		var p = pluginData.autoSearch;
@@ -159,11 +159,11 @@ var pluginLoader = {
 			InstantFoxModule.autoSearch = p
 
 		var a = InstantFoxModule.autoSearch
-		
+
 		if (!a.def_json || a.def_json == a.json)
 			a.json = p.json
 		a.def_json = p.json
-		
+
 		if (!a.def_url || a.def_url == a.url)
 			a.url = p.url
 		a.def_url = p.url
@@ -179,7 +179,7 @@ var pluginLoader = {
 				for each (var k in keys) {
 					if (!k)
 						continue
-					
+
 					var id = InstantFoxModule.resolveShortcut(k)
 					if (id) {
 						conflicts[InstantFoxModule.Plugins[id].id] = true
@@ -197,12 +197,12 @@ var pluginLoader = {
 	addDefaultPluginData: function(pluginData){
 		this.addDefaultPlugins(pluginData)
 		// add data from browser search engines
-		importBrowserPlugins(true)		
+		importBrowserPlugins(true)
 	},
 	addFromUserString: function(jsonString){
 		try{
 			var pluginData = JSON.parse(jsonString)
-		}catch(e){			
+		}catch(e){
 			return false
 		}
 
@@ -221,7 +221,7 @@ var pluginLoader = {
 
 		if(pluginData.autoSearch)
 			InstantFoxModule.autoSearch = pluginData.autoSearch
-		else 
+		else
 			return false
 
 		return true;
@@ -230,7 +230,7 @@ var pluginLoader = {
 	getPluginString: function(forUser){
 		var prefs = Services.prefs.getBranch('extensions.InstantFox.')
 		var version = prefs.prefHasUserValue("version") ? prefs.getCharPref("version") : "0.0.0"
-		
+
 		var ob={}
 		for each(var p in InstantFoxModule.Plugins)
 			if(p.url)
@@ -248,8 +248,14 @@ var pluginLoader = {
 		return JSON.stringify(pluginData, null, forUser?4:1)
 	},
 	savePlugins: function(){
+		if (this.req) {
+			Cu.reportError("fetchAsync is too slow")
+			if (this.req.loadQueue.indexOf(this.savePlugins) == -1)
+				this.req.loadQueue.push(this.savePlugins)
+			return
+		}
+		dump("success:)")
 		var js = this.getPluginString(false)
-
 		writeToFile(getUserFile('instantFoxPlugins.js'), js)
 	},
 	scheduleSavePlugins: function(setTimeout, t) {
@@ -263,8 +269,8 @@ var pluginLoader = {
 		var file = getUserFile('instantFoxPlugins.js')
 		if (!locale && file.exists()) {
 			var spec = Services.io.newFileURI(file).spec
-			var onload = [			
-				(function(str){
+			var onload = [
+				function(str){
 					try{
 						if(!this.addFromUserString(str))
 							throw("error")
@@ -273,23 +279,23 @@ var pluginLoader = {
 						this.loadPlugins(true)
 					}
 					delete this.req
-				}).bind(this),
-				this.initShortcuts.bind(this),
+				},
+				this.initShortcuts,
 				callback
 			];
 			if(this.req)
 				this.req.abort()
-			this.req = fetchAsync(spec, onload)
+			this.req = fetchAsync(spec, onload, this)
 			return
 		}
 		var defList = Cu.import("chrome://instantfox/content/defaultPluginList.js")
-		
+
 		if (typeof locale == "string")
 			InstantFoxModule.selectedLocale = locale
 		var data = defList.getData(InstantFoxModule)
 		this.addDefaultPluginData(data)
 		this.initShortcuts()
-		
+
 		callback && callback()
 	},
 
@@ -353,6 +359,13 @@ var pluginLoader = {
 	},
 	// add new plugins when instantfox is updated
 	onInstantfoxUpdate: function() {
+		if (this.req) {
+			Cu.reportError("fetchAsync is too slow")
+			if (this.req.loadQueue.indexOf(this.onInstantfoxUpdate) == -1)
+				this.req.loadQueue.push(this.onInstantfoxUpdate)
+			return
+		}
+		dump("onInstantfoxUpdate success:)")
 		this.loadPlugins(InstantFoxModule.selectedLocale||true, this.savePlugins.bind(this))
 	},
 
@@ -372,7 +385,7 @@ var pluginLoader = {
 		}catch(e){}
 		return 'http://g.etfv.co/http://'+host
 	}
-	
+
 }
 
 
@@ -384,21 +397,24 @@ function getFileUri(mPath) {
 	}
 	return uri.spec
 }
-function fetchAsync(href, callback){
+function fetchAsync(href, callback, thisVal){
 	var req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
 	req.overrideMimeType('text/plain')
 	req.open('GET', href, true);
+	req.loadQueue = typeof callback == 'function' ? [callback] : callback
 
 	req.addEventListener('load', function() {
 		req.removeEventListener('load', arguments.callee, false)
+		var t=Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer)
+		t.init(
+		function(){
 		var reqText = req = req.responseText
-		
-		if(typeof callback == 'function')
-			callback(reqText);
-		else for each(var func in callback)
+
+		for each(var func in callback)
 			if (typeof func == 'function') try {
-				func(reqText);
-			} catch(e){Components.utils.reportError(e)}	
+				func.call(thisVal, reqText);
+			} catch(e){Components.utils.reportError(e)}
+		}, 2000, 0)
 	}, false)
 
 	req.send(null);
@@ -463,7 +479,7 @@ function importBrowserPlugins(importKeys) {
 				if (!iPlugin.key)
 					iPlugin.key = p.key
 			}
-			
+
 			// handle default plugins
 			var p1 = InstantFoxModule.Plugins[p.id]
 			if(p1.type == 'browserSearch')
@@ -506,8 +522,8 @@ InstantFoxModule = {
 	update_url:  "http://www.instantfox.net/update.php",
 
 	bp: this,
-	
-    getContextMenuPlugins: function(type) {
+
+	getContextMenuPlugins: function(type) {
 		if (!this.contextMenuPlugins)
 			this.setContextMenuPlugins()
 
@@ -520,14 +536,14 @@ InstantFoxModule = {
 			case "off":
 				var ans = []; var pList = this.contextMenuPlugins
 				var add = function(id) { if (pList.indexOf(id) == -1) ans.push(id) }
-				
+
 				for each (var engine in this.Plugins)
 					engine.disabled || add(engine.id)
 				add("__search_site__")
 				ans.splice(1,0,"-")
 				return ans
 		}
-    },
+	},
 	updateContextMenuPlugins: function(){
 		var pList = this.getContextMenuPlugins("on")
 		for (var i = pList.length; i--;) {
@@ -539,7 +555,7 @@ InstantFoxModule = {
 				continue
 			pList.splice(i, 1)
 		}
-		
+
 		for each (var p in this.Plugins) {
 			if(p.disabled || p.hideFromContextMenu)
 				continue
@@ -547,14 +563,14 @@ InstantFoxModule = {
 			if (pList.indexOf(id) == -1) {
 				var insertPos = pList.lastIndexOf("-")
 				if (insertPos == -1)
-					insertPos = pList.length				
+					insertPos = pList.length
 				pList.splice(insertPos - 1, 0, id)
 			}
-		}		
+		}
 	},
-    setContextMenuPlugins: function(list) {
+	setContextMenuPlugins: function(list) {
 		var pList = this.contextMenuPlugins = []
-		
+
 		if (!list) {
 			var add = function(id) { pList.push(id) }
 			for each (var p in this.Plugins) {
@@ -572,15 +588,15 @@ InstantFoxModule = {
 				if (id == "-" || id == "__search_site__") {
 					this.contextMenuPlugins.push(id)
 					continue
-				}			
+				}
 				var p = this.Plugins[id]
 				if(!p || p.disabled || p.hideFromContextMenu)
 					continue
-					
+
 				this.contextMenuPlugins.push(id)
 			}
 		}
-    },
+	},
 	//
 	get openSearchInNewTab(){
 		delete this.openSearchInNewTab
@@ -928,7 +944,7 @@ SimpleAutoCompleteResult.prototype = {
 	appendMatch: function(aValue,aComment,aImage, aStyle){},
 	setListener: function(aListener){},
 	/********************/
-	setResultList: function(list, defItem) { 
+	setResultList: function(list, defItem) {
 		if (list) {
 			var status = (list.length?'SUCCESS':'NOMATCH')
 			this.list = list;
@@ -946,22 +962,22 @@ SimpleAutoCompleteResult.prototype = {
 	get errorDescription() this._errorDescription,
 	get matchCount() this.list.length,
 
-	getCommentAt: function(index) 
+	getCommentAt: function(index)
 		this.list[index] && this.list[index].comment || "",//title attribute on richlistitem in popup
-	getLabelAt: function(index) 
+	getLabelAt: function(index)
 		this.list[index] && this.list[index].title || "",//url attribute on richlistitem in popup
-	getValueAt: function(index) 
+	getValueAt: function(index)
 		this.list[index] && this.list[index].url || "",//displayed in urlbar
-	getImageAt: function(index) 
-		this.list[index] && this.list[index].icon || "",// "chrome://instantfox/content/skin/button-logo.png", //pin-icon.png", 
-	getStyleAt: function(index) 
+	getImageAt: function(index)
+		this.list[index] && this.list[index].icon || "",// "chrome://instantfox/content/skin/button-logo.png", //pin-icon.png",
+	getStyleAt: function(index)
 		this.list[index] && this.list[index].type || "InstantFoxSuggest",
 
 	removeValueAt: function(index, removeFromDb) {
 		dump(index, removeFromDb)
 		this.list.splice(index, 1);
 	},
-	QueryInterface: XPCOMUtils.generateQI([ Ci.nsIAutoCompleteResult, Ci.nsIAutoCompleteSimpleResult ])  
+	QueryInterface: XPCOMUtils.generateQI([ Ci.nsIAutoCompleteResult, Ci.nsIAutoCompleteSimpleResult ])
 };
 
 function combinedSearch(searchProvider) {
@@ -971,13 +987,13 @@ function combinedSearch(searchProvider) {
 }
 combinedSearch.prototype = {
 	removeValueAt: function(index, removeFromDb) {
-	
+
 		var item = this._result.list[index]
 		if (!item)
 			return
-			
+
 		this._result.list.splice(index, 1);
-		
+
 		if(item.origIndex == null)
 			this.historyResult(origIndex, removeFromDb)
 	},
@@ -1023,7 +1039,7 @@ combinedSearch.prototype = {
 	start: function(searchString, searchParam, listener, jsonURL) {
 		this.listener = listener
 		this.searchString = searchString
-		
+
 		this.searchProvider.historyAutoComplete.stopSearch()
 		this.searchProvider.historyAutoComplete.startSearch(searchString, searchParam, null, this);
 		var url = jsonURL.replace('%q', encodeURIComponent(searchString))
@@ -1054,7 +1070,7 @@ InstantFoxSearch.prototype = {
 			listener.onSearchResult(this, newResult);
 			return
 		}
-		
+
 		if (!InstantFoxModule.currentQuery) {
 			var p = InstantFoxModule.autoSearch || {}
 			//Search user's history
@@ -1064,14 +1080,14 @@ InstantFoxSearch.prototype = {
 
 			if (p.suggest && searchString.length >= p.minQChars) {
 				if (!this._combinedResult) {
-					this._combinedResult = new combinedSearch(this)					
+					this._combinedResult = new combinedSearch(this)
 				}
 				this._combinedResult.start(searchString, searchParam, listener, p.json)
 				return
 			}
 			this.historyAutoComplete.startSearch(searchString, searchParam, null, this);
 			return
-		} 
+		}
 		if (this.$searchingHistory)
 			this.historyAutoComplete.stopSearch()
 
@@ -1112,7 +1128,7 @@ InstantFoxSearch.prototype = {
 			this.parser = isMaps ? parseMapsJson : parseSimpleJson
 		}
 
-		
+
 		if (url) {
 			this.listener = listener;
 			this.startReq(url)
@@ -1145,9 +1161,9 @@ InstantFoxSearch.prototype = {
 		_req.addEventListener("load", this.onSearchReady, false);
 
 		this._reqList.push(_req)
-		
+
 		if (HttpsEverywhere) url = url.replace(/^http:/, 'https:')
-		
+
 		_req.open("GET", url, true);
 		// without this request can generate prompts
 		_req.channel.notificationCallbacks = new SearchSuggestLoadListener();
@@ -1265,7 +1281,7 @@ checkVersion = function() {
 		var oldVersion = pb.prefHasUserValue('version') ? pb.getCharPref('version') : '0.0.0'
 		var uninstallVersion = pb.prefHasUserValue("uninstalled") && pb.getCharPref('uninstalled')
 		var newVersion = addon.version;
-		
+
 		// ---------------------------- remove old pref ---------------
 		if (oldVersion == '0.0.0') {
 			let pbo = Services.prefs.getBranch('extensions.instantfox.')
@@ -1275,7 +1291,7 @@ checkVersion = function() {
 			}
 		}
 		// ---------------------------- --------------- ---------------
-		
+
 		var topWin, ifox
 		// update toolbar items of loaded windows
 		if (oldVersion != newVersion) {
@@ -1289,7 +1305,7 @@ checkVersion = function() {
 				ifox.updateToolbarItems("install");
 			} catch(e) {Cu.reportError(e)}
 		}
-		
+
 		if (oldVersion == newVersion)
 			return;
 
@@ -1298,11 +1314,11 @@ checkVersion = function() {
 		try {
 			InstantFoxModule.pluginLoader.onInstantfoxUpdate()
 		} catch(e) {Cu.reportError(e)}
-	
+
 		// don't bother user with minor updates or after reenabling
 		if (oldVersion.slice(0,-1) == newVersion.slice(0,-1) || uninstallVersion == newVersion)
 			return
-		
+
 		if (oldVersion == "0.0.0") {
 			var url = InstantFoxModule.install_url + '?to=' + newVersion;
 			// add options button only on first install
@@ -1315,5 +1331,5 @@ checkVersion = function() {
 	})
 }
 
-// this will be called after 
+// this will be called after
 checkVersion()

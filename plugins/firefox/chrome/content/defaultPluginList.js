@@ -95,6 +95,11 @@ var commonPlugins = {
 		key: "gt",
 		url: "http://translate.google.com/#auto|%ls|%q",
 		name: "Google Translate"
+	},
+	GoogleTranslate4: {
+		key: "gt4",
+		url: "44http://translate.google.com/#auto|%ls|%q",
+		name: "44Google Translate"
 	}
 }
 
@@ -259,7 +264,8 @@ locale(["en","en-CA","ca"], {
 	IMDb: true,
 	GoogleLuck: true,
 	Calculator: true,
-	GoogleTranslate: true
+	GoogleTranslate: true,
+GoogleTranslate4:true
 })
 
 locale(["en","en-GB","co.uk"], {
