@@ -372,6 +372,15 @@ prefpane{
 					<preference id="takeSuggestedOnEnter" name="extensions.InstantFox.takeSuggestedOnEnter" type="bool" />
 				</preferences>
 
+				<groupbox pack="start">
+                    <caption class="i18n" label="export_import"/>
+					<slickbutton class="i18n" label='copyPluginsToClipboard' oncommand='copyPluginsToClipboard()'/>					
+					<slickbutton class="i18n" label='addPluginDataFromClipboard' oncommand='addPluginsFromClipboard()'/>
+					<slickbutton class="i18n" label='resetAllPlugins' oncommand='resetAllPlugins()'/>
+				</groupbox>
+                
+                <spacer flex="1"/>
+                
 				<hbox align='center'>
 					<label class="i18n" value='pref_maxUrlbarResults' control='maxRichResults-textbox'/>
 					<textbox id='maxRichResults-textbox' preference="maxRichResults"/>
@@ -386,12 +395,6 @@ prefpane{
 				<separator/>
 				<checkbox class="i18n" label="pref_hideSearchbox" preference="removeSearchbar" checked="true"
 						oncommand="window.gToolbarsChanged=true;schedule(updateToolbarItems)"/>
-				<spacer flex="1"/>
-				<groupbox pack="start">
-					<slickbutton class="i18n" label='copyPluginsToClipboard' oncommand='copyPluginsToClipboard()'/>					
-					<slickbutton class="i18n" label='addPluginDataFromClipboard' oncommand='addPluginsFromClipboard()'/>
-					<slickbutton class="i18n" label='resetAllPlugins' oncommand='resetAllPlugins()'/>
-				</groupbox>
 			</prefpane>
 		</tabpanel>
 		<tabpanel orient='vertical'  flex='1' >

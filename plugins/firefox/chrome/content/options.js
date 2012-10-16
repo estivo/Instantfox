@@ -937,7 +937,7 @@ addPluginsFromClipboard = function(){
 		alert(i18n.get('alert.invalid'))
 		return
 	}
-	var arr = [i18n.get("alert.replace"), i18n.get("alert.merge")]
+	var arr = [i18n.get("alert.merge"), i18n.get("alert.replace")]
 	var sel={}
 	var proceed = Services.prompt.select(
 		window, "Instantfox ", i18n.get("alert.what2do"),
@@ -948,7 +948,7 @@ addPluginsFromClipboard = function(){
 		return
 	try{
 		var origPlugins = InstantFoxModule.Plugins
-		if(sel.value == 0){//"replace"
+		if(sel.value == 1){//"replace"
 			InstantFoxModule.Plugins = {}
 		}
 		InstantFoxModule.pluginLoader.addFromUserString(str)
