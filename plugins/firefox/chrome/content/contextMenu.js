@@ -52,7 +52,7 @@ InstantFox.modifyContextMenu = function(enable){
                 croppedText = selectedText.substr(0,15) + this.ellipsis;
 
             var engineId = InstantFoxModule.getContextMenuPlugins("default")
-            var engine = InstantFoxModule.Plugins[engineId]
+            var engine = InstantFoxModule.Plugins[engineId] || {}
 
             // format "Search <engine> for <selection>" string to show in menu
             var menuLabel = getLabel(engine.name, croppedText)
