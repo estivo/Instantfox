@@ -100,15 +100,14 @@ var instantFoxDevel = {
 								   XPIProvider.bootstrappedAddons[id].type, file,
 								   "startup", XPIProviderBP.BOOTSTRAP_REASONS.APP_STARTUP);
 	},
-	clearFirstRunPref: function(update){
-		try{
-			var prefs = Services.prefs
+	clearFirstRunPref: function(isUpdate){
+        var prefs = Services.prefs
+        if (isUpdate)
+            prefs.setCharPref("extensions.InstantFox.version", 'oldVersion')
+		else try{
 			prefs.getChildList("extensions.InstantFox.",{},{}).forEach(function(x){
 				prefs.clearUserPref(x)
 			})
-			
-			if (update)
-				prefs.setCharPref("extensions.InstantFox.version", 'oldVersion')
 		}catch(e){}
 	},
 	testFirstRun: function(isUpdate){

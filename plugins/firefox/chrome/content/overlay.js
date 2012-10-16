@@ -91,32 +91,27 @@ InstantFox.applyOverlay = function(off) {
     }
     
     function insertMenuitem() {
-        var popup = $("menu_ToolsPopup")
-        if (!popup)
-            return;
-        popup.insertBefore($el("menuitem", { 
-              id:"instantFox-menuitem"
-            , image:"chrome://instantfox/content/skin/button-logo.png"
-            , onclick:"InstantFox.openOptionsWindow()", label: "InstantFox Options"
-            , class: "menuitem-iconic"
-        }), $("prefSep"))
+        InstantFox.updateMenuitem(true)        
     }
 }
-InstantFox.openOptionsWindow = function() {
-    var uri = "chrome://instantfox/content/options.xul"
-    function findWin() {
-        var winEnum = Services.wm.getEnumerator("");
-        while (winEnum.hasMoreElements()) {
-            var win = winEnum.getNext();
-            if (win.closed)continue;
-            if (win.location.href == uri)
-                return win;
-        }
-    }
-    var optWindow = findWin()
-    if (optWindow) optWindow.focus()
-    else window.open(uri, "_blank", "chrome,extrachrome,menubar,resizable,scrollbars,status,toolbar");
+InstantFox.updateMenuitem = function(show) {
+    var $el = InstantFox.$el, $ = InstantFox.$, rem = InstantFox.rem
+    var popup = $("menu_ToolsPopup")
+    var mi = $("instantFox-menuitem")
+    
+    if (!popup)
+        return;
+    if (!show)
+        return mi && rem(mi);
+
+    mi || popup.insertBefore($el("menuitem", {
+          id:"instantFox-menuitem"
+        , image:"chrome://instantfox/content/skin/button-logo.png"
+        , onclick:'document.getElementById("instantfox-popup").openPopup(gNavToolbox)', label: "InstantFox Options"
+        , class: "menuitem-iconic"
+    }), $("prefSep"))
 }
+
 //************************************************************************
 // options popup
 InstantFox.popupCloser = function(e) {
@@ -135,7 +130,8 @@ InstantFox.onPopupShowing = function(p) {
 	if (p.id != 'instantfox-popup')
 		return
 
-	document.getElementById('instantFox-options').setAttribute("open", true)
+	var button = document.getElementById('instantFox-options')
+    button && button.setAttribute("open", true)
 	window.addEventListener('mousedown', InstantFox.popupCloser, false)
 
 	var st = p.querySelector('stack')
@@ -160,7 +156,8 @@ InstantFox.onPopupHiding = function(p) {
 	var ifr = p.querySelector('iframe')
 	ifr.contentWindow.saveChanges()
 	window.removeEventListener('mousedown', InstantFox.popupCloser, false)
-	document.getElementById('instantFox-options').removeAttribute("open");
+	var button = document.getElementById('instantFox-options')
+    button && button.removeAttribute("open");
 }
 InstantFox.updatePopupSize = function(options) {
 	var RDF = Cc["@mozilla.org/rdf/rdf-service;1"].getService(Ci.nsIRDFService)
@@ -279,6 +276,7 @@ InstantFox.updateToolbarItems = function(mode) {
 		document.persist(navBar.id, "currentset");
 		try {
 			BrowserToolboxCustomizeDone(true);
+            InstantFox.updateMenuitem(curSet.indexOf(newId) == -1)
 		} catch (e) {}
 	}
 }
@@ -292,5 +290,7 @@ InstantFox.updateToolbarPrefs = function(e) {
 	Services.prefs.setBoolPref("extensions.InstantFox.removeOptions", !optionsButton)
 
 	dump(searchBar, optionsButton, "************************************")
+    
+    setTimeout(InstantFox.updateMenuitem, 0, !optionsButton)
 }
 
