@@ -143,7 +143,7 @@ function shutdown(aData, aReason) {
 			.removeBootstrappedManifestLocation(aData.installPath)
 	
 	Cu.import('chrome://instantfox/content/instantfoxModule.js')
-	InstantFoxModule.updateComponent('off')
+    InstantFoxModule.shutdown()
 
 	Cu.unload('chrome://instantfox/content/instantfoxModule.js')
 	Cu.unload('chrome://instantfox/content/defaultPluginList.js')

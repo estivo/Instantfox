@@ -432,7 +432,11 @@ function makeURI(aURL, aOriginCharset, aBaseURI) {
 	return Services.io.newURI(aURL, aOriginCharset, aBaseURI);
 }
 
-
+function setTimer(f, t) {
+    var timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer)
+    timer.init(f, t || 100, 0)
+    return timer
+}
 /*************************************************************************
  *    search service
  ***************/
@@ -463,9 +467,10 @@ function pluginFromNsiSearch(bp){
 	}
 }
 function importBrowserPlugins(importKeys) {
+    dump("importBrowserPlugins")
 	try{
 		var browserPlugins = Services.search.getEngines().map(pluginFromNsiSearch)
-		for each(var p in browserPlugins){
+		for each(var p in browserPlugins){dump(p.id)
 			if (!InstantFoxModule.Plugins[p.id])
 				InstantFoxModule.Plugins[p.id] = p
 			else if (importKeys && p.key) {
@@ -488,21 +493,39 @@ function importBrowserPlugins(importKeys) {
 
 searchEngineObserver = {
 	observe: function(subject, topic, j){
-		importBrowserPlugins(false)
-		if(this.$listener){
-			this.$listener.get()()
-		}
+        if (this.$pending)
+            return;
+        this.$pending = true
+        var _this = this
+        setTimer(function(){
+            _this.$pending = false
+            try{
+                importBrowserPlugins(false)
+            }catch(e){}
+            _this.$listeners && _this.$listeners.forEach(function(l) {
+                try{
+                    l.get()()
+                }catch(e){Cu.reportError(e)}
+            })
+        }, 100)
 	},
 	addListener: function(w){
-		this.$listener = Components.utils.getWeakReference(w)
+		if (!this.$listeners) 
+            this.$listeners = [];
+        this.$listeners.push(Components.utils.getWeakReference(w))
+        dump(this.$listeners)
 	},
-	QueryInterface: function() this
+	QueryInterface: function() this,
+    turn: function(state){
+        var f = state == "on" ? "addObserver" : "removeObserver"
+        Services.obs[f](this, "engine-added", true)
+        Services.obs[f](this, "engine-loaded", true)
+        Services.obs[f](this, "engine-removed", true)
+        Services.obs[f](this, "browser-search-engine-modified", true)
+    }
 }
-// holds weak reference. no need to remove
-Services.obs.addObserver(searchEngineObserver, "engine-added", true)
-Services.obs.addObserver(searchEngineObserver, "engine-loaded", true)
-Services.obs.addObserver(searchEngineObserver, "engine-removed", true)
-Services.obs.addObserver(searchEngineObserver, "browser-search-engine-modified", true)
+
+searchEngineObserver.turn('on')
 
 /*****************************************************
  * main object
@@ -1227,6 +1250,10 @@ InstantFoxModule.updateComponent = function(off) {
 		var factory = XPCOMUtils.generateNSGetFactory([component])(cp.classID);
 		reg.registerFactory(cp.classID, cp.classDescription, cp.contractID, factory);
 	})(InstantFoxSearch, off);
+}
+InstantFoxModule.shutdown = function() {
+    InstantFoxModule.updateComponent('off')
+    searchEngineObserver.turn('off')
 }
 InstantFoxModule.updateComponent()
 InstantFoxModule.initialize()

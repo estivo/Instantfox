@@ -518,6 +518,12 @@ enginesPopup = {
 			}
 		}
 		$("add-from-browser").hidden = hide
+
+        rebuild()
+
+        var el = $("shortcuts")
+        el.selectedItem = el.lastChild
+        el.scrollToIndex(el.itemCount - 1)
 	}
 }
 
