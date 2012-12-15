@@ -49,7 +49,25 @@ window.InstantFox = {
 		searchBar.select();
 		searchBar.focus();
 	},
-
+    adjustHeight_: function () {
+        // Figure out how many rows to show
+        var rows = this.richlistbox.childNodes;
+        var numRows = Math.min(this._matchCount, this.maxRows, rows.length);
+        
+        // Default the height to 0 if we have no rows to show
+        var height = 0;
+        if (numRows) {
+            var firstRowRect = rows[0].getBoundingClientRect();
+            var lastRowRect = rows[numRows - 1].getBoundingClientRect();
+            height = lastRowRect.bottom - firstRowRect.top
+        }
+        
+        // Only update the height if we have a non-zero height and if it
+        // changed (the richlistbox is collapsed if there are no results)
+        if (height && height != this.richlistbox.height)
+            this.richlistbox.height = height;
+    },
+    
 	$patch: function(obj, funcName, patchName) {
 		patchName = patchName || funcName+'_'
 		if (this[funcName+'_orig'])
@@ -176,9 +194,11 @@ window.InstantFox = {
 		// this is needed if searchbar is removed from toolbar
 		this.$patch(BrowserSearch, 'addEngine')
 		this.$patch(BrowserSearch, 'webSearch')
-
+        if (gURLBar.popup.adjustHeight.toString().indexOf("_rowHeight"))
+            this.$patch(gURLBar.popup, 'adjustHeight')
 		this.hookUrlbarCommand()
 		this.modifyContextMenu()
+        
 	},
 
 	destroy: function(event) {
@@ -215,6 +235,7 @@ window.InstantFox = {
 
 		this.$unpatch(BrowserSearch, 'addEngine')
 		this.$unpatch(BrowserSearch, 'webSearch')
+		this.$unpatch(gURLBar.popup, 'adjustHeight')
 	},
 
 	setURLBarAutocompleter: function(state, isNewWindow){
