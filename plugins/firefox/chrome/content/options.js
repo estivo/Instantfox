@@ -761,31 +761,31 @@ function saveChanges(){
 }
 
 /**********************************************///{
-xmlFragment =
-	  <richlistitem align="center" id="$id$">
-		<hbox align="center" class='image'>
-			<image src="$iconURI$" width="16" height="16"/>
-		</hbox>
-		<label value="$name$"/>
-		<hbox flex='1' pack='start' align='top'>
-			<hbox class="plugin-status" status="$status$" aID='edit-link' tooltiptext="$_status$"/>
-		</hbox>
-		<hbox align="center" class='key'>
-			<textbox class='key' aID='key' value='$key$' tooltiptext='$i18n_key_tooltip$'
-				onblur='onTextboxEnter(this)' oninput='onTextboxInput(this)'/>
-		</hbox>
-		<label class='link' value="$i18n_edit$" aID='edit-link'/>
-	  </richlistitem>.toXMLString().replace(/>\s*</g,'><')
-xmlFragmentDis =
-	  <richlistitem align="center" id="$id$" disabled="true">
-		<hbox align="center" class='image'>
-			<image src="$iconURI$" width="16" height="16"/>
-		</hbox>
-		<label value="$name$"/>
-		<spacer flex='1' />
-		<textbox class='key invisible' aID='key'/>
-		<label class='link' value="$i18n_enable$" aID='enable-link'/>
-	  </richlistitem>.toXMLString().replace(/>\s*</g,'><')
+xmlFragment = "\
+	  <richlistitem align='center' id='$id$'>\
+		<hbox align='center' class='image'>\
+			<image src='$iconURI$' width='16' height='16'/>\
+		</hbox>\
+		<label value='$name$'/>\
+		<hbox flex='1' pack='start' align='top'>\
+			<hbox class='plugin-status' status='$status$' aID='edit-link' tooltiptext='$_status$'/>\
+		</hbox>\
+		<hbox align='center' class='key'>\
+			<textbox class='key' aID='key' value='$key$' tooltiptext='$i18n_key_tooltip$'\
+				onblur='onTextboxEnter(this)' oninput='onTextboxInput(this)'/>\
+		</hbox>\
+		<label class='link' value='$i18n_edit$' aID='edit-link'/>\
+	  </richlistitem>".replace(/>\s*</g,'><')
+xmlFragmentDis = "\
+	  <richlistitem align='center' id='$id$' disabled='true'>\
+		<hbox align='center' class='image'>\
+			<image src='$iconURI$' width='16' height='16'/>\
+		</hbox>\
+		<label value='$name$'/>\
+		<spacer flex='1' />\
+		<textbox class='key invisible' aID='key'/>\
+		<label class='link' value='$i18n_enable$' aID='enable-link'/>\
+	  </richlistitem>".replace(/>\s*</g,'><')
 //}
 
 function plugin2XML(p){
