@@ -946,8 +946,8 @@ function locale(localeNames, plugins, autoSearch){
 			json: 'http://clients1.google.com/complete/search?client=chrome&hl=%ls&q=%q',
 			url: goog.url,
 			instant: "off",
-			suggest: false,
-			minQChars: 3,
+			suggest: true,
+			minQChars: 2,
 			disabled: true
 		}
 	}
