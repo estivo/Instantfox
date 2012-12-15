@@ -217,7 +217,7 @@ InstantFox.pageLoader = {
 			if(!isTabEmpty(tab)){
 				gBrowser._lastRelatedTab = null
 				var relatedToCurrent = Services.prefs.getBoolPref("browser.tabs.insertRelatedAfterCurrent")
-				var tab = gBrowser.addTab('', {relatedToCurrent:relatedToCurrent, skipAnimation:true})
+				tab = gBrowser.addTab('', {relatedToCurrent:relatedToCurrent, skipAnimation:true})
 				gBrowser.selectedTab = tab;
 			}
 		}

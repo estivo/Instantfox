@@ -753,7 +753,7 @@ window.InstantFox = {
 			self._timeout = null
 			if(InstantFoxModule.currentQuery)
 				self.doPreload(InstantFoxModule.currentQuery)
-			else
+			else if (self.defaultSearch)
 				self.defaultSearch.doPreload()
 
 		}, delay||200, this)

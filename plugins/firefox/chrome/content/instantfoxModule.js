@@ -743,8 +743,11 @@ var parseSimpleJson = function(json, key, splitSpace){
 		Cu.reportError(e);
 		dump(json)
 		try{
-			xhrReturn = json.substring(json.indexOf("[\"")+2,json.lastIndexOf("\"]")).split('","')
-		}catch(e){
+            var i = json.indexOf("[\"")
+            var j = json.lastIndexOf("\"]")
+            if (i != -1 && j != -1)
+                xhrReturn = json.substring(i+2,j).split('","')
+		}catch(e) {
 			Cu.reportError(e)
 			return
 		}
@@ -1185,6 +1188,8 @@ InstantFoxSearch.prototype = {
 		// without this request can generate prompts
 		_req.channel.notificationCallbacks = new SearchSuggestLoadListener();
 		_req.send(null);
+        
+        _req._url = url
 	},
 
 	onSearchReady: function(e){
@@ -1192,12 +1197,21 @@ InstantFoxSearch.prototype = {
 			return
 		// don't let older requests completing later mess with suggestions
 		this.stopOldRequests(e.target)
-		var json = e.target.responseText;
-
+        var req = e.target
+		var json = req.responseText;
+        
 		var q = InstantFoxModule.currentQuery
 		if (q) {
 			var key = q.key || q.plugin.key
 			q.results = this.parser(json, key, q.splitSpace)
+            if (!q.results && req.status == 404 || req.status == 0) {
+                q.results = [{
+                    comment: "request to suggest url didn't return valid json, please check your settings",
+                    title: req._url,
+                    type: "favicon",
+                    url: key + q.splitSpace
+                }]
+            }
 			var newResult = new SimpleAutoCompleteResult(q.results, q.value);
 			this.listener.onSearchResult(this, newResult);
 			q.onSearchReady()
