@@ -87,7 +87,7 @@ function startup(aData, aReason) {
 	Services.ww.registerNotification(windowWatcher);
 }
 
-function showNotice(aData, aReason) {
+function showUninstallPage(aData, aReason) {
 	// addon manager gives buggy information about uninstalling, so we look up the pressed button
 	try {
 		var el = Cc["@mozilla.org/focus-manager;1"].getService(Ci.nsIFocusManager).focusedElement
@@ -124,7 +124,7 @@ function shutdown(aData, aReason) {
 	
 	// || aReason == ADDON_UNINSTALL happens on update ?
 	if (aReason == ADDON_DISABLE ) try {
-		showNotice(aData, aReason)
+		showUninstallPage(aData, aReason)
 	} catch (e) {Cu.reportError(e)}
 	
 	// Unload from any existing windows
