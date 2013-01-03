@@ -5,7 +5,7 @@
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>searchy@searchy</em:id>
-    <em:version>2.7.6</em:version>
+    <em:version>2.7.7</em:version>
     <em:type>2</em:type>
 
     <em:bootstrap>true</em:bootstrap>
