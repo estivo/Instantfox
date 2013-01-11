@@ -204,6 +204,8 @@ InstantFox.pageLoader = {
 		if (this.preview != null && this.preview.parentNode) {
 			this.preview.parentNode.removeChild(this.preview);
 			this.removeProgressListener(this.preview);
+			// on firefox 20+ keeping preview browser causes errors
+			this.preview = null
 		}
 	},
 
