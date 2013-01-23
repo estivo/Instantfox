@@ -169,8 +169,14 @@ window.InstantFox = {
 	initialize: function(isNewWindow) {
 		Cu.import('chrome://instantfox/content/instantfoxModule.js')
 
-		this.stylesheet = document.createProcessingInstruction('xml-stylesheet', 'href="chrome://instantfox/content/skin/instantfox.css"')
-		document.insertBefore(this.stylesheet, document.documentElement)
+        var link = document.createElementNS("http://www.w3.org/1999/xhtml", "h:link")
+        link.rel = "stylesheet"
+        link.href = "chrome://instantfox/content/skin/instantfox.css"
+        link.type = "text/css"
+        link.style.display = "none"
+        document.documentElement.appendChild(link)
+
+		this.stylesheet = link
 		setTimeout(this.updateUserStyle, 200, true) // needs some time untill stylesheet is loaded
 
 		this.setURLBarAutocompleter('on', isNewWindow)
@@ -255,8 +261,17 @@ window.InstantFox = {
 	},
 
 	updateUserStyle: function(firstTime) {
+        try {
+            var sheet = InstantFox.stylesheet.sheet
+            var cssRules = sheet.cssRules
+        } catch(e) {
+            if (firstTime == true)
+                setTimeout(InstantFox.updateUserStyle, 200, 1)
+            return;
+        }
+        
 		var prefs = Services.prefs.getBranch('extensions.InstantFox.')
-		var cssRules, ruleIndex
+		var ruleIndex
 
 		var findRule = function(selector) {
 			for (var i = 0; i < cssRules.length; i++) {
@@ -283,8 +298,8 @@ window.InstantFox = {
 			}
 		}
 
-		var sheet = InstantFox.stylesheet.sheet
-		cssRules = sheet.cssRules
+        
+
 
 
 		if (true) {

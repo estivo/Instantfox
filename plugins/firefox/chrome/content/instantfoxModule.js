@@ -470,7 +470,7 @@ function importBrowserPlugins(importKeys) {
     dump("importBrowserPlugins")
 	try{
 		var browserPlugins = Services.search.getEngines().map(pluginFromNsiSearch)
-		for each(var p in browserPlugins){dump(p.id)
+		for each(var p in browserPlugins){
 			if (!InstantFoxModule.Plugins[p.id])
 				InstantFoxModule.Plugins[p.id] = p
 			else if (importKeys && p.key) {

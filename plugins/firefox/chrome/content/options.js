@@ -169,8 +169,7 @@ function formatString(string, options){
 		return options[x] ? options[x].toString() : ''
 	})
 }
-function escapeHTML(str) str.replace(/[&"<>]/g, function(m)"&"+escapeMap[m]+";");
-var escapeMap = { "&": "amp", '"': "quot", '"': "#39", "<": "lt", ">": "gt" }
+function escapeHTML(str) str.replace(/[&"'<>]/g, function(m)"&#"+m.charCodeAt(0)+";");
 
 //************************ context menu
 initContextMenu = function(popup){
@@ -760,7 +759,7 @@ function saveChanges(){
 	gPluginsChanged = false
 }
 
-/**********************************************///{
+/** XML********************************************///{
 xmlFragment = "\
 	  <richlistitem align='center' id='$id$'>\
 		<hbox align='center' class='image'>\
@@ -775,7 +774,7 @@ xmlFragment = "\
 				onblur='onTextboxEnter(this)' oninput='onTextboxInput(this)'/>\
 		</hbox>\
 		<label class='link' value='$i18n_edit$' aID='edit-link'/>\
-	  </richlistitem>".replace(/>\s*</g,'><')
+	  </richlistitem>".replace(/>\s*</g,'><').trim()
 xmlFragmentDis = "\
 	  <richlistitem align='center' id='$id$' disabled='true'>\
 		<hbox align='center' class='image'>\
@@ -785,7 +784,7 @@ xmlFragmentDis = "\
 		<spacer flex='1' />\
 		<textbox class='key invisible' aID='key'/>\
 		<label class='link' value='$i18n_enable$' aID='enable-link'/>\
-	  </richlistitem>".replace(/>\s*</g,'><')
+	  </richlistitem>".replace(/>\s*</g,'><').trim()
 //}
 
 function plugin2XML(p){
