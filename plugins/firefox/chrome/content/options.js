@@ -495,7 +495,12 @@ enginesPopup = {
 		var id = event.target.value
 		var e = gBrowserEngineList[id]
 		var type = Ci.nsISearchEngine.DATA_XML;
-		InstantFoxModule.bp.searchEngineObserver.addListener(this.scheduleBrowserEngineListUpdate.bind(this))
+		InstantFoxModule.bp.searchEngineObserver.addListener(function() {
+			this.updateBrowserEngineList()
+			var el = $("shortcuts")
+			el.selectedItem = el.lastChild
+			el.scrollToIndex(el.itemCount - 1)
+		}.bind(this))
 		Services.search.addEngine(e.uri, type, e.iconURI, false)
 	},
 	scheduleBrowserEngineListUpdate: function(){
@@ -518,11 +523,7 @@ enginesPopup = {
 		}
 		$("add-from-browser").hidden = hide
 
-        rebuild()
-
-        var el = $("shortcuts")
-        el.selectedItem = el.lastChild
-        el.scrollToIndex(el.itemCount - 1)
+		rebuild()
 	}
 }
 

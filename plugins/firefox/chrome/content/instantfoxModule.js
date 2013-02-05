@@ -433,9 +433,9 @@ function makeURI(aURL, aOriginCharset, aBaseURI) {
 }
 
 function setTimer(f, t) {
-    var timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer)
-    timer.init(f, t || 100, 0)
-    return timer
+	var timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer)
+	timer.init(f, t || 100, 0)
+	return timer
 }
 /*************************************************************************
  *    search service
@@ -467,7 +467,7 @@ function pluginFromNsiSearch(bp){
 	}
 }
 function importBrowserPlugins(importKeys) {
-    dump("importBrowserPlugins")
+	dump("importBrowserPlugins")
 	try{
 		var browserPlugins = Services.search.getEngines().map(pluginFromNsiSearch)
 		for each(var p in browserPlugins){
@@ -493,36 +493,36 @@ function importBrowserPlugins(importKeys) {
 
 searchEngineObserver = {
 	observe: function(subject, topic, j){
-        if (this.$pending)
-            return;
-        this.$pending = true
-        var _this = this
-        setTimer(function(){
-            _this.$pending = false
-            try{
-                importBrowserPlugins(false)
-            }catch(e){}
-            _this.$listeners && _this.$listeners.forEach(function(l) {
-                try{
-                    l.get()()
-                }catch(e){Cu.reportError(e)}
-            })
-        }, 100)
+		if (this.$pending)
+			return;
+		this.$pending = true
+		var _this = this
+		setTimer(function(){
+			_this.$pending = false
+			try{
+				importBrowserPlugins(false)
+			}catch(e){}
+			_this.$listeners && _this.$listeners.forEach(function(l) {
+				try{
+					l.get()()
+				}catch(e){Cu.reportError(e)}
+			})
+		}, 100)
 	},
 	addListener: function(w){
 		if (!this.$listeners) 
-            this.$listeners = [];
-        this.$listeners.push(Components.utils.getWeakReference(w))
-        dump(this.$listeners)
+			this.$listeners = [];
+		this.$listeners.push(Components.utils.getWeakReference(w))
+		dump(this.$listeners)
 	},
 	QueryInterface: function() this,
-    turn: function(state){
-        var f = state == "on" ? "addObserver" : "removeObserver"
-        Services.obs[f](this, "engine-added", true)
-        Services.obs[f](this, "engine-loaded", true)
-        Services.obs[f](this, "engine-removed", true)
-        Services.obs[f](this, "browser-search-engine-modified", true)
-    }
+	turn: function(state){
+		var f = state == "on" ? "addObserver" : "removeObserver"
+		Services.obs[f](this, "engine-added", true)
+		Services.obs[f](this, "engine-loaded", true)
+		Services.obs[f](this, "engine-removed", true)
+		Services.obs[f](this, "browser-search-engine-modified", true)
+	}
 }
 
 searchEngineObserver.turn('on')
@@ -642,17 +642,17 @@ InstantFoxModule = {
 			var i = this.Shortcuts[key]
 			var p = this.Plugins[i]
 			if(p && p.url){
-				var dom = p.domain.replace(/\w+\:\/\/(www\.)?/, '')
-				if(url.indexOf(dom)!=-1){
+				var domain = p.domain.replace(/\w+\:\/\/(www\.)?/, '')
+				if(url.indexOf(domain)!=-1){
 					match=true;
 					break;
 				}
-				dom = dom.replace(/\.\w{1,3}(\.\w{1,3})?\//, '.@@@@/')
-				if(dom == '.')
+				domain = domain.replace(/\.\w{1,3}(\.\w{1,3})?\//, '.@@@@/')
+				if(domain == '.')
 					continue
 				// test in other locales
-				dom = escapeRegexp(dom).replace('@@@@','\\w{1,3}(?:\.\\w{1,3})?')
-				if(RegExp(dom).test(url))
+				domain = escapeRegexp(domain).replace('@@@@','\\w{1,3}(?:\.\\w{1,3})?')
+				if(RegExp(domain).test(url))
 					localizedMatchingPlugin = p
 			}
 		}
@@ -672,9 +672,15 @@ InstantFoxModule = {
 		if(!regexp){
 			var m = p.url.match(/.([^&?#]*)%q(.?)/)
 			regexp = escapeRegexp(m[1])
-			regexp = RegExp('[&?#]'+regexp+'([^&]*)')
+			regexp = RegExp('[&?#]'+regexp+'([^&]+)')
 		}
-		var queryString = (url.match(regexp)||{})[1]
+		do {
+			var match = url.match(regexp);
+			if (!match)
+				break
+			url = url.substr(match.index + match[0].length);
+			var queryString = match[1]
+		} while(match)
 		if(!queryString)
 			return null;
 
@@ -743,10 +749,10 @@ var parseSimpleJson = function(json, key, splitSpace){
 		Cu.reportError(e);
 		dump(json)
 		try{
-            var i = json.indexOf("[\"")
-            var j = json.lastIndexOf("\"]")
-            if (i != -1 && j != -1)
-                xhrReturn = json.substring(i+2,j).split('","')
+			var i = json.indexOf("[\"")
+			var j = json.lastIndexOf("\"]")
+			if (i != -1 && j != -1)
+				xhrReturn = json.substring(i+2,j).split('","')
 		}catch(e) {
 			Cu.reportError(e)
 			return
@@ -923,7 +929,7 @@ function getAboutUrls(){
 	return ans.sort()
 }
 /*************************************************************************
- *    search component
+ *	search component
  ***************/
 function AutoCompleteResultToArray(r){
 	var ans = [];
@@ -1188,8 +1194,8 @@ InstantFoxSearch.prototype = {
 		// without this request can generate prompts
 		_req.channel.notificationCallbacks = new SearchSuggestLoadListener();
 		_req.send(null);
-        
-        _req._url = url
+		
+		_req._url = url
 	},
 
 	onSearchReady: function(e){
@@ -1197,21 +1203,21 @@ InstantFoxSearch.prototype = {
 			return
 		// don't let older requests completing later mess with suggestions
 		this.stopOldRequests(e.target)
-        var req = e.target
+		var req = e.target
 		var json = req.responseText;
-        
+		
 		var q = InstantFoxModule.currentQuery
 		if (q) {
 			var key = q.key || q.plugin.key
 			q.results = this.parser(json, key, q.splitSpace)
-            if (!q.results && req.status == 404 || req.status == 0) {
-                q.results = [{
-                    comment: "request to suggest url didn't return valid json, please check your settings",
-                    title: req._url,
-                    type: "favicon",
-                    url: key + q.splitSpace
-                }]
-            }
+			if (!q.results && req.status == 404 || req.status == 0) {
+				q.results = [{
+					comment: "request to suggest url didn't return valid json, please check your settings",
+					title: req._url,
+					type: "favicon",
+					url: key + q.splitSpace
+				}]
+			}
 			var newResult = new SimpleAutoCompleteResult(q.results, q.value);
 			this.listener.onSearchResult(this, newResult);
 			q.onSearchReady()
@@ -1266,8 +1272,8 @@ InstantFoxModule.updateComponent = function(off) {
 	})(InstantFoxSearch, off);
 }
 InstantFoxModule.shutdown = function() {
-    InstantFoxModule.updateComponent('off')
-    searchEngineObserver.turn('off')
+	InstantFoxModule.updateComponent('off')
+	searchEngineObserver.turn('off')
 }
 InstantFoxModule.updateComponent()
 InstantFoxModule.initialize()
