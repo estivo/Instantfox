@@ -683,6 +683,12 @@ InstantFoxModule = {
 		} while(match)
 		if(!queryString)
 			return null;
+        
+        if (this.Plugins.weather&& p.id=="google" && /^weather /.test(queryString)
+            && /\.google\..*weather %q/.test(this.Plugins.weather.url)) {
+            p = this.Plugins.weather
+            queryString = queryString.substr(8)
+        }
 
 		return p.key.replace(/ .*/, "") + ' ' + decodeURIComponent(queryString);
 	},

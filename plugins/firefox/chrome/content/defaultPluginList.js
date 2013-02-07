@@ -61,9 +61,10 @@ var commonPlugins = {
 	},
 	Weather: {
 		key: "wt",
-		url: "http://weather.instantfox.net/%q",
+		url: "http://www.google.%ld/search?hl=%ls&q=weather %q",
 		json: "http://maps.google.com/maps/suggest?q=%q&cp=999&hl=%ls&gl=%ls&v=2&json=b",
 		hideFromContextMenu: true,
+		iconURI: "http://weather.instantfox.net/favicon.ico",
 		name: "Weather"
 	},
 	LEO: {
