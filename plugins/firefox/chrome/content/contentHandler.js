@@ -223,9 +223,12 @@ InstantFox.pageLoader = {
 				gBrowser.selectedTab = tab;
 			}
 		}
+		this.beforeSwap()
+
 		var browser = this.swapBrowsers(tab)
 		browser.userTypedValue = null;
 
+		this.afterSwap()
 		// Move focus out of the preview to the tab's browser before removing it
 
 		this.preview.blur();
@@ -296,7 +299,6 @@ InstantFox.pageLoader = {
 
 		// restore history
 		targetBrowser.docShell.useGlobalHistory = true
-
 		return targetBrowser
 	},
 
@@ -305,7 +307,7 @@ InstantFox.pageLoader = {
 	},
 	onMouseDown: function(e) {
 		// if searchBoxAPI haven't been used yet, do nothing
-		if (!InstantFoxModule.currentQuery 
+		if (!InstantFoxModule.currentQuery
 		  ||!InstantFoxModule.currentQuery.$searchBoxAPI_URL)
 			return
 		InstantFox.searchBoxAPI.delaySubmiting()
@@ -325,7 +327,7 @@ InstantFox.pageLoader = {
 		let browser = window.gBrowser;
 		// Create the preview if it's missing
 		if (!preview || !preview.docShell) {
-			preview && this.removePreview() // 1password somehow deletes docShell 
+			preview && this.removePreview() // 1password somehow deletes docShell
 
 			preview = window.document.createElement("browser");
 			preview.setAttribute("type", "content");
@@ -351,10 +353,12 @@ InstantFox.pageLoader = {
 			this.addProgressListener(preview)
 
 			// todo: handle this elsewhere
-			// set urlbaricon, this isn't possible in firefox 14+ 
+			// set urlbaricon, this isn't possible in firefox 14+
 			if (window.PageProxySetIcon)
 				PageProxySetIcon('chrome://instantfox/content/skin/button-logo.png')
 			gIdentityHandler.setMode(gIdentityHandler.IDENTITY_MODE_UNKNOWN)
+
+			this.onCreatePreview(preview)
 		}
 		this.previewIsActive = true
 		// disable history
@@ -363,6 +367,42 @@ InstantFox.pageLoader = {
 		InstantFox.searchBoxAPI.listen(preview)
 		// Load the url i
 		preview.webNavigation.loadURI(url, nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE, null, null, null);
+	},
+
+	// workaround for noSquint bug
+	onCreatePreview: function(preview){
+		try{
+			if (window.NoSquint && NoSquint.browser) {
+				preview.markupDocumentViewer.fullZoom =
+					gBrowser.markupDocumentViewer.fullZoom
+			}
+		} catch(e){
+			Cu.reportError(e)
+		}
+	},
+	beforeSwap: function() {
+		try{
+			if (window.NoSquint && NoSquint.browser) {
+				var browser = gBrowser.mCurrentBrowser
+				NoSquint.browser.detach(browser)
+			}
+		} catch(e){
+			Cu.reportError(e)
+		}
+	},
+	afterSwap: function(){
+		try{
+			if (window.NoSquint && NoSquint.browser) {
+				var browser = gBrowser.mCurrentBrowser
+				//try{NoSquint.browser.detach(gBrowser.mCurrentBrowser)}
+				if (!browser.getUserData('nosquint')) {
+					NoSquint.browser.attach(browser);
+					NoSquint.browser.zoom(browser);
+				}
+			}
+		} catch(e){
+			Cu.reportError(e)
+		}
 	},
 
 	//
