@@ -1025,27 +1025,32 @@ combinedSearch.prototype = {
 	},
 	notifyListener: function() {
 		var list, l1 = this.xhrEntries, l2 = this.historyEntries
-		var defaultEntry = this.historyEntries[this.defaultHistoryIndex]
-		if (!l1 || !l1.length) {
-			list = l2 && l2.concat()
-		} else  if (!l2 || !l2.length) {
+		;(InstantFoxModule.o||(InstantFoxModule.o=[])).push([l1, l2])
+		
+		if (!l2 || !l2.length) {
 			list = l1 && l1.concat()
-		} else {
+		} else  {
+			var defaultEntry = l2[this.defaultHistoryIndex]
 			var list = []
-			var tip = list.length
+			var tip = 0
 			for (var i = 0; i < l2.length; i++) {
 				var item = l2[i]
-				if (item.title == item.comment)
-					list.push(item)
-				else
+				if (item.title !== item.url || item.url.length < 150)
 					list.splice(tip++, 0, item)
+				else
+					list.push(item)
 			}
-			tip = 1
-			for (var i = 0; i < l1.length; i++) {
-				var item = l1[i]
-				list.splice(tip++, 0, item)
+			if (l1) {
+				tip = Math.min(tip, 1)
+				var max = Math.min(l1.length, 4)
+				for (var i = 0; i < max; i++)
+					list.splice(tip++, 0, l1[i])
+				while(i < l1.length)
+					list.push(l1[i++])
 			}
 		}
+		
+		dump(JSON.stringify(list[0], null, 4))
 		this._result.setResultList(list, defaultEntry)
 		this.listener.onSearchResult(this.searchProvider, this._result)
 	},
