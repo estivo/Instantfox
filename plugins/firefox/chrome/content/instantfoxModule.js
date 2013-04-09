@@ -1109,7 +1109,7 @@ InstantFoxSearch.prototype = {
 			this.listener = listener;
 			this.searchString = searchString;
 
-			if (p.suggest && searchString.length >= p.minQChars) {
+			if (!p.disabled && p.suggest && searchString.length >= p.minQChars) {
 				if (!this._combinedResult) {
 					this._combinedResult = new combinedSearch(this)
 				}

@@ -95,6 +95,7 @@ this.runNext = function(){
 		dump('all tests finished')
 		return	
 	}
+	itest.qs("toolbarspring[flex='1']").textContent="running test: " + this.test.name
 	this.prepare2test()
 }
 this.prepare2test = function(){
@@ -111,6 +112,7 @@ this.prepare2test = function(){
 		f = fList[i++]
 	}
 	
+    window.focus()
 	function run(){
 		try{
 			r = f.call(test)
@@ -376,6 +378,41 @@ testList = [{
 				success = success && p.disabled
 		
 		return success
+	},
+	delay:500
+}, {
+	name: 'default search enabled',
+	run: function() {
+		InstantFoxModule.autoSearch.disabled=false
+		window.focus()
+		itest.mouse(gURLBar)
+		gURLBar.select()
+		itest.type('abc')
+
+	},
+	test: function(){
+		var ch = gURLBar.popup.richlistbox.children
+		for (var i = 0; i < ch.length; i++) {
+			if (ch[i].image == "chrome://instantfox/content/skin/button-logo.png")
+				return true
+		}
+	},
+	delay:500
+}, {
+	name: 'default search disabled',
+	run: function() {
+		InstantFoxModule.autoSearch.disabled=true
+		window.focus()
+		itest.mouse(gURLBar)
+		gURLBar.select()
+		itest.type('abc')
+	},
+	test: function(){
+		var ch = gURLBar.popup.richlistbox.children
+		for (var i = 0; i < ch.length; i++) {
+			if (ch[i].image == "chrome://instantfox/content/skin/button-logo.png")
+				return false
+		}
 	},
 	delay:500
 }]
