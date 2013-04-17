@@ -369,13 +369,22 @@ InstantFox.pageLoader = {
 		preview.webNavigation.loadURI(url, nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE, null, null, null);
 	},
 
-	// workaround for noSquint bug
 	onCreatePreview: function(preview){
 		try{
+			// workaround for noSquint bug
 			if (window.NoSquint && NoSquint.browser) {
 				preview.markupDocumentViewer.fullZoom =
 					gBrowser.markupDocumentViewer.fullZoom
 			}
+		} catch(e){
+			Cu.reportError(e)
+		}
+		
+		try{
+			// privateTab https://addons.mozilla.org/en-US/firefox/addon/private-tab/reviews/451236/
+			if (typeof privateTab == "object" && typeof PrivateBrowsingUtils == "object" &&
+				PrivateBrowsingUtils.privacyContextFromWindow(content).usePrivateBrowsing)
+			PrivateBrowsingUtils.privacyContextFromWindow(preview.contentWindow).usePrivateBrowsing =true
 		} catch(e){
 			Cu.reportError(e)
 		}
