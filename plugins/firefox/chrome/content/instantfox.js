@@ -398,7 +398,7 @@ window.InstantFox = {
 			else if (key == 8 || key == 46) { // 8 == BACK_SPACE, 46 == DELETE
 				if(gURLBar.selectionEnd == gURLBar.mInputField.value.length){
 					InstantFoxModule.currentQuery.shadowOff = true
-					simulateInput = key == 46
+					simulateInput = key == 46 && gURLBar.selectionEnd == gURLBar.selectionStart
 				}
 			}
 		}
