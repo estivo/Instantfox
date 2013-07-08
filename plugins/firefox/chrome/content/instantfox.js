@@ -49,25 +49,25 @@ window.InstantFox = {
 		searchBar.select();
 		searchBar.focus();
 	},
-    adjustHeight_: function () {
-        // Figure out how many rows to show
-        var rows = this.richlistbox.childNodes;
-        var numRows = Math.min(this._matchCount, this.maxRows, rows.length);
-        
-        // Default the height to 0 if we have no rows to show
-        var height = 0;
-        if (numRows) {
-            var firstRowRect = rows[0].getBoundingClientRect();
-            var lastRowRect = rows[numRows - 1].getBoundingClientRect();
-            height = lastRowRect.bottom - firstRowRect.top
-        }
-        
-        // Only update the height if we have a non-zero height and if it
-        // changed (the richlistbox is collapsed if there are no results)
-        if (height && height != this.richlistbox.height)
-            this.richlistbox.height = height;
-    },
-    
+	adjustHeight_: function () {
+		// Figure out how many rows to show
+		var rows = this.richlistbox.childNodes;
+		var numRows = Math.min(this._matchCount, this.maxRows, rows.length);
+		
+		// Default the height to 0 if we have no rows to show
+		var height = 0;
+		if (numRows) {
+			var firstRowRect = rows[0].getBoundingClientRect();
+			var lastRowRect = rows[numRows - 1].getBoundingClientRect();
+			height = lastRowRect.bottom - firstRowRect.top
+		}
+		
+		// Only update the height if we have a non-zero height and if it
+		// changed (the richlistbox is collapsed if there are no results)
+		if (height && height != this.richlistbox.height)
+			this.richlistbox.height = height;
+	},
+	
 	$patch: function(obj, funcName, patchName) {
 		patchName = patchName || funcName+'_'
 		if (this[funcName+'_orig'])
@@ -85,7 +85,7 @@ window.InstantFox = {
 	// end overrides
 
 	$el: function(name, attributes, childList_, parent) {
-    	if (!Array.isArray(childList_)){
+		if (!Array.isArray(childList_)){
 			parent = childList_
 			childList_ = null
 		}
@@ -108,7 +108,7 @@ window.InstantFox = {
 	reloadBinding: function(node) {
 		return node && node.parentNode && node.parentNode.insertBefore(node, node.nextSibling)
 	},
-    idsToRemove: [],
+	idsToRemove: [],
 	// belong to notifyTab
 	addTab: function(url, nextToCurrent){
 		if(url){
@@ -152,7 +152,7 @@ window.InstantFox = {
 		var item = $el("menuitem", {
 			label:    n.a.label,
 			action:   true
-        }, popupnotification);
+		}, popupnotification);
 		var closeItemSeparator = $el("menuseparator", null, popupnotification);
 
 		p.openPopup($(n.anchor), "bottomcenter topleft");
@@ -169,12 +169,12 @@ window.InstantFox = {
 	initialize: function(isNewWindow) {
 		Cu.import('chrome://instantfox/content/instantfoxModule.js')
 
-        var link = document.createElementNS("http://www.w3.org/1999/xhtml", "h:link")
-        link.rel = "stylesheet"
-        link.href = "chrome://instantfox/content/skin/instantfox.css"
-        link.type = "text/css"
-        link.style.display = "none"
-        document.documentElement.appendChild(link)
+		var link = document.createElementNS("http://www.w3.org/1999/xhtml", "h:link")
+		link.rel = "stylesheet"
+		link.href = "chrome://instantfox/content/skin/instantfox.css"
+		link.type = "text/css"
+		link.style.display = "none"
+		document.documentElement.appendChild(link)
 
 		this.stylesheet = link
 		setTimeout(this.updateUserStyle, 200, true) // needs some time untill stylesheet is loaded
@@ -200,11 +200,11 @@ window.InstantFox = {
 		// this is needed if searchbar is removed from toolbar
 		this.$patch(BrowserSearch, 'addEngine')
 		this.$patch(BrowserSearch, 'webSearch')
-        if (gURLBar.popup.adjustHeight.toString().indexOf("_rowHeight"))
-            this.$patch(gURLBar.popup, 'adjustHeight')
+		if (gURLBar.popup.adjustHeight.toString().indexOf("_rowHeight"))
+			this.$patch(gURLBar.popup, 'adjustHeight')
 		this.hookUrlbarCommand()
 		this.modifyContextMenu()
-        
+		
 	},
 
 	destroy: function(event) {
@@ -261,15 +261,15 @@ window.InstantFox = {
 	},
 
 	updateUserStyle: function(firstTime) {
-        try {
-            var sheet = InstantFox.stylesheet.sheet
-            var cssRules = sheet.cssRules
-        } catch(e) {
-            if (firstTime == true)
-                setTimeout(InstantFox.updateUserStyle, 200, 1)
-            return;
-        }
-        
+		try {
+			var sheet = InstantFox.stylesheet.sheet
+			var cssRules = sheet.cssRules
+		} catch(e) {
+			if (firstTime == true)
+				setTimeout(InstantFox.updateUserStyle, 200, 1)
+			return;
+		}
+		
 		var prefs = Services.prefs.getBranch('extensions.InstantFox.')
 		var ruleIndex
 
@@ -298,7 +298,7 @@ window.InstantFox = {
 			}
 		}
 
-        
+		
 
 
 
@@ -466,18 +466,18 @@ window.InstantFox = {
 		if(gURLBar.mIgnoreFocus || e.originalTarget != gURLBar.mInputField)
 			return
 
-        if (InstantFox._isOwnQuery && !gURLBar.mIgnoreFocus && e.originalTarget == gURLBar.mInputField) {
+		if (InstantFox._isOwnQuery && !gURLBar.mIgnoreFocus && e.originalTarget == gURLBar.mInputField) {
 			//gURLBar.value = content.document.location.href;
 			//gBrowser.userTypedValue = null;
 			InstantFox.finishSearch("block");
-        }
+		}
 		//InstantFox.mouseUI.remove();
-    },
+	},
 	onfocus: function(e) {
 		if(gURLBar.mIgnoreFocus || e.originalTarget != gURLBar.mInputField)
 			return
 		//InstantFox.mouseUI.add();
-    },
+	},
 
 	// ****** ----- -------- ****************************************
 	_isOwnQuery: false,
@@ -690,7 +690,7 @@ window.InstantFox = {
 			return hb
 		}
 
-        var b2 = shadow.box2 = hbox('box')
+		var b2 = shadow.box2 = hbox('box')
 		b2.setAttribute('pack', 'end')
 		b2.setAttribute('onclick','InstantFox.openHelp()')
 		b2.appendChild(hbox('tip', true))
@@ -848,6 +848,8 @@ window.InstantFox = {
  * urlbarCommand
  *******/
 InstantFox.hookUrlbarCommand = function(off){
+	if (gURLBar.handleCommand.toString().indexOf("Task.spawn") != -1)
+		InstantFox.handleCommand_ = InstantFox.handleCommand_async;
 	var patcher = off ? '$unpatch' : '$patch'
 	this[patcher](gURLBar, 'handleCommand')
 	this[patcher](window, 'URLBarSetURI')
@@ -902,11 +904,13 @@ InstantFox.handleCommand_ = function(aTriggeringEvent) {
 				aTriggeringEvent = {__noSuchFunction__: function(){}}
 				aTriggeringEvent.altKey = true
 			}
+			instantFoxUri = true
 		} else if (InstantFoxModule.autoSearch && !InstantFoxModule.autoSearch.disabled && !isModifierPressed(aTriggeringEvent)) {
 			url = url.trimRight() // remove spaces at the end
-			if (!url)
+			if (!url) {
 				url = InstantFoxModule.autoSearch.url.replace(/[#\?].*/, "")
-			else {
+				instantFoxUri = true
+			} else {
 				// let firefox to handle builtin shortcuts if any
 				var postData = {};
 				var mayInheritPrincipal = { value: false };
@@ -916,36 +920,38 @@ InstantFox.handleCommand_ = function(aTriggeringEvent) {
 
 				if (shortcutURL != url)
 					url = shortcutURL
-				else if (!canBeUrl(url))
+				else if (!canBeUrl(url)) {
 					url = InstantFoxModule.urlFromQuery(InstantFoxModule.autoSearch, url)
+					instantFoxUri = true
+				}
 			}
 		} else {
 			// fallback to default behaviour of adding .com/.net/.org
 			[url, postData, mayInheritPrincipal] = this._canonizeURL(aTriggeringEvent)
 		}
 
-        if (!url)
-            return;
-    }
+		if (!url)
+			return;
+	}
 
-    this.value = url;
-    if(!instantFoxUri)
+	this.value = url;
+	if(!instantFoxUri)
 		gBrowser.userTypedValue = url;
 
-    try {
+	try {
 		if(!instantFoxUri)
 			addToUrlbarHistory(url);
-    } catch (ex) {
-        Cu.reportError(ex);
-    }
+	} catch (ex) {
+		Cu.reportError(ex);
+	}
 
-    function loadCurrent() {
-        var flags = instantFoxUri ? 0 : Ci.nsIWebNavigation.LOAD_FLAGS_ALLOW_THIRD_PARTY_FIXUP;
-        if (!mayInheritPrincipal) {
-            flags |= Ci.nsIWebNavigation.LOAD_FLAGS_DISALLOW_INHERIT_OWNER;
-        }
-        gBrowser.loadURIWithFlags(url, flags, null, null, postData);
-    }
+	function loadCurrent() {
+		var flags = instantFoxUri ? 0 : Ci.nsIWebNavigation.LOAD_FLAGS_ALLOW_THIRD_PARTY_FIXUP;
+		if (!mayInheritPrincipal) {
+			flags |= Ci.nsIWebNavigation.LOAD_FLAGS_DISALLOW_INHERIT_OWNER;
+		}
+		gBrowser.loadURIWithFlags(url, flags, null, null, postData);
+	}
 
 	// Focus the content area before triggering loads, since if the load
 	// occurs in a new tab, we want focus to be restored to the content
@@ -960,17 +966,183 @@ InstantFox.handleCommand_ = function(aTriggeringEvent) {
 			loadCurrent();
 		} else {
 			this.handleRevert();
-            openUILinkIn(url, where, {allowThirdPartyFixup: true, postData: postData});
-        }
+			openUILinkIn(url, where, {allowThirdPartyFixup: true, postData: postData});
+		}
 	} else if (aTriggeringEvent && aTriggeringEvent.altKey && !isTabEmpty(gBrowser.selectedTab)) {
 		this.handleRevert();
-        gBrowser.loadOneTab(url, {postData: postData, inBackground: false, allowThirdPartyFixup: true});
+		gBrowser.loadOneTab(url, {postData: postData, inBackground: false, allowThirdPartyFixup: true});
 		aTriggeringEvent.preventDefault();
 		aTriggeringEvent.stopPropagation();
 	} else {
 		loadCurrent();
 	}
 }
+
+InstantFox.handleCommand_async = function(aTriggeringEvent) {
+	if (aTriggeringEvent instanceof MouseEvent && aTriggeringEvent.button == 2)
+		return; // Do nothing for right clicks
+
+	var url = this.value;
+	var mayInheritPrincipal = false;
+	var postData = null;
+	
+	var typedval = url
+
+	var action = this._parseActionUrl(url);
+	let lastLocationChange = gBrowser.selectedBrowser.lastLocationChange;
+	Task.spawn(function() {
+		let matchLastLocationChange = true;
+		if (action) {
+			url = action.param;
+			if (this.hasAttribute("actiontype")) {
+				if (action.type == "switchtab") {
+					this.handleRevert();
+					let prevTab = gBrowser.selectedTab;
+					if (switchToTabHavingURI(url) &&
+							isTabEmpty(prevTab))
+						gBrowser.removeTab(prevTab);
+				}
+				return;
+			}
+		} else {
+			var isModifierPressed = function(e) {
+				return e && (e.altKey || e.ctrlKey || e.shiftKey || e.metaKey)
+			}
+			var canBeUrl = function(str) {
+				if (/^[\w\-]+:/.test(str))
+					return true
+				if (/^localhost/.test(str))
+					return true
+				if (/^(\w+)\.(\w{1,4})(\.\w{1,4})?($|\/|:)/.test(str))
+					return true
+				if (/[\/\\]/.test(str))
+					return true
+				if (/[\.]/.test(str))
+					return true
+			}
+
+			InstantFox.onInput()
+			// instantfox shortcuts have the highest priority
+			if (InstantFoxModule.currentQuery) {
+				var q = InstantFoxModule.currentQuery
+				InstantFox.fixQueryBeforeEnter(q)
+				url = InstantFoxModule.urlFromQuery(q)
+				InstantFox.finishSearch()
+				if (InstantFoxModule.openSearchInNewTab) {
+					aTriggeringEvent = {__noSuchFunction__: function(){}}
+					aTriggeringEvent.altKey = true
+				}
+				instantFoxUri = true
+			} else if (InstantFoxModule.autoSearch && !InstantFoxModule.autoSearch.disabled && !isModifierPressed(aTriggeringEvent)) {
+				url = url.trimRight() // remove spaces at the end
+				if (!url) {
+					url = InstantFoxModule.autoSearch.url.replace(/[#\?].*/, "")
+					instantFoxUri = true
+				} else {
+					// let firefox to handle builtin shortcuts if any
+					dump("--------------", url)
+					let data = yield getShortcutOrURIAndPostData(url);
+					var shortcutURL = data.url
+					postData = data.postData
+					mayInheritPrincipal = data.mayInheritPrincipal;
+
+					dump("--------------+", url, shortcutURL, shortcutURL == url)
+					if (shortcutURL != url)
+						url = shortcutURL
+					else if (!canBeUrl(url)) {
+						url = InstantFoxModule.urlFromQuery(InstantFoxModule.autoSearch, url)
+						instantFoxUri = true
+					}
+					dump("--------------*", url)
+				}
+			} else {
+				// fallback to default behaviour of adding .com/.net/.org
+				[url, postData, mayInheritPrincipal] = yield this._canonizeURL(aTriggeringEvent)
+			}
+
+			if (!url)
+				return;
+
+			matchLastLocationChange = (lastLocationChange == gBrowser.selectedBrowser.lastLocationChange);
+		}
+
+		if (!instantFoxUri) {
+			gBrowser.userTypedValue = this.value = url;
+		} else
+			gBrowser.userTypedValue = typedval;
+		try {
+			if(!instantFoxUri)
+				addToUrlbarHistory(url);
+		} catch (ex) {
+			// Things may go wrong when adding url to session history,
+			// but don't let that interfere with the loading of the url.
+			Cu.reportError(ex);
+		}
+
+		function loadCurrent() {
+			let flags = instantFoxUri ? 0 : Ci.nsIWebNavigation.LOAD_FLAGS_ALLOW_THIRD_PARTY_FIXUP;
+			// Pass LOAD_FLAGS_DISALLOW_INHERIT_OWNER to prevent any loads from
+			// inheriting the currently loaded document's principal, unless this
+			// URL is marked as safe to inherit (e.g. came from a bookmark
+			// keyword).
+			if (!mayInheritPrincipal)
+				flags |= Ci.nsIWebNavigation.LOAD_FLAGS_DISALLOW_INHERIT_OWNER;
+			// If the value wasn't typed, we know that we decoded the value as
+			// UTF-8 (see losslessDecodeURI)
+			if (!this.valueIsTyped)
+				flags |= Ci.nsIWebNavigation.LOAD_FLAGS_URI_IS_UTF8;
+			gBrowser.loadURIWithFlags(url, flags, null, null, postData);
+		}
+
+		// Focus the content area before triggering loads, since if the load
+		// occurs in a new tab, we want focus to be restored to the content
+		// area when the current tab is re-selected.
+		gBrowser.selectedBrowser.focus();
+
+		let isMouseEvent = aTriggeringEvent instanceof MouseEvent;
+		let altEnter = !isMouseEvent && aTriggeringEvent && aTriggeringEvent.altKey;
+
+		if (altEnter) {
+			// XXX This was added a long time ago, and I'm not sure why it is
+			// necessary. Alt+Enter's default action might cause a system beep,
+			// or something like that?
+			aTriggeringEvent.preventDefault();
+			aTriggeringEvent.stopPropagation();
+		}
+
+		// If the current tab is empty, ignore Alt+Enter (just reuse this tab)
+		altEnter = altEnter && !isTabEmpty(gBrowser.selectedTab);
+
+		if (isMouseEvent || altEnter) {
+			// Use the standard UI link behaviors for clicks or Alt+Enter
+			let where = "tab";
+			if (isMouseEvent)
+				where = whereToOpenLink(aTriggeringEvent, false, false);
+
+			if (where == "current") {
+				if (matchLastLocationChange) {
+					loadCurrent();
+				}
+			} else {
+				this.handleRevert();
+				let params = {
+					allowThirdPartyFixup: true,
+					postData: postData,
+					initiatingDoc: document
+				};
+				if (!this.valueIsTyped)
+					params.isUTF8 = true;
+				openUILinkIn(url, where, params);
+			}
+		} else {
+			if (matchLastLocationChange) {
+				loadCurrent();
+			}
+		}
+	}.bind(this));
+}
+
+
 InstantFox.URLBarSetURI_ = function(aURI) {
 	// auri is null if URLBarSetURI is called from urlbar.handleRevert
 	if (InstantFox.$urlBarModified) {
@@ -984,21 +1156,21 @@ InstantFox.URLBarSetURI_ = function(aURI) {
 			InstantFox.finishSearch();
 		}
 	}
-    var value = gBrowser.userTypedValue;
-    var valid = false;
-    if (value == null) {
-        var uri = aURI || getWebNavigation().currentURI;
-        if (gInitialPages.indexOf(uri.spec) != -1) {
-            value = content.opener ? uri.spec : "";
-        } else {
-            value = losslessDecodeURI(uri);
-        }
-        valid = uri.spec != "about:blank";
+	var value = gBrowser.userTypedValue;
+	var valid = false;
+	if (value == null) {
+		var uri = aURI || getWebNavigation().currentURI;
+		if (gInitialPages.indexOf(uri.spec) != -1) {
+			value = content.opener ? uri.spec : "";
+		} else {
+			value = losslessDecodeURI(uri);
+		}
+		valid = uri.spec != "about:blank";
 		// do not allow "about:blank"
 		if(!valid) value = '';
-    }
-    gURLBar.value = value;
-    SetPageProxyState(valid ? "valid" : "invalid");
+	}
+	gURLBar.value = value;
+	SetPageProxyState(valid ? "valid" : "invalid");
 }
 // todo: find better way to intercept cut command
 InstantFox._urlbarCutCommand = function(aCommand){
