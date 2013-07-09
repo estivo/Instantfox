@@ -985,8 +985,8 @@ InstantFox.handleCommand_async = function(aTriggeringEvent) {
 	var url = this.value;
 	var mayInheritPrincipal = false;
 	var postData = null;
-	
 	var typedval = url
+    var instantFoxUri = false
 
 	var action = this._parseActionUrl(url);
 	let lastLocationChange = gBrowser.selectedBrowser.lastLocationChange;
