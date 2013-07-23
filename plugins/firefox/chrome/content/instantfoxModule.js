@@ -249,7 +249,7 @@ var pluginLoader = {
 	},
 	savePlugins: function(){
 		if (this.req) {
-			Cu.reportError("fetchAsync is too slow")
+			dump("WARNING: fetchAsync is too slow")
 			if (this.req.loadQueue.indexOf(this.savePlugins) == -1)
 				this.req.loadQueue.push(this.savePlugins)
 			return
