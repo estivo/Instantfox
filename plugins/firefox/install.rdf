@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0"?>
 
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      xmlns:em="http://www.mozilla.org/2004/em-rdf#">
@@ -20,8 +20,15 @@
 
     <em:name>InstantFox</em:name>
     <em:description>Search via your addressbar with shortcuts at your fingertips. Use g for Google, m for Maps, e for eBay, y for Youtube, w for Wikipedia, c for Calculator, f for Weather Forecast and many more.</em:description>
+    
     <em:creator>instantfox.net</em:creator>
     <em:optionsURL>chrome://instantfox/content/options.xul</em:optionsURL>
     <em:homepageURL>http://www.instantfox.net/</em:homepageURL>
+    
+    <em:locale>pl</em:locale>
+    <em:name>InstantFox</em:name>
+    <em:description>Szukaj z klawiatury używajšc paska adresu. Używaj g do Google, m do Google Map, e do eBay, y do YouTube, w do Wikipedii, k do Kalkulatora, p do Prognozy pogody, a także wiele więcej.</em:description>
+    <em:translator>http://github.com/piotrex</em:translator>
+
   </Description>      
 </RDF>

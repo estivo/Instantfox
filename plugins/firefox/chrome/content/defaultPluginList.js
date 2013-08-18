@@ -517,7 +517,7 @@ locale(["pl","pl","pl"], {
 	Twitter: true,
 	Weather: {
 		key: "wy",
-		name: "Wyziewy"
+		name: "Pogoda"
 	},
 	IMDb: true,
 	GoogleLuck: {
