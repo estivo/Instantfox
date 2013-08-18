@@ -747,12 +747,15 @@ var parseSimpleJson = function(json, key, splitSpace){
 		var xhrReturn = JSON.parse(json)[1];
 	}catch(e){
 		Cu.reportError(e);
-		dump(json)
+		dump(json, "-------------------------")
 		try{
 			var i = json.indexOf("[\"")
 			var j = json.lastIndexOf("\"]")
 			if (i != -1 && j != -1)
 				xhrReturn = json.substring(i+2,j).split('","')
+			else if (json && !/<[^><]>|[{\[\]]|^\s+/m.test(json)) {
+				xhrReturn = json.split(/[\n\r]+/);
+			}
 		}catch(e) {
 			Cu.reportError(e)
 			return
