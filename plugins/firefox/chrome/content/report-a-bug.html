@@ -109,6 +109,10 @@ updateUI = function(){
 	var data = $('data'), text, div, fullText = ""
 	data.textContent=""
 	for (var i in report){
+        var reportData = report[i]
+        if (typeof reportData == "string")
+            reportData = reportData.replace(/^\s*"(iconURI|def_\w+)".*[\r\n]+/gm, "");
+            
 		div = document.createElement("div")
 		div.className = "head"
 		text = "#>>" + Array(40).join("-") + "\n"
@@ -119,10 +123,10 @@ updateUI = function(){
 		
 		var div = document.createElement("div")
 		div.className = "data"
-		div.textContent = report[i] + "\n"
-		data.appendChild(div)		
+		div.textContent = reportData + "\n"
+		data.appendChild(div)
 
-		fullText = fullText + text + report[i] + "\n"
+		fullText = fullText + text + reportData + "\n"
 	}
 	
 	return fullText
@@ -194,6 +198,7 @@ setTimeout(function(){
 	InstantFoxModule.pluginLoader.loadPlugins(false, function(str){
 		if(str != report.pluginFile)
 			report.str = str
+        
 		updateUI()
 	})
 	updateUI()
