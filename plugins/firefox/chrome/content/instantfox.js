@@ -901,7 +901,7 @@ InstantFox.handleCommand_ = function(aTriggeringEvent) {
 			url = InstantFoxModule.urlFromQuery(q)
 			InstantFox.finishSearch()
 			if (InstantFoxModule.openSearchInNewTab) {
-				aTriggeringEvent = {__noSuchFunction__: function(){}}
+				aTriggeringEvent = {__noSuchMethod__: function(){}}
 				aTriggeringEvent.altKey = true
 			}
 			instantFoxUri = true
@@ -1029,7 +1029,7 @@ InstantFox.handleCommand_async = function(aTriggeringEvent) {
 				url = InstantFoxModule.urlFromQuery(q)
 				InstantFox.finishSearch()
 				if (InstantFoxModule.openSearchInNewTab) {
-					aTriggeringEvent = {__noSuchFunction__: function(){}}
+					aTriggeringEvent = {__noSuchMethod__: function(){}}
 					aTriggeringEvent.altKey = true
 				}
 				instantFoxUri = true
