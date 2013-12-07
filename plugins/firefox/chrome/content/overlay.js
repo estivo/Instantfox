@@ -70,7 +70,7 @@ InstantFox.applyOverlay = function(off) {
 
 	var toolbarButton = $el('toolbarbutton', {type:"menu", popup: popupId, id: buttonId,
 		class:'toolbarbutton-1 chromeclass-toolbar-additional',
-		image:'chrome://instantfox/content/skin/button-logo.png', label:'InstantFox'
+		image:InstantFoxModule.buttonLogoURL, label:'InstantFox'
 	}, gNavToolbox.palette)
 
 	var id = buttonId
@@ -106,7 +106,7 @@ InstantFox.updateMenuitem = function(show) {
 
     mi || popup.insertBefore($el("menuitem", {
           id:"instantFox-menuitem"
-        , image:"chrome://instantfox/content/skin/button-logo.png"
+        , image: InstantFoxModule.buttonLogoURL
         , onclick:'document.getElementById("instantfox-popup").openPopup(gNavToolbox)', label: "InstantFox Options"
         , class: "menuitem-iconic"
     }), $("prefSep"))

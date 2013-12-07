@@ -83,14 +83,6 @@ window.InstantFox = {
 		this[funcName+'_orig'] = null
 	},
 	// end overrides
-    
-	xmas: function() {
-		var d = new Date()
-		if (d.getMonth() === 11 || (d.getMonth() === 0 && d.getDay() < 7)) {
-			var button = document.getElementById('instantFox-options')
-			button && button.setAttribute("image", "chrome://instantfox/content/skin/xmas_button-logo.png");
-		}
-	},
 	
 	$el: function(name, attributes, childList_, parent) {
 		if (!Array.isArray(childList_)){
@@ -211,9 +203,7 @@ window.InstantFox = {
 		if (gURLBar.popup.adjustHeight.toString().indexOf("_rowHeight"))
 			this.$patch(gURLBar.popup, 'adjustHeight')
 		this.hookUrlbarCommand()
-		this.modifyContextMenu()
-		
-        this.xmas();
+		this.modifyContextMenu()		
 	},
 
 	destroy: function(event) {
@@ -310,7 +300,11 @@ window.InstantFox = {
 		
 
 
+        if (InstantFoxModule.xmasLogo) {
+            findRule('richlistbox[type="InstantFoxSuggest"]').style.backgroundImage = 
+            findRule('.popup-notification-icon').style.listStyleImage = 'url("' + InstantFoxModule.logoURL + '")';
 
+        }
 		if (true) {
 			var selector = '.instantfox-shadow[selected]'
 			var newSelector = selector

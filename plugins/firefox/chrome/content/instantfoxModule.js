@@ -530,6 +530,12 @@ searchEngineObserver.turn('on')
 /*****************************************************
  * main object
  ***********/
+var xmas = (function() {
+    var d = new Date()
+    if (d.getMonth() === 11 || (d.getMonth() === 0 && d.getDay() < 7)) {
+        return "xmas_";
+    }
+})() || "";
 InstantFoxModule = {
 	helpURL: 'http://www.instantfox.net/help/',
 	editingHelpURL: 'http://www.instantfox.net/help/#add-plugin',
@@ -537,7 +543,11 @@ InstantFoxModule = {
 	deactivatedURL: 'http://www.instantfox.net/deactivated.php',
 	install_url: "http://www.instantfox.net/welcome.php",
 	update_url:  "http://www.instantfox.net/update.php",
-
+    
+    logoURL: "chrome://instantfox/content/skin/" + xmas + "logo.png",
+    buttonLogoURL: "chrome://instantfox/content/skin/" + xmas + "button-logo.png",
+    xmasLogo: xmas,
+    
 	bp: this,
 
 	getContextMenuPlugins: function(type) {

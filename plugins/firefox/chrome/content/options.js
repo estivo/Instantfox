@@ -590,7 +590,7 @@ autoSearchUI = {
 		var p = {}
 		p.disabled = a.disabled
 		p.name = i18n.get("standard_search_label")
-		p.iconURI = "chrome://instantfox/content/skin/button-logo.png"
+		p.iconURI = InstantFoxModule.buttonLogoURL
 		p.id = this.id
 		
 		var fr = p.disabled ? xmlFragmentDis : xmlFragment
