@@ -261,7 +261,7 @@ InstantFox.initPopupEvents = function(el) {
 
     /*** drag menuitems ***/
     function shouldShow(x, rect) {
-        return (x < rect.right - 2 && x > rect.right - 30)
+        return (x < rect.right - 2 && x > rect.left + 2)
     }
     function isOutside(x, y, rect, d) {
         if (rect.left - d > x || rect.right + d < x)
