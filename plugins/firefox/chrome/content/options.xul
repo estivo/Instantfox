@@ -203,6 +203,9 @@ label[control='opacity-scale']{
 .image{
 	width:16px
 }
+#\-------autoSearchUI-id>.image {
+    padding: 8px
+}
 .shiftTop{
 	margin-top:-5px;
 	margin-bottom:5px;
