@@ -70,7 +70,6 @@ function startup(aData, aReason) {
 	if (Services.vc.compare(Services.appinfo.platformVersion, "10.0") < 0)  
 		Components.manager.QueryInterface(Ci.nsIComponentRegistrar)
 							.addBootstrappedManifestLocation(aData.installPath)
-    xmas("add", aData.installPath);
 	Services.io.getProtocolHandler('resource')
 		.QueryInterface(Ci.nsIResProtocolHandler)
 		.setSubstitution(
@@ -143,8 +142,6 @@ function shutdown(aData, aReason) {
 		Components.manager.QueryInterface(Ci.nsIComponentRegistrar)
 			.removeBootstrappedManifestLocation(aData.installPath)
 	
-    xmas("remove", aData.installPath);
-    
 	Cu.import('chrome://instantfox/content/instantfoxModule.js')
     InstantFoxModule.shutdown()
 
@@ -168,15 +165,4 @@ function uninstall(aData, aReason) {
 		var dump = Components.utils.import("resource://shadia/main.js").dump
 		dump(aData, aReason, "uninstall--------------------")
 	/*devel__)*/
-}
-
-
-function xmas(action, aFile) {
-    var d = new Date()
-    if (d.getMonth() === 11 || (d.getMonth() === 0 && d.getDay() < 7)) {
-        var f = aFile.clone();
-        f.append("chrome"); f.append("content"); f.append("skin");
-		Components.manager.QueryInterface(Ci.nsIComponentRegistrar)
-			[(action)+ "BootstrappedManifestLocation"](f);
-	}
 }

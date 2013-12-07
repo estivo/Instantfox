@@ -84,6 +84,14 @@ window.InstantFox = {
 	},
 	// end overrides
     
+	xmas: function() {
+		var d = new Date()
+		if (d.getMonth() === 11 || (d.getMonth() === 0 && d.getDay() < 7)) {
+			var button = document.getElementById('instantFox-options')
+			button && button.setAttribute("image", "chrome://instantfox/content/skin/xmas_button-logo.png");
+		}
+	},
+	
 	$el: function(name, attributes, childList_, parent) {
 		if (!Array.isArray(childList_)){
 			parent = childList_
@@ -204,6 +212,8 @@ window.InstantFox = {
 			this.$patch(gURLBar.popup, 'adjustHeight')
 		this.hookUrlbarCommand()
 		this.modifyContextMenu()
+		
+        this.xmas();
 	},
 
 	destroy: function(event) {
