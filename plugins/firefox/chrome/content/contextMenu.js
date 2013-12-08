@@ -261,7 +261,7 @@ InstantFox.initPopupEvents = function(el) {
 
     /*** drag menuitems ***/
     function shouldShow(x, rect) {
-        return (x < rect.right - 2 && x > rect.left + 2)
+        return true;
     }
     function isOutside(x, y, rect, d) {
         if (rect.left - d > x || rect.right + d < x)
@@ -285,13 +285,8 @@ InstantFox.initPopupEvents = function(el) {
     }
 
     el.addEventListener("mousedown", function(e) {
-        if (!isTooltipOpen) {
-            var state = "wait"
-        } else {
-            var state = "drag"
-            disableTooltip()
-        }
-
+        var state = "wait"
+        
         var startY = e.clientY
         var drag = {}
         var drag = getChild(startY)
@@ -371,6 +366,7 @@ InstantFox.initPopupEvents = function(el) {
         var onUp = function(e) {
             el.removeEventListener("mouseup", onUp, true)
             el.removeEventListener("mousemove", onMove, true)
+            tooltip.hidePopup()
             if (state == "wait")
                 return;
             // stop the event
