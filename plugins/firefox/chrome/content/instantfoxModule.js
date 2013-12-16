@@ -1033,7 +1033,7 @@ combinedSearch.prototype = {
 
 		this._result.list.splice(index, 1);
 
-		if(item.origIndex == null)
+		if(typeof item.origIndex == "number")
 			this.historyResult(origIndex, removeFromDb)
 	},
 	notifyListener: function() {
