@@ -1032,9 +1032,9 @@ combinedSearch.prototype = {
 			return
 
 		this._result.list.splice(index, 1);
-
+		dump("deleting", item.origIndex)
 		if(typeof item.origIndex == "number")
-			this.historyResult(origIndex, removeFromDb)
+			this.historyResult.removeValueAt(item.origIndex, removeFromDb)
 	},
 	notifyListener: function() {
 		var list, l1 = this.xhrEntries, l2 = this.historyEntries
