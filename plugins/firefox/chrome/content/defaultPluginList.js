@@ -44,7 +44,7 @@ var commonPlugins = {
 	},
 	Amazon: {
 		key: "a",
-		url: "http://amazon.instantfox.net/?q=%q&hl=en-us",
+		url: "http://www.amazon.com/gp/search?ie=UTF8&keywords=%q&index=aps&linkCode=ur2&camp=1789&creative=9325",
 		json: "http://completion.amazon.co.uk/search/complete?method=completion&q=%q&search-alias=aps&mkt=4",
 		name: "Amazon",
 //		disableInstant: true,
@@ -113,7 +113,7 @@ locale(["de","de-DE","de"], {
 	Wikipedia: true,
 	Youtube: true,
 	Amazon: {
-		url: "http://www.amazon.de/gp/search?ie=UTF8&keywords=%q&tag=324-21&index=aps&linkCode=ur2&camp=1638&creative=6742"
+		url: "http://www.amazon.de/gp/search?ie=UTF8&keywords=%q&index=aps&linkCode=ur2&camp=1638&creative=6742"
 	},
 	eBay: true,
 	Twitter: true,
@@ -142,7 +142,7 @@ locale(["de","de-AT","at"], {
 	Wikipedia: true,
 	Youtube: true,
 	Amazon: {
-		url: "http://www.amazon.de/gp/search?ie=UTF8&keywords=%q&tag=324-21&index=aps&linkCode=ur2&camp=1638&creative=6742"
+		url: "http://www.amazon.de/gp/search?ie=UTF8&keywords=%q&index=aps&linkCode=ur2&camp=1638&creative=6742"
 	},
 	eBay: true,
 	Twitter: true,
@@ -171,7 +171,7 @@ locale(["de","de-CH","ch"], {
 	Wikipedia: true,
 	Youtube: true,
 	Amazon: {
-		url: "http://www.amazon.de/gp/search?ie=UTF8&keywords=%q&tag=324-21&index=aps&linkCode=ur2&camp=1638&creative=6742"
+		url: "http://www.amazon.de/gp/search?ie=UTF8&keywords=%q&index=aps&linkCode=ur2&camp=1638&creative=6742"
 	},
 	eBay: true,
 	Twitter: true,
