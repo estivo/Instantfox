@@ -532,7 +532,7 @@ searchEngineObserver.turn('on')
  ***********/
 var xmas = (function() {
     var d = new Date()
-    if (d.getMonth() === 11 || (d.getMonth() === 0 && d.getDay() < 7)) {
+    if (d.getMonth() === 11 || (d.getMonth() === 0 && d.getDate() < 7)) {
         return "xmas_";
     }
 })() || "";
