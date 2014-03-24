@@ -83,8 +83,12 @@ var instantFoxDevel = {
 	moduleHref: 'chrome://instantfox/content/instantfoxModule.js',
 
 	doReload: function(){
-		XPIProviderBP = Components.utils.import("resource://gre/modules/XPIProvider.jsm")
-		XPIProvider = XPIProviderBP.XPIProvider
+		try {
+            var XPIProviderBP = Cu.import("resource://gre/modules/addons/XPIProvider.jsm")
+        } catch(e) {
+            var XPIProviderBP = Cu.import("resource://gre/modules/XPIProvider.jsm")
+        }
+		var XPIProvider = XPIProviderBP.XPIProvider
      
 		var id="searchy@searchy"
 		let file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);

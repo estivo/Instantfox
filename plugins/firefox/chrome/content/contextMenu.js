@@ -32,9 +32,15 @@ InstantFox.modifyContextMenu = function(enable){
         }catch(e){return " "}
     }
     
-    if (enable && !proto.isTextSelection_orig) {
-        proto.isTextSelection_orig = proto.isTextSelection_orig || proto.isTextSelection
-        proto.isTextSelection = function() {
+    var fnName = (proto["formatSearchContextItem"] && "formatSearchContextItem")
+        || (proto["isTextSelection"] && "isTextSelection");
+        
+    if (!fnName) return;    
+    fnName_orig = fnName + "_orig"
+    
+    if (enable && !proto[fnName_orig]) {
+        proto[fnName_orig] = proto[fnName_orig] || proto[fnName]
+        proto[fnName] = function() {
             var splitMenu = document.getElementById("ifox-context-searchselect") || this.createSearchItem()
             var menuitem = splitMenu.menuitem
 
@@ -185,9 +191,9 @@ InstantFox.modifyContextMenu = function(enable){
             });
         }
     }
-    else if(!enable && proto.isTextSelection_orig){
-        proto.isTextSelection = proto.isTextSelection_orig
-        delete proto.isTextSelection_orig
+    else if(!enable && proto[fnName_orig]){
+        proto[fnName] = proto[fnName_orig]
+        delete proto[fnName_orig]
         delete proto.createSearchItem
         delete proto.getSelectedText
         delete proto.doSearch
@@ -206,38 +212,33 @@ InstantFox.modifyContextMenu = function(enable){
  * contextMenu
  *******/
 InstantFox.initPopupEvents = function(el) {
-    var lastMouseEvent, timer, tooltip, isTooltipOpen, right;
+    var lastMouseEvent, timer, tooltip, right;
     /*** TOOLTIP ***/
     var updateTooltip = function() {
         timer = null;
         if (!tooltip) {
-            tooltip = document.createElement("tooltip");
+            tooltip = document.createElementNS("http://www.w3.org/1999/xhtml", "div");
             document.documentElement.appendChild(tooltip);
             tooltip.textContent = InstantFoxModule.getString("context.Drag");
+            tooltip.style.cssText = "position: fixed; display: none; -moz-appearance: tooltip;"
         }
         var rect = el.getBoundingClientRect();
+        dump(rect)
         var x = lastMouseEvent.clientX
+        var y = lastMouseEvent.clientY
         right = lastMouseEvent.screenX - x + rect.right + 5
-        if (shouldShow(x, rect)) {
-            if (!isTooltipOpen){
-                isTooltipOpen = true
-                tooltip.showPopup(null, right, lastMouseEvent.screenY, "tooltip")
-                // el.removeAttribute("tooltiptext")
-            }
+        if (shouldShow(x, y, rect)) {
+            tooltip.style.display = ""
+            tooltip.style.top = rect.top  + 1 + "px";
+            tooltip.style.left = rect.right + 1 + "px";
         } else {
-            if (isTooltipOpen){
-                tooltip.hidePopup()
-                isTooltipOpen = false
-                // el.setAttribute("tooltiptext", "click")
-            }
+            tooltip.style.display = "none";
         }
     }
     var onTooltipMouseMove = function(e){
         lastMouseEvent = e
         if (!timer)
             timer = setTimeout(updateTooltip, 100)
-        if (isTooltipOpen)
-            tooltip.moveTo(right, e.screenY+10)
     }
     var onTooltipMouseOut = function(e){
         lastMouseEvent = e
@@ -245,23 +246,23 @@ InstantFox.initPopupEvents = function(el) {
             timer = setTimeout(updateTooltip, 100)
     }
     function enableTooltip(){
-        timer = isTooltipOpen = false;
+        timer = false;
         el.addEventListener("mousemove", onTooltipMouseMove)
         el.addEventListener("mouseout", onTooltipMouseOut)
     }
     function disableTooltip(){
         el.removeEventListener("mousemove", onTooltipMouseMove)
         el.removeEventListener("mouseout", onTooltipMouseOut)
-        tooltip.hidePopup()
-        isTooltipOpen = false;
+        tooltip.style.display = "none"
         if (timer)
             clearTimeout(timer)
     }
     enableTooltip()
 
     /*** drag menuitems ***/
-    function shouldShow(x, rect) {
-        return true;
+    function shouldShow(x, y, rect) {
+        return rect.left < x && x < rect.right
+            && rect.top  < y && y < rect.bottom;
     }
     function isOutside(x, y, rect, d) {
         if (rect.left - d > x || rect.right + d < x)
@@ -366,7 +367,7 @@ InstantFox.initPopupEvents = function(el) {
         var onUp = function(e) {
             el.removeEventListener("mouseup", onUp, true)
             el.removeEventListener("mousemove", onMove, true)
-            tooltip.hidePopup()
+            disableTooltip()
             if (state == "wait")
                 return;
             // stop the event

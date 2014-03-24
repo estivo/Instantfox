@@ -130,4 +130,8 @@ menu[type=splitmenu] {
 */
 
 
-
+/* workaround for broken TrueSuite Website Logon addon*/
+#urlbar html|object:-moz-type-unsupported,
+#urlbar html|object:-moz-type-unsupported-platform {
+    display: none
+}
