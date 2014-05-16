@@ -32,8 +32,10 @@ InstantFox.modifyContextMenu = function(enable){
         }catch(e){return " "}
     }
     
-    var fnName = (proto["formatSearchContextItem"] && "formatSearchContextItem")
-        || (proto["isTextSelection"] && "isTextSelection");
+    if (typeof proto["formatSearchContextItem"] == "function")
+        var fnName = "formatSearchContextItem";
+    else if (typeof proto["isTextSelection"] == "function")
+        var fnName = "isTextSelection";
         
     if (!fnName) return;    
     fnName_orig = fnName + "_orig"
