@@ -313,6 +313,10 @@ prefpane{
 	-moz-margin-end: 0!important;
 	-moz-margin-start: 0!important;
 }
+
+window {
+    background: transparent;
+}
 </html:style>
 
 <tabbox flex='1'>

@@ -58,7 +58,14 @@ InstantFox.applyOverlay = function(off) {
 		id: popupId, noautohide:'true', position:'after_end',
 		persist:'width,height', width:'400', height:'600',
 		onpopupshowing: "if(event.target==this)InstantFox.onPopupShowing(this)",
-		onpopuphiding: "if(event.target==this)InstantFox.onPopupHiding(this)"
+		onpopuphiding: "if(event.target==this)InstantFox.onPopupHiding(this)",
+		type: "arrow",
+		flip: 'slide',
+		animate:'true',
+		position: 'bottomcenter topright',
+		noautofocus: 'true',
+		side: 'top',
+		consumeoutsideclicks: 'false',
 	}
 	InstantFox.updatePopupSize(options)
 	$el("panel", options, [$el("stack", {flex: 1}, [

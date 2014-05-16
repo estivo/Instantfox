@@ -293,7 +293,8 @@ function $openPopup(panel, anchor){
 		panel.hidePopup()
 		panel.openedOnce = true
 		panel.setAttribute("onpopuphiding", onpopuphiding)
-	}	
+	}
+	panel.setAttribute("animate", false) // animate is broken on windows
 	var popupBoxObject = panel.popupBoxObject;
 	popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
 	panel.openPopup(anchor, 'start_before', 0, 0, false, true)
