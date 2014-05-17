@@ -1,3 +1,5 @@
+/*global gBrowser:true, InstantFox:true */
+
 window.InstantFox = {
 	// function overriding.
 	// using this instead of eval to not get slow reviews because of "eval crusade"
@@ -6,7 +8,7 @@ window.InstantFox = {
 		var browser = gBrowser.getBrowserForDocument(targetDoc);
 		if (!browser)
 			return;
-		if (browser.engines && browser.engines.some((function(e) e.title == engine.title)))
+		if (browser.engines && browser.engines.some((function(e) {e.title == engine.title})))
 			return;
 
 		var iconURL = null;
@@ -300,11 +302,11 @@ window.InstantFox = {
 		
 
 
-        if (InstantFoxModule.xmasLogo) {
-            findRule('richlistbox[type="InstantFoxSuggest"]').style.backgroundImage = 
-            findRule('.popup-notification-icon').style.listStyleImage = 'url("' + InstantFoxModule.logoURL + '")';
+		if (InstantFoxModule.xmasLogo) {
+			findRule('richlistbox[type="InstantFoxSuggest"]').style.backgroundImage = 
+			findRule('.popup-notification-icon').style.listStyleImage = 'url("' + InstantFoxModule.logoURL + '")';
 
-        }
+		}
 		if (true) {
 			var selector = '.instantfox-shadow[selected]'
 			var newSelector = selector
@@ -851,249 +853,152 @@ window.InstantFox = {
  * urlbarCommand
  *******/
 InstantFox.hookUrlbarCommand = function(off){
-	if (gURLBar.handleCommand.toString().indexOf("Task.spawn") != -1)
-		InstantFox.handleCommand_ = InstantFox.handleCommand_async;
 	var patcher = off ? '$unpatch' : '$patch'
 	this[patcher](gURLBar, 'handleCommand')
 	this[patcher](window, 'URLBarSetURI')
 	this[patcher](gURLBar._copyCutController, 'doCommand', '_urlbarCutCommand')
 }
 
+InstantFox.handleCommandQuery = function(url, aTriggeringEvent, cb){
+	var instantFoxUri
+	var isModifierPressed = function(e) {
+		return e && (e.altKey || e.ctrlKey || e.shiftKey || e.metaKey)
+	}
+	var canBeUrl = function(str) {
+		if (/^[\w\-]+:/.test(str))
+			return true
+		if (/^localhost/.test(str))
+			return true
+		if (/^(\w+)\.(\w{1,4})(\.\w{1,4})?($|\/|:)/.test(str))
+			return true
+		if (/[\/\\]/.test(str))
+			return true
+		if (/[\.]/.test(str))
+			return true
+	}
+
+	InstantFox.onInput()
+	// instantfox shortcuts have the highest priority
+	if (InstantFoxModule.currentQuery) {
+		var q = InstantFoxModule.currentQuery
+		InstantFox.fixQueryBeforeEnter(q)
+		url = InstantFoxModule.urlFromQuery(q)
+		InstantFox.finishSearch()
+		if (InstantFoxModule.openSearchInNewTab) {
+			aTriggeringEvent = {__noSuchMethod__: function(){}}
+			aTriggeringEvent.altKey = true
+		}
+		instantFoxUri = true
+	} else if (InstantFoxModule.autoSearch && !InstantFoxModule.autoSearch.disabled && !isModifierPressed(aTriggeringEvent)) {
+		url = url.trimRight() // remove spaces at the end
+		if (!url) {
+			url = InstantFoxModule.autoSearch.url.replace(/[#\?].*/, "")
+			instantFoxUri = true
+		} else {
+			// let firefox to handle builtin shortcuts if any
+			dump("--------------", url)
+			var keyword = url
+			let offset = url.indexOf(" ");
+			if (offset > 0) {
+				keyword = url.substr(0, offset);
+				param = url.substr(offset + 1);
+			}
+			var [shortcutURL, postData] = PlacesUtils.getURLAndPostDataForKeyword(keyword);
+
+			dump("--------------+", url, shortcutURL, shortcutURL == url)
+			if (!shortcutURL && !canBeUrl(url)) {
+				url = InstantFoxModule.urlFromQuery(InstantFoxModule.autoSearch, url)
+				instantFoxUri = true
+			}
+			dump("--------------*", url)
+		}
+	}
+	cb(instantFoxUri && {
+		aTriggeringEvent: aTriggeringEvent,
+		instantFoxUri: instantFoxUri,
+		url: url
+	})
+}
+
 InstantFox.handleCommand_ = function(aTriggeringEvent) {
+
 	if (aTriggeringEvent instanceof MouseEvent && aTriggeringEvent.button == 2)
 		return; // Do nothing for right clicks
+
 	var url = this.value;
-	var instantFoxUri;
 	var mayInheritPrincipal = false;
 	var postData = null;
 
+	var typedval = url
+	var instantFoxUri = false
+
 	var action = this._parseActionUrl(url);
+	let lastLocationChange = gBrowser.selectedBrowser.lastLocationChange;
+
+	let matchLastLocationChange = true;
 	if (action) {
 		url = action.param;
 		if (this.hasAttribute("actiontype")) {
 			if (action.type == "switchtab") {
 				this.handleRevert();
 				let prevTab = gBrowser.selectedTab;
-				if (switchToTabHavingURI(url) && isTabEmpty(prevTab))
+				if (switchToTabHavingURI(url) &&
+						isTabEmpty(prevTab))
 					gBrowser.removeTab(prevTab);
 			}
 			return;
 		}
-	} else {
-		var isModifierPressed = function(e) {
-			return e && (e.altKey || e.ctrlKey || e.shiftKey || e.metaKey)
-		}
-		var canBeUrl = function(str) {
-			if (/^[\w\-]+:/.test(str))
-				return true
-			if (/^localhost/.test(str))
-				return true
-			if (/^(\w+)\.(\w{1,4})(\.\w{1,4})?($|\/|:)/.test(str))
-				return true
-			if (/[\/\\]/.test(str))
-				return true
-			if (/[\.]/.test(str))
-				return true
-		}
-
-		InstantFox.onInput()
-		// instantfox shortcuts have the highest priority
-		if (InstantFoxModule.currentQuery) {
-			var q = InstantFoxModule.currentQuery
-			InstantFox.fixQueryBeforeEnter(q)
-			url = InstantFoxModule.urlFromQuery(q)
-			InstantFox.finishSearch()
-			if (InstantFoxModule.openSearchInNewTab) {
-				aTriggeringEvent = {__noSuchMethod__: function(){}}
-				aTriggeringEvent.altKey = true
+		continueOperation.call(this);
+	}
+	else {
+		var _self = this;
+		InstantFox.handleCommandQuery(url, aTriggeringEvent, function(response) {
+			// if instantfox handled it
+			if (response) {
+				aTriggeringEvent = response.aTriggeringEvent
+				url = response.url
+				instantFoxUri = response.instantFoxUri
+				
+				matchLastLocationChange = (lastLocationChange == gBrowser.selectedBrowser.lastLocationChange);
+				return continueOperation.call(_self);
 			}
-			instantFoxUri = true
-		} else if (InstantFoxModule.autoSearch && !InstantFoxModule.autoSearch.disabled && !isModifierPressed(aTriggeringEvent)) {
-			url = url.trimRight() // remove spaces at the end
-			if (!url) {
-				url = InstantFoxModule.autoSearch.url.replace(/[#\?].*/, "")
-				instantFoxUri = true
-			} else {
-				// let firefox to handle builtin shortcuts if any
-				var postData = {};
-				var mayInheritPrincipal = { value: false };
-				var shortcutURL = getShortcutOrURI(url, postData, mayInheritPrincipal)
-				postData = postData.value
-				mayInheritPrincipal = mayInheritPrincipal.value
-
-				if (shortcutURL != url)
-					url = shortcutURL
-				else if (!canBeUrl(url)) {
-					url = InstantFoxModule.urlFromQuery(InstantFoxModule.autoSearch, url)
-					instantFoxUri = true
+			
+			// fall back to default behavior
+			callCbOrPromiss(_self._canonizeURL, _self, aTriggeringEvent, function(response) {
+				[url, postData, mayInheritPrincipal] = response;
+				if (url) {
+					matchLastLocationChange = (lastLocationChange == gBrowser.selectedBrowser.lastLocationChange);
+					continueOperation.call(_self);
 				}
-			}
-		} else {
-			// fallback to default behaviour of adding .com/.net/.org
-			[url, postData, mayInheritPrincipal] = this._canonizeURL(aTriggeringEvent)
-		}
-
-		if (!url)
-			return;
+			});
+		});
 	}
 
-	this.value = url;
-	if(!instantFoxUri)
-		gBrowser.userTypedValue = url;
-
-	try {
-		if(!instantFoxUri)
-			addToUrlbarHistory(url);
-	} catch (ex) {
-		Cu.reportError(ex);
-	}
-
-	function loadCurrent() {
-		var flags = instantFoxUri ? 0 : Ci.nsIWebNavigation.LOAD_FLAGS_ALLOW_THIRD_PARTY_FIXUP;
-		if (!mayInheritPrincipal) {
-			flags |= Ci.nsIWebNavigation.LOAD_FLAGS_DISALLOW_INHERIT_OWNER;
-		}
-		gBrowser.loadURIWithFlags(url, flags, null, null, postData);
-	}
-
-	// Focus the content area before triggering loads, since if the load
-	// occurs in a new tab, we want focus to be restored to the content
-	// area when the current tab is re-selected.
-	gBrowser.selectedBrowser.focus();
-
-	if (aTriggeringEvent instanceof MouseEvent) {
-		// We have a mouse event (from the go button), so use the standard
-		// UI link behaviors
-		let where = whereToOpenLink(aTriggeringEvent, false, false);
-		if (where == "current") {
-			loadCurrent();
-		} else {
-			this.handleRevert();
-			openUILinkIn(url, where, {allowThirdPartyFixup: true, postData: postData});
-		}
-	} else if (aTriggeringEvent && aTriggeringEvent.altKey && !isTabEmpty(gBrowser.selectedTab)) {
-		this.handleRevert();
-		gBrowser.loadOneTab(url, {postData: postData, inBackground: false, allowThirdPartyFixup: true});
-		aTriggeringEvent.preventDefault();
-		aTriggeringEvent.stopPropagation();
-	} else {
-		loadCurrent();
-	}
-}
-
-InstantFox.handleCommand_async = function(aTriggeringEvent) {
-	if (aTriggeringEvent instanceof MouseEvent && aTriggeringEvent.button == 2)
-		return; // Do nothing for right clicks
-
-	var url = this.value;
-	var mayInheritPrincipal = false;
-	var postData = null;
-	var typedval = url
-    var instantFoxUri = false
-
-	var action = this._parseActionUrl(url);
-	let lastLocationChange = gBrowser.selectedBrowser.lastLocationChange;
-	Task.spawn(function() {
-		let matchLastLocationChange = true;
-		if (action) {
-			url = action.param;
-			if (this.hasAttribute("actiontype")) {
-				if (action.type == "switchtab") {
-					this.handleRevert();
-					let prevTab = gBrowser.selectedTab;
-					if (switchToTabHavingURI(url) &&
-							isTabEmpty(prevTab))
-						gBrowser.removeTab(prevTab);
-				}
-				return;
-			}
-		} else {
-			var isModifierPressed = function(e) {
-				return e && (e.altKey || e.ctrlKey || e.shiftKey || e.metaKey)
-			}
-			var canBeUrl = function(str) {
-				if (/^[\w\-]+:/.test(str))
-					return true
-				if (/^localhost/.test(str))
-					return true
-				if (/^(\w+)\.(\w{1,4})(\.\w{1,4})?($|\/|:)/.test(str))
-					return true
-				if (/[\/\\]/.test(str))
-					return true
-				if (/[\.]/.test(str))
-					return true
-			}
-
-			InstantFox.onInput()
-			// instantfox shortcuts have the highest priority
-			if (InstantFoxModule.currentQuery) {
-				var q = InstantFoxModule.currentQuery
-				InstantFox.fixQueryBeforeEnter(q)
-				url = InstantFoxModule.urlFromQuery(q)
-				InstantFox.finishSearch()
-				if (InstantFoxModule.openSearchInNewTab) {
-					aTriggeringEvent = {__noSuchMethod__: function(){}}
-					aTriggeringEvent.altKey = true
-				}
-				instantFoxUri = true
-			} else if (InstantFoxModule.autoSearch && !InstantFoxModule.autoSearch.disabled && !isModifierPressed(aTriggeringEvent)) {
-				url = url.trimRight() // remove spaces at the end
-				if (!url) {
-					url = InstantFoxModule.autoSearch.url.replace(/[#\?].*/, "")
-					instantFoxUri = true
-				} else {
-					// let firefox to handle builtin shortcuts if any
-					dump("--------------", url)
-					let data = yield getShortcutOrURIAndPostData(url);
-					var shortcutURL = data.url
-					postData = data.postData
-					mayInheritPrincipal = data.mayInheritPrincipal;
-
-					dump("--------------+", url, shortcutURL, shortcutURL == url)
-					if (shortcutURL != url)
-						url = shortcutURL
-					else if (!canBeUrl(url)) {
-						url = InstantFoxModule.urlFromQuery(InstantFoxModule.autoSearch, url)
-						instantFoxUri = true
-					}
-					dump("--------------*", url)
-				}
-			} else {
-				// fallback to default behaviour of adding .com/.net/.org
-				[url, postData, mayInheritPrincipal] = yield this._canonizeURL(aTriggeringEvent)
-			}
-
-			if (!url)
-				return;
-
-			matchLastLocationChange = (lastLocationChange == gBrowser.selectedBrowser.lastLocationChange);
-		}
-
+	function continueOperation() {
 		if (!instantFoxUri) {
-			gBrowser.userTypedValue = this.value = url;
+			this.value = url;
+			gBrowser.userTypedValue = url;
 		} else
 			gBrowser.userTypedValue = typedval;
 		try {
 			if(!instantFoxUri)
 				addToUrlbarHistory(url);
-		} catch (ex) {
+		}
+		catch (ex) {
 			// Things may go wrong when adding url to session history,
 			// but don't let that interfere with the loading of the url.
 			Cu.reportError(ex);
 		}
 
 		function loadCurrent() {
-			let flags = instantFoxUri ? 0 : Ci.nsIWebNavigation.LOAD_FLAGS_ALLOW_THIRD_PARTY_FIXUP;
+			let webnav = Ci.nsIWebNavigation;
+			let flags = instantFoxUri ? 0 : webnav.LOAD_FLAGS_ALLOW_THIRD_PARTY_FIXUP | webnav.LOAD_FLAGS_FIXUP_SCHEME_TYPOS;
 			// Pass LOAD_FLAGS_DISALLOW_INHERIT_OWNER to prevent any loads from
 			// inheriting the currently loaded document's principal, unless this
 			// URL is marked as safe to inherit (e.g. came from a bookmark
 			// keyword).
 			if (!mayInheritPrincipal)
 				flags |= Ci.nsIWebNavigation.LOAD_FLAGS_DISALLOW_INHERIT_OWNER;
-			// If the value wasn't typed, we know that we decoded the value as
-			// UTF-8 (see losslessDecodeURI)
-			if (!this.valueIsTyped)
-				flags |= Ci.nsIWebNavigation.LOAD_FLAGS_URI_IS_UTF8;
 			gBrowser.loadURIWithFlags(url, flags, null, null, postData);
 		}
 
@@ -1133,8 +1038,6 @@ InstantFox.handleCommand_async = function(aTriggeringEvent) {
 					postData: postData,
 					initiatingDoc: document
 				};
-				if (!this.valueIsTyped)
-					params.isUTF8 = true;
 				openUILinkIn(url, where, params);
 			}
 		} else {
@@ -1142,7 +1045,65 @@ InstantFox.handleCommand_async = function(aTriggeringEvent) {
 				loadCurrent();
 			}
 		}
-	}.bind(this));
+	}
+	
+	
+	function callCbOrPromiss(fn, _self, param, cb) {
+		var pm = fn.call(_self, param, cb);
+		if (pm && typeof pm.then == "function")
+			pm.then(cb);
+	}
+}
+
+
+InstantFox.bookmarks = {
+	get db() {
+		var db = Cc["@mozilla.org/browser/nav-history-service;1"].
+				getService(Ci.nsPIPlacesDatabase).DBConnection;
+		delete this.db;
+		return this.db = db;
+	},
+	query: function(sql, transformRow, cb) {
+		var statement = this.db.createAsyncStatement(sql);
+		var err;
+		// var t = performance.now()
+		var completionListener = {
+			handleCompletion: function(reason) {},
+			handleError: function(error) { err = error; },
+			handleResult: function(result) {
+				var values = [], row;
+				while (row = result.getNextRow()) {
+					values.push(transformRow(row));
+				}
+				// dump(t - performance.now())
+				cb(err, values)
+			}
+		};
+		this.db.executeAsync([statement], 1, completionListener);
+	},
+	getKeywords: function(cb) {
+		this.query("SELECT kw.keyword p1 FROM moz_keywords kw", function(row) {
+			return row.getString(0)
+		}, function(err, result) {
+			cb(err, result);
+		});
+	},
+	getEngines: function(cb) {
+		this.query([
+			"SELECT kw.keyword keyword, bkm.title title, plc.url url",
+			"FROM moz_keywords kw",
+			"JOIN moz_bookmarks bkm ON bkm.keyword_id = kw.id",
+			"JOIN moz_places plc ON plc.id = bkm.fk"
+		].join("\n"), function(row) {
+			return {
+				keyword: row.getString(0),
+				title: row.getString(1),
+				url: row.getString(2)
+			}
+		}, function(err, result) {
+			cb(err, result);
+		});
+	},
 }
 
 
