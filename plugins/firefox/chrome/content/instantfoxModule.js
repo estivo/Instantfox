@@ -715,7 +715,7 @@ InstantFoxModule = {
 		if (plugin.id == 'imdb')
 			query = escape(query.replace(/ /g, '+'));
 		else
-			query = encodeURIComponent(query);
+			query = escape(query);
 
 		return plugin.url.replace('%q', query);
 	},
@@ -1086,7 +1086,7 @@ combinedSearch.prototype = {
 
 		this.searchProvider.historyAutoComplete.stopSearch()
 		this.searchProvider.historyAutoComplete.startSearch(searchString, searchParam, null, this);
-		var url = jsonURL.replace('%q', encodeURIComponent(searchString))
+		var url = jsonURL.replace('%q', escape(searchString))
 		this.searchProvider.startReq(url)
 	}
 }
@@ -1168,7 +1168,7 @@ InstantFoxSearch.prototype = {
 			this.parser = parseImdbJson
 		} else {
 			// **********************
-			url = plugin.json.replace('%q', encodeURIComponent(q.query))
+			url = plugin.json.replace('%q', escape(q.query))
 			this.parser = isMaps ? parseMapsJson : parseSimpleJson
 		}
 

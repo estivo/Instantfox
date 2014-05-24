@@ -9,6 +9,7 @@ InstantFox.modifyContextMenu = function(enable){
     let proto = nsContextMenu.prototype
     // stupid rename in firefox 18
     var bundleName;
+    var hide;
     var getBundleName = function() {
         try {
             bundleName = "contextMenuSearchText"
@@ -100,6 +101,10 @@ InstantFox.modifyContextMenu = function(enable){
             var s = document.getElementById("context-sep-open")
             var c = document.getElementById("contentAreaContextMenu")
             c.insertBefore(m, s)
+            c.addEventListener("popuphiding", hide = function(e) {
+                if (e.target == e.currentTarget)
+                    m.hidden = true;
+            })
             return m
         }
         proto.getSelectedText = function() {
@@ -202,6 +207,7 @@ InstantFox.modifyContextMenu = function(enable){
         delete proto.openLinkIn
         let popup = document.getElementById("contentAreaContextMenu")
         let node = document.getElementById("ifox-context-searchselect")
+        popup.removeEventListener("popuphiding", hide)
         InstantFox.rem(node)
         proto.oldNode && popup.insertBefore(proto.oldNode, proto.oldNodePosId && document.getElementById(proto.oldNodePosId))
     }
