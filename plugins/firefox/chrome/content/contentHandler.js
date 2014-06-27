@@ -235,10 +235,108 @@ InstantFox.pageLoader = {
 		inBackground || browser.focus();
 		this.removePreview();
 	},
-	// Mostly copied from mozillaLabs instantPreview
-	swapBrowsers: function(tab) {
-		var origin = this.preview;
+    get prependHistory() {
+        try {
+            var si = Cu.import("resource:///modules/sessionstore/SessionStore.jsm").SessionStoreInternal
+            var TabState = Cu.import("resource:///modules/sessionstore/TabState.jsm").TabState
+            var TabStateCache = Cu.import("resource:///modules/sessionstore/TabStateCache.jsm").TabStateCache
+            var setHistory = function(browser, tabData) {
+                // Flush all data from the content script synchronously. This is done so
+                // that all async messages that are still on their way to chrome will
+                // be ignored and don't override any tab data set when restoring.
+                TabState.flush(browser);
 
+                // Ensure the index is in bounds.
+                var activeIndex = (tabData.index || tabData.entries.length) - 1;
+                activeIndex = Math.min(activeIndex, tabData.entries.length - 1);
+                activeIndex = Math.max(activeIndex, 0);
+
+                // Save the index in case we updated it above.
+                tabData.index = activeIndex + 1;
+              
+                // Start a new epoch and include the epoch in the restoreHistory
+                // message. If a message is received that relates to a previous epoch, we
+                // discard it.
+                var epoch = si._nextRestoreEpoch++;
+                si._browserEpochs.set(browser.permanentKey, epoch);
+
+                // Update the persistent tab state cache with |tabData| information.
+                TabStateCache.update(browser, {
+                    history: {entries: tabData.entries, index: tabData.index}
+                });
+
+                browser.messageManager.sendAsyncMessage("SessionStore:restoreHistory",
+                                                      {tabData: tabData, epoch: epoch});
+            }
+        } catch(e) {
+            
+        }
+        delete this.prependHistory;
+        return this.prependHistory = setHistory ? function(targetBrowser, origin) {
+            // new e10s world
+            var history = origin.sessionHistory.QueryInterface(Ci.nsISHistoryInternal);
+            var entry;
+            if (history.count > 0) {
+                entry = history.getEntryAtIndex(history.index, false);
+            }
+            var tabData = TabStateCache.get(targetBrowser).history
+            origin._permanentKey = targetBrowser._permanentKey;
+          
+            if (entry) {
+                var tmp = {url: entry.URI.spec, title: entry.title, ID: entry.ID, docshellID: entry.docshellID, docIdentifier: entry.ID}
+                tabData.entries.splice(tabData.index, 0, tmp);
+                tabData.index++;                
+            }
+            setHistory(origin, tabData);
+        } : function(targetBrowser, origin) {
+            // old world
+            var history = origin.sessionHistory.QueryInterface(Ci.nsISHistoryInternal);
+            var entry;
+            if (history.count > 0) {
+                entry = history.getEntryAtIndex(history.index, false);
+                history.PurgeHistory(history.count);
+            }
+
+            // Copy over the history from the current tab if it's not empty
+            var origHistory = targetBrowser.sessionHistory;
+            for (var i = 0; i <= origHistory.index; i++) {
+                var origEntry = origHistory.getEntryAtIndex(i, false);
+                if (origEntry.URI.spec != "about:blank") history.addEntry(origEntry, true);
+            }
+
+            // Add the last entry from the preview; in-progress preview will add itself
+            if (entry != null)
+                history.addEntry(entry, true);
+        }
+    },
+    
+	get swapBrowsers() {
+		delete this.swapBrowsers
+		try {
+			var si = Cu.import("resource:///modules/sessionstore/SessionStore.jsm").SessionStoreInternal
+			var TabState = Cu.import("resource:///modules/sessionstore/TabState.jsm").TabState
+			var TabStateCache = Cu.import("resource:///modules/sessionstore/TabStateCache.jsm").TabStateCache
+			this.swapBrowsers = this.swapBrowsers_new
+		} catch(e) {
+			this.swapBrowsers = this.swapBrowsers_old
+		}
+		return this.swapBrowsers
+	},
+	swapBrowsers_new: function(tab) {
+		var origin = this.preview;
+		// Mostly copied from tabbrowser.xml swapBrowsersAndCloseOther
+		var gBrowser = window.gBrowser;
+		var targetTab = tab || gBrowser.selectedTab;
+		var targetBrowser = targetTab.linkedBrowser;
+		targetBrowser.stop();
+		origin.getTabBrowser = function() {}
+		gBrowser.swapNewTabWithBrowser(targetTab, origin)
+		targetBrowser.docShell.useGlobalHistory = true
+		return targetBrowser;
+	},
+	// Mostly copied from mozillaLabs instantPreview
+	swapBrowsers_old: function(tab) {
+		var origin = this.preview;
 		// Mostly copied from tabbrowser.xml swapBrowsersAndCloseOther
 		var gBrowser = window.gBrowser;
 		var targetTab = tab || gBrowser.selectedTab;
