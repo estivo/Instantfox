@@ -83,26 +83,41 @@ var instantFoxDevel = {
 	moduleHref: 'chrome://instantfox/content/instantfoxModule.js',
 
 	doReload: function(){
-		try {
+		var id="searchy@searchy"
+        try {
             var XPIProviderBP = Cu.import("resource://gre/modules/addons/XPIProvider.jsm")
         } catch(e) {
             var XPIProviderBP = Cu.import("resource://gre/modules/XPIProvider.jsm")
         }
-		var XPIProvider = XPIProviderBP.XPIProvider
+        var XPIProvider = XPIProviderBP.XPIProvider
      
-		var id="searchy@searchy"
-		let file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
-		file.persistentDescriptor = XPIProvider.bootstrappedAddons[id].descriptor;
-		XPIProvider.callBootstrapMethod(id, XPIProvider.bootstrappedAddons[id].version,
-								   XPIProvider.bootstrappedAddons[id].type, file, "shutdown",
-								   XPIProviderBP.BOOTSTRAP_REASONS.ADDON_UPGRADE);
-		
-		delete XPIProvider.bootstrapScopes[id]
-		XPIProviderBP.flushStartupCache()
-		
-		XPIProvider.callBootstrapMethod(id, XPIProvider.bootstrappedAddons[id].version,
-								   XPIProvider.bootstrappedAddons[id].type, file,
-								   "startup", XPIProviderBP.BOOTSTRAP_REASONS.APP_STARTUP);
+        id = id || this.addonId
+        var addon = XPIProvider.bootstrappedAddons[id]
+
+        var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+        file.persistentDescriptor = addon.descriptor;
+        var call  
+        addon.id = id;
+        if (XPIProvider.callBootstrapMethod.length == 5) {
+            // aAddon, aFile, aMethod, aReason, aExtraParams
+            call = function(aAddon, aFile, aMethod, aReason, aExtraParams) {
+                XPIProvider.callBootstrapMethod(aAddon, aFile, aMethod, aReason, aExtraParams);
+            }
+            XPIProvider.callBootstrapMethod
+        } else {
+            // old api
+            call = function(aAddon, aFile, aMethod, aReason, aExtraParams) {
+                XPIProvider.callBootstrapMethod(aAddon.id, aAddon.version, aAddon.type,
+                    aFile, aMethod, aReason, aExtraParams);
+            }
+        } 
+        
+        call(addon, file, "shutdown", XPIProviderBP.BOOTSTRAP_REASONS.ADDON_UPGRADE);
+        
+        delete XPIProvider.bootstrapScopes[id]
+        XPIProviderBP.flushStartupCache()
+        
+        call(addon, file, "startup", XPIProviderBP.BOOTSTRAP_REASONS.APP_STARTUP);
 	},
 	clearFirstRunPref: function(isUpdate){
         var prefs = Services.prefs

@@ -401,14 +401,15 @@ function fetchAsync(href, callback, thisVal){
 	req.open('GET', href, true);
 	req.loadQueue = typeof callback == 'function' ? [callback] : callback
 
-	req.addEventListener('load', function() {
-		req.removeEventListener('load', arguments.callee, false)
-		var reqText = req = req.responseText
-
-		for each(var func in callback)
+	req.addEventListener('load', function onLoad() {
+		req.removeEventListener('load', onLoad, false)
+		var reqText = req.responseText
+		for each(var func in req.loadQueue) {
 			if (typeof func == 'function') try {
 				func.call(thisVal, reqText);
 			} catch(e){Components.utils.reportError(e)}
+		}
+		req = null
 	}, false)
 
 	req.send(null);
@@ -1023,6 +1024,7 @@ function combinedSearch(searchProvider) {
 	this.searchProvider = searchProvider
 	this._result = new SimpleAutoCompleteResult()
 	this._result.removeValueAt = this.removeValueAt.bind(this)
+	this.instantUrl = null
 }
 combinedSearch.prototype = {
 	removeValueAt: function(index, removeFromDb) {
@@ -1075,9 +1077,27 @@ combinedSearch.prototype = {
 	},
 	onXHRReady: function(json) {
 		this.xhrEntries = parseSimpleJson(json, "", "")
+        var iu = this.instantUrl;
 		for (var i = this.xhrEntries.length; i--; ) {
-			this.xhrEntries[i].icon = "chrome://instantfox/content/skin/button-logo.png"
+            var entry = this.xhrEntries[i];
+			entry.icon = "chrome://instantfox/content/skin/button-logo.png"
+            if (iu && entry.url == iu.search) {
+                entry.url = entry.instantUrl = iu.url
+                entry.search = iu.search;
+                entry.title = entry.search + "=>" + entry.url
+            }
 		}
+        
+        if (entry && entry.url && !entry.instantUrl) {
+            getInstantUrl(entry.url, function(r) {
+                this.instantUrl = {
+                    search: entry.url,
+                    url: r
+                };
+                this.notifyListener();
+            }.bind(this));
+        }
+        
 		this.notifyListener()
 	},
 	start: function(searchString, searchParam, listener, jsonURL) {
@@ -1295,6 +1315,23 @@ InstantFoxModule.shutdown = function() {
 }
 InstantFoxModule.updateComponent()
 InstantFoxModule.initialize()
+
+
+function getInstantUrl(word, callback) {    
+    // "https://www.google.com/search?q=" + escape(word) + "&num=1"
+    var href = InstantFoxModule.urlFromQuery("google", word) + "&num=1"
+    fetchAsync(href, function(reqText) {
+        var m = reqText.match(/<h\d[^<>]*><a[^><]+>/g)
+        var result = m.map(function(a) {
+            var m = a.match(/href="([^"]*)"|href='([^']*)'/)
+            return m && (m[1] || m[2])
+        }).filter(Boolean).sort(function(a, b) {
+            return a.length - b.length
+        })[0];
+        
+        callback(result);
+    });
+}
 
 /***************************************************
  * localization
