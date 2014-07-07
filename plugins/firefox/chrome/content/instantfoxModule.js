@@ -1077,16 +1077,12 @@ combinedSearch.prototype = {
 	},
 	onXHRReady: function(json) {
 		this.xhrEntries = parseSimpleJson(json, "", "")
-        var iu = this.instantUrl;
 		for (var i = this.xhrEntries.length; i--; ) {
             var entry = this.xhrEntries[i];
 			entry.icon = "chrome://instantfox/content/skin/button-logo.png"
-            if (iu && entry.url == iu.search) {
-                entry.url = entry.instantUrl = iu.url
-                entry.search = iu.search;
-                entry.title = entry.search + "=>" + entry.url
-            }
 		}
+        
+        this.applyInstantUrl();
         
         if (entry && entry.url && !entry.instantUrl) {
             getInstantUrl(entry.url, function(r) {
@@ -1094,12 +1090,26 @@ combinedSearch.prototype = {
                     search: entry.url,
                     url: r
                 };
+                this.applyInstantUrl();
                 this.notifyListener();
             }.bind(this));
         }
         
 		this.notifyListener()
 	},
+    applyInstantUrl: function() {
+        var iu = this.instantUrl;
+        if (!iu) return;
+        for (var i = this.xhrEntries.length; i--; ) {
+            var entry = this.xhrEntries[i];
+            if (entry.url == iu.search) {
+                entry.icon = "chrome://instantfox/content/skin/button-logo.png"
+                entry.url = entry.instantUrl = iu.url
+                entry.search = iu.search;
+                entry.title = entry.search + "=>" + entry.url
+            }
+		}
+    },    
 	start: function(searchString, searchParam, listener, jsonURL) {
 		this.listener = listener
 		this.searchString = searchString
