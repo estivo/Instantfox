@@ -174,6 +174,7 @@ InstantFox.updatePopupSize = function(options) {
 	var root = RDF.GetResource("chrome://browser/content/browser.xul#instantfox-popup");
 
 	var getPersist = function getPersist(aProperty) {
+		if (!store) return null;
 		let property = RDF.GetResource(aProperty);
 		let target = store.GetTarget(root, property, true);
 		if (target instanceof Ci.nsIRDFLiteral)

@@ -532,10 +532,10 @@ searchEngineObserver.turn('on')
  * main object
  ***********/
 var xmas = (function() {
-    var d = new Date()
-    if (d.getMonth() === 11 || (d.getMonth() === 0 && d.getDate() < 7)) {
-        return "xmas_";
-    }
+	var d = new Date()
+	if (d.getMonth() === 11 || (d.getMonth() === 0 && d.getDate() < 7)) {
+		return "xmas_";
+	}
 })() || "";
 InstantFoxModule = {
 	helpURL: 'http://www.instantfox.net/help/',
@@ -544,11 +544,11 @@ InstantFoxModule = {
 	deactivatedURL: 'http://www.instantfox.net/deactivated.php',
 	install_url: "http://www.instantfox.net/welcome.php",
 	update_url:  "http://www.instantfox.net/update.php",
-    
-    logoURL: "chrome://instantfox/content/skin/" + xmas + "logo.png",
-    buttonLogoURL: "chrome://instantfox/content/skin/" + xmas + "button-logo.png",
-    xmasLogo: xmas,
-    
+	
+	logoURL: "chrome://instantfox/content/skin/" + xmas + "logo.png",
+	buttonLogoURL: "chrome://instantfox/content/skin/" + xmas + "button-logo.png",
+	xmasLogo: xmas,
+	
 	bp: this,
 
 	getContextMenuPlugins: function(type) {
@@ -1078,38 +1078,38 @@ combinedSearch.prototype = {
 	onXHRReady: function(json) {
 		this.xhrEntries = parseSimpleJson(json, "", "")
 		for (var i = this.xhrEntries.length; i--; ) {
-            var entry = this.xhrEntries[i];
+			var entry = this.xhrEntries[i];
 			entry.icon = "chrome://instantfox/content/skin/button-logo.png"
 		}
-        
-        this.applyInstantUrl();
-        
-        if (entry && entry.url && !entry.instantUrl) {
-            getInstantUrl(entry.url, function(r) {
-                this.instantUrl = {
-                    search: entry.url,
-                    url: r
-                };
-                this.applyInstantUrl();
-                this.notifyListener();
-            }.bind(this));
-        }
-        
+		
+		this.applyInstantUrl();
+		
+		if (entry && entry.url && !entry.instantUrl) {
+			getInstantUrl(entry.url, function(r) {
+				this.instantUrl = {
+					search: entry.url,
+					url: r
+				};
+				this.applyInstantUrl();
+				this.notifyListener();
+			}.bind(this));
+		}
+		
 		this.notifyListener()
 	},
-    applyInstantUrl: function() {
-        var iu = this.instantUrl;
-        if (!iu) return;
-        for (var i = this.xhrEntries.length; i--; ) {
-            var entry = this.xhrEntries[i];
-            if (entry.url == iu.search) {
-                entry.icon = "chrome://instantfox/content/skin/button-logo.png"
-                entry.url = entry.instantUrl = iu.url
-                entry.search = iu.search;
-                entry.title = entry.search + "=>" + entry.url
-            }
+	applyInstantUrl: function() {
+		var iu = this.instantUrl;
+		if (!iu) return;
+		for (var i = this.xhrEntries.length; i--; ) {
+			var entry = this.xhrEntries[i];
+			if (entry.url == iu.search) {
+				entry.icon = "chrome://instantfox/content/skin/button-logo.png"
+				entry.url = entry.instantUrl = iu.url
+				entry.search = iu.search;
+				entry.title = entry.search + "=>" + entry.url
+			}
 		}
-    },    
+	},
 	start: function(searchString, searchParam, listener, jsonURL) {
 		this.listener = listener
 		this.searchString = searchString
@@ -1327,20 +1327,52 @@ InstantFoxModule.updateComponent()
 InstantFoxModule.initialize()
 
 
-function getInstantUrl(word, callback) {    
-    // "https://www.google.com/search?q=" + escape(word) + "&num=1"
-    var href = InstantFoxModule.urlFromQuery("google", word) + "&num=1"
-    fetchAsync(href, function(reqText) {
-        var m = reqText.match(/<h\d[^<>]*><a[^><]+>/g)
-        var result = m.map(function(a) {
-            var m = a.match(/href="([^"]*)"|href='([^']*)'/)
-            return m && (m[1] || m[2])
-        }).filter(Boolean).sort(function(a, b) {
-            return a.length - b.length
-        })[0];
-        
-        callback(result);
-    });
+var instantUrlCache = Object.create(null);
+var cached = 0;
+var MAX_CACHE = 100000;
+function getInstantUrl(word, callback) {
+	if (instantUrlCache[word])
+		return callback(instantUrlCache[word]);
+	// "https://www.google.com/search?q=" + escape(word) + "&num=1"
+	var href = InstantFoxModule.urlFromQuery("google", word) + "&num=1"
+	fetchAsync(href, function(reqText) {
+		var m = reqText.match(/<h\d[^<>]*><a[^><]+>/g)
+		var result = m.map(function(a) {
+			var m = a.match(/href="([^"]*)"|href='([^']*)'/)
+			return m && (m[1] || m[2])
+		}).filter(Boolean).sort(function(a, b) {
+			return a.length - b.length
+		})[0];
+		
+		if (cached < MAX_CACHE) {
+			instantUrlCache[word] = result;
+			cached++;
+		}
+		callback(result);
+	});
+}
+function getInstantUrlSearchboxApi(word, callback) {
+	if (instantUrlCache[word])
+		return callback(instantUrlCache[word]);
+	// "https://www.google.com/search?q=" + escape(word) + "&num=1"
+	var topWin = Services.wm.getMostRecentWindow("navigator:browser");
+	
+	var href = InstantFoxModule.urlFromQuery("google", word) + "&num=1"
+	googleFetchAsync(href, function(reqText) {
+		var m = reqText.match(/<h\d[^<>]*><a[^><]+>/g)
+		var result = m.map(function(a) {
+			var m = a.match(/href="([^"]*)"|href='([^']*)'/)
+			return m && (m[1] || m[2])
+		}).filter(Boolean).sort(function(a, b) {
+			return a.length - b.length
+		})[0];
+		
+		if (cached < MAX_CACHE) {
+			instantUrlCache[word] = result;
+			cached++;
+		}
+		callback(result);
+	});
 }
 
 /***************************************************
