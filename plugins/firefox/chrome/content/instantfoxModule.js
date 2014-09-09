@@ -1082,8 +1082,8 @@ combinedSearch.prototype = {
 			entry.icon = "chrome://instantfox/content/skin/button-logo.png"
 		}
 		
-		this.applyInstantUrl();
-		
+        /**devel__(*/
+		this.applyInstantUrl();		
 		if (entry && entry.url && !entry.instantUrl) {
 			getInstantUrl(entry.url, function(r) {
 				this.instantUrl = {
@@ -1094,7 +1094,7 @@ combinedSearch.prototype = {
 				this.notifyListener();
 			}.bind(this));
 		}
-		
+		/**devel__)*/
 		this.notifyListener()
 	},
 	applyInstantUrl: function() {
@@ -1326,7 +1326,7 @@ InstantFoxModule.shutdown = function() {
 InstantFoxModule.updateComponent()
 InstantFoxModule.initialize()
 
-
+/**devel__(*/
 var instantUrlCache = Object.create(null);
 var cached = 0;
 var MAX_CACHE = 100000;
@@ -1351,29 +1351,7 @@ function getInstantUrl(word, callback) {
 		callback(result);
 	});
 }
-function getInstantUrlSearchboxApi(word, callback) {
-	if (instantUrlCache[word])
-		return callback(instantUrlCache[word]);
-	// "https://www.google.com/search?q=" + escape(word) + "&num=1"
-	var topWin = Services.wm.getMostRecentWindow("navigator:browser");
-	
-	var href = InstantFoxModule.urlFromQuery("google", word) + "&num=1"
-	googleFetchAsync(href, function(reqText) {
-		var m = reqText.match(/<h\d[^<>]*><a[^><]+>/g)
-		var result = m.map(function(a) {
-			var m = a.match(/href="([^"]*)"|href='([^']*)'/)
-			return m && (m[1] || m[2])
-		}).filter(Boolean).sort(function(a, b) {
-			return a.length - b.length
-		})[0];
-		
-		if (cached < MAX_CACHE) {
-			instantUrlCache[word] = result;
-			cached++;
-		}
-		callback(result);
-	});
-}
+/**devel__)*/
 
 /***************************************************
  * localization

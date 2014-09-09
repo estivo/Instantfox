@@ -136,7 +136,25 @@ InstantFox.popupCloser = function(e) {
 InstantFox.onPopupShowing = function(p) {
 	if (p.id != 'instantfox-popup')
 		return
-
+    
+    if (!p.hidePopup_orig) {
+        p.hidePopup_orig = p.hidePopup;
+        p.hidePopup = function() {
+            this.hidePopup_orig()
+            // workaround for firefox 32 bug
+            if (this.getBoundingClientRect().width) {
+                var ifr = this.querySelector("iframe");
+                var w = ifr && ifr.contentWindow;
+                if (w) {
+                    w.openEditPopup(w.$('shortcuts').firstElementChild)
+                } else {
+                    this.parentNode.appendChild(this)
+                    this.parentNode.insertBefore(this, this.parentNode.firstChild)
+                }
+            }
+        }
+    }
+    
 	var button = document.getElementById('instantFox-options')
     button && button.setAttribute("open", true)
 	window.addEventListener('mousedown', InstantFox.popupCloser, false)
