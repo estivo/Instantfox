@@ -1,6 +1,7 @@
 /* global InstantFox, dump, InstantFoxModule, Cu, Cc, Ci, 
     gNavigatorBundle, Services, gBrowser, gNavToolbox,
-    nsContextMenu, content, Components, XULBrowserWindow */
+    nsContextMenu, content, Components, XULBrowserWindow,
+    BrowserToolboxCustomizeDone */
 /*jshint asi:true*/    
 
 /* devel__( */ // helps to test button behavior while disabling
@@ -60,7 +61,8 @@ InstantFox.applyOverlay = function(off) {
 
     // ---------------------------
     var options = {
-        id: popupId, noautohide:'true', position:'after_end',
+        id: popupId, noautohide:'true',
+        // position:'after_end',
         persist:'width,height', width:'400', height:'600',
         onpopupshowing: "if(event.target==this)InstantFox.onPopupShowing(this)",
         onpopuphiding: "if(event.target==this)InstantFox.onPopupHiding(this)",
@@ -77,19 +79,19 @@ InstantFox.applyOverlay = function(off) {
         $el('resizer', {element: popupId, dir:'bottomleft',
             left:'0', bottom:'0', width:'16', height:'16', style:'-moz-transform: rotate(90deg);'
         })
-    ])], $("mainPopupSet"))
+    ])], $("mainPopupSet"));
     // ---------------------------
 
     var toolbarButton = $el('toolbarbutton', {type:"menu", popup: popupId, id: buttonId,
         class:'toolbarbutton-1 chromeclass-toolbar-additional',
         image:InstantFoxModule.buttonLogoURL, label:'InstantFox'
-    }, gNavToolbox.palette)
+    }, gNavToolbox.palette);
 
     var id = buttonId
-    var selector = "[currentset^='"+id+",'],[currentset*=',"+id+",'],[currentset$=',"+id+"']"
+    var selector = "[currentset^='" + id + ",'],[currentset*='," + id + ",'],[currentset$='," + id + "']"
     var toolbar = document.querySelector(selector)
     
-    toolbar ?  insertButton() : insertMenuitem()
+    toolbar ? insertButton() : insertMenuitem()
 
     function insertButton() {
         var currentset = toolbar.getAttribute("currentset").split(",");
@@ -97,7 +99,7 @@ InstantFox.applyOverlay = function(off) {
 
         var len = currentset.length, beforeEl;
         while (i < len && !(beforeEl = $(currentset[i])))
-            i++
+            i++;
 
         toolbar.insertItem(id, beforeEl);
     }
@@ -190,18 +192,12 @@ InstantFox.onPopupHiding = function(p) {
     button && button.removeAttribute("open");
 }
 InstantFox.updatePopupSize = function(options) {
-    var RDF = Cc["@mozilla.org/rdf/rdf-service;1"].getService(Ci.nsIRDFService)
-
-    var store = PlacesUIUtils.localStore//this.RDF.GetDataSource("rdf:local-store")
-
-    var root = RDF.GetResource("chrome://browser/content/browser.xul#instantfox-popup");
-
+    try {
+        var xulStore = Cc["@mozilla.org/xul/xulstore;1"].getService(Ci.nsIXULStore);
+    } catch(e) {Cu.reportError(e)}
+    var root = "chrome://browser/content/browser.xul";
     var getPersist = function getPersist(aProperty) {
-        if (!store) return null;
-        let property = RDF.GetResource(aProperty);
-        let target = store.GetTarget(root, property, true);
-        if (target instanceof Ci.nsIRDFLiteral)
-            return target.Value;
+        return xulStore && xulStore.getValue(root, "instantfox-popup", aProperty);
     }
     options.width  = getPersist("width")  || options.width
     options.height = getPersist("height") || options.height
