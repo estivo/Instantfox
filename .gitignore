@@ -1,5 +1,2 @@
-.DS_Store
-plugins/.DS_Store
-plugins/firefox/chrome/.DS_Store
-plugins/firefox/chrome/locale/.DS_Store
-plugins/firefox/firefox.xpi
+.*
+firefox/firefox.xpi
