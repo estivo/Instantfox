@@ -939,7 +939,7 @@ InstantFox.handleCommand_ = function(aTriggeringEvent) {
 
     let matchLastLocationChange = true;
     if (action) {
-	    if (action.params) {
+        if (action.params) {
             // FF 35+
             url = action.params.url;
         } else {
