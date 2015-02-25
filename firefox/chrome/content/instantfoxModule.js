@@ -381,7 +381,7 @@ var pluginLoader = {
             if(icon != this.faviconService.defaultFavicon.spec)
                 return icon
         }catch(e){}
-        return 'http://g.etfv.co/http://'+host
+        return 'http://www.google.com/s2/favicons?domain=http://'+host
     }
 
 }

@@ -510,7 +510,7 @@ window {
 						if(this.timeout==null)
 							this.timeout=setTimeout(function(a){
 								a.timeout=null;
-								$t($('edit-box'), 'image').src='http://g.etfv.co/'+a.value;
+								$t($('edit-box'), 'image').src='http://www.google.com/s2/favicons?domain='+a.value;
 							}, 500, this)
 						"/>
 					<resetbutton hidden='true' onclick='resetPluginProp(this)' tooltiptext='reset to default'/>

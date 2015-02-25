@@ -244,7 +244,7 @@ testList = [{
 		InstantFoxModule.bp.fixupPlugin(p)
 
 		return p.domain == "http://am.wikipedia.org" &&
-			p.iconURI == "http://g.etfv.co/http://am.wikipedia.org" &&
+			p.iconURI == "http://www.google.com/s2/favicons?domain=http://am.wikipedia.org" &&
 			p.name == "am.wikipedia.org" &&
 			p.json.indexOf("wikipedia")>0
 	},
