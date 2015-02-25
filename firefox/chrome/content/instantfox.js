@@ -939,7 +939,13 @@ InstantFox.handleCommand_ = function(aTriggeringEvent) {
 
     let matchLastLocationChange = true;
     if (action) {
-        url = action.param;
+        if (action.params) {
+            // FF 35+
+            url = action.params.url;
+        } else {
+            // FF 34-
+            url = action.param;
+        }
         if (this.hasAttribute("actiontype")) {
             if (action.type == "switchtab") {
                 this.handleRevert();
