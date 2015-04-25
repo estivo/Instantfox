@@ -1090,7 +1090,6 @@ combinedSearch.prototype = {
                     search: entry.url,
                     url: r
                 };
-                this.applyInstantUrl();
                 this.notifyListener();
             }.bind(this));
         }
