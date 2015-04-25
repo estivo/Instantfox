@@ -646,7 +646,7 @@ locale(["ja","ja","co.jp"], {
 	},
 	Twitter: true,
 	Weather: {
-		name: "\u6e7f\u6f64\u5264"
+		name: "\u5929\u6c17"
 	},
 	Calculator: {
 		name: "\u30dd\u30b1\u30c3\u30c8\u96fb\u5353"
