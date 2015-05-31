@@ -298,7 +298,7 @@ locale(["es","es-ES","es"], {
 		name: "Calculadora"
 	},
 	GoogleTranslate: {
-		name: "Google Traductor"
+		name: "Google Traductor"	
 	}
 })
 
@@ -327,7 +327,7 @@ locale(["es","es-AR","com.ar"], {
 		name: "Calculadora"
 	},
 	GoogleTranslate: {
-		name: "Google Traductor"
+		name: "Google Traductor"	
 	}
 })
 
@@ -356,7 +356,7 @@ locale(["es","es-MX","com.mx"], {
 		name: "Calculadora"
 	},
 	GoogleTranslate: {
-		name: "Google Traductor"
+		name: "Google Traductor"	
 	}
 })
 
@@ -385,7 +385,7 @@ locale(["es","es-CL","cl"], {
 		name: "Calculadora"
 	},
 	GoogleTranslate: {
-		name: "Google Traductor"
+		name: "Google Traductor"	
 	}
 })
 
@@ -417,7 +417,7 @@ locale(["fr","fr-FR","fr"], {
 		name: "Calculateur"
 	},
 	GoogleTranslate: {
-		name: "Google Traduction"
+		name: "Google Traduction"	
 	}
 })
 
@@ -449,7 +449,7 @@ locale(["it","it-IT","it"], {
 		name: "Calculateur"
 	},
 	GoogleTranslate: {
-		name: "Google Traduttore"
+		name: "Google Traduttore"	
 	}
 })
 
@@ -650,7 +650,7 @@ locale(["ja","ja","co.jp"], {
 	},
 	Calculator: {
 		name: "\u30dd\u30b1\u30c3\u30c8\u96fb\u5353"
-	},
+	},	
 	GoogleTranslate: {
 		name: "Google \u7ffb\u8a33"
 	}
@@ -689,7 +689,7 @@ locale(["zh","zh-CN","cn"], {
 	},
 	Calculator: {
 		name: "\u8896\u73cd\u8ba1\u7b97\u5668"
-	},
+	},	
 	GoogleTranslate: {
 		name: "Google \u7ffb\u8bd1"
 	}
@@ -702,7 +702,7 @@ locale(["sv","sv-SE","se"], {
 	},
 	GoogleMaps: {
 		name: "Google Kartor"
-	},
+	},	
 	Wikipedia: true,
 	Youtube: true,
 	Amazon: true,
@@ -919,7 +919,7 @@ function locale(localeNames, plugins, autoSearch){
 	//============================
 	loc.localeMap = {}
 	;['%ls', '%ll', '%ld'].forEach(function(x, i)loc.localeMap[x] = localeNames[i])
-
+	
 	if (!autoSearch) {
 		var goog = loc.plugins.Google || commonPlugins.Google
 		autoSearch = {
@@ -931,7 +931,7 @@ function locale(localeNames, plugins, autoSearch){
 			disabled: true
 		}
 	}
-
+	
 	loc.autoSearch = autoSearch
 
 	avaliableLocales[spec] = loc
@@ -1006,7 +1006,7 @@ function findClosestLocale(avaliableLocales, desiredLocale) {
 
   for each (var locale in matchLocales) {
     var lparts = locale.split("-");
-    for each (let localeName in avaliableLocales) {
+    for each (let localeName in avaliableLocales) {		
         let found = localeName.toLowerCase();
         // Exact match is returned immediately
         if (locale == found)

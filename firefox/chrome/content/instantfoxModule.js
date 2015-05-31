@@ -511,7 +511,7 @@ searchEngineObserver = {
         }, 100)
     },
     addListener: function(w){
-        if (!this.$listeners)
+        if (!this.$listeners) 
             this.$listeners = [];
         this.$listeners.push(Components.utils.getWeakReference(w))
         dump(this.$listeners)
@@ -544,11 +544,11 @@ InstantFoxModule = {
     deactivatedURL: 'http://www.instantfox.net/deactivated.php',
     install_url: "http://www.instantfox.net/welcome.php",
     update_url:  "http://www.instantfox.net/update.php",
-
+    
     logoURL: "chrome://instantfox/content/skin/" + xmas + "logo.png",
     buttonLogoURL: "chrome://instantfox/content/skin/" + xmas + "button-logo.png",
     xmasLogo: xmas,
-
+    
     bp: this,
 
     getContextMenuPlugins: function(type) {
@@ -1041,7 +1041,7 @@ combinedSearch.prototype = {
     notifyListener: function() {
         var list, l1 = this.xhrEntries, l2 = this.historyEntries
         ;(InstantFoxModule.o||(InstantFoxModule.o=[])).push([l1, l2])
-
+        
         if (!l2 || !l2.length) {
             list = l1 && l1.concat()
         } else  {
@@ -1064,7 +1064,7 @@ combinedSearch.prototype = {
                     list.push(l1[i++])
             }
         }
-
+        
         dump(JSON.stringify(list[0], null, 4))
         this._result.setResultList(list, defaultEntry)
         this.listener.onSearchResult(this.searchProvider, this._result)
@@ -1081,9 +1081,9 @@ combinedSearch.prototype = {
             var entry = this.xhrEntries[i];
             entry.icon = "chrome://instantfox/content/skin/button-logo.png"
         }
-
+        
         /**devel__(*/
-        this.applyInstantUrl();
+        this.applyInstantUrl();		
         if (entry && entry.url && !entry.instantUrl) {
             getInstantUrl(entry.url, function(r) {
                 this.instantUrl = {
@@ -1242,7 +1242,7 @@ InstantFoxSearch.prototype = {
         // without this request can generate prompts
         _req.channel.notificationCallbacks = new SearchSuggestLoadListener();
         _req.send(null);
-
+        
         _req._url = url
     },
 
@@ -1253,7 +1253,7 @@ InstantFoxSearch.prototype = {
         this.stopOldRequests(e.target)
         var req = e.target
         var json = req.responseText;
-
+        
         var q = InstantFoxModule.currentQuery
         if (q) {
             var key = q.key || q.plugin.key
@@ -1343,7 +1343,7 @@ function getInstantUrl(word, callback) {
         }).filter(Boolean).sort(function(a, b) {
             return a.length - b.length
         })[0];
-
+        
         if (cached < MAX_CACHE) {
             instantUrlCache[word] = result;
             cached++;
