@@ -103,7 +103,9 @@ window.InstantFox = {
 
         return el
     },
-    $: function(x) document.getElementById(x),
+    $: function(x) {
+        return document.getElementById(x)
+    },
     rem: function(x) {
         if (typeof x == "string")
             x = document.getElementById(x)
@@ -490,8 +492,8 @@ window.InstantFox = {
     _isOwnQuery: false,
     $urlBarModified: false,
 
-    get _ctabID() gBrowser.mCurrentTab.linkedPanel,
-    get _url() InstantFoxModule.currentQuery,
+    get _ctabID() { return gBrowser.mCurrentTab.linkedPanel },
+    get _url() { return InstantFoxModule.currentQuery },
 
     getQuery: function(val, oldQ){
         //dump(val, oldQ)

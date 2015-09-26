@@ -8,7 +8,7 @@ var BASE_URI = "chrome://instantfox/content/"
 var {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 Cu.import("resource://gre/modules/Services.jsm");
 
-var addScript = function(src, win) Services.scriptloader.loadSubScript(BASE_URI + src + ".js", win);
+var addScript = function(src, win) { Services.scriptloader.loadSubScript(BASE_URI + src + ".js", win) };
 /*devel__(*/
 try{
 	dump = Components.utils.import("resource://shadia/main.js").dump

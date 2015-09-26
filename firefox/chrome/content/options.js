@@ -32,7 +32,7 @@ function updateLocaleList(){
 
         locales = locales.map(addDisplayName);
 
-        locales.sort(function(x, y)x.displayName > y.displayName);
+        locales.sort(function(x, y) { return x.displayName > y.displayName });
 
         var xml = []
         for each(var i in locales)
@@ -173,7 +173,7 @@ function formatString(string, options){
         return options[x] ? options[x].toString() : ''
     })
 }
-function escapeHTML(str) str.replace(/[&"'<>]/g, function(m)"&#"+m.charCodeAt(0)+";");
+function escapeHTML(str) str.replace(/[&"'<>]/g, function(m) { return "&#"+m.charCodeAt(0)+";" });
 
 //************************ context menu
 initContextMenu = function(popup){

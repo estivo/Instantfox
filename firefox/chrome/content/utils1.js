@@ -55,7 +55,7 @@ exports.ToolbarButton = function ToolbarButton(options) {
         return;
 
       let doc = window.document;
-      let $ = function(id) doc.getElementById(id);
+      let $ = function(id) { return doc.getElementById(id) };
 
       // create toolbar button
       let tbb = doc.createElementNS(NS_XUL, "toolbarbutton");
@@ -142,11 +142,11 @@ exports.ToolbarButton = function ToolbarButton(options) {
         options.panel.destroy();
 
       // run unload functions
-      destoryFuncs.forEach(function(f) f && f());
+      destoryFuncs.forEach(function(f) { f && f() });
       destoryFuncs.length = 0;
 
       // remove unload functions from unload+'s queue
-      unloaders.forEach(function(f) f());
+      unloaders.forEach(function(f) { f() });
       unloaders.length = 0;
     },
     moveTo: function(pos) {
@@ -161,7 +161,7 @@ exports.ToolbarButton = function ToolbarButton(options) {
         if ("chrome://browser/content/browser.xul" != window.location) return;
 
         let doc = window.document;
-        let $ = function (id) doc.getElementById(id);
+        let $ = function (id) { return doc.getElementById(id) };
 
         // if the move isn't being forced and it is already in the window, abort
         if (!pos.forceMove && $(options.id)) return;

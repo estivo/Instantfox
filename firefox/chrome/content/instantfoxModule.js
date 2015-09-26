@@ -85,7 +85,7 @@ function fixupPlugin(p){
     if(!p.json && p.domain){
         var jRe = p.domain.split(/[\/\.\?#]/)
         jRe.shift()
-        jRe = jRe.filter(function(x)x)
+        jRe = jRe.filter(function(x) { return x });
         var ans = []
         for each(var plugin in InstantFoxModule.Plugins){
             if(!plugin.json)
@@ -100,7 +100,7 @@ function fixupPlugin(p){
             if(match >= 9)
                 ans.push({match:match, D:plugin.domain, json:plugin.json})
         }
-        ans.sort(function(a, b) b.match-a.match)
+        ans.sort(function(a, b) { return b.match-a.match });
 
         if(ans[0])
             p.json = ans[0].json
@@ -516,7 +516,7 @@ searchEngineObserver = {
         this.$listeners.push(Components.utils.getWeakReference(w))
         dump(this.$listeners)
     },
-    QueryInterface: function() this,
+    QueryInterface: function() { return this },
     turn: function(state){
         var f = state == "on" ? "addObserver" : "removeObserver"
         Services.obs[f](this, "engine-added", true)
@@ -977,8 +977,8 @@ SimpleAutoCompleteResult.prototype = {
     _errorDescription: "",
     list: [],
     /*********** nsIAutoCompleteSimpleResult *********/
-    setSearchResult: function(val) this._searchResult = val,
-    setDefaultIndex: function(val) this._defaultIndex = val,
+    setSearchResult: function(val) { return this._searchResult = val },
+    setDefaultIndex: function(val) { return this._defaultIndex = val },
     setSearchString: function(aSearchString){},
     setErrorDescription: function(aErrorDescription){},
     appendMatch: function(aValue,aComment,aImage, aStyle){},
@@ -996,23 +996,27 @@ SimpleAutoCompleteResult.prototype = {
     },
     /********************/
 
-    get searchResult() this._searchResult,
-    get searchString() this._searchString,
-    get defaultIndex() this._defaultIndex,
-    get errorDescription() this._errorDescription,
-    get matchCount() this.list.length,
+    get searchResult() { return this._searchResult },
+    get searchString() { return this._searchString },
+    get defaultIndex() { return this._defaultIndex },
+    get errorDescription() { return this._errorDescription },
+    get matchCount() { return this.list.length },
 
-    getCommentAt: function(index)
-        this.list[index] && this.list[index].comment || "",//title attribute on richlistitem in popup
-    getLabelAt: function(index)
-        this.list[index] && this.list[index].title || "",//url attribute on richlistitem in popup
-    getValueAt: function(index)
-        this.list[index] && this.list[index].url || "",//displayed in urlbar
-    getImageAt: function(index)
-        this.list[index] && this.list[index].icon || "",// "chrome://instantfox/content/skin/button-logo.png", //pin-icon.png",
-    getStyleAt: function(index)
-        this.list[index] && this.list[index].type || "InstantFoxSuggest",
-
+    getCommentAt: function(index) {
+        return this.list[index] && this.list[index].comment || "";//title attribute on richlistitem in popup
+    },
+    getLabelAt: function(index) {
+        return this.list[index] && this.list[index].title || "";//url attribute on richlistitem in popup
+    },
+    getValueAt: function(index) {
+        return this.list[index] && this.list[index].url || "";//displayed in urlbar
+    },
+    getImageAt: function(index) {
+        return this.list[index] && this.list[index].icon || "";// "chrome://instantfox/content/skin/button-logo.png", //pin-icon.png",
+    },
+    getStyleAt: function(index) {
+        return this.list[index] && this.list[index].type || "InstantFoxSuggest";
+    },
     removeValueAt: function(index, removeFromDb) {
         dump(index, removeFromDb)
         this.list.splice(index, 1);

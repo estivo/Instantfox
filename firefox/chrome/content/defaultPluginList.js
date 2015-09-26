@@ -918,7 +918,9 @@ function locale(localeNames, plugins, autoSearch){
 
 	//============================
 	loc.localeMap = {}
-	;['%ls', '%ll', '%ld'].forEach(function(x, i)loc.localeMap[x] = localeNames[i])
+	;['%ls', '%ll', '%ld'].forEach(function(x, i) {
+        loc.localeMap[x] = localeNames[i];
+    })
 	
 	if (!autoSearch) {
 		var goog = loc.plugins.Google || commonPlugins.Google

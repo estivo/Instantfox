@@ -229,7 +229,7 @@ var instantFoxDevel = {
 			.QueryInterface(Ci.nsIFileProtocolHandler).getURLSpecFromFile(f)
 		var t = makeReq(href)
 		
-		var locales = t.match(/201\: [^ ]* /g).map(function(x)x.slice(5,-1).replace(/\/$/, ''))
+		var locales = t.match(/201\: [^ ]* /g).map(function(x) { return x.slice(5,-1).replace(/\/$/, '') })
 		var decl = 'locale    instantfox %n%s chrome/locale/%n/'
 		var ans = locales.map(function(x){
 			return decl.replace('%n', x, 'g').replace('%s', Array(9-x.length).join(' '), 'g')

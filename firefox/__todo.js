@@ -116,7 +116,7 @@ function processRequest(html){
 			t2 = t2.slice(1, -1)
 		attrs.push([match[1], t2])
 	}
-	attrs.forEach(function(x)el.setAttribute(x[0],x[1]))
+	attrs.forEach(function(x) { el.setAttribute(x[0],x[1]) })
 	// update url	
 	content.document.title = title
 	content.history.replaceState(null, title, url)
