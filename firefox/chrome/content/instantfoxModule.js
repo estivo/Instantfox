@@ -1087,17 +1087,17 @@ combinedSearch.prototype = {
         }
         
         /**devel__(*/
-        this.applyInstantUrl();		
-        if (entry && entry.url && !entry.instantUrl) {
-            getInstantUrl(entry.url, function(r) {
-                this.instantUrl = {
-                    search: entry.url,
-                    url: r
-                };
-                this.applyInstantUrl();
-                this.notifyListener();
-            }.bind(this));
-        }
+        // this.applyInstantUrl();		
+        // if (entry && entry.url && !entry.instantUrl) {
+        //     getInstantUrl(entry.url, function(r) {
+        //         this.instantUrl = {
+        //             search: entry.url,
+        //             url: r
+        //         };
+        //         this.applyInstantUrl();
+        //         this.notifyListener();
+        //     }.bind(this));
+        // }
         /**devel__)*/
         this.notifyListener()
     },

@@ -187,6 +187,7 @@ window.InstantFox = {
 
         this.setURLBarAutocompleter('on', isNewWindow)
 
+        gURLBar.popup.addEventListener('mouseup', this.onMouseUp, true);
         gURLBar.addEventListener('keydown', this.onKeydown, false);
         // must be capturing to run after value is changed and before autocompleter
         gURLBar.addEventListener('input', this.onInput, true);
@@ -224,6 +225,7 @@ window.InstantFox = {
         this.applyOverlay('off')
 
 
+        gURLBar.popup.removeEventListener('mouseup', this.onMouseUp, true);
         gURLBar.removeEventListener('keydown', this.onKeydown, false);
         gURLBar.removeEventListener('input', this.onInput, true);
         gURLBar.removeEventListener('focus', this.onfocus, false);
@@ -358,6 +360,18 @@ window.InstantFox = {
             InstantFox.reloadBinding(InstantFox.$("PopupAutoCompleteRichResult"))
     },
     // ****** event handlers ****************************************
+    onMouseUp: function(event) {
+        if (event.button == 0 && !event.ctrlKey && !event.altKey) {
+            var item = event.originalTarget;
+            while (item && item.localName != "richlistitem")
+                item = item.parentNode;
+            if (!item)
+                return;
+            var url = item.getAttribute("url")
+            if (url && gURLBar.value != url)
+                gURLBar.value = url;
+        }
+    },
     onKeydown: function(event) {
         var key = event.keyCode ? event.keyCode : event.which,
             alt = event.altKey, meta = event.metaKey,
@@ -456,7 +470,7 @@ window.InstantFox = {
         }
     },
     onInput: function() {
-        var val = gURLBar.value;
+        var val = gURLBar.mInputField.value;
         gBrowser.userTypedValue = val;
         dump(val)
 
@@ -880,8 +894,8 @@ InstantFox.handleCommandQuery = function(url, aTriggeringEvent, cb){
         if (/[\.]/.test(str))
             return true
     }
-
-    InstantFox.onInput()
+    if (InstantFoxModule.currentQuery && InstantFoxModule.currentQuery.plugin != InstantFoxModule.autoSearch)
+        InstantFox.onInput()
     // instantfox shortcuts have the highest priority
     if (InstantFoxModule.currentQuery) {
         var q = InstantFoxModule.currentQuery
@@ -985,6 +999,7 @@ InstantFox.handleCommand_ = function(aTriggeringEvent) {
     }
 
     function continueOperation() {
+        dump(instantFoxUri, url)
         if (!instantFoxUri) {
             this.value = url;
             gBrowser.userTypedValue = url;
