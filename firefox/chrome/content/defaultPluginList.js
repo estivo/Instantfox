@@ -12,40 +12,40 @@ var avaliableLocales = {}, avaliableLocaleNames = [];
 var commonPlugins = {
 	Google: {
 		key: "g",
-		url: "http://www.google.%ld/search?hl=%ls&q=%q",
-		json: "http://suggestqueries.google.com/complete/search?json&client=firefox&q=%q&hl=%ls",
+		url: "https://www.google.%ld/search?hl=%ls&q=%q",
+		json: "https://suggestqueries.google.com/complete/search?json&client=firefox&q=%q&hl=%ls",
 		name: "Google"
 	},
 	GoogleImages: {
 		key: "i",
-		url: "http://www.google.%ld/search?tbm=isch&q=%q&hl=%ls",
-		json: "http://suggestqueries.google.com/complete/search?json&client=firefox&ds=i&hl=%ls&q=%q",
+		url: "https://www.google.%ld/search?tbm=isch&q=%q&hl=%ls",
+		json: "https://suggestqueries.google.com/complete/search?json&client=firefox&ds=i&hl=%ls&q=%q",
 		name: "Google Images",
 		iconURI: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAB41BMVEUAAAB7wUJ6wUJ6wUJ6wUL1nxn1oBn1oBn1nxl6wUJ6wUJ6wUJrvUT1mxr1nxn1nxlfu0Z8wkLznhv0mhp6wUJWuUdaukfLrSv4rhX1nxl5wUJyv0TQrCnyjhz1kyH2pRj1oBl7wkNbukfzjR3zkxv1liHuMDXuGTf2rxN7wUJeu0apuDfzjhz1nBvuNizwZi/3sxP2pBh9wkGvuTbvoRvuJy/xcC33qRhbl7F2uGOMwT94havnRTzuMjjwTTNRislRjcZ5uVpnvU0rk9Fhjr3aTkPuLTVQkM1PgsKHxD9/w0JfnKsAouPtHCTvQDRRkM1Qjstfn6p2jLHvOzDvQDVQkM1Rkc1RjstOh8Z/h6buLirtGyTvOzHvQDXwQDVPkcftPzdRkc1QkMxRkM0xlNLuNSzwQDXvQDVQkM1Rkc1QkM1Rkc3vQDTvQDXvQDXwQDV7wUL2oBr1nxn2oBl6wUJ7wkN9wkF9wkJ6wUP0lRv3qhf1oBn4rhX3qhb1nhp8wkL0nBruGjLuIzf3qRZ/w0JcukbuLCntIzl+wkFkvEbtGyVPhMRyv0QAmNfuLCruMDVRkc1ViccKltTvQDVRhcUAmdfvQDRRks5RiskcltTwQzdQkM07k9DtGyPvQzdQkMzvPzSgiRCBAAAAcHRSTlMAM9bsfmzq30TnaEIQF1b390JR9nP98873iO4nsPyvO3Vly1783sVB8T/5j+2SiIXyKITTeqTRY0ThWl/g9jAn2cBPbNfJFWXVrOjTge5EeeC0qPBsYPfUstjGvOP+dnp0+pmBR1GEikvl8paC8etfYXu9TgAAAAlwSFlzAAAASAAAAEgARslrPgAAAQJJREFUGNM1j8VWQzEARAco8NDiLsXdXQvF3d3dIQ2vOBR3CQSCFPtUUg7Mbu5i7hnY2Npp8Bd7B0cFToQQZxdXwE1xN9JVLVRiUsmah6eXNzVKQOFD1PUNXz//za0ASul2IKBRg4IREroThnAt1cmlCFMkoqJ3Y2LjEL+nSJBgTkxK3k9JPThMSz/KsMoyj0+ysoGc07PcvF97fsH5RSFQVHxZUmrt+quycvO1oeKmsur2rlqCGlaLuvqG+4dGNPFmCVpYK9D2+NQOdIhOoKubPff0vrz29Q8MvvGhYTAZC3sfGf34FFwIgTHLFxufmASmpme+OeeYnZtf+L+/uLS88gMT2kW5QAjbFwAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxMi0wNC0wNlQxMDoxMzowNSswNDowMIQ8zwwAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTItMDQtMDZUMTA6MTM6MDUrMDQ6MDD1YXewAAAAAElFTkSuQmCC"
 	},
 	GoogleMaps: {
 		key: "m",
-		url: "http://maps.google.%ld/maps?q=%q",
-		json: "http://maps.google.%ld/maps/suggest?q=%q&cp=999&hl=%ll&gl=%ll&v=2&json=b",
+		url: "https://maps.google.%ld/maps?q=%q",
+		json: "https://maps.google.%ld/maps/suggest?q=%q&cp=999&hl=%ll&gl=%ll&v=2&json=b",
 		name: "Google Maps",
-		iconURI: "http://maps.gstatic.com/favicon.ico"
+		iconURI: "https://maps.gstatic.com/favicon.ico"
 	},
 	Wikipedia: {
 		key: "w",
-		url: "http://%ls.wikipedia.org/wiki/%q",
-		json: "http://%ls.wikipedia.org/w/api.php?action=opensearch&search=%q",
+		url: "https://%ls.wikipedia.org/wiki/%q",
+		json: "https://%ls.wikipedia.org/w/api.php?action=opensearch&search=%q",
 		name: "Wikipedia"
 	},
 	Youtube: {
 		key: "y",
-		url: "http://www.youtube.com/results?search_query=%q",
-		json: "http://suggestqueries.google.com/complete/search?json&client=firefox&hl=%ls&ds=yt&q=%q",
+		url: "https://www.youtube.com/results?search_query=%q",
+		json: "https://suggestqueries.google.com/complete/search?json&client=firefox&hl=%ls&ds=yt&q=%q",
 		name: "Youtube"
 	},
 	Amazon: {
 		key: "a",
-		url: "http://www.amazon.com/gp/search?ie=UTF8&keywords=%q&index=aps&linkCode=ur2&camp=1789&creative=9325",
-		json: "http://completion.amazon.co.uk/search/complete?method=completion&q=%q&search-alias=aps&mkt=4",
+		url: "https://www.amazon.com/gp/search?ie=UTF8&keywords=%q&index=aps&linkCode=ur2&camp=1789&creative=9325",
+		json: "https://completion.amazon.co.uk/search/complete?method=completion&q=%q&search-alias=aps&mkt=4",
 		name: "Amazon",
 //		disableInstant: true,
 		iconURI: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAB/0lEQVR42n2Sz4tSURTHLw39De0EhRxoYvwvWjRLZWrhzl2rhtwErYRmE40orZJcyDzGqIxGBJ1KgohZqIuwKAcpzF8jOaE+/AH67ie7D68GNR+4vHMP53zf995zBXARiAAmNhJgNpsxHo/VWkFiMwD2gDUBPFot+NOYzWa5vbPD9a0tvF4voVCISqViF8xhyZ6Y7yfYWACJRAIhxD9Xs9lciMywMYXqtCylWqvVdPGTeJzhcEgul9O5TCazENDHEauuBoMBpVKJfD6vmgHq9TqX3W4lkEwmVwVUKFAoFywol8vEYjH8fj/u9XWubGwoAcMwtMACsZqYTqdEIhFtORgMEg6H8Xg85wrovxcKBd2cSqUA6Ha7OF1OfYRzHewbhhaoVqsAFItFnZtP6H8O7Kmk02ldHI1G1V34fD61d7pcOBwOmo0GukcLYNNpt9ncvPrX7Le3b3B/d1fFgUCAs55pu1g6kJJRVydarRYHxj7x2GPSh68Y9HtMxiMV9+cxo1Os6mswT1fGWD+WfEwgzQ7nM0N+fQkf7sH39/ohjQH4cWyRvYl8dxd5coTsfEGeVe3VLmN9eoF8cws+P4Pa2xnDn4unbEVZMO5Jyk/h8BokBRwI+/v8EuTvQKOgZrC8NR4KYM2yrDDS6uvLkVMw29A9gV/fYNJHpdH0gAfAhd9fTUd5jvGIiQAAAABJRU5ErkJggg=="
@@ -58,19 +58,19 @@ var commonPlugins = {
 	},
 	Twitter: {
 		key: "t",
-		url: "http://twitter.com/#!/search/%q",
+		url: "https://twitter.com/search?q=%q",
 		name: "Twitter"
 	},
 	Weather: {
 		key: "wt",
 		url: "http://weather.instantfox.net/%q",
-		json: "http://maps.google.com/maps/suggest?q=%q&cp=999&hl=%ls&gl=%ls&v=2&json=b",
+		json: "https://maps.google.com/maps/suggest?q=%q&cp=999&hl=%ls&gl=%ls&v=2&json=b",
 		hideFromContextMenu: true,
 		name: "Weather"
 	},
 	LEO: {
 		key: "d",
-		url: "http://dict.leo.org/?search=%q",
+		url: "https://dict.leo.org/?search=%q",
 		name: "LEO Eng-Deu Dictionary"
 	},
 	IMDb: {
@@ -82,8 +82,8 @@ var commonPlugins = {
 	},
 	GoogleLuck: {
 		key: "gg",
-		url: "http://www.google.%ld/search?hl=%ls&q=%q&btnI=1",
-		json: "http://suggestqueries.google.com/complete/search?json&client=firefox&q=%q&hl=%ls",
+		url: "https://www.google.%ld/search?hl=%ls&q=%q&btnI=1",
+		json: "https://suggestqueries.google.com/complete/search?json&client=firefox&q=%q&hl=%ls",
 		hideFromContextMenu: true,
 		name: "Google Luck"
 	},
@@ -95,7 +95,7 @@ var commonPlugins = {
 	},
 	GoogleTranslate: {
 		key: "gt",
-		url: "http://translate.google.com/#auto|%ls|%q",
+		url: "https://translate.google.com/#auto|%ls|%q",
 		name: "Google Translate"
 	}
 }
@@ -113,7 +113,7 @@ locale(["de","de-DE","de"], {
 	Wikipedia: true,
 	Youtube: true,
 	Amazon: {
-		url: "http://www.amazon.de/gp/search?ie=UTF8&keywords=%q&index=aps&linkCode=ur2&camp=1638&creative=6742"
+		url: "https://www.amazon.de/gp/search?ie=UTF8&keywords=%q&index=aps&linkCode=ur2&camp=1638&creative=6742"
 	},
 	eBay: true,
 	Twitter: true,
@@ -142,7 +142,7 @@ locale(["de","de-AT","at"], {
 	Wikipedia: true,
 	Youtube: true,
 	Amazon: {
-		url: "http://www.amazon.de/gp/search?ie=UTF8&keywords=%q&index=aps&linkCode=ur2&camp=1638&creative=6742"
+		url: "https://www.amazon.de/gp/search?ie=UTF8&keywords=%q&index=aps&linkCode=ur2&camp=1638&creative=6742"
 	},
 	eBay: true,
 	Twitter: true,
@@ -171,7 +171,7 @@ locale(["de","de-CH","ch"], {
 	Wikipedia: true,
 	Youtube: true,
 	Amazon: {
-		url: "http://www.amazon.de/gp/search?ie=UTF8&keywords=%q&index=aps&linkCode=ur2&camp=1638&creative=6742"
+		url: "https://www.amazon.de/gp/search?ie=UTF8&keywords=%q&index=aps&linkCode=ur2&camp=1638&creative=6742"
 	},
 	eBay: true,
 	Twitter: true,
@@ -193,16 +193,16 @@ locale(["de","de-CH","ch"], {
 // make en-US default for en-* branch
 locale(["en","en-US","com"], {
 	Google: {
-		url: "http://www.google.%ld/search?q=%q"
+		url: "https://www.google.%ld/search?q=%q"
 	},
 	GoogleImages: {
-		url: "http://www.google.%ld/images?q=%q",
-		json: "http://suggestqueries.google.com/complete/search?json&client=firefox&ds=i&q=%q"
+		url: "https://www.google.%ld/images?q=%q",
+		json: "https://suggestqueries.google.com/complete/search?json&client=firefox&ds=i&q=%q"
 	},
 	GoogleMaps: true,
 	Wikipedia: true,
 	Youtube: {
-		json: "http://suggestqueries.google.com/complete/search?json&client=firefox&ds=yt&q=%q"
+		json: "https://suggestqueries.google.com/complete/search?json&client=firefox&ds=yt&q=%q"
 	},
 	Amazon: true,
 	eBay: true,
@@ -212,7 +212,7 @@ locale(["en","en-US","com"], {
 		name: "IMDb"
 	},
 	GoogleLuck: {
-		url: "http://www.google.com/search?q=%q&btnI=1"
+		url: "https://www.google.com/search?q=%q&btnI=1"
 	},
 	Calculator: true,
 	GoogleTranslate: true
@@ -241,7 +241,7 @@ locale(["en","en-CA","ca"], {
 	Wikipedia: true,
 	Youtube: true,
 	Amazon: {
-		url: "http://www.amazon.ca/gp/search?ie=UTF8&keywords=%q&tag=609-20&index=aps&linkCode=ur2&camp=15121&creative=330641"
+		url: "https://www.amazon.ca/gp/search?ie=UTF8&keywords=%q&tag=609-20&index=aps&linkCode=ur2&camp=15121&creative=330641"
 	},
 	eBay: true,
 	Twitter: true,
@@ -259,7 +259,7 @@ locale(["en","en-GB","co.uk"], {
 	Wikipedia: true,
 	Youtube: true,
 	Amazon: {
-		url: "http://www.amazon.co.uk/gp/search?ie=UTF8&keywords=%q&tag=509-21&index=aps&linkCode=ur2&camp=1634&creative=6738"
+		url: "https://www.amazon.co.uk/gp/search?ie=UTF8&keywords=%q&tag=509-21&index=aps&linkCode=ur2&camp=1634&creative=6738"
 	},
 	eBay: true,
 	Twitter: true,
@@ -281,7 +281,7 @@ locale(["es","es-ES","es"], {
 	Wikipedia: true,
 	Youtube: true,
 	Amazon: {
-		url: "http://www.amazon.es/gp/search?ie=UTF8&keywords=%q&tag=608-21&index=aps&linkCode=ur2&camp=3626&creative=24790"
+		url: "https://www.amazon.es/gp/search?ie=UTF8&keywords=%q&tag=608-21&index=aps&linkCode=ur2&camp=3626&creative=24790"
 	},
 	eBay: true,
 	Twitter: true,
@@ -400,7 +400,7 @@ locale(["fr","fr-FR","fr"], {
 	Wikipedia: true,
 	Youtube: true,
 	Amazon: {
-		url: "http://www.amazon.fr/gp/search?ie=UTF8&keywords=%q&tag=604-21&index=aps&linkCode=ur2&camp=1642&creative=6746"
+		url: "https://www.amazon.fr/gp/search?ie=UTF8&keywords=%q&tag=604-21&index=aps&linkCode=ur2&camp=1642&creative=6746"
 	},
 	eBay: true,
 	Twitter: true,
@@ -432,7 +432,7 @@ locale(["it","it-IT","it"], {
 	Wikipedia: true,
 	Youtube: true,
 	Amazon: {
-		url: "http://www.amazon.it/gp/search?ie=UTF8&keywords=%q&tag=805-21&index=blended&linkCode=ur2&camp=3370&creative=23322"
+		url: "https://www.amazon.it/gp/search?ie=UTF8&keywords=%q&tag=805-21&index=blended&linkCode=ur2&camp=3370&creative=23322"
 	},
 	eBay: true,
 	Twitter: true,
@@ -465,7 +465,7 @@ locale(["nl","nl","nl"], {
 	Wikipedia: true,
 	Youtube: true,
 	Amazon: {
-		url: "http://www.amazon.co.uk/gp/search?ie=UTF8&keywords=%q&tag=509-21&index=aps&linkCode=ur2&camp=1634&creative=6738"
+		url: "https://www.amazon.co.uk/gp/search?ie=UTF8&keywords=%q&tag=509-21&index=aps&linkCode=ur2&camp=1634&creative=6738"
 	},
 	eBay: true,
 	Twitter: true,
@@ -611,8 +611,8 @@ locale(["tr","tr","com.tr"], {
 	},
 	GoogleMaps: {
 		name: "Google Haritalar",
-		url: "http://maps.google.com/maps?q=%q",
-		json: "http://maps.google.com/maps/suggest?q=%q&cp=999&hl=%ll&gl=%ll&v=2&json=b",
+		url: "https://maps.google.com/maps?q=%q",
+		json: "https://maps.google.com/maps/suggest?q=%q&cp=999&hl=%ll&gl=%ll&v=2&json=b",
 	},
 	Wikipedia: true,
 	Youtube: true,
@@ -642,7 +642,7 @@ locale(["ja","ja","co.jp"], {
 	Wikipedia: true,
 	Youtube: true,
 	Amazon: {
-		url: "http://www.amazon.co.jp/s?ie=UTF8&x=17&ref_=nb_sb_noss&y=11&field-keywords=%q&url=search-alias%3Daps&_encoding=UTF8&tag=7098-22&linkCode=ur2&camp=247&creative=7399"
+		url: "https://www.amazon.co.jp/s?ie=UTF8&x=17&ref_=nb_sb_noss&y=11&field-keywords=%q&url=search-alias%3Daps&_encoding=UTF8&tag=7098-22&linkCode=ur2&camp=247&creative=7399"
 	},
 	Twitter: true,
 	Weather: {
@@ -658,30 +658,30 @@ locale(["ja","ja","co.jp"], {
 
 locale(["zh","zh-CN","cn"], {
 	Google: {
-		url: "http://www.google.com.hk/#hl=%ls&q=%q&fp=1&cad=b",
-		json: "http://www.google.com.hk/complete/search?json&q=%q&hl=%ls",
+		url: "https://www.google.com.hk/#hl=%ls&q=%q&fp=1&cad=b",
+		json: "https://www.google.com.hk/complete/search?json&q=%q&hl=%ls",
 		name: "Google \u4e3b\u9875"
 	},
 	GoogleImages: {
-		url: "http://www.google.com.hk/images?q=%q&hl=%ls",
-		json: "http://suggestqueries.google.com/complete/search?json&client=firefox&ds=i&hl=%ls&q=%q",
+		url: "https://www.google.com.hk/images?q=%q&hl=%ls",
+		json: "https://suggestqueries.google.com/complete/search?json&client=firefox&ds=i&hl=%ls&q=%q",
 		name: "Google \u56fe\u7247"
 	},
 	GoogleMaps: {
-		url: "http://ditu.google.cn/maps?q=%q",
-		json: "http://ditu.google.%ld/maps/suggest?q=%q&cp=999&hl=%ll&gl=%ll&v=2&json=b",
+		url: "https://ditu.google.cn/maps?q=%q",
+		json: "https://ditu.google.%ld/maps/suggest?q=%q&cp=999&hl=%ll&gl=%ll&v=2&json=b",
 		name: "Google \u5730\u56fe"
 	},
 	Baidu: {
 		key: "b",
-		url: "http://www.baidu.com/s?wd=%q&rsv_bp=0&rsv_spt=3&inputT=625",
-		json: "http://suggestion.baidu.com/su?wd=%q&p=3&cb=window.bdsug.sug",
+		url: "https://www.baidu.com/s?wd=%q&rsv_bp=0&rsv_spt=3&inputT=625",
+		json: "https://suggestion.baidu.com/su?wd=%q&p=3&cb=window.bdsug.sug",
 		name: "Baidu"
 	},
 	Wikipedia: true,
 	Youtube: true,
 	Amazon: {
-		url: "http://www.amazon.cn/s?ie=UTF8&x=0&ref_=nb_sb_noss&y=0&field-keywords=%q&url=search-alias%3Daps&_encoding=UTF8&tag=80e0-23&linkCode=ur2&camp=536&creative=3132"
+		url: "https://www.amazon.cn/s?ie=UTF8&x=0&ref_=nb_sb_noss&y=0&field-keywords=%q&url=search-alias%3Daps&_encoding=UTF8&tag=80e0-23&linkCode=ur2&camp=536&creative=3132"
 	},
 	Twitter: true,
 	Weather: {
@@ -769,7 +769,7 @@ locale(["hu","hu","hu"], {
 	},
 	GoogleLuck: {
 		key: "gz",
-		url: "http://www.google.com/search?q=%q&btnI=1",
+		url: "https://www.google.com/search?q=%q&btnI=1",
 		name: "Google Zkus\u00edm \u0161t\u011bst\u00ed"
 	},
 	Calculator: {
@@ -925,7 +925,7 @@ function locale(localeNames, plugins, autoSearch){
 	if (!autoSearch) {
 		var goog = loc.plugins.Google || commonPlugins.Google
 		autoSearch = {
-			json: 'http://clients1.google.com/complete/search?client=chrome&hl=%ls&q=%q',
+			json: 'https://clients1.google.com/complete/search?client=chrome&hl=%ls&q=%q',
 			url: goog.url,
 			instant: "off",
 			suggest: true,

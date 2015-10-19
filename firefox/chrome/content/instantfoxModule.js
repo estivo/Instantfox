@@ -381,7 +381,7 @@ var pluginLoader = {
             if(icon != this.faviconService.defaultFavicon.spec)
                 return icon
         }catch(e){}
-        return 'http://www.google.com/s2/favicons?domain=http://'+host
+        return 'https://www.google.com/s2/favicons?domain=http://'+host
     }
 
 }
@@ -1173,7 +1173,7 @@ InstantFoxSearch.prototype = {
         var plugin = q.plugin
         var results, url, callOnSearchReady;
 
-        var isMaps = plugin && plugin.json && plugin.json.indexOf('http://maps.google') == 0
+        var isMaps = plugin && plugin.json && plugin.json.indexOf('https://maps.google') == 0
 
         if (plugin.pluginSuggestions) {
             // handle ` searches
@@ -1186,7 +1186,7 @@ InstantFoxSearch.prototype = {
             // in some cases we can provide suggestions even before user started typing
             if (isMaps) {
                 if (!InstantFoxModule.geoResult){
-                    url = 'http://geoiplookup.wikia.com/'
+                    url = 'https://geoiplookup.wikia.com/'
                     this.parser = parseGeoJson
                 } else {
                     url = null
