@@ -40,7 +40,7 @@ var commonPlugins = {
 		key: "y",
 		url: "https://www.youtube.com/results?search_query=%q",
 		json: "https://suggestqueries.google.com/complete/search?json&client=firefox&hl=%ls&ds=yt&q=%q",
-		name: "Youtube"
+		name: "YouTube"
 	},
 	Amazon: {
 		key: "a",
